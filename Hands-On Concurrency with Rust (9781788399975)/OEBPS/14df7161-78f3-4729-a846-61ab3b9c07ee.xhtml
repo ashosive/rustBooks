@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Further reading</h1>
+                </header>
+            
+            <article>
+                
+<ul>
+<li><em>FFI examples written in Rust</em>, available at <a href="https://github.com/alexcrichton/rust-ffi-examples">https://github.com/alexcrichton/rust-ffi-examples</a>. This repository by Alex Crichton is a well-done collection of FFI examples in Rust. The documentation in this book on this topic is quite good, but it never hurts to pour through working code.</li>
+<li><em>Hacker's Delight</em>, Henry Warren Jr. If you enjoyed the bit fiddling present in this chapter's take on feruscore, you'll love Hacker's Delight. It's old now and some of its algorithms no longer function on 64-bit words, but it's still well worth reading, especially if you, like me, work to keep fixed-width types as small as possible.</li>
+<li><em>Foreign Function Interface</em>, available at <a href="https://doc.rust-lang.org/nomicon/ffi.html">https://doc.rust-lang.org/nomicon/ffi.html</a>. The Nomicon builds a higher-level wrapper for the compression library snappy. This wrapper is extended in ways we did not touch on here, specifically with regard to C callbacks and vardic function calls.</li>
+<li><em>Global Interpreter Lock</em>, available at <a href="https://wiki.python.org/moin/GlobalInterpreterLock">https://wiki.python.org/moin/GlobalInterpreterLock</a>. The GIL has long been the bane of multiprocessing software written in Python. This wiki entry discusses the technical details mandating the GIL and the historical attempts to remedy the situation.</li>
+<li><em>Guided Tour</em>, available at <a href="https://github.com/chucklefish/rlua/blob/master/examples/guided_tour.rs">https://github.com/chucklefish/rlua/blob/master/examples/guided_tour.rs</a>. The rlua crate includes a guided tour module, which is well-documented and runnable. I haven't seen this approach to documentation in other projects and I warmly encourage you to check it out. First, it's helpful for learning rlua. Second, it's well-written and empathetic to the reader: a fine example of technical writing.</li>
+<li><em>Linkage</em>, available at <a href="https://doc.rust-lang.org/reference/linkage.html">https://doc.rust-lang.org/reference/linkage.html</a>. This is the Rust Reference chapter on linking. The details here are very specific, but that's often necessary when being explicit about linking. The common reader will more or less use the information we've covered in this chapter but there's always some new domain requiring specific knowledge.</li>
+<li><em>Rust Inside Other Languages</em>, available at <a href="https://doc.rust-lang.org/1.2.0/book/rust-inside-other-languages.html">https://doc.rust-lang.org/1.2.0/book/rust-inside-other-languages.html</a>. This chapter in the Rust Book covers similar ground to this chapter—embedding Rust—but at a faster clip and with different high-level languages. Specifically, The Book covers embedding Rust into both Ruby and NodeJS, which we did not.</li>
+<li><em>FFI in Rust - writing bindings for libcpuid</em>, available at <a href="http://siciarz.net/ffi-rust-writing-bindings-libcpuid/">http://siciarz.net/ffi-rust-writing-bindings-libcpuid/</a>. Zbigniew Siciarz has been writing about Rust and writing in Rust for a good while. You may know him from his <em>24 days of Rust</em> series. In this post, Sicarz documents the process of building a safe wrapper for libcpuid, a library whose job is to poll the OS for information about the user's CPU.</li>
+<li><em><span> </span></em><span><em>Taking Elixir to the Metal with Rust</em>, Sonny Scroggin, available at </span><span class="Object"><a href="https://www.youtube.com/watch?v=lSLTwWqTbKQ" target="_blank">https://www.youtube.com/watch?v=lSLTwWqTbKQ</a></span><span>. In this chapter we demonstrated Beamcoin, a combination of Elixir and Rust in the same project. Integrating NIFs into a BEAM system is a complicated subject. This talk, presented at NDC London 2017, is warmly recommended as an introduction to the subject.</span><span> </span></li>
+<li><em>Piecemeal Into Space: Reliability, Safety and Erlang Principles</em>, Brian L. Troutwine, available at <a href="https://www.youtube.com/watch?v=pwoaJvrJE_U">https://www.youtube.com/watch?v=pwoaJvrJE_U</a>. There's a great deal of work that's gone into the BEAM over the decades, earning those languages a key place in fault-tolerant software deployments. Exactly how the BEAM functions is something of a mystery without inspection. In this talk, I cover the BEAM's semantic model and then discuss it's implementation at a high-level.</li>
+</ul>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

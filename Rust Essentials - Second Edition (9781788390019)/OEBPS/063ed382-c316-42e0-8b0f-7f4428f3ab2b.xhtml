@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style00.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style01.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Buffered reading</h1>
+                </header>
+            
+            <article>
+                
+<p>Reading in a file in memory with <kbd>read_to_string</kbd> might not be that clever with large files, because that would use a large chunk of memory. In that case, it is much better to use the buffered reading provided by <kbd>BufReader</kbd> and <kbd>BufRead</kbd> from <kbd>std::io:</kbd>; this way lines are read in and processed one by one.</p>
+<p>In the following example, a file with numerical information is processed. Each line contains two fields, an integer, and a float, separated by a space:</p>
+<pre>// code from Chapter 11/code/reading_text_file.rs: 
+<strong>use std::io::{BufRead, BufReader};</strong> 
+use std::fs::File; 
+ 
+fn main() { 
+<strong>    let file = <br/>BufReader::new(File::open("numbers.txt").unwrap());<br/></strong><strong>    let pairs: Vec&lt;_&gt; = file.lines().map(|line| {</strong> 
+        let line = line.unwrap(); 
+        let line = line.trim(); 
+<strong>        let mut words = line.split(" ");</strong><strong>        <br/>let left = words.next().expect("Unexpected empty line!");</strong><strong>        <br/>let right = words.next().expect("Expected number!");</strong><strong>        <br/><br/>(<br/></strong><strong>left.parse::&lt;u64&gt;().ok().expect("Expected integer in first column!"),<br/></strong><strong>right.parse::&lt;f64&gt;().ok().expect("Expected float in second column!")</strong><strong>        )<br/></strong><strong>}).collect();</strong> 
+     println!("{:?}", pairs); 
+} </pre>
+<p>This prints out:</p>
+<pre><strong>[(120, 345.56), (125, 341.56)]  </strong></pre>
+<p>The information is collected in <kbd>pairs</kbd>, which is a <kbd>Vec&lt;(u64, f64)&gt;</kbd>, and which can then be processed as you want.</p>
+<p>For a more complex line structure, you would want to work with struct values describing the line content instead of pairs, like this:</p>
+<pre>struct LineData { 
+    string1: String, 
+    int1 : i32, 
+    string2: String, 
+    // Some other fields  
+} </pre>
+<p>In production code, the <kbd>unwrap()</kbd> and <kbd>expect()</kbd> functions should be replaced by more robust code using pattern matching and/or <kbd>try!</kbd>.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

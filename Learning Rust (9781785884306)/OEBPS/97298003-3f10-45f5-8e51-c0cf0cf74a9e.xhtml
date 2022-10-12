@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style00.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style01.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Looking at modules</h1>
+                </header>
+            
+            <article>
+                
+<p>To show how crates are put together, we are going to create one. In this case, it will be a simple math crate.</p>
+<p>Before we consider this, let's consider something we all know: a car. We will consider the car a crate, as everything to do with the car is held within it.</p>
+<p>To start, let's think about the main parts of the car: the engine, fuel, interior, wheels and movement, and electrics.</p>
+<p class="mce-root">There are more but, for now, we will ignore them. Let's represent this as a block diagram to make the relationship clearer:</p>
+<div class="CDPAlignCenter CDPAlign"><img height="209" width="272" src="Images/ba536dcb-0c36-4ec2-a407-b3d41d828979.png"/></div>
+<p>We can, of course, split up each of these blocks (for example, we can split the electrics into ignition, audio, windows, heated windscreens, lights, and interior fan).</p>
+<p>The car is the crate. Each block is a module. Each split is a submodule. It's now quite simple to see how crates can be visualized.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

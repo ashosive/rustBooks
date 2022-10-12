@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Consumers and adapters</h1>
+                </header>
+            
+            <article>
+                
+<p>Now, we will see some examples that show why iterators are so useful. Iterators are lazy and have to be activated by invoking a consumer to start using the values. Let's start with a range of the numbers from <kbd>0</kbd> to <kbd>999</kbd> included. To make this into a vector, we apply the function <kbd>collect()</kbd> consumer:</p>
+<pre>// see code in Chapter 5/code/adapters_consumers.rs 
+let rng = 0..1000; 
+let rngvec: Vec&lt;i32&gt; = rng.collect(); 
+// alternative notation: 
+// let rngvec = rng.collect::&lt;Vec&lt;i32&gt;&gt;(); 
+println!("{:?}", rngvec); </pre>
+<p>This prints out the range (we shortened the output with...):</p>
+<pre>    <strong>[0, 1, 2, 3, 4, ... , 999]</strong> </pre>
+<p>The function <kbd>collect()</kbd> loops through the entire iterator, collecting all of the elements into a container, here of type <kbd>Vec&lt;i32&gt;</kbd>. That container does not have to be an iterator. Notice that we indicate the item type of the vector with <kbd>Vec&lt;i32&gt;</kbd>, but we could have also written it as <kbd>Vec&lt;_&gt;</kbd>. The notation <kbd>collect::&lt;Vec&lt;i32&gt;&gt;()</kbd> is new, it indicates that the function <kbd>collect()</kbd> is a parametrized method that can work with generic types. See the next section for more information.</p>
+<p>The function <kbd>find()</kbd> consumer gets the first value of the iterator that makes its condition (here <kbd>&gt;= 42</kbd>) true and returns it as a value of the type <kbd>Option</kbd>, for example:</p>
+<pre>let forty_two = rng.find(|n| *n &gt;= 42); 
+println!("{:?}", forty_two);  // </pre>
+<p>This prints out the following output:</p>
+<pre>    <strong>Some(42)</strong></pre>
+<p>The value of the function <kbd>find()</kbd> is of type <kbd>Option</kbd> because the condition could be false for all items and then it would return a <kbd>None</kbd> value. The condition is wrapped in a closure <kbd>|n| *n &gt;= 42</kbd>, which is applied on every item of the iterator through a reference <kbd>n</kbd>; that's why we have to dereference <kbd>*n</kbd> to get the value.</p>
+<p>Suppose we only want the even numbers in our range, producing a new range by testing a closure condition on each item. This can be done with the <kbd>filter()</kbd> function, which is an adapter because it produces a new iterator from the old one. Its result can be collected just like any iterator:</p>
+<pre>let rng_even = rng.filter(|n| is_even(*n)) 
+                  .collect::&lt;Vec&lt;i32&gt;&gt;(); // (1)
+println!("{:?}", rng_even); </pre>
+<p>Here, <kbd>is_even</kbd> is the following function:</p>
+<pre>fn is_even(n: i32) -&gt; bool { 
+    n % 2 == 0 
+} </pre>
+<p>This prints out the following output:</p>
+<pre>    <strong>[0, 2, 4, ..., 996, 998]</strong> </pre>
+<p>This shows that odd integers are filtered out.</p>
+<p>Notice how we can chain our consumers and adapters, just apply <kbd>collect()</kbd> on the result of the <kbd>filter()</kbd> function with <kbd>.collect()</kbd>, as in the previous <em>line 1</em>.</p>
+<p>What if we want to cube (<kbd>n * n * n</kbd>) every item in the resulting iterator? Producing a new range by applying a closure to each item in it can be done with the <kbd>map()</kbd> function:</p>
+<pre>let rng_even_pow3 = rng.filter(|n| is_even(*n)) 
+                       .map(|n| n * n * n) 
+                       .collect::&lt;Vec&lt;i32&gt;&gt;(); 
+println!("{:?}", rng_even_pow3); </pre>
+<p>This prints out the following output:</p>
+<pre>    <strong>[0, 8, 64, ..., 988047936, 994011992]</strong>  </pre>
+<p>If you only want the first five results, insert a <kbd>take(5)</kbd> adapter before the <kbd>collect</kbd>. The resulting vector then contains the following:</p>
+<pre>    <strong>[0, 8, 64, 216, 512]</strong>  </pre>
+<p>So, call a consumer if you see the following message while compiling:</p>
+<pre><strong>warning: unused result which must be used: iterator adaptors are lazy and do nothing unless consumed</strong>  </pre>
+<p>To see all consumers and adapters, consult the docs of module <kbd>std::iter</kbd>.</p>
+<div class="packt_tip packt_infobox"><span class="packt_screen">Exercise:</span><br/>
+<br/>
+Another very powerful consumer is the <kbd>fold()</kbd> function.<br/>
+The following example calculates the sum of the first hundred integers. It starts with a base value 0, which is also the initial value of the accumulator <kbd>sum</kbd>, and then iterates and adds every item <kbd>n</kbd> to <kbd>sum</kbd>:<br/>
+<kbd>let sum = (0..101).fold(0, |sum, n| sum + n);</kbd><br/>
+<kbd>println!("{}", sum); //prints out 5050</kbd><br/>
+<span><br/>
+Now calculate the product of all cubes of the integers in the range from 1 to 6.<br/>
+The result should be</span> <kbd>1728000</kbd><span>; watch out for the base value! As a second exercise, subtract all items from the following array</span> <kbd>[1, 9, 2, 3, 14, 12]</kbd> <span>starting from</span> <kbd>0</kbd> <span>(that is,</span> <kbd>0 -1 -9 -2</kbd> <span>and so on).<br/>
+This should result in</span> <kbd>41</kbd> <span>(for example code, see</span> <kbd>Chapter 5/exercises/fold.rs</kbd><span>).</span></div>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

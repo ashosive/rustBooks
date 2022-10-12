@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style00.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style01.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Values and primitive types</h1>
+                </header>
+            
+            <article>
+                
+<p>Constants that have been initialized have a value. Values exist in different types: <kbd>70</kbd> is an integer, <kbd>3.14</kbd> is a <kbd>float</kbd>, and <kbd>Z</kbd> and <kbd>θ</kbd> are the type of a character. Characters are Unicode values that take four bytes of memory each. <kbd>Godzilla</kbd> is a string of type <kbd>&amp;str</kbd> (which is Unicode UTF8 by default), <kbd>true</kbd> and <kbd>false</kbd> are the type of Boolean values. Integers can be written in different formats:</p>
+<ul>
+<li>Hexadecimal format with <kbd>0x</kbd>, like <kbd>0x46</kbd> for <kbd>70</kbd>.</li>
+<li>Octal format with <kbd>0o</kbd>, like <kbd>0o106</kbd> for <kbd>70</kbd>.</li>
+<li>Binary format with <kbd>0b</kbd>, like <kbd>0b1000110</kbd>.</li>
+</ul>
+<ul>
+<li>Underscores can be used for readability, as in <kbd>1_000_000</kbd>. Sometimes the compiler will urge you to indicate more explicitly the type of number with a suffix, for example (the number after <kbd>u</kbd> or <kbd>i</kbd> is the number of memory bits used, namely: 8, 16, 32, or 64).</li>
+<li>The <kbd>10usize</kbd> denotes an unsigned integer of machine word size (<kbd>usize)</kbd>, which can be any of the following types: <kbd>u8</kbd>, <kbd>u16</kbd>, <kbd>u32</kbd>, <kbd>u64</kbd>.</li>
+<li>The <kbd>10isize</kbd> denotes a signed integer of machine word size (<kbd>isize)</kbd>, which can be any of the following types: <kbd>i8</kbd>, <kbd>i16</kbd>, <kbd>i32</kbd>, <kbd>i64</kbd></li>
+<li>In the cases above on a 64-bit operating system <kbd>usize</kbd> is in fact <kbd>u64</kbd>, and <kbd>isize</kbd> is equivalent to <kbd>i64</kbd>.</li>
+<li>The <kbd>3.14f32</kbd> denotes a 32-bit floating-point number.</li>
+<li>The <kbd>3.14f64</kbd> denotes a 64-bit floating-point number.</li>
+<li>The numeric types <kbd>i32</kbd> and <kbd>f64</kbd> are the defaults if no suffix is given, but in that case to differentiate between them you must end an <kbd>f64</kbd> value with <kbd>.0</kbd>, like:</li>
+</ul>
+<pre>let e = 7.0; </pre>
+<p>In general, indicating a specific type is recommended.</p>
+<p>Rust is like any other C-like language when it comes to the different operators and their precedence. However, notice that Rust does not have increment (<kbd>++</kbd>) or decrement (<kbd>--</kbd>) operators. To compare two values for equality use <kbd>==</kbd> , and <kbd>!=</kbd> to test if they are different.</p>
+<p>There is even the empty value <kbd>()</kbd> of zero size, which is the only value of the so called unit type <kbd>()</kbd>. It is used to indicate the return value when an expression or a function returns nothing (no value), as is the case for a function that only prints to the console. <kbd>()</kbd> is not the equivalent of a null value in other languages; <kbd>()</kbd> is no value, whereas null is a value.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style00.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style01.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">The Sync trait</h1>
+                </header>
+            
+            <article>
+                
+<p>An <kbd>Arc&lt;T&gt;</kbd> object implements the <kbd>Sync</kbd> trait (while <kbd>Rc</kbd> does not), which indicates to the compiler that it is safe to use concurrently with multiple threads. Any data that has to be shared simultaneously among threads must implement the <kbd>Sync</kbd> trait. The ;<kbd>T</kbd> ;type is <kbd>Sync</kbd> if there is no possibility of data races when passing <kbd>&amp;T</kbd> references between threads; in short, <kbd>&amp;T</kbd> ;is thread-safe. All simple types, such as integers and floating point numbers, are <kbd>Sync</kbd>, as well as all composite types (such as structs, enums, and tuples) that are built with simple types. Any types that only contain things that implement <kbd>Sync</kbd> are automatically <kbd>Sync</kbd>.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

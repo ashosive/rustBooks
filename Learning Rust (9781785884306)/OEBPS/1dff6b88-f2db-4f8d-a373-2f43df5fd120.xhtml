@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style00.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style01.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Formatting traits</h1>
+                </header>
+            
+            <article>
+                
+<p>Formatting traits determine how the output of the format will be produced. They are all used in the same way: <kbd>{:trait_name}.</kbd></p>
+<p>The following are the current traits available:</p>
+<table class="table">
+<tbody>
+<tr>
+<td>
+<p><strong>Format string</strong></p>
+</td>
+<td>
+<p><strong>Trait</strong></p>
+</td>
+<td>
+<p><strong>Meaning</strong></p>
+</td>
+<td>
+<p><strong>Example</strong></p>
+</td>
+</tr>
+<tr>
+<td>
+<p><kbd>{}</kbd></p>
+</td>
+<td>
+<p>Display</p>
+</td>
+<td>
+<p>A human-readable representation. Not all things implement Display.</p>
+</td>
+<td>
+<p>123 =&gt; "123"</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><kbd>{:?}</kbd></p>
+</td>
+<td>
+<p>Debug</p>
+</td>
+<td>
+<p>An internal representation. Almost everything implements Debug.</p>
+</td>
+<td>
+<p>b"123" =&gt; [49, 50, 51]</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><kbd>{:b}</kbd></p>
+</td>
+<td>
+<p>Binary</p>
+</td>
+<td>
+<p>Converts a number into binary</p>
+</td>
+<td>
+<p>123 =&gt; "1111011"</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><kbd>{:x}</kbd></p>
+</td>
+<td>
+<p>LowerHex</p>
+</td>
+<td>
+<p>Hex in lowercase</p>
+</td>
+<td>
+<p>123 =&gt; 7b</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><kbd>{:X}</kbd></p>
+</td>
+<td>
+<p>UpperHex</p>
+</td>
+<td>
+<p>Hex in uppercase</p>
+</td>
+<td>
+<p>123 =&gt; 7B</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><kbd>{:e}</kbd></p>
+</td>
+<td>
+<p>LowerExp</p>
+</td>
+<td>
+<p>Number with exponential, lowercase</p>
+</td>
+<td>
+<p>123.0 =&gt; 1.23e2</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><kbd>{:E}</kbd></p>
+</td>
+<td>
+<p>UpperExp</p>
+</td>
+<td>
+<p>Number with exponential, uppercase</p>
+</td>
+<td>
+<p>123.0 =&gt; 1.23E2</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><kbd>{:p}</kbd></p>
+</td>
+<td>
+<p>Pointer</p>
+</td>
+<td>
+<p>Pointer location</p>
+</td>
+<td>
+<p>&amp;123 =&gt; 0x55b3fbe72980 (may point to a different address on every run)</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p> </p>
+<p>Similarly, the output can be formatted with formatting parameters.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

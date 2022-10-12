@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Reference counting</h1>
+                </header>
+            
+            <article>
+                
+<p>Reference-counting memory reclamation associates a piece of protected data with an atomic counter. Every thread reading or writing to that protected data increases the counter on acquisition and decreases the counter on de-acquisition. The thread to decrease the counter and find it as zero is the last to hold the data and may either mark the data as available for reclamation or deallocate it immediately. This should, hopefully, sound familiar. The Rust standard library ships with <kbd>std::sync::Arc</kbd>—discussed in <a href="5a332d94-37e4-4748-8920-1679b07e2880.xhtml" target="_blank">Chapter 4</a>, <em>Sync and Send<span> </span>–<span> </span>the Foundation of Rust Concurrency</em>, and <a href="e2de1ba7-c291-494e-82da-37fee7323c1d.xhtml" target="_blank"><span>Chapter 5</span></a>, <em>Locks – Mutex, Condvar, Barriers and RWLock</em>, especially—to fulfill this exact need. While we discussed the usage of <kbd>Arc</kbd>, we did not discuss its internals previously, owing to our need to reach <a href="d42acb0b-a05e-4068-894f-81365d147bf4.xhtml" target="_blank">Chapter 6</a>, <em>Atomics<span> </span>–<span> </span>the Primitives of Synchronization</em>, before we had the necessary background. Let's dig into <kbd>Arc</kbd> now.</p>
+<p>The Rust compiler's code for <kbd>Arc</kbd> is <kbd>src/liballoc/arc.rs</kbd>. The structure definition is compact enough:</p>
+<pre style="padding-left: 30px">pub struct Arc&lt;T: ?Sized&gt; {
+    ptr: Shared&lt;ArcInner&lt;T&gt;&gt;,
+    phantom: PhantomData&lt;T&gt;,
+}</pre>
+<p>We encountered <kbd>Shared&lt;T&gt;</kbd> in <a href="605ce307-29ed-4b5a-961e-8d327467b84f.xhtml" target="_blank">Chapter 3</a><span>, </span> <span><em>The Rust Memory Model – Ownership, References and Manipulation</em></span>, with it being a pointer with the same characteristics as <kbd>*mut X</kbd> except that it is non-null. There are two functions for creating a new <kbd>Shared&lt;T&gt;</kbd>, which are <kbd>const unsafe fn new_unchecked(ptr: *mut X) -&gt; Self</kbd> and <kbd>fn new(ptr: *mut X) -&gt; Option&lt;Self&gt;</kbd>. In the first variant, the caller is responsible for ensuring that the pointer is non-null, in the second, the nulled nature of the pointer is checked. Please refer back to <a href="605ce307-29ed-4b5a-961e-8d327467b84f.xhtml" target="_blank">Chapter 3</a>,  <span><em>The Rust Memory Model – Ownership, References and Manipulation</em></span><span class="cdp-chapters-widget-post-title">,</span> <span class="underline"><em>Rc</em></span> section for a deep-dive. We know, then, that <kbd>ptr</kbd> in <kbd>Arc&lt;T&gt;</kbd> is non-null and, owing to the phantom data field, that the store of <kbd>T</kbd> is not held in <kbd>Arc&lt;T&gt;</kbd>. That'd be in <kbd>ArcInner&lt;T&gt;</kbd>:</p>
+<pre style="padding-left: 30px">struct ArcInner&lt;T: ?Sized&gt; {
+    strong: atomic::AtomicUsize,
+
+    // the value usize::MAX acts as a sentinel for temporarily <br/>    // "locking" the ability to upgrade weak pointers or <br/>    // downgrade strong ones; this is used to avoid races<br/>    // in `make_mut` and `get_mut`.
+    weak: atomic::AtomicUsize,
+
+    data: T,
+}</pre>
+<p>We see two inner <kbd>AtomicUsize</kbd> fields: <kbd>strong</kbd> and <kbd>weak</kbd>. Like <kbd>Rc</kbd>, <kbd>Arc&lt;T&gt;</kbd> allows two kinds of strength references to the interior data. A weak reference does not own the interior data, allowing for <kbd>Arc&lt;T&gt;</kbd> to be arranged in a cycle without causing an impossible memory-reclamation situation. A strong reference owns the interior data. Here, we see the creation of a new strong reference via <kbd>Arc&lt;T&gt;::clone() -&gt; Arc&lt;T&gt;</kbd>:</p>
+<pre>    fn clone(&amp;self) -&gt; Arc&lt;T&gt; {
+        let old_size = self.inner().strong.fetch_add(1, Relaxed);
+
+        if old_size &gt; MAX_REFCOUNT {
+            unsafe {
+                abort();
+            }
+        }
+
+        Arc { ptr: self.ptr, phantom: PhantomData }
+    }</pre>
+<p>Here, we can see that on every clone, the <kbd>strong</kbd> of <kbd>ArcInner&lt;T&gt;</kbd> is increased by one  when you use relaxed ordering. The code comment to this block—dropped for brevity in this text—asserts that relaxed ordering is sufficient owing to the circumstance of the use of <kbd>Arc</kbd><em>.</em> Using a relaxed ordering is alright here, as knowledge of the original reference prevents other threads from erroneously deleting the object. This is an important consideration. Why does clone not require a more strict ordering? Consider a thread, <kbd>A</kbd>, that clones some <kbd>Arc&lt;T&gt;</kbd> and passes it to another thread, <kbd>B</kbd>, and then, having passed to <kbd>B</kbd>, immediately drops its own copy of <kbd>Arc</kbd>. We can determine from the inspection of <kbd>Arc&lt;T&gt;::new() -&gt; Arc&lt;T&gt;</kbd> that, at creation time, <kbd>Arc</kbd> always has one strong and one weak reference:</p>
+<pre>    pub fn new(data: T) -&gt; Arc&lt;T&gt; {
+        // Start the weak pointer count as 1 which is the weak <br/>        // pointer that's held by all the strong pointers <br/>        // (kinda), see std/rc.rs for more info
+        let x: Box&lt;_&gt; = box ArcInner {
+            strong: atomic::AtomicUsize::new(1),
+            weak: atomic::AtomicUsize::new(1),
+            data,
+        };
+        Arc { ptr: Shared::from(Box::into_unique(x)), <br/>              phantom: PhantomData }
+    }</pre>
+<p>From the perspective of thread <kbd>A</kbd>, the cloning of <kbd>Arc</kbd> is composed of the following operations:</p>
+<pre style="padding-left: 30px">clone Arc
+    INCR strong, Relaxed
+    guard against strong wrap-around
+    allocate New Arc
+move New Arc into B
+drop Arc</pre>
+<p>We know from discussion in the previous chapter, that <kbd>Release</kbd> ordering does not offer a causality relationship. It's entirely possible that a hostile CPU could reorder the increment of <kbd>strong</kbd> to after the movement of  <kbd>New Arc</kbd> into <kbd>B</kbd>. Would we be in trouble if <kbd>B</kbd> then immediately dropped <kbd>Arc</kbd>? We need to inspect <kbd>Arc&lt;T&gt;::drop()</kbd>:</p>
+<pre>    fn drop(&amp;mut self) {
+        if self.inner().strong.fetch_sub(1, Release) != 1 {
+            return;
+        }
+
+        atomic::fence(Acquire);
+
+        unsafe {
+            let ptr = self.ptr.as_ptr();
+
+            ptr::drop_in_place(&amp;mut self.ptr.as_mut().data);
+
+            if self.inner().weak.fetch_sub(1, Release) == 1 {
+                atomic::fence(Acquire);
+                Heap.dealloc(ptr as *mut u8, Layout::for_value(&amp;*ptr))
+            }
+        }
+    }</pre>
+<p>Here we go. <kbd>atomic::fence(Acquire)</kbd> is new to us. <kbd>std::sync::atomic::fence</kbd> prevents memory migration around itself, according to the causality relationship established by the provided memory ordering. The fence applies to same-thread and other-thread memory operations. Recall that <kbd>Release</kbd> ordering disallows loads and stores from migrating downward in the source-code order. Here, we see, that the load and store of strong will disallow migrations downward but will not be reordered after the <kbd>Acquire</kbd> fence. Therefore, the deallocation of the <kbd>T</kbd> interior to <kbd>Arc</kbd> will not happen until both the <kbd>A</kbd> and <kbd>B</kbd> threads have synchronized and removed all strong references. An additional thread, <kbd>C</kbd>, cannot come through and increase the strong references to the interior <kbd>T</kbd> while this is ongoing, owing to the causality relationship established—neither <kbd>A</kbd> nor <kbd>B</kbd> can give <kbd>C</kbd> a strong reference without increasing the strong counter, causing the drops of <kbd>A</kbd> or <kbd>B</kbd> to bail out early. A similar analysis holds for weak references.</p>
+<p>Doing an immutable dereference of <kbd>Arc</kbd> does not increase the strong or weak counts:</p>
+<pre style="padding-left: 30px">impl&lt;T: ?Sized&gt; Deref for Arc&lt;T&gt; {
+    type Target = T;
+
+    #[inline]
+    fn deref(&amp;self) -&gt; &amp;T {
+        &amp;self.inner().data
+    }
+}</pre>
+<p>Because drop requires a mutable self, it is impossible to free <kbd>Arc&lt;T&gt;</kbd> while there is a valid <kbd>&amp;T</kbd>. Getting <kbd>&amp;mut T</kbd> is more involved, which is done via <kbd>Arc&lt;T&gt;::get_mut(&amp;mut Self) -&gt; Option&lt;&amp;mut T&gt;</kbd>. Note that the return is an <kbd>Option</kbd>. If there are other strong or weak references to the interior <kbd>T</kbd>, then it's not safe to consume <kbd>Arc</kbd>. The implementation of <kbd>get_mut</kbd> is as follows:</p>
+<pre>    pub fn get_mut(this: &amp;mut Self) -&gt; Option&lt;&amp;mut T&gt; {
+        if this.is_unique() {
+            // This unsafety is ok because we're guaranteed that the<br/>            // pointer returned is the *only* pointer that will ever<br/>            // be returned to T. Our reference count is guaranteed<br/>            // to be 1 at this point, and we required the Arc itself<br/>            // to be `mut`, so we're returning the only possible <br/>            // reference to the inner data.
+            unsafe {
+                Some(&amp;mut this.ptr.as_mut().data)
+            }
+        } else {
+            None
+        }
+    }</pre>
+<p>Where <kbd>is_unique</kbd> is:</p>
+<pre>    fn is_unique(&amp;mut self) -&gt; bool {
+        if self.inner().weak.compare_exchange(1, usize::MAX, <br/>                                              Acquire, Relaxed).is_ok() {
+            let unique = self.inner().strong.load(Relaxed) == 1;
+            self.inner().weak.store(1, Release);
+            unique
+        } else {
+            false
+        }
+    }</pre>
+<p>The compare and exchange operation on weak ensures that there is only one weak reference outstanding—implying uniqueness—and does so on success with <kbd>Acquire</kbd> ordering. This ordering will force the subsequent check of the strong references to occur after the check of weak references in the code order and above the release store to the same. This exact technique will be familiar from our discussion on mutual exclusion in the previous chapter.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

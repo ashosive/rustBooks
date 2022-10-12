@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Ordering::Release</h1>
+                </header>
+            
+            <article>
+                
+<p>If <kbd>Acquire</kbd> is the starting line of a lock, then <kbd>Release</kbd> is the finish line. In fact, the LLVM documentation says:</p>
+<div class="packt_quote">
+<p>"Release is similar to Acquire, but with a barrier of the sort necessary to release a lock."</p>
+</div>
+<p>It's may be a little more subtle than <kbd>lock</kbd> might suggest, though. Here's what the Rust documentation has to say:</p>
+<div class="packt_quote">
+<p>"When coupled with a store, all previous writes become visible to the other threads that perform a load with Acquire ordering on the same value."</p>
+</div>
+<p>Where <kbd>Acquire</kbd> stopped loads and stores after itself from migrating upward, <kbd>Release</kbd> stops loads and stores prior to itself from migrating downward, with regard to program order. Like <kbd>Acquire</kbd>, <kbd>Release</kbd> does not stop loads and stores prior to itself from migrating up. A <kbd>Release</kbd> store is akin to the finish line of a lock, but one that is porous on the bottom side.</p>
+<p>Incidentally, there's an interesting complication here that lock intuition is not helpful with. Question: can two <kbd>Acquire</kbd> loads or two <kbd>Release</kbd> stores happen simultaneously? The answer is, well, it depends on quite a lot, but it is possible. In the preceding hopper example, the spinning <kbd>pop_front</kbd> thread does not block the <kbd>push_back</kbd> thread from performing its check of size, either by permanently holding the size until a <kbd>Release</kbd> came along to free the <kbd>pop_front</kbd> thread, even temporarily, until the while loop can be checked. Remember, the causality model of the language says nothing about the ordering of two <kbd>Acquire</kbd> loads or <kbd>Release</kbd> stores. It's undefined what happens and is probably going to strongly depend on your hardware. All we do know is that the <kbd>pop_front</kbd> thread will not partially see the stores done to memory by <kbd>push_back</kbd>; it'll be all-or-none. All of the loads and stores after an <kbd>Acquire</kbd> and before a <kbd>Release</kbd> come as a unit.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

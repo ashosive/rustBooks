@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Into Erlang/Elixir</h1>
+                </header>
+            
+            <article>
+                
+<p>In this last section of the chapter, we'll investigate embedding Rust into the BEAM, the virtual machine that underpins Erlang and Elixir. The BEAM is a sophisticated work-stealing scheduler system that happens to be programmable. Erlang processes are small C structs that bounce around between scheduler threads and carry enough internal information to allow interpretation for a fixed number of instructions. There's no concept of shared memory in Erlang/Elixir: communication between different concurrent actors in the system <em>must</em> happen via message passing. There are many benefits to this and the VM does a great deal of work to avoid copying when possible. Erlang/Elixir processes receive messages into a message queue, a double-ended threadsafe queue of the kind we've discussed throughout the book.</p>
+<p>Erlang and Elixir are rightly known for their efficiency at handling high-scale IO in a real-time fashion. Erlang was invented at Ericsson to serve as telephony control software, after all. What these languages are not known for is serial performance. Sequential computations in Erlang are relatively slow, it's just that it's so <em>easy</em> to get concurrent computations going that this is sort of made up for. Sort of. Sometimes, you need raw, serial performance.</p>
+<p>Erlang has a few answers for this. A <em>Port</em> opens up an external OS process with a bidirectional byte stream. We saw an approach much like this in the previous chapter with feruscore embedding pmars. A <em>Port Driver</em> is a linked shared object, often written in C. The Port Driver interface has facilities for giving interrupt hints to BEAM's schedulers and has much to recommend it. A Port Driver <em>is</em> a process and must be able to handle the things an Erlang process normally does: servicing its message queue, dealing with special interrupt signals, cooperatively scheduling itself, and so on. These are non-trivial to write. Finally, Erlang supports a Natively Implemented Function (NIF) concept. These are simpler than Port Drivers and are synchronous, being simply callable functions that happen to be written in a language other than Erlang. NIFs are shared libraries and are often implemented in C. Both Port Drivers and NIFs have a serious downside: memory issues will corrupt the BEAM and knock your application offline. Erlang systems tend to be deployed where fault-tolerance is a major factor and segfaulting the VM is a big no-no.</p>
+<p>As a result, there's a good deal of interest in the Erlang/Elixir communities towards Rust. The Rustler project (<a href="https://crates.io/crates/rustler">https://crates.io/crates/rustler</a>) aims to make combining Rust into an Elixir project as NIFs a simple matter. Let's take a look at a brief example project, presented by Sonny Scroggin at Code BEAM 2018 in San Francisco—beamcoin (<a href="https://github.com/blt/beamcoin">https://github.com/blt/beamcoin</a>). We'll discuss the project at SHA <kbd>3f510076990588c51e4feb1df990ce54ff921a06</kbd>.</p>
+<div class="packt_infobox"><span>The beamcoin project is not listed in its entirety. We've mostly dropped the build configuration. You can find the full listing in this book's source repository.</span></div>
+<p>The build system for Elixir—the BEAM language that Rustler targets natively—is called Mix. Its configuration file is <kbd>mix.exs</kbd> at the root of the project:</p>
+<pre>defmodule Beamcoin.Mixfile do
+  use Mix.Project
+
+  def project do
+    [app: :beamcoin,
+     version: "0.1.0",
+     elixir: "~&gt; 1.5",
+     start_permanent: Mix.env == :prod,
+     compilers: [:rustler] ++ Mix.compilers(),
+     deps: deps(),
+     rustler_crates: rustler_crates()]
+  end
+
+  def application do
+    [extra_applications: [:logger]]
+  end
+
+  defp deps do
+    [{:rustler, github: "hansihe/rustler", sparse: "rustler_mix"}]
+  end
+
+  defp rustler_crates do
+    [beamcoin: [
+      path: "native/beamcoin",
+      mode: mode(Mix.env)
+    ]]
+  end
+
+  defp mode(:prod), do: :release
+  defp mode(_), do: :debug
+end</pre>
+<p>There's a fair bit here that we won't get into. Note, however, this section:</p>
+<pre>  defp rustler_crates do
+    [beamcoin: [
+      path: "native/beamcoin",
+      mode: mode(Mix.env)
+    ]]
+  end</pre>
+<p>Embedded in the project under <kbd>native/beamcoin</kbd> is the Rust library we'll be exploring. Its cargo configuration, at <kbd>native/beamcoin/Cargo.toml</kbd>, is:</p>
+<pre>[package]
+name = "beamcoin"
+version = "0.1.0"
+authors = []
+
+[lib]
+name = "beamcoin"
+path = "src/lib.rs"
+crate-type = ["dylib"]
+
+[dependencies]
+rustler = { git = "https://github.com/hansihe/rustler", branch = "master" }
+rustler_codegen = { git = "https://github.com/hansihe/rustler", branch = "master" }
+lazy_static = "0.2"
+num_cpus = "1.0"
+scoped-pool = "1.0.0"
+sha2 = "0.7"</pre>
+<p>Nothing too surprising here. A dynamic library, called libbeamcoin, will be produced when Rust compiles this and we've seen almost all the dependencies before. rustler and <kbd>rustler_codegen</kbd> are the interface and compiler generators for Rustler, respectively. <kbd>rustler_codegen</kbd> removes a lot of boilerplate C extern work we might otherwise have to do. sha2 is a crate from the RustCrypto project that, well, implements the sha2 hashing algorithm. Beamcoin is kind of a joke project. The idea is to distribute numbers between threads and count the zeros at the back of the sha2-256 hash, mining those with a pre-set number of zeros. This would be a <em>very</em> slow thing to do in Erlang but, as we'll see, is a relatively fast computation in Rust. The scoped-pool crate is a threadpooling library that is Sendable, meaning it can be placed in a <kbd>lazy_static!</kbd></p>
+<p>The preamble for <kbd>src/lib.rs</kbd> is straightforward enough:</p>
+<pre>#[macro_use]
+extern crate lazy_static;
+extern crate num_cpus;
+extern crate scoped_pool;
+extern crate sha2;
+#[macro_use]
+extern crate rustler;
+
+use rustler::{thread, Encoder, Env, Error, Term};
+use scoped_pool::Pool;
+use sha2::Digest;
+use std::mem;
+use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::{mpsc, Arc};</pre>
+<p>We've seen much of this before. The Rustler imports are analogs of the Erlang C NIF API. The difficulty of mining is controlled by a top-level usize, called <kbd>DIFFICULTY</kbd>:</p>
+<pre>const DIFFICULTY: usize = 6;</pre>
+<p>This value controls the total number of zeros that are required to be found at the back of a hash before it is declared minable. Here's our thread pool:</p>
+<pre>lazy_static! {
+    static ref POOL: Pool = Pool::new(num_cpus::get());
+}</pre>
+<p>I mentioned earlier that the BEAM maintains its own scheduler threads. This is true. The beamcoin NIF also maintains its own, separate pool of threads to distribute mining over. Now, Rustler reduces boilerplate but cannot totally remove it. We must, for instance, tell BEAM which interpreted functions to associate with that symbol and pre-define <em>atoms</em> for use:</p>
+<pre style="padding-left: 30px">rustler_atoms! {
+    atom ok;
+    atom error;
+}
+
+rustler_export_nifs! {
+    "Elixir.Beamcoin",
+    [("native_mine", 0, mine)],
+    None
+}</pre>
+<p>An Erlang atom is a named constant. These are extremely common data types in Erlang/Elixir programs. The threads in the pool are each given a chunk of the positive integers to search, stripped according to their thread number. The pool workers use an MPSC channel to communicate back to the mining thread that a result has been found:</p>
+<pre style="padding-left: 30px">#[derive(Debug)]
+struct Solution(u64, String);
+
+fn mine&lt;'a&gt;(caller: Env&lt;'a&gt;, _args: &amp;[Term&lt;'a&gt;]) <br/>    -&gt; Result&lt;Term&lt;'a&gt;, Error&gt; <br/>{
+    thread::spawn::&lt;thread::ThreadSpawner, _&gt;(caller, move |env| {
+        let is_solved = Arc::new(AtomicBool::new(false));
+        let (sender, receiver) = mpsc::channel();
+
+        for i in 0..num_cpus::get() {
+            let sender_n = sender.clone();
+            let is_solved = is_solved.clone();
+
+            POOL.spawn(move || {
+                search_for_solution(i as u64, num_cpus::get() as u64, <br/>                                    sender_n, is_solved);
+            });
+        }
+
+        match receiver.recv() {
+            Ok(Solution(i, hash)) =&gt; (atoms::ok(), i, hash).encode(env),
+            Err(_) =&gt; (
+                atoms::error(),
+                "Worker threads disconnected before the \<br/>                 solution was found".to_owned(),
+            ).encode(env),
+        }
+    });
+
+    Ok(atoms::ok().encode(caller))
+}</pre>
+<p>The <kbd>search_for_solution</kbd> function is a small loop:</p>
+<pre style="padding-left: 30px">fn search_for_solution(
+    mut number: u64,
+    step: u64,
+    sender: mpsc::Sender&lt;Solution&gt;,
+    is_solved: Arc&lt;AtomicBool&gt;,
+) -&gt; () {
+    let id = number;
+    while !is_solved.load(Ordering::Relaxed) {
+        if let Some(solution) = verify_number(number) {
+            if let Ok(_) = sender.send(solution) {
+                is_solved.store(true, Ordering::Relaxed);
+                break;
+            } else {
+                println!("Worker {} has shut down without \<br/>                         finding a solution.", id);
+            }
+        }
+        number += step;
+    }
+}</pre>
+<p>At the top of the loop, every thread in the pool checks to see whether any other thread has mined a beamcoin. If one has, the function exits and the thread is available for new work in the pool. Otherwise, <kbd>verify_number</kbd> is called. That function is:</p>
+<pre style="padding-left: 30px">fn verify_number(number: u64) -&gt; Option&lt;Solution&gt; {
+    let number_bytes: [u8; 8] = unsafe { <br/>        mem::transmute::&lt;u64, [u8; 8]&gt;(number) <br/>    };
+    let hash = sha2::Sha256::digest(&amp;number_bytes);
+
+    let top_idx = hash.len() - 1;<br/>    // Hex chars are 16 bits, we have 8 bits. /2 is conversion.
+    let trailing_zero_bytes = DIFFICULTY / 2;
+<br/>    let mut jackpot = true;
+    for i in 0..trailing_zero_bytes {
+        jackpot &amp;= hash[top_idx - i] == 0;
+    }
+
+    if jackpot {
+        Some(Solution(number, format!("{:X}", hash)))
+    } else {
+        None
+    }
+}</pre>
+<p>The number is passed in, transmuted into a byte array of 8 members, and hashed. If the hash has the appropriate number of trailing zero bytes, jackpot is true at the end of the function, and the number plus its hash are returned. The careful reader will have noted that the Rust module exports a NIF named <kbd>native_mine</kbd>. Erlang NIFs, generally speaking, have a system language component with a BEAM-native implementation as a fallback. The system language NIF implementation is called <kbd>native_*</kbd> by tradition.</p>
+<p>The final piece here is the Elixir module to wrap the native NIF bits. This module is called <kbd>Beamcoin</kbd> and is <kbd>lib/beamcoin.ex</kbd>:</p>
+<pre style="padding-left: 30px">defmodule Beamcoin do
+  use Rustler, otp_app: :beamcoin
+
+  require Logger
+
+  def mine do
+    :ok = native_mine()
+
+    start = System.system_time(:seconds)
+    receive do
+      {:ok, number, hash} -&gt;
+        done = System.system_time(:seconds)
+        total = done - start
+        Logger.info("Solution found in #{total} seconds")
+        Logger.info("The number is: #{number}")
+        Logger.info("The hash is: #{hash}")
+      {:error, reason} -&gt;
+        Logger.error(inspect reason)
+    end
+  end
+
+  def native_mine, do: :erlang.nif_error(:nif_not_loaded)
+end</pre>
+<p>After installing Elixir (<a href="https://elixir-lang.org/install.html">https://elixir-lang.org/install.html</a>), you can move to the root of the project, execute <kbd>mix deps.get</kbd> to get the project's dependencies, and then use <kbd>MIX_ENV=prod iex -S mix</kbd> to bring up the Elixir repl. That latter command should look something like this:</p>
+<pre><strong>&gt; MIX_ENV=prod iex -S mix
+Erlang/OTP 20 [erts-9.3] [source] [64-bit] [smp:4:4] [ds:4:4:10] [async-threads:10] [hipe] [kernel-poll:false] [dtrace]
+
+Compiling NIF crate :beamcoin (native/beamcoin)...
+    Finished release [optimized] target(s) in 0.70 secs
+Interactive Elixir (1.6.4) - press Ctrl+C to exit (type h() ENTER for help)
+iex(1)&gt;</strong></pre>
+<p>At the prompt, type <kbd>Beamcoin.mine</kbd> and hit <em>Enter</em>. After a few seconds, you should see:</p>
+<pre><strong>iex(1)&gt; Beamcoin.mine
+
+23:30:45.243 [info]  Solution found in 3 seconds
+
+23:30:45.243 [info]  The number is: 10097471
+
+23:30:45.243 [info]  The hash is: 2354BB63E90673A357F53EBC96141D5E95FD26B3058AFAD7B1F7BACC9D000000
+:ok</strong></pre>
+<p>Or, something like it.</p>
+<p>Building NIFs in the BEAM is a complicated topic, one we've hardly touched on here. Sonny Scroggin's talk, included in the <em>Further reading</em> section, covers that nuance in detail. If you're curious about how the BEAM functions, I've included a talk of mine on that subject in the <em>Further reading</em> section as well. Decades of careful effort have gone into the BEAM and it really shows.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

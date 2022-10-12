@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style00.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style01.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">The Rust Memory Model – Ownership, References and Manipulation</h1>
+                </header>
+            
+            <article>
+                
+<p>In the previous chapter, <a href="8c61da2f-08c8-40be-89d4-d8afa8510850.xhtml" target="_blank">Chapter 2</a>, <em>Sequential Rust Performance and Testing</em>, we discussed factors that contribute or detract from the serial performance of a Rust program. We did not explicitly address concurrent performance for want of sufficient information about the way Rust's abstract memory model interacts with the real memory hierarchy of a machine. In this chapter, we'll discuss Rust's memory model, how to control the layout of types in memory, how types are aliased, and how Rust's memory safety works. We'll dig into the standard library to understand how this plays out in practice. This chapter will also examine common crates in the ecosystem that will be of interest to us later in this book. Please be aware that by the time you read this chapter, the <kbd>rustc</kbd> implementation will have changed, potentially making our code listings here no longer square with the naming patterns in <kbd>rustc</kbd> itself. If you wish to follow along, please check out Rust at SHA <kbd>da569fa9ddf8369a9809184d43c600dc06bd4b4d</kbd>.</p>
+<p>By the close of this chapter, we will have:</p>
+<ul>
+<li>Investigated how Rust lays objects out in memory</li>
+<li>Discussed the various ways Rust points to memory and their guarantees</li>
+<li>Discussed how Rust allocates and deallocates memory</li>
+<li>Discussed how Rust denotes stack and heap allocations </li>
+<li>Investigated the internal implementation of <kbd>Option</kbd>, <kbd>Cell</kbd>, <kbd>CellRef</kbd> , <kbd>Rc</kbd> and <kbd>Vec</kbd>.</li>
+</ul>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

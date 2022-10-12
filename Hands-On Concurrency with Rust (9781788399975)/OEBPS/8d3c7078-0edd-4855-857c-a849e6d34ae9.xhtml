@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style00.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style01.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Individuals</h1>
+                </header>
+            
+            <article>
+                
+<p>Nothing special, especially by this point in the book. The <kbd>random() -&gt; Self</kbd> functions are a touch fragile because you can't query an enumeration for its total number of fields, meaning that if we add or remove a field from <kbd>Modifier</kbd>, for instance, we also have to remember to update <kbd>gen_range(0, 7)</kbd> appropriately. Removal is not so bad, the compiler will complain some, but addition is easy to forget and overlook.</p>
+<p>Let's now look at the individual module. The bulk of the code is in src/individual/mod.rs. The struct for Individual is very short:</p>
+<pre>#[derive(Debug)]
+pub struct Individual {
+    chromosome: Vec&lt;Option&lt;Instruction&gt;&gt;,
+}</pre>
+<p>An <kbd>Individual</kbd> is a chromosome and little else, a vector of instructions just as we discussed. The functions on the <kbd>Individual</kbd> provide what you might expect, given the discussion of the evolution algorithm. Firstly, we have to be able to make a new <kbd>Individual</kbd>:</p>
+<pre>impl Individual {
+    pub fn new(chromosome_size: u16, core_size: u16) -&gt; Individual {
+        let mut chromosome = Vec::with_capacity(chromosome_size as usize);
+        chromosome.par_extend((0..(chromosome_size as usize))<br/>                  .into_par_iter().map(|_| {
+            if thread_rng().gen_weighted_bool(OpCode::total() * 2) {
+                None
+            } else {
+                Some(Instruction::random(core_size))
+            }
+        }));
+        Individual { chromosome }
+    }</pre>
+<p>Ah! Here now we've run into something new. What in the world is <kbd>par_extend</kbd>? It's a rayon function, short for parallel extend. Let's work inside out. The interior map ignores its argument and produces a <kbd>None</kbd> with 1/28 chance—14 being the total number of <kbd>OpCode</kbd> variants—and some other random <kbd>Instruction</kbd> with 27/28th chance:</p>
+<pre>map(|_| {
+    if thread_rng().gen_weighted_bool(OpCode::total() * 2) {
+        None
+    } else {</pre>
+<pre>        Some(Instruction::random(core_size))
+    }
+})</pre>
+<p>The input that the interior map is so studiously ignoring is <kbd>(0..(chromosome_size as usize)).into_par_iter()</kbd>. That's a <kbd>ParallelIterator</kbd> over a range of numbers, from 0 to the maximum number of chromosomes an Individual is allowed to have. One creative solution in early Corewars was to submit a <kbd>MOV 0 1</kbd> imp followed by 7999 <kbd>DAT</kbd> instructions. If the MARS loaded your warrior and wasn't programmed to carefully check warrior offsets, your opponent would lose by being immediately overwritten. <kbd>Instruction</kbd> length limits were quickly put into place and we obey that here, too. Serialization of an <kbd>Individual</kbd> follows the pattern we're familiar with:</p>
+<pre>    pub fn serialize(&amp;self, w: &amp;mut Write) -&gt; io::Result&lt;usize&gt; {
+        let mut total_wrote = 0;
+        for inst in &amp;self.chromosome {
+            if let Some(inst) = inst {
+                total_wrote += inst.serialize(w)?;
+            } else {
+                break;
+            }
+        }
+        Ok(total_wrote)
+    }</pre>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

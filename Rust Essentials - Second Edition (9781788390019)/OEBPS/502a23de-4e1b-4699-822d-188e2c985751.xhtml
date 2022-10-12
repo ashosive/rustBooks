@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Using a builder pattern</h1>
+                </header>
+            
+            <article>
+                
+<p>Sometimes data structures have lots of or complicated fields, so that they need a number of constructors to effectively create them. Other languages would use method overloading or named arguments, but Rust doesn't have these. Instead, we can use the so-called <em>builder pattern</em>, which is used occasionally in Servo and the Rust standard library. The idea is that the instance construction is forwarded to an analogous Builder struct, which has a default new constructor, methods that change each of its properties, and a finish method that returns an instance of the original struct. Here is an example:</p>
+<pre>// see code in Chapter 6/code/builder_pattern.rs 
+struct Alien { 
+    name: &amp;'static str, 
+    health: u32, 
+    damage: u32 
+} 
+ 
+struct AlienBuilder { 
+    name: &amp;'static str, 
+    health: u32, 
+    damage: u32 
+} 
+ 
+impl AlienBuilder { 
+    fn new() -&gt; Self { 
+        AlienBuilder { name: "Walker", health: 100, damage: 10 } 
+    } 
+ 
+    fn name(&amp;mut self, n: &amp;'static str) -&gt; &amp;mut AlienBuilder { 
+        self.name = n; 
+        self 
+    } 
+ 
+    fn health(&amp;mut self, h: u32) -&gt; &amp;mut AlienBuilder { 
+        self.health = h; 
+        self 
+    } 
+ 
+    fn damage(&amp;mut self, d: u32) -&gt; &amp;mut AlienBuilder { 
+        self.damage = d; 
+        self 
+    } 
+ 
+    fn finish(&amp;self) -&gt; Alien { 
+        Alien { name: self.name, health: self.health, damage: self.damage } 
+    } 
+} 
+ 
+fn main() { 
+    let al1 = AlienBuilder::new() 
+                .name("Bork") 
+                .health(80) 
+                .damage(20) 
+                .finish(); 
+    println!("name: {}", al1.name); 
+    println!("health: {}", al1.health); 
+} </pre>
+<p>This prints out the following output:</p>
+<pre>    <strong>name: Bork</strong>
+    <strong>health: 80</strong>  </pre>
+<p>This way we have used the type system to enforce our concerns, and we can use the methods on the struct <kbd>AlienBuilder</kbd> to constrain making the struct <kbd>Alien</kbd> instances in any way we choose.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

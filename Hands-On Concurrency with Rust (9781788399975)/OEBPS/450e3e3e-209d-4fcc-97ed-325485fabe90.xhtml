@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Corewars</h1>
+                </header>
+            
+            <article>
+                
+<p>Corewars is a computer programmer game from the 1980s. Introduced in a 1984 Scientific American article, the game is a competition between two or more programs—or warriors—that are written in an obscure assembly language called Redcode. Realistically, there are effectively two variants of Redcode, one of which has nice features, such as labels or pseudo-opcodes for variable assignments. This is usually referred to as Redcode. The other variant is referred to as <em>load file Redcode</em> or simply <em>load file</em> and is a straight listening of opcodes. The machine that Redcode targets is the Memory Array Redcode Simulator (MARS). It is… peculiar. Memory is bounded and circular, the maximum address prior to wrap-around is <kbd>core_size-1</kbd>. Most players set <kbd>core_size</kbd> to 8000 but any value is valid. Each memory location is an instruction. There is no distinction between instruction cache and data storage. In fact, there's not <em>really</em> data storage per se, though you can store information in unused sections of an instruction. There is no such thing as absolute memory addressing in the MARS machine: every address is relative in the ring of memory to the current instruction. For instance, the following instruction will tell MARS to jump backward two spots in memory and continue execution from there:</p>
+<pre>JMP -2</pre>
+<p>MARS executes one instruction from each warrior in turn, in the order that the MARS loaded the warrior into memory. Warriors start at some offset from one another and are guaranteed not to overlap. A warrior may spawn sub-warriors and this sub-warrior will get executed like all the others. A single opcode <kbd>DAT</kbd> will cause a warrior to exit. The objective of the game is force opposing warriors to execute <kbd>DAT.</kbd> The last warrior—plus any spawned warriors—under simulation wins the game.</p>
+<p>There's quite a bit more detail to Corewars than has been presented here, in terms of opcode listing and memory modes and what not, but this is not a Corewars tutorial. There are many fine tutorials online and I suggest some in the <em>Further reading</em> section. What's important to understand is that Corewars is a game played between programmers with programs. There are many MARS simulators but the most commonly used as the <em>MARS</em> is pMARS (<a href="http://www.koth.org/pmars/">http://www.koth.org/pmars/</a>), or Portable MARS. It'll build pretty easily even under a modern GCC, though I can't say I've managed to build it under clang.</p>
+<p>Here's a pretty fun bomber from pmars 0.9.2's source distribution, to give you a sense of how these programs look:</p>
+<pre>;redcode-94
+;name Rave
+;author Stefan Strack
+;strategy Carpet-bombing scanner based on Agony and Medusa's
+;strategy (written in ICWS'94)
+;strategy Submitted: @date@
+;assert CORESIZE==8000
+
+CDIST   equ 12
+IVAL    equ 42
+FIRST   equ scan+OFFSET+IVAL
+OFFSET  equ (2*IVAL)
+DJNOFF  equ -431
+BOMBLEN equ CDIST+2
+
+        org comp
+
+scan    sub.f  incr,comp
+comp    cmp.i  FIRST,FIRST-CDIST        ;larger number is A
+        slt.a  #incr-comp+BOMBLEN,comp  ;compare to A-number
+        djn.f  scan,&lt;FIRST+DJNOFF       ;decrement A- and B-number
+        mov.ab #BOMBLEN,count
+split   mov.i  bomb,&gt;comp               ;post-increment
+count   djn.b  split,#0
+        sub.ab #BOMBLEN,comp
+        jmn.b  scan,scan
+bomb    spl.a  0,0
+        mov.i  incr,&lt;count
+incr    dat.f  &lt;0-IVAL,&lt;0-IVAL
+        end</pre>
+<p>A bomber tosses a bomb at offset intervals into memory. Some toss <kbd>DAT</kbd>s, which force warriors to exit if executed. This one tosses an imp. An imp is a Corewars program that creeps forward in memory some number of instructions at a time. The Imp, introduced in the 1984 article, is:</p>
+<pre>MOV.I 0 1</pre>
+<p>The opcode here is <kbd>MOV</kbd> with modifier <kbd>I</kbd>, source address 0, and destination address 1. <kbd>MOV</kbd> moves instructions at the source address, also traditionally called the <em>a-field</em>, to the destination address, also called the <em>b-field</em>. The opcode modifier—the <kbd>.I</kbd>—defines how the opcode interprets its mandate. Here, we're specifying that MOV moves the whole instruction from the current cell to the next one up the ring. <kbd>MOV.A</kbd> would have only moved the a-field of the current instruction into the a-field of the destination instruction. The bomber's imp <kbd>mov.i incr,&lt;count</kbd> relies on previously computed values to drop imps in memory that advance at different rates with different offsets. The <kbd>&lt;</kbd> on the b-field is an indirect with predecrement operator on the address but, like I said, this is not a Corewars tutorial.</p>
+<p>The pMARS simulator can read in both load files and Redcode, will drop the warriors into the simulator, and report the results. Here we run the bomber against the imp for 100 simulated rounds:</p>
+<pre><strong>&gt; pmars -b -r 1000 imp.red rave.red
+Imp by Alexander Dewdney scores 537
+Rave by Stefan Strack scores 1926
+Results: 0 463 537</strong></pre>
+<p>The imp does not fare too well. It wins 0 times but does manage to tie 537 times. An imp is hard to kill.</p>
+<p>Writing warriors is fun, but teaching a computer to write warriors is even more fun and so that's what we're going to set out to do. Specifically, we'll write an <em>evolver,</em> a program that uses a simulated evolution of a population of warriors to produce ever more fit specimens. We'll call out to the pMARS executable to evaluate our population and, with enough time, hopefully pop out something pretty impressive.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

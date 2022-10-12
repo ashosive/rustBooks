@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style00.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style01.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Generics 101</h1>
+                </header>
+            
+            <article>
+                
+<p>For those coming from the likes of C++ and C#, generics will be nothing new to you. It is typically represented as <kbd>T</kbd>. It is used in the same way as a standard type. As <kbd>T</kbd> doesn't actually have a type, it's known a <strong>polymorphic parameter</strong>.</p>
+<p>There's a simple rule regarding generic types.</p>
+<p>The types have to match—if we define <kbd>T</kbd> as being <kbd>f64</kbd> and attempt to assign a <kbd>String</kbd> to it, the compiler will fail to build that code.</p>
+<p>While <kbd>T</kbd> is also (probably) the most commonly used letter for a generic type, in reality you can have any letter, or even words.</p>
+<p>For example, this is perfectly acceptable code:</p>
+<pre>enum Result&lt;Y, N&gt; 
+{ 
+    Ok(Y), 
+    Err(N), 
+} </pre>
+<p><kbd>Y</kbd> and <kbd>N</kbd> do not need to be the same type either; therefore, <kbd>Y</kbd> could be a <kbd>String</kbd> and <kbd>N</kbd> a <kbd>bool</kbd>.</p>
+<p>In practice, the following shows how the generic type works. <kbd>Option</kbd> is provided as part of the standard library:</p>
+<pre>enum Option&lt;T&gt; 
+{ 
+    Some_Type(T), 
+    None 
+} 
+let varname: Option&lt;f32&gt; = Some_Type(3.1416f32); </pre>
+<p>Generics also provide another useful facility: they allow for the production of generic functions.</p>
+<p>Generic functions—the functions that you can throw anything at! A standard function may look like this:</p>
+<pre>fn defined_type_fn(x: i32) 
+{ 
+    // do something with x 
+} </pre>
+<div class="packt_infobox">The example code for this section can be found in <kbd>09/multiply_generic_return_t</kbd>.</div>
+<p>The parameter being passed in is an <kbd>i32</kbd> and is called <kbd>x</kbd>. If we attempt to pass in a float, bool, string, or any other type that is not an <kbd>i32</kbd>, the compiler will fail the build as the types don't match.</p>
+<p>The generic function looks very similar:</p>
+<pre>fn generic_type_fn&lt;T&gt;(x: T) 
+{ 
+    // do something with x 
+} </pre>
+<p>In style, this is very similar to how a generic method is written in C#:</p>
+<pre>void generic_type_method&lt;T&gt;(T x) 
+{ 
+    // do something 
+} </pre>
+<p>This can be extended to take multiple parameters with the same type:</p>
+<pre>fn generic_type_fn&lt;T&gt;(x: T, y: T) 
+{ 
+    // do something 
+} </pre>
+<p>Or with multiple types and parameters:</p>
+<pre>fn generic_types_fn&lt;T, U, V&gt;(x: T, y: U, z: V) 
+{ 
+    // do something 
+} </pre>
+<p>Finally, we can use a generic as a return type. Recall that a standard function returns a value like this:</p>
+<pre>fn multiply(a: i32, b: i32) -&gt; i32 
+{ 
+    return a * b; 
+} </pre>
+<p>The generic return would be as follows:</p>
+<pre>fn multiply_generic&lt;T&gt;(a: T, b: T) -&gt; T 
+{ 
+    return a * b; 
+} </pre>
+<p class="mce-root">This will only work for simplesome types; you cannot multiply string types, though you can concatenate them—this means you add one string to another. The problem though is we cannot do this... yet.</p>
+<p>When we attempt to build this, an error is generated:</p>
+<pre class="mce-root"><strong>Binary operation '*' cannot be applied to type 'T'; an implementation of 'std::ops::Mul' might be missing for 'T'</strong></pre>
+<p>Let's see if we can break this down a bit to see why we're getting the error.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

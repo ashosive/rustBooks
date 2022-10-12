@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Copying and moving values - The copy trait</h1>
+                </header>
+            
+            <article>
+                
+<p>In the code we looked at above (see <kbd>Chapter 7/code/lifetimes.rs</kbd>) the value of <kbd>n</kbd> is copied to a new location each time <kbd>n</kbd> is assigned via a new let binding or passed as a function argument:</p>
+<pre>let n = 42u32; 
+let n2 = n; // no move, only a copy of the value n to n2 
+ 
+life(n); // copy of the value n to m 
+ 
+fn life(m: u32) -&gt; u32 { 
+    let o = m; // copy of the value m to o 
+    o 
+} </pre>
+<p class="packt_figure"><span>At a certain moment in the program's execution we would have four memory locations containing the copied value 42, which we could visualize as follows:</span></p>
+<div class="CDPAlignCenter CDPAlign"><img height="100" width="262" src="Images/a95d218a-da3d-4ec4-b097-768b00f3bffa.png"/></div>
+<p>Each value disappears (and its memory location is freed) when the lifetime of its corresponding variable ends, which is at the end of the function or code block in which it is defined. Nothing much can go wrong with this <em>Copy</em> behavior, in which the value (its bits) is simply copied to another location on the stack. Many built-in types, like <kbd>u32</kbd> and <kbd>i64</kbd> work like this, and this copy-value behavior is defined in Rust as the <kbd>Copy</kbd> trait, which <kbd>u32</kbd> and <kbd>i64</kbd> implement.</p>
+<p>You can also implement the <kbd>Copy</kbd> trait for your own type, provided all of its fields or items implement <kbd>Copy</kbd>.</p>
+<pre>Let's now look at what happens when we do struct assignments: 
+struct MagicNumber { 
+    value: u64 
+} </pre>
+<p>Try the following code:</p>
+<pre>let mag = MagicNumber {value: 42}; 
+let mag2 = mag; 
+let mag3 = mag; </pre>
+<div>
+<p>The standard behavior is different, we now get a compiler error:</p>
+<pre><strong>error[E0382]: use of moved value: `mag`</strong> </pre></div>
+<div>
+<div>
+<pre>    let mag2 = mag; 
+        ---- value moved here 
+    let mag3 = mag; 
+        ^^^^ value used here after move</pre></div>
+</div>
+<div class="packt_infobox"><span class="packt_screen">Note:</span> Move occurs because <kbd>mag</kbd> has type <kbd>MagicNumber</kbd>, which does not implement the <kbd>Copy</kbd> trait</div>
+<div>
+<p>When <kbd>mag</kbd> was assigned to <kbd>mag2</kbd>, the ownership of that value was transferred to <kbd>mag2</kbd>--the value was moved. <kbd>mag</kbd> doesn't own it anymore, so using <kbd>mag</kbd>, for example in a new assignment cannot work, providing the following error:</p>
+</div>
+<pre><strong>value used after move</strong></pre>
+<p>We'll go into more detail in the section <em>Ownership and Borrowing</em>.</p>
+<p>Having only one owner of a value is a good thing: then the value can only be changed through one variable! This eliminates a lot of potential bugs.</p>
+<p>One way to solve the compiler error is suggested in the note--<kbd><span>let</span> MagicNumber</kbd> implement the <kbd>Copy</kbd> trait.</p>
+<p>A type that does not implement the <kbd>Copy</kbd> trait, as is <kbd>MagicNumber</kbd> at this moment, is called <strong>non-copyable</strong>.</p>
+<p>To make <kbd>MagicNumber</kbd> copyable, there is one more thing we need to know.</p>
+<p>The <kbd>Clone</kbd> trait is a supertrait of <kbd>Copy</kbd> which states that every structure that implements <kbd>Clone</kbd> can duplicate itself. So if a struct implements <kbd>Copy</kbd>, it should also implement <kbd>Clone</kbd>. The <kbd>Clone</kbd> specifies that the following function must be implemented:</p>
+<pre>   fn clone(&amp;self) -&gt; Self; </pre>
+<p>It takes a reference to the current object (<kbd>&amp;self</kbd>) and returns a duplicate of that, which is of course of the same type <kbd>Self</kbd>.</p>
+<p>Let's now implement <kbd>Copy</kbd> for the struct <kbd>MagicNumber</kbd>, which contains a field of type <kbd>u64</kbd>. This can be done in two ways:</p>
+<ul>
+<li>One way is by explicitly naming the <kbd>Copy</kbd> and <kbd>Clone</kbd> implementation like this:</li>
+</ul>
+<pre>impl Copy for MagicNumber {} 
+      impl Clone for MagicNumber {      
+    fn clone(&amp;self) -&gt; MagicNumber {<br/>        *self<br/>    } 
+} </pre>
+<ul>
+<li class="packt_nosymbol">The <kbd>*self</kbd> here is the dereferencing operator which says: return the value in the memory location <kbd>&amp;self</kbd> points to.</li>
+</ul>
+<ul>
+<li>Or we can annotate the <kbd>struct</kbd> with an attribute and let the compiler do the work for us:</li>
+</ul>
+<pre>#[derive(Copy, Clone)] 
+struct MagicNumber { 
+    value: u64 
+} </pre>
+<p>Now our previous code is allowed:</p>
+<pre>let mag2 = mag; 
+let mag3 = mag; </pre>
+<p>The <kbd>mag</kbd>, <kbd>mag2,</kbd> and <kbd>mag3</kbd> variables are distinct copies because they have different memory addresses, which we can show as follows (the values shown will differ at each execution):</p>
+<pre>println!("address mag:  {:p}", &amp;mag);  // address mag: 0x6ebbcff550 
+println!("address mag2: {:p}", &amp;mag2); // address mag2: 0x6ebbcff558 
+println!("address mag3: {:p}", &amp;mag3); // address mag3: 0x6ebbcff568 </pre>
+<p>The <kbd>&amp;mag</kbd> instance is the address of the <kbd>mag</kbd> value; we have to use <kbd>:p</kbd> in the format string, <kbd>p</kbd> stands for pointer.</p>
+<p>Because <kbd>MagicNumber</kbd> now also implements the <kbd>Clone</kbd> trait, we can also use the <kbd>clone()</kbd> method explicitly to make a copy of <kbd>mag</kbd> to a different object <kbd>mag4</kbd>, like this:</p>
+<pre>let mag4 = mag.clone(); 
+println!("address mag4: {:p}", &amp;mag4); // address mag4: 0x7c0053f820  </pre>
+<div class="packt_infobox"><span class="packt_screen">Remark</span>:<br/>
+<br/>
+If we want to display the contents of our struct like this:<br/>
+<kbd>println!("mag is: {}", mag);</kbd><br/>
+<span><br/>
+Or:<br/></span><kbd>println!("mag is: {:?}", mag);</kbd><br/>
+<span><br/>
+We get an error:<br/></span> <strong><kbd>error[E0277]: the trait bound `MagicNumber: std::fmt::Display` is not satisfied;</kbd></strong></div>
+<p>Rust tells us that it doesn't know how to display the struct's value. To let the <kbd>{:?}</kbd> version work, which is the debug format-string, <kbd>MagicNumber</kbd> has to implement the <kbd>Debug</kbd> trait, which we can do by adding a <kbd>#[derive(Debug)]</kbd> attribute.</p>
+<p>(All three traits can also be combined in: <kbd>#[derive(Debug, Copy, Clone)]</kbd>).</p>
+<p>Now the last print statement gives us the following output:</p>
+<pre>    <strong>mag is: MagicNumber { value: 42 }</strong>  </pre>
+<p>The following code snippet shows how to implement the <kbd>Clone</kbd> trait for a struct:</p>
+<pre>// see code in Chapter 7/code/clone.rs: 
+struct Block { 
+    number: Box&lt;i32&gt; 
+} 
+ 
+impl Clone for Block { 
+    fn clone(&amp;self) -&gt; Self { 
+        Block{ number: self.number.clone() } 
+    } 
+} 
+ 
+fn print_block(block: Block) { 
+    println!("{:p}: {:?}", block.number, block.number); 
+} 
+ 
+fn main() { 
+    let block = Block{ number: Box::new(1) }; 
+    println!("{:p}: {:?}", block.number, block.number); 
+ 
+    print_block(block.clone()); 
+} </pre>
+<p>This prints out the following output:</p>
+<pre>    <strong>0x20c5ca23b00: 1</strong>
+    <strong>0x20c5ca2cbe0: 1</strong>  </pre>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

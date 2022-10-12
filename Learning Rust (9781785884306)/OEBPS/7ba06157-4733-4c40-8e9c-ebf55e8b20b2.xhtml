@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style00.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style01.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">The lifetime variable - '</h1>
+                </header>
+            
+            <article>
+                
+<p>We have two types of lifetime within Rust—implicit and explicit. We have seen the implicit functions plenty of times:</p>
+<pre>fn myfunction(pi: &amp;f32) 
+{ 
+    // do something 
+} </pre>
+<p>The lifetime of the function is the length of time the code inside of the braces exists once it is called.</p>
+<p>We also have an explicit lifetime, denoted by <kbd>'</kbd> before the name:</p>
+<pre>fn expfunction&lt;'a&gt;(pi: &amp;'a f32) 
+{ 
+    // do something 
+} </pre>
+<p>However, what exactly does the <kbd>'a</kbd> mean?</p>
+<p>It means, for the lifetime of <kbd>a</kbd>. The <kbd>&lt;&gt;</kbd> after <kbd>expfunction</kbd> means that the function is taking a generic parameter (these will all become clear in <span class="ChapterrefPACKT">Chapter 9</span>, <em>Generics and Traits</em>), but it means of a type. If you consider <kbd>Vec</kbd>, it is actually <kbd>Vec&lt;T&gt;</kbd>. When we create a vector of type <kbd>f32</kbd>, <kbd>T</kbd> becomes <kbd>f32</kbd>, so it's <kbd>Vec&lt;f32&gt;</kbd> when it comes to compile time. In the case of <kbd>expfunction</kbd>, <kbd>T</kbd> is <kbd>'a</kbd>, and therefore the type inside the <kbd>()</kbd> has to also be <kbd>'a</kbd>.</p>
+<p>If we had another parameter within the <kbd>&lt;&gt;</kbd>, we would have <kbd>&lt;'a, 'b&gt;(f: &amp;'a f32, g: &amp;'b i32)</kbd>, and so on.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

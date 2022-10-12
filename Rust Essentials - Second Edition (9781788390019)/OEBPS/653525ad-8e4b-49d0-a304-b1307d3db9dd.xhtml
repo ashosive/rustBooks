@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Testing for failure</h1>
+                </header>
+            
+            <article>
+                
+<p>However, in most cases, we would like to attempt to recover from the error and let the program continue. We have already seen the basic techniques used in Rust to do just this in the <em>Result and Option</em> section in <a href="397a1a97-368f-4af7-a7fb-f44ad8c5aab9.xhtml"><span class="ChapterrefPACKT">Chapter 4</span></a>, <em>Structuring Data and Matching Patterns</em>, and in the section <em>Generic data structures and functions</em> in this chapter.</p>
+<p>Both the <kbd>Option</kbd> and <kbd>Result</kbd> types are generic types:</p>
+<ul>
+<li>The <kbd>Option&lt;T&gt;</kbd> enum can be used when we expect a value, at which point a <kbd>Some(T)</kbd> value is given, and a <kbd>None</kbd> value is returned when there was no value or in the failure case. In this way Rust forces nothingness to appear in a clear and syntactically identifiable form, leaving no room for null pointer runtime errors.</li>
+<li>The <kbd>Result&lt;T, E&gt;</kbd> enum can be used to return an <kbd>Ok(T)</kbd> value in the normal (success) case, and an <kbd>Err(E)</kbd> value in the failure case, containing info on the error.</li>
+</ul>
+<p>It is used when a computation should return a result, but it can also return an error if something went wrong. The <kbd>Result</kbd> type is defined with two generic types <kbd>T</kbd> and <kbd>E</kbd> as:</p>
+<pre>enum Result&lt;T, E&gt; { 
+    Ok(T), 
+    Err(E) 
+} </pre>
+<p>It again shows Rust's commitment to being on the safe side: if it's OK, give back a value of type <kbd>T</kbd>, if there is a problem, then give back the error which is a value of type <kbd>E</kbd> (usually an error message string). So, we could read them also as: <kbd>OK(what)</kbd> and <kbd>Err(why)</kbd>, where <kbd>what</kbd> has type <kbd>T</kbd> and <kbd>why</kbd> has type <kbd>E</kbd>.</p>
+<p>In the following example, we use the <kbd>Result</kbd> type to safely read in a value from the keyboard:</p>
+<pre>let input_num: Result&lt;u32, _&gt; = buf.trim().parse(); </pre>
+<p>In other languages, like Java or C#, parsing the input to a number could result in an exception (when the input contains non-numeric characters or when it is nothing or null), and you would have to use a resource heavy <kbd>try</kbd> or <kbd>catch</kbd> construct to deal with it.</p>
+<p>In Rust, the result of the <kbd>parse()</kbd> function is a <kbd>Result</kbd> type, and we simply test the return value of <kbd>Result</kbd> with a <kbd>match</kbd> as in line (1) in the following code, which is a much simpler mechanism.</p>
+<p>Here is the complete code:</p>
+<pre>// see code in Chapter 5/code/input_number.rs 
+use std::io; 
+ 
+fn main() { 
+  println!("Give an integer number bigger than 0:"); 
+  let mut buf = String::new(); 
+  io::stdin().read_line(&amp;mut buf) 
+      .ok() 
+      .expect("Failed to read line"); 
+  let input_num: Result&lt;u32, _&gt;  = buf.trim().parse(); 
+  let res = match input_num {                             // (1)
+        Ok(num) =&gt; num, 
+        Err(_) =&gt; 0 
+    }; 
+    if res != 0 { 
+        println!("{}, that's a beautiful number", res); 
+    } 
+    else { 
+ println!("The input was not correct: {:?} ",  input_num); 
+    } 
+} </pre>
+<p>We captured the result variable <kbd>num</kbd> in a new variable, using a <kbd>let</kbd> binding on the match:</p>
+<pre>let res = match input_num { 
+      Ok(num) =&gt; num, 
+      Err(_) =&gt; 0 
+}; </pre>
+<p>This prints out the input number or an error message if the input is incorrect.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">A telemetry server</h1>
+                </header>
+            
+            <article>
+                
+<p>Let's build a descriptive statistics server. These pop up often in one way or another inside organizations: a thing is needed that consumes events, does some kind of descriptive statistic computation over those things, and then multiplexes the descriptions out to other systems. The very reason my work project, postmates/cernan (<a href="https://crates.io/crates/cernan">https://crates.io/crates/cernan</a>), exists is to service this need at scale on resource constrained devices without tying operations staff into any kind of pipeline. What we'll build here now is a kind of mini-cernan, something whose flow is as follows:</p>
+<pre>                                _--&gt; high_filter --&gt; cma_egress
+                               /
+  telemetry -&gt; ingest_point ---
+    (udp)                      \_--&gt; low_filter --&gt; ckms_egress</pre>
+<p>The idea is to take <kbd>telemetry</kbd> from a simple UDP protocol, receive it as quickly as possible to avoid the OS dumping packets, pass these points through a high and low filter, and then hand the filtered points off to two different statistical <kbd>egress</kbd> points. The <kbd>egress</kbd> associated with the high filter computes a continuous moving average, while the low filter associated <kbd>egress</kbd> computes a quantile summary using an approximation algorithm from the postmates/quantiles (<a href="https://crates.io/crates/quantiles">https://crates.io/crates/quantiles</a>) library.</p>
+<p>Let's dig in. First, let's look at <kbd>Cargo.toml</kbd> for the project:</p>
+<pre>[package]
+name = "telem"
+version = "0.1.0"
+
+[dependencies]
+quantiles = "0.7"
+seahash = "3.0"
+
+[[bin]]
+name = "telem"
+doc = false</pre>
+<p>Short and to the point. We draw in quantiles, as mentioned previously, as well as seahasher. Seahasher is a particularly fast—but not cryptographically safe—hasher that we'll substitute into <kbd>HashMap</kbd>. More on that shortly. Our executable is broken out into <kbd>src/bin/telem.rs</kbd> since this project is a split library/binary setup:</p>
+<pre style="padding-left: 30px">extern crate telem;
+
+use std::{thread, time};
+use std::sync::mpsc;
+use telem::IngestPoint;
+use telem::egress::{CKMSEgress, CMAEgress, Egress};
+use telem::event::Event;
+use telem::filter::{Filter, HighFilter, LowFilter};
+
+fn main() {
+    let limit = 100;
+    let (lp_ic_snd, lp_ic_rcv) = mpsc::channel::&lt;Event&gt;();
+    let (hp_ic_snd, hp_ic_rcv) = mpsc::channel::&lt;Event&gt;();
+    let (ckms_snd, ckms_rcv) = mpsc::channel::&lt;Event&gt;();
+    let (cma_snd, cma_rcv) = mpsc::channel::&lt;Event&gt;();
+
+    let filter_sends = vec![lp_ic_snd, hp_ic_snd];
+    let ingest_filter_sends = filter_sends.clone();
+    let _ingest_jh = thread::spawn(move || {
+        IngestPoint::init("127.0.0.1".to_string(), 1990, <br/>        ingest_filter_sends).run();
+    });
+    let _low_jh = thread::spawn(move || {
+        let mut low_filter = LowFilter::new(limit);
+        low_filter.run(lp_ic_rcv, vec![ckms_snd]);
+    });
+    let _high_jh = thread::spawn(move || {
+        let mut high_filter = HighFilter::new(limit);
+        high_filter.run(hp_ic_rcv, vec![cma_snd]);
+    });
+    let _ckms_egress_jh = thread::spawn(move || {
+        CKMSEgress::new(0.01).run(ckms_rcv);
+    });
+    let _cma_egress_jh = thread::spawn(move || {
+        CMAEgress::new().run(cma_rcv);
+    });
+
+    let one_second = time::Duration::from_millis(1_000);
+    loop {
+        for snd in &amp;filter_sends {
+            snd.send(Event::Flush).unwrap();
+        }
+        thread::sleep(one_second);
+    }
+}</pre>
+<p>There's a fair bit going on here. The first eight lines are imports of the library bits and pieces we need. The body of main is dominated by setting up our worker threads and feeding the appropriate channels into them. Note that some threads take multiple sender sides of a channel:</p>
+<pre>    let filter_sends = vec![lp_ic_snd, hp_ic_snd];
+    let ingest_filter_sends = filter_sends.clone();
+    let _ingest_jh = thread::spawn(move || {
+        IngestPoint::init("127.0.0.1".to_string(), 1990, <br/>        ingest_filter_sends).run();
+    });</pre>
+<p>That's how we do fanout using Rust MPSC. Let's take a look at <kbd>IngestPoint</kbd>, in fact. It's defined in <kbd>src/ingest_point.rs</kbd>:</p>
+<pre style="padding-left: 30px">use event;
+use std::{net, thread};
+use std::net::ToSocketAddrs;
+use std::str;
+use std::str::FromStr;
+use std::sync::mpsc;
+use util;
+
+pub struct IngestPoint {
+    host: String,
+    port: u16,
+    chans: Vec&lt;mpsc::Sender&lt;event::Event&gt;&gt;,
+}</pre>
+<p>An <kbd>IngestPoint</kbd> is a host—either an IP address or a DNS hostname, per <kbd>ToSocketAddrs</kbd>—a port and a vector of <kbd>mpsc::Sender&lt;event::Event&gt;</kbd>. The inner type is something we've defined:</p>
+<pre style="padding-left: 30px">#[derive(Clone)]
+pub enum Event {
+    Telemetry(Telemetry),
+    Flush,
+}
+
+#[derive(Debug, Clone)]
+pub struct Telemetry {
+    pub name: String,
+    pub value: u32,
+}</pre>
+<p><kbd>telem</kbd> has two kinds of <em>events</em> that flow through it—<kbd>Telemetry</kbd>, which comes from <kbd>IngresPoint</kbd> and <kbd>Flush</kbd>, which comes from the main thread. <kbd>Flush</kbd> acts like a clock-tick for the system, allowing the individual subsystems of the project to keep track of time without making reference to the wall-clock. It's not uncommon in embedded programs to define time in terms of some well-known pulse and, when possible, I've tried to keep to that in parallel programming as well. If nothing else, it helps with testing to have time as an externally pushed attribute of the system. Anyhow, back to <kbd>IngestPoint</kbd>:</p>
+<pre>impl IngestPoint {
+    pub fn init(
+        host: String,
+        port: u16,
+        chans: Vec&lt;mpsc::Sender&lt;event::Event&gt;&gt;,
+    ) -&gt; IngestPoint {
+        IngestPoint {
+            chans: chans,
+            host: host,
+            port: port,
+        }
+    }
+
+    pub fn run(&amp;mut self) {
+        let mut joins = Vec::new();
+
+        let addrs = (self.host.as_str(), self.port).to_socket_addrs();
+        if let Ok(ips) = addrs {
+            let ips: Vec&lt;_&gt; = ips.collect();
+            for addr in ips {
+                let listener =
+                    net::UdpSocket::bind(addr)<br/>                        .expect("Unable to bind to UDP socket");
+                let chans = self.chans.clone();
+                joins.push(thread::spawn(move || handle_udp(chans, <br/>                                                   &amp;listener)));
+            }
+        }
+
+        for jh in joins {
+            jh.join().expect("Uh oh, child thread panicked!");
+        }
+    }
+}</pre>
+<p>The first bit of this, <kbd>init</kbd>, is just setup. The run function calls <kbd>to_socket_addrs</kbd> on our host/port pair and retrieves all the associated IP addresses. Each of these addresses get a <kbd>UdpSocket</kbd> bound to them and an OS thread to listen for datagrams from that socket. This is wasteful in terms of thread overhead and later in this book we'll discuss evented-IO alternatives. Cernan, discussed previously, being a production system makes use of Mio in its <em>Sources</em>. The key function here is <kbd>handle_udp</kbd>, the function that gets passed to the new listener threads. It is as follows:</p>
+<pre>fn handle_udp(mut chans: Vec&lt;mpsc::Sender&lt;event::Event&gt;&gt;, <br/>              socket: &amp;net::UdpSocket) {
+    let mut buf = vec![0; 16_250];
+    loop {
+        let (len, _) = match socket.recv_from(&amp;mut buf) {
+            Ok(r) =&gt; r,
+            Err(e) =&gt; { <br/>                panic!(<br/>                    format!("Could not read UDP socket with \<br/>                            error {:?}", e)),<br/>            }
+        };
+        if let Some(telem) = <br/>        parse_packet(str::from_utf8(&amp;buf[..len]).unwrap()) {
+            util::send(&amp;mut chans, event::Event::Telemetry(telem));
+        }
+    }
+}</pre>
+<p>The function is a simple infinite loop that pulls datagrams off the socket into a 16 KB buffer—comfortably larger than most datagrams—and then calls <kbd>parse_packet</kbd> on the result. If the datagram was a valid example of our as yet unspecified protocol, then we call <kbd>util::send</kbd> to send the <kbd>Event::Telemetry</kbd> out over the <kbd>Sender&lt;event::Event&gt;</kbd> in <kbd>chans</kbd>. <kbd>util::send</kbd> is little more than a for loop:</p>
+<pre style="padding-left: 30px">pub fn send(chans: &amp;[mpsc::Sender&lt;event::Event&gt;], event: event::Event) {
+    if chans.is_empty() {
+        return;
+    }
+
+    for chan in chans.iter() {
+        chan.send(event.clone()).unwrap();
+    }
+}</pre>
+<p>The ingest payload is nothing special: a name of non-whitespace characters followed by one or more whitespace characters followed by a <kbd>u32</kbd>, all string encoded and utf8 valid:</p>
+<pre style="padding-left: 30px">fn parse_packet(buf: &amp;str) -&gt; Option&lt;event::Telemetry&gt; {
+    let mut iter = buf.split_whitespace();
+    if let Some(name) = iter.next() {
+        if let Some(val) = iter.next() {
+            match u32::from_str(val) {
+                Ok(int) =&gt; {
+                    return Some(event::Telemetry {
+                        name: name.to_string(),
+                        value: int,
+                    })
+                }
+                Err(_) =&gt; return None,
+            };
+        }
+    }
+    None
+}</pre>
+<p>Popping out to the filters, both <kbd>HighFilter</kbd> and <kbd>LowFilter</kbd> are done in terms of a common <kbd>Filter</kbd> trait, defined in <kbd>src/filter/mod.rs</kbd>:</p>
+<pre>use event;
+use std::sync::mpsc;
+use util;
+
+mod high_filter;
+mod low_filter;
+
+pub use self::high_filter::*;
+pub use self::low_filter::*;
+
+pub trait Filter {
+    fn process(
+        &amp;mut self,
+        event: event::Telemetry,
+        res: &amp;mut Vec&lt;event::Telemetry&gt;,
+    ) -&gt; ();
+
+    fn run(
+        &amp;mut self,
+        recv: mpsc::Receiver&lt;event::Event&gt;,
+        chans: Vec&lt;mpsc::Sender&lt;event::Event&gt;&gt;,
+    ) {
+        let mut telems = Vec::with_capacity(64);
+        for event in recv.into_iter() {
+            match event {
+                event::Event::Flush =&gt; util::send(&amp;chans, <br/>                 event::Event::Flush),
+                event::Event::Telemetry(telem) =&gt; {
+                    self.process(telem, &amp;mut telems);
+                    for telem in telems.drain(..) {
+                        util::send(&amp;chans, <br/>                        event::Event::Telemetry(telem))
+                    }
+                }
+            }
+        }
+    }
+}</pre>
+<p>Any implementing filter is responsible for providing their own process. It's this function that the default run calls when an <kbd>Event</kbd> is pulled from the <kbd>Receiver&lt;Event&gt;</kbd> and found to be a <kbd>Telemetry</kbd>. Though neither high nor low filters make use of it, the process function is able to inject new <kbd>Telemetry</kbd> into the stream if it's programmed to do so by pushing more onto the passed <kbd>telems</kbd> vector. That's how cernan's <em>programmable filter</em> is able to allow end users to create <kbd>telemetry</kbd> from Lua scripts. Also, why pass <kbd>telems</kbd> rather than have the process return a vector of <kbd>Telemetry</kbd>? It avoids continual small allocations. Depending on the system, allocations will not necessarily be uncoordinated between threads—meaning high-load situations can suffer from mysterious pauses—and so it's good style to avoid them where possible if the code isn't twisted into some weird version of itself by taking such care.</p>
+<p>Both low and high filters are basically the same. The low filter passes a point through itself if the point is less than or equal to a pre-defined limit, where the high filter is greater than or equal to it. Here's <kbd>LowFilter</kbd>, defined in <kbd>src/filter/low_filter.rs</kbd>:</p>
+<pre style="padding-left: 30px">use event;
+use filter::Filter;
+
+pub struct LowFilter {
+    limit: u32,
+}
+
+impl LowFilter {
+    pub fn new(limit: u32) -&gt; Self {
+        LowFilter { limit: limit }
+    }
+}
+
+impl Filter for LowFilter {
+    fn process(
+        &amp;mut self,
+        event: event::Telemetry,
+        res: &amp;mut Vec&lt;event::Telemetry&gt;,
+    ) -&gt; () {
+        if event.value &lt;= self.limit {
+            res.push(event);
+        }
+    }
+}</pre>
+<p><kbd>Egress</kbd> of telemetry is defined similarly to the way filter is done, split out into a sub-module and a common trait. The trait is present in <kbd>src/egress/mod.rs</kbd>:</p>
+<pre style="padding-left: 30px">use event;
+use std::sync::mpsc;
+
+mod cma_egress;
+mod ckms_egress;
+
+pub use self::ckms_egress::*;
+pub use self::cma_egress::*;
+
+pub trait Egress {
+    fn deliver(&amp;mut self, event: event::Telemetry) -&gt; ();
+
+    fn report(&amp;mut self) -&gt; ();
+
+    fn run(&amp;mut self, recv: mpsc::Receiver&lt;event::Event&gt;) {
+        for event in recv.into_iter() {
+            match event {
+                event::Event::Telemetry(telem) =&gt; self.deliver(telem),
+                event::Event::Flush =&gt; self.report(),
+            }
+        }
+    }
+}</pre>
+<p>The deliver function is intended to give the <kbd>egress</kbd> its <kbd>Telemetry</kbd> for storage. The report is intended to force the implementors of <kbd>Egress</kbd> to issue their summarized telemetry to the outside world. Both of our <kbd>Egress</kbd> implementors—<kbd>CKMSEgress</kbd> and <kbd>CMAEgress</kbd>—merely print their information but you can well imagine an <kbd>Egress</kbd> that emits its information out over some network protocol to a remote system. This is, in fact, exactly what cernan's <kbd>Sinks</kbd> do, across many protocols and transports. Let's look at a single egress, as they're both very similar. <kbd>CKMSEgress</kbd> is defined in <kbd>src/egress/ckms_egress.rs</kbd>:</p>
+<pre>use egress::Egress;
+use event;
+use quantiles;
+use util;
+
+pub struct CKMSEgress {
+    error: f64,
+    data: util::HashMap&lt;String, quantiles::ckms::CKMS&lt;u32&gt;&gt;,
+    new_data_since_last_report: bool,
+}
+
+impl Egress for CKMSEgress {
+    fn deliver(&amp;mut self, event: event::Telemetry) -&gt; () {
+        self.new_data_since_last_report = true;
+        let val = event.value;
+        let ckms = self.data
+            .entry(event.name)
+            .or_insert(quantiles::ckms::CKMS::new(self.error));
+        ckms.insert(val);
+    }
+
+    fn report(&amp;mut self) -&gt; () {
+        if self.new_data_since_last_report {
+            for (k, v) in &amp;self.data {
+                for q in &amp;[0.0, 0.25, 0.5, 0.75, 0.9, 0.99] {
+                    println!("[CKMS] {} {}:{}", k, q, <br/>                             v.query(*q).unwrap().1);
+                }
+            }
+            self.new_data_since_last_report = false;
+        }
+    }
+}
+
+impl CKMSEgress {
+    pub fn new(error: f64) -&gt; Self {
+        CKMSEgress {
+            error: error,
+            data: Default::default(),
+            new_data_since_last_report: false,
+        }
+    }
+}</pre>
+<p>Note that <kbd>data: util::HashMap&lt;String, quantiles::ckms::CKMS&lt;u32&gt;&gt;</kbd>. This <kbd>util::HashMap</kbd> is a type alias for <kbd>std::collections::HashMap&lt;K, V, hash::BuildHasherDefault&lt;SeaHasher&gt;&gt;</kbd>, as mentioned previously. The cryptographic security of hashing here is less important than the speed of hashing, which is why we go with <kbd>SeaHasher</kbd>. There are a great many alternative hashers available in crates and it's a fancy trick to be able to swap them out for your use case. <kbd>quantiles::ckms::CKMS</kbd> is an approximate data structure, defined in <em>Effective Computation of Biased Quantiles Over Data Streams</em> by Cormode et al. Many summary systems run in limited space but are willing to tolerate errors. The CKMS data structure allows for point shedding while keeping guaranteed error bounds on the quantile approximations. The discussion of the data structure is outside the domain of this book but the implementation is interesting and the paper is remarkably well-written. Anyhow, that's what the error setting is all about. If you flip back to the main function, note that we hard-code the error as being 0.01, or, any quantile summary is guaranteed to be off true within 0.01.</p>
+<p>That, honestly, is pretty much it. We've just stepped through the majority of a non-trivial Rust program built around the MPSC abstraction provided in the standard library. Let's fiddle with it some. In one shell, start <kbd>telem</kbd>:</p>
+<pre><strong>&gt; cargo run --release
+   Compiling quantiles v0.7.0
+   Compiling seahash v3.0.5
+   Compiling telem v0.1.0 (file:///Users/blt/projects/us/troutwine/concurrency_in_rust/external_projects/telem)
+    Finished release [optimized] target(s) in 7.16 secs
+     Running `target/release/telem`</strong></pre>
+<p>In another shell, start sending UDP packets. On macOS, you can use <kbd>nc</kbd> like so:</p>
+<pre><strong>&gt; echo "a 10" | nc -c -u 127.0.0.1 1990
+&gt; echo "a 55" | nc -c -u 127.0.0.1 1990</strong></pre>
+<p>The call is similar on Linux; you just have to be careful not to wait for a response is all. In the original shell, you should see an output like this after a second:</p>
+<pre><strong>[CKMS] a 0:10
+[CKMS] a 0.25:10
+[CKMS] a 0.5:10
+[CKMS] a 0.75:10
+[CKMS] a 0.9:10
+[CKMS] a 0.99:10
+[CKMS] a 0:10
+[CKMS] a 0.25:10
+[CKMS] a 0.5:10
+[CKMS] a 0.75:55
+[CKMS] a 0.9:55
+[CKMS] a 0.99:55</strong></pre>
+<p>The points, being below the limit, have gone through the low filter and into the CKMS <kbd>egress</kbd>. Back to our other shell:</p>
+<pre><strong>&gt; echo "b 1000" | nc -c -u 127.0.0.1 1990
+&gt; echo "b 2000" | nc -c -u 127.0.0.1 1990
+&gt; echo "b 3000" | nc -c -u 127.0.0.1 1990</strong></pre>
+<p>In the telem shell:</p>
+<pre><strong>[CMA] b 1000
+[CMA] b 1500
+[CMA] b 2000</strong></pre>
+<p>Bang, just as expected. The points, being above the limit, have gone through the high filter and into the CMA <kbd>egress</kbd>. So long as no points are coming in, the <kbd>telem</kbd> should be drawing almost no CPU, waking up each of the threads once every second or so for the Flush pulse. Memory consumption will also be very low, being primarily represented by the large input buffer in <kbd>IngestPoint</kbd>.</p>
+<p>There are problems with this program. In many places, we explicitly panic or unwrap on potential problem points, rather than deal with the issues. While it's reasonable to unwrap in a production program, you should be <em>very</em> sure that the error you're blowing your program up for cannot be otherwise dealt with. Most concerning is that the program has no concept of <em>back-pressure</em>. If <kbd>IngestPoint</kbd> were able to produce points faster than the filters or the <kbd>egress</kbd>es, they could absorb the channels between threads that would keep allocating space. A slight rewrite of the program to use <kbd>mpsc::SyncSender</kbd> would be suitable—back-pressure is applied as soon as a channel is filled to capacity—but only if dropping points is acceptable. Given that the ingest protocol is in terms of UDP it almost surely is, but the reader can imagine a scenario where it would not be. Rust's standard library struggles in areas where alternative forms of back-pressure are needed but these are, admittedly, esoteric. If you're interested in reading through a production program that works along the lines of <kbd>telem</kbd> but has none of the defects identified here, I warmly recommend the cernan codebase.</p>
+<p>All in all, Rust's MPSC is a very useful tool when constructing parallel systems. In this chapter, we built our own buffered channel, Ring, but that isn't common at all. You'd need a fairly specialized use case to consider not using the standard library's MPSC for intra-thread channel-based communication. We'll examine one such use case in the next chapter after we cover more of Rust's basic concurrency primitives.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

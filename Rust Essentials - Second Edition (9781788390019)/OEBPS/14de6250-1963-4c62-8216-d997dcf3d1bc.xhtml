@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Reference counting</h1>
+                </header>
+            
+            <article>
+                
+<p>Sometimes you need several references to an immutable value at the same time, this is also called <strong>shared ownership</strong>. The pointer type <kbd>Box&lt;T&gt;</kbd> can't help us out here, because this type has a single owner by definition. For this, Rust provides the generic reference counted box <kbd>Rc&lt;T&gt;</kbd>, where multiple references can share the same resource. The <kbd>std::rc</kbd> module provides a way to share ownership of the same value between different <kbd>Rc</kbd> pointers; the value remains alive as long as there is least one pointer referencing it.</p>
+<p>In the following example, we have Aliens that have a number of tentacles. Each <kbd>Tentacle</kbd> is also a struct instance and has to indicate to which <kbd>Alien</kbd> it belongs; besides that it has other properties like a degree of poison. A first attempt at this could be the following code which however does not compile:</p>
+<pre>// see Chapter 7/code/refcount_not_good.rs): 
+struct Alien { 
+    name: String, 
+    n_tentacles: u8 
+} 
+ 
+struct Tentacle { 
+    poison: u8, 
+    owner: Alien 
+} 
+ 
+fn main() { 
+let dhark = Alien { name: "Dharkalen".to_string(), n_tentacles: 7 }; 
+ 
+    // defining dhark's tentacles: 
+    for i in 0u8..dhark.n_tentacles { 
+        Tentacle { poison: i * 3, owner: dhark }; // &lt;- error! 
+    } 
+} </pre>
+<p>The compiler gives a following error for the line in the <kbd>for</kbd> loop:</p>
+<pre>    <strong>error: use of moved value 'dhark' - move occurs because `dhark` has type `Alien`, which does not implement the `Copy` trait</strong>  </pre>
+<p>Each <kbd>Alien Tentacle</kbd> when it is defined seemingly tries to make a copy of the <kbd>Alien</kbd> instance as its owner, which would make no sense and is not allowed.</p>
+<p>The correct version defines the owner in the <kbd>Tentacle</kbd> struct to have the type <kbd>Rc&lt;Alien&gt;</kbd>:</p>
+<pre>// see code in Chapter 7/code/refcount.rs  
+use std::rc::Rc; 
+ 
+#[derive(Debug)] 
+struct Alien { 
+    name: String, 
+    n_tentacles: u8 
+} 
+ 
+#[derive(Debug)] 
+struct Tentacle { 
+    poison: u8, 
+    owner: Rc&lt;Alien&gt; 
+} 
+ 
+fn main() { 
+    let dhark = Alien { name: "Dharkalen".to_string(), n_tentacles: 7 }; 
+ 
+    let dhark_master = Rc::new(dhark); 
+ 
+    for i in 0u8..dhark_master.n_tentacles { 
+        let t = Tentacle { poison: i * 3, owner: dhark_master.clone() }; 
+       println!("{:?}", t); 
+    } 
+} </pre>
+<p>This prints the following output:</p>
+<pre><strong>Tentacle {poison: 0, owner: Alien{name: "Dharkalen", n_tentacles: 7}}<br/></strong><strong>Tentacle {poison: 3, owner: Alien{name: "Dharkalen", n_tentacles: 7}</strong><strong>}<br/></strong><strong>Tentacle {poison: 6, owner: Alien{name: "Dharkalen", n_tentacles: 7 }}<br/></strong><strong>Tentacle {poison: 18, owner: Alien{name: "Dharkalen", n_tentacles: 7}}</strong></pre>
+<p>We envelop our Alien instance in an <kbd>Rc&lt;T&gt;</kbd> type with <kbd>Rc::new(dhark)</kbd>. Applying the <kbd>clone()</kbd> method on this <kbd>Rc</kbd> object provides each <kbd>Tentacle</kbd> with its own reference to the <kbd>Alien</kbd> object. Note that <kbd>clone()</kbd> here copies the <kbd>Rc</kbd> pointer, not the <kbd>Alien</kbd> struct. We also annotate the structs with <kbd>#[derive(Debug)]</kbd>, so that we can print out their instances through a <kbd>println!("{:?}", t);</kbd>.</p>
+<p>If we want mutability inside our <kbd>Rc</kbd> type, we have to use either a <kbd>Cell</kbd> pointer if the value implements the <kbd>Copy</kbd> trait, or a <kbd>RefCell</kbd> pointer otherwise. Both these smart pointers are found in the <kbd>std:cell</kbd> module.</p>
+<p>The <kbd>Rc</kbd> pointer type can however only be used inside one thread of execution only. If you need shared ownership across multiple threads, you need to use the <kbd>Arc&amp;lt;T&gt;</kbd> pointer (atomic reference counted box), which is the thread-safe counterpart of <kbd>Rc</kbd> (see <a href="60543aaa-c7d6-43ec-9237-9fe71a0cad4d.xhtml"><span class="ChapterrefPACKT">Chapter 9&lt;/span&gt;</span></a>, <em>Concurrency - Coding for Multicore Execution</em> in the section <em>Atomic reference counting</em>).</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

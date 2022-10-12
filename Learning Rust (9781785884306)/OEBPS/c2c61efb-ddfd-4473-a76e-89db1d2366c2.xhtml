@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">The use of expect</h1>
+                </header>
+            
+            <article>
+                
+<p>Rust contains a very useful function called <kbd>expect</kbd>. This method is used with any form of call that has an <kbd>Option</kbd> or a <kbd>Result</kbd> type (for example, <kbd>Result</kbd> in the file-writing example has the options of <kbd>File</kbd> or <kbd>Error</kbd>). It works by moving the value out of the option and returning it. If the <kbd>option</kbd>/<kbd>result</kbd> type contains an error, the <kbd>expect</kbd> call stops your program and prints out the error message.</p>
+<p>For example, the following statement will return either <kbd>File</kbd> or <kbd>Error</kbd> into <kbd>file</kbd>:</p>
+<pre>let file: Result&lt;File, Error&gt; = options.open("my_file.txt").expect("Opening the file failed"); </pre>
+<p>A shorter form is available in the <kbd>unwrap</kbd> method. This is the same as the <kbd>expect</kbd> method, but it doesn't print out anything in case of a failure. In general, <kbd>Some(a).unwrap()</kbd> will return <kbd>a</kbd>.</p>
+<p><kbd>Expect</kbd> is usually favored instead of <kbd>unwrap</kbd>, since the full error message makes it easier to find where the error came from.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Vectors</h1>
+                </header>
+            
+            <article>
+                
+<p>Often it is more practical to work with a kind of array than can grow (or shrink) in size because it is allocated on the heap. Rust provides this through the vector type <kbd>Vec</kbd>, from the module <kbd>std::vec</kbd>. This is a generic type, which means that the items can have any type <kbd>T</kbd>, where <kbd>T</kbd> is specified in the code; for example we can have <kbd>Vec&lt;i32&gt;</kbd> or <kbd>Vec&lt;&amp;str&gt;</kbd> vector types. To indicate that it is a generic type, it is written as <kbd>Vec&lt;T&gt;</kbd>, where all elements must be of the same type <kbd>T</kbd>.</p>
+<p>We can make a vector in either of two ways, with the function <kbd>new()</kbd> or with the macro <kbd>vec!</kbd>:</p>
+<pre>let mut numbers: Vec&lt;i32&gt; = Vec::new(); 
+let mut magic_numbers = vec![7i32, 42, 47, 45, 54]; </pre>
+<p>In the first case the type is indicated explicitly with the vector type <kbd>Vec&lt;i32</kbd>&gt;, in the second case this is done by giving the first item an <kbd>i32</kbd> suffix, but this is usually optional.</p>
+<p>We can also make a new vector with an initial memory size allocated to it, which can be useful if you know in advance that you will need at least that many items. The following initializes a vector for signed integers, with memory allocated for <kbd>25</kbd> integers:</p>
+<pre>let mut ids: Vec&lt;i32&gt; = Vec::with_capacity(25); </pre>
+<p>We need to provide the type here, otherwise the compiler can not calculate the amount of memory needed.</p>
+<p>A vector can also be constructed from an <kbd>Iterator</kbd> through the method <kbd>collect()</kbd>, like in this example with a range:</p>
+<pre>let rgvec: Vec&lt;u32&gt; = (0..7).collect(); 
+println!("Collected the range into: {:?}", rgvec); </pre>
+<p>This prints the following output:</p>
+<pre>    <strong>Collected the range into: [0, 1, 2, 3, 4, 5, 6]</strong>  </pre>
+<p>Indexing, getting the length and looping over a vector works the same as with arrays. For example, a <kbd>for</kbd> loop over a vector can be written simply as:</p>
+<pre>let values = vec![1, 2, 3]; 
+for n in values { 
+    println!("{}", n); 
+} </pre>
+<p>This prints out the following output on consecutive lines:</p>
+<pre>    <strong>1 2 3</strong></pre>
+<p>Add a new item to the end of a vector with the function <kbd>push(<span>)</span></kbd>, and remove the last item with the function <kbd>pop()</kbd>.</p>
+<pre>numbers.push(magic_numbers[1]); 
+numbers.push(magic_numbers[4]); 
+println!("{:?}", numbers); // [42, 54] 
+let fifty_four = numbers.pop();// fifty_four now contains 54 
+println!("{:?}", numbers); // [42] </pre>
+<p>If you need to mutate the vector while iterating, use <kbd>iter_mut</kbd>:</p>
+<pre>let mut vec = vec![1, 2, 3, 4]; 
+for x in vec.iter_mut() { 
+    *x += 1; 
+} 
+println!("Mutated vector: {:?}", vec); </pre>
+<p>This prints out the following output:</p>
+<pre>    <strong>Mutated vector: [2, 3, 4, 5]</strong>  </pre>
+<p>The <kbd>x</kbd> variable here is a reference to the successive items of the vector, to obtain its value you must use the dereferencing operator <kbd>*</kbd>.</p>
+<p>If you omit the <kbd>*</kbd>, you get the following error:</p>
+<pre><strong>error[E0368]: binary assignment operation '+=' cannot be applied to type '&amp;mut {integer}'</strong></pre>
+<p>If a function needs to return many values of the same type, make an array or vector with these values and return that object.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

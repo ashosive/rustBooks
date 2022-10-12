@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style00.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style01.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Looping</h1>
+                </header>
+            
+            <article>
+                
+<p>For repeating pieces of code, Rust has the common <kbd>while</kbd> loop, again without parentheses around the condition:</p>
+<pre>// from Chapter 3/code/loops.rs 
+fn main() { 
+  let max_power = 10; 
+  let mut power = 1; 
+    while power &lt; max_power { 
+        print!("{} ", power); // prints without newline 
+        power += 1;           // increment counter 
+    } 
+} </pre>
+<p>This prints the following output:</p>
+<pre>    <strong>1 2 3 4 5 6 7 8 9</strong></pre>
+<p>To start an infinite loop, use the <kbd>loop</kbd> statement, as shown below:</p>
+<pre>loop { 
+        power += 1; 
+        if power == 42 { 
+            // Skip the rest of this iteration 
+        continue; 
+        } 
+        print!("{}  ", power); 
+        if power == 50 { 
+           print!("OK, that's enough for today"); 
+        break;  // exit the loop 
+        } 
+} </pre>
+<p>All the <kbd>power</kbd> values including <kbd>50</kbd> but except <kbd>42</kbd> are printed; then the loop stops with the statement <kbd>break</kbd>. The value <kbd>42</kbd> is not printed because of the <kbd>continue</kbd> statement. So, <kbd>loop</kbd> is equivalent to a <kbd>while true</kbd> and a <kbd>loop</kbd> with a conditioned <kbd>break</kbd> simulates a <kbd>do while</kbd> in other languages.</p>
+<p>When loops are nested inside each other, the <kbd>break</kbd> and <kbd>continue</kbd> statements apply to the immediate enclosing loop. Any loop statement (also the <kbd>while</kbd> and <kbd>for</kbd> loop which we'll see next) can be preceded by a label (denoted as <kbd>labelname:</kbd>) to allow us to jump to the next or outer enclosing loop, as in this snippet:</p>
+<pre>  'outer: loop { 
+        println!("Entered the outer dungeon."); 
+        inner: loop { 
+            println!("Entered the inner dungeon."); 
+            // break;    // this would break out of the inner loop 
+            break 'outer; // breaks to the outer loop 
+        } 
+        println!("This treasure can sadly never be reached."); 
+    } 
+    println!("Exited the outer dungeon!"); </pre>
+<p>This prints the following output:</p>
+<pre>    <strong>Entered the outer dungeon.</strong>
+    <strong>Entered the inner dungeon.</strong>
+    <strong>Exited the outer dungeon!</strong></pre>
+<p>Obviously, the use of labels makes reading the code more difficult, so use it wisely. The infamous <kbd>goto</kbd> statement from C luckily does not exist in Rust!</p>
+<p>Looping where a variable <kbd>var</kbd> begins from a start value <kbd>a</kbd> to an end value <kbd>b</kbd> (exclusive) is done with a <kbd>for</kbd> loop over a range expression, as shown in the following statement:</p>
+<pre>for var in a..b </pre>
+<p>Here is an example which prints the squares of the numbers <kbd>1</kbd> to <kbd>10</kbd>:</p>
+<pre>for n in 1..11 { 
+      println!("The square of {} is {}", n, n * n); 
+} </pre>
+<p>In general, <kbd>for in</kbd> loops over an iterator, which is an object that gives back a series of values one by one. The range <kbd>a..b</kbd> is the simplest form of iterator.</p>
+<p>Each subsequent value is bound to the variable <kbd>n</kbd> and used in the next loop iteration. The <kbd>for</kbd> loop ends when there are no more values and the variable <kbd>n</kbd> then goes out of scope. If we don't need the value of the variable <kbd>n</kbd> in the loop, we can replace it with an <kbd>_</kbd> (underscore), like this:</p>
+<pre>for _ in 1..11 { } </pre>
+<p>The many bugs in C-style <kbd>for</kbd> loops, like the off-by-one error with the counter, cannot occur here, because we loop over an iterator.</p>
+<p>Variables can also be used in a range, like in the following snippet which prints nine dots:</p>
+<pre>let mut x = 10; 
+for _ in 1..x { x -= 1; print!("."); } </pre>
+<p>We'll examine iterators in more detail in <a href="680a0457-8a2d-4196-9ef4-ddc2476dd715.xhtml"><span class="ChapterrefPACKT">Chapter 5</span></a>, <em>Higher Order Functions and Error-Handling</em>.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style00.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style01.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Global constants</h1>
+                </header>
+            
+            <article>
+                
+<p>Often, an application needs a few values that are in fact constants, meaning that they do not change in the course of the program. In our game, for example, the game name <kbd>Monster Attack</kbd> could be a constant, as could the maximum health amount, which is the number <kbd>100</kbd>. We must be able to use them in the <kbd>main()</kbd> function or any other function in our program, so they are placed at the top of the code file. They live in the global scope of the program. Such constants are declared with the keyword <kbd>static</kbd>, as follows:</p>
+<pre>// see Chapter 2/code/constants1.rs 
+static MAX_HEALTH: i32 = 100; 
+static GAME_NAME: &amp;str = "Monster Attack"; 
+ 
+fn main() { 
+} </pre>
+<p>Names of constants must be in uppercase, underscores can be used to separate word parts. Their type must also be indicated; the variable <kbd>MAX_HEALTH</kbd> is a 32-bit integer (<kbd>i32</kbd>) and the variable <kbd>GAME_NAME</kbd> is a string (<kbd>str</kbd>) type. As we will discuss further, the declaration of types for variables is done in exactly the same way, although it is often optional when the compiler can infer the type from the code context.</p>
+<p>Remember that Rust is a low-level language, so many things must be specified in detail. The <kbd>&amp;</kbd> is a reference to something (it contains its memory address)<span class="MsoCommentReference">,</span> here of the string.</p>
+<p>The compiler gives us a warning, which looks like this:</p>
+<pre><strong>warning: static item is never used: `MAX_HEALTH`, #[warn(dead_code)] on by default  </strong></pre>
+<p>This warning does not prevent the compilation, so in this stage, we can compile to an executable <kbd>constants1.exe</kbd>. But the compiler is right; these objects are never used in the program's code (they are called dead code), so, in a complete program, either use them or throw them out.</p>
+<div class="packt_tip">It takes a while before the aspiring Rust developer starts to regard the Rust compiler as his friend, and not as an annoying machine spitting out errors and warnings. As long as you see this message at the end of the compiler output,<kbd>error: aborting due to previous errors</kbd>, no (new) compiled executable is made. But remember, correcting the errors eliminates runtime problems, so this can save you a lot of time otherwise wasted tracking nasty bugs. Often, the error messages are accompanied by helpful notes on how to eliminate the error. Even the warnings can point you to flaws in your code. Rust also warns us when something is declared but not used in the code that follows, like unused variables, functions, imported modules, and so on. It even warns us if we make a variable mutable (which means it's value can be changed) when it should not be, or when code doesn't get executed! The compiler does such a good job that when you reach the stage that all errors and warnings are eliminated, your program most likely will run correctly!</div>
+<p>Besides static values, we can also use simple constant values whose value never changes. Constants always have to be typed, as shown here:</p>
+<pre>const MYPI: f32 = 3.14; </pre>
+<p>The compiler automatically substitutes the value of the constant everywhere in the code.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

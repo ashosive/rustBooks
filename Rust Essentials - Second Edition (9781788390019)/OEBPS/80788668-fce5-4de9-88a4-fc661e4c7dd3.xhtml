@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style00.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style01.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Our first program</h1>
+                </header>
+            
+            <article>
+                
+<p>Let's get started by showing a welcome message to the players of our game. Open your favorite text editor (like Notepad++ or gedit) for a new file and type in the following code:</p>
+<pre>// code in Chapter1\code\welcome.rs 
+fn main() { 
+    println!("Welcome to the Game!"); 
+} </pre>
+<p>The steps to be performed are as follows:</p>
+<ol>
+<li><span class="NormalPACKTChar">Save</span> the file as <kbd>welcome.rs</kbd>. <span class="NormalPACKTChar">The</span> <kbd>.rs</kbd> extension is the standard extension of Rust code files. Source file names may not contain spaces; if they contain more than one word, you can use an underscore, <kbd>_</kbd>, as a separator, for example: <kbd>start_game.rs</kbd>.</li>
+<li>Then <span class="NormalPACKTChar">compile</span> it to native code on the command line with <kbd>rustc.welcome.rs</kbd>. This produces an executable program, <kbd>welcome.exe</kbd>, on Windows or <kbd>welcome</kbd> on Linux.</li>
+<li><span class="NormalPACKTChar">Run</span> this program with <kbd>welcome</kbd> or<kbd>./welcome</kbd> to get the output:</li>
+</ol>
+<pre><strong>Welcome to the Game!</strong>  </pre>
+<p>The output executable gets its name from the source file. If you want to give the executable another name, like <kbd>start</kbd>, compile it with the option <kbd>-o output_name,</kbd> as shown below:</p>
+<pre><strong>rustc welcome.rs -o start</strong></pre>
+<p>The <kbd>rustc -O</kbd> produces native code optimized for execution speed (equivalent to <kbd>rustc -C opt-level=2</kbd>); the most optimized code is generated for <kbd>rustc -C opt-level=3</kbd>.</p>
+<p>Compiling and running are separate consecutive steps, contrary to dynamic languages like Ruby or Python where these are performed in one step.</p>
+<p>Let's explain the code a bit. If you have already worked in a C, or Java, or C# like environment, this code will seem quite familiar. As in most languages, execution of code starts in a <kbd>main()</kbd> function, which is mandatory in an executable program.</p>
+<p>In a larger project with many source files, the file containing the <kbd>main()</kbd> function would be called <kbd>main.rs</kbd> by convention.</p>
+<p>We see that <kbd>main()</kbd> is a function declaration because it is preceded by the keyword <kbd>fn</kbd>, short and elegant like most Rust keywords. The <kbd>()</kbd> after <kbd>main</kbd> denotes the parameter list, which is empty here. The function's code is placed in a code block, surrounded by curly braces <kbd>{ }</kbd>, where the opening brace is put by convention on the same line as the function declaration, but separated by one space. The closing brace appears after the code, in the column right beneath <kbd>fn</kbd>.</p>
+<p>Our program has only one line, which is indented by four spaces to improve readability (Rust is not whitespace sensitive). This line prints the string <kbd>Welcome to the Game!</kbd>. Rust <span class="NormalPACKTChar">recognizes</span> this as a string, because it is surrounded by double quotes <kbd>" "</kbd>. This string was given as argument to the <kbd>println!</kbd> macro (the <kbd>!</kbd> indicates it is a macro and not a function). The code line ends in a semicolon, <kbd>;,</kbd> as most, but not all, code lines in Rust do (see <a href="4e1f4309-1ce5-4eb2-9860-99a814bdd2ea.xhtml"><span class="ChapterrefPACKT">Chapter 2</span></a>, <em>Using Variables and Types</em>).</p>
+<div class="packt_infobox"><span class="packt_screen">Exercises</span>:<br/>
+<span>Write, compile, and execute a Rust program,</span> <kbd>name.rs</kbd><span>, that prints out your name.<br/></span><span>What is the smallest possible program in Rust in terms of code size?</span></div>
+<p>The <kbd>println!</kbd> macro has some nice formatting capabilities and at the same time checks when compiling whether the type of variables is correct for the applied formatting (see <a href="4e1f4309-1ce5-4eb2-9860-99a814bdd2ea.xhtml"><span class="ChapterrefPACKT">Chapter 2</span></a>, <em>Using Variables and Types</em>).</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

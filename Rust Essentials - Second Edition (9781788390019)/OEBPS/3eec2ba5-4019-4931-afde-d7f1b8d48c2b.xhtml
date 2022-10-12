@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Communication through channels</h1>
+                </header>
+            
+            <article>
+                
+<p>Data can also be exchanged between threads by passing messages among them. This is implemented in Rust by channels, which are like unidirectional pipes that connect two threads; data is processed first-in, first-out.</p>
+<p>Data flows over this channel between two endpoints: from the <kbd>Sender&lt;T&gt;</kbd> to the <kbd>Receiver&lt;T&gt;</kbd>, both of which are generic and take the type <kbd>T</kbd> of the message to be transferred (which obviously must be the same for the <kbd>Sender</kbd> and <kbd>Receiver</kbd>). In this mechanism, a copy of the data to share is made for the receiving thread, so you wouldn't want to use this for very large data:</p>
+<div class="packt_figure CDPAlignCenter CDPAlign"><img height="115" width="328" src="Images/4a9785ef-ce65-4879-bfb2-2dc0a0c389c4.jpg"/></div>
+<p>To create a channel, we need to import the <kbd>mpsc</kbd> submodule from <kbd>std::sync (mpsc</kbd>, which stands for multi-producer, single-consumer communication primitives, and then use the <kbd>channel()</kbd> method:</p>
+<pre>// code from Chapter 9/code/channels.rs: 
+use std::thread; 
+<strong>use std::sync::mpsc::channel;</strong><strong>use std::sync::mpsc::{Sender, Receiver};</strong> 
+fn main() { 
+<strong>   let (tx, rx): (Sender&lt;i32&gt;, Receiver&lt;i32&gt;) = channel();</strong> 
+}  </pre>
+<p>This creates a tuple of endpoints, <kbd>tx</kbd> (t stands for transmission) being the <kbd>Sender</kbd> and <kbd>rx</kbd> (r stands for receiver) being the <kbd>Receiver</kbd>. We have indicated that we will send <kbd>i32</kbd> integers over the channel, but the type annotations are not needed if the compiler can deduce the channel datatype from the rest of the code.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

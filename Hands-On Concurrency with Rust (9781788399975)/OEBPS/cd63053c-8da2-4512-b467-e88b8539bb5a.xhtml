@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Rc</h1>
+                </header>
+            
+            <article>
+                
+<p>Now, let's consider one last single-item container before we get into a multi-item container. We'll look into <kbd>Rc&lt;T&gt;</kbd>, described by the Rust documentation as being a single-threaded reference-counting pointer. Reference counting pointers are distinct from the usual Rust references in that, while they are allocated on the heap as a <kbd>Box&lt;T&gt;</kbd>, cloning a reference counter pointer does not cause a new heap allocation, bitwise copy. Instead, a counter inside the <kbd>Rc&lt;T&gt;</kbd> is incremented, somewhat analogously as to the way <kbd>RefCell&lt;T&gt;</kbd> works. The drop of an <kbd>Rc&lt;T&gt;</kbd> reduces that internal counter and when the counter's value is equal to zero, the heap allocation is released. Let's take a peek inside <kbd>src/liballoc/rc.s</kbd>:</p>
+<pre style="padding-left: 30px">pub struct Rc&lt;T: ?Sized&gt; {
+    ptr: Shared&lt;RcBox&lt;T&gt;&gt;,
+    phantom: PhantomData&lt;T&gt;,
+}</pre>
+<p>We've already encountered <kbd>PhantomData&lt;T&gt;</kbd> in this chapter, so we know that <kbd>Rc&lt;T&gt;</kbd> will not directly hold the allocation of <kbd>T</kbd>, but the compiler will behave as if it does. Also, we know that <kbd>T</kbd> may or may not be sized. The pieces we need to catch up on then are <kbd>RcBox&lt;T&gt;</kbd> and <kbd>Shared&lt;T&gt;.</kbd> Let's inspect <kbd>Shared&lt;T&gt;</kbd> first. Its full name is <kbd>std::ptr::Shared&lt;T&gt;</kbd> and it's the same kind of pointer as <kbd>*mut X</kbd> except that it is non-zero. There are two variants for creating a new <kbd>Shared&lt;T&gt;</kbd>, <kbd>const unsafe fn new_unchecked(ptr: *mut X) -&gt; Self</kbd> and  <kbd>fn new(ptr: *mut X) -&gt; Option&lt;Self&gt;</kbd>. In the first variant, the caller is responsible for ensuring that the pointer is non-null, and in the second the nulled nature of the pointer is checked, like so:</p>
+<pre>    pub fn new(ptr: *mut T) -&gt; Option&lt;Self&gt; {
+        NonZero::new(ptr as *const T).map(|nz| Shared { pointer: nz })
+    }</pre>
+<p>We find the definition and implementation of <kbd>NonZero&lt;T&gt;</kbd> in <kbd>src/libcore/nonzero.rs </kbd> like so:</p>
+<pre style="padding-left: 30px">pub struct NonZero&lt;T: Zeroable&gt;(T);
+
+impl&lt;T: Zeroable&gt; NonZero&lt;T&gt; {
+    /// Creates an instance of NonZero with the provided value.
+    /// You must indeed ensure that the value is actually "non-zero".
+    #[unstable(feature = "nonzero",
+               reason = "needs an RFC to flesh out the design",
+               issue = "27730")]
+    #[inline]
+    pub const unsafe fn new_unchecked(inner: T) -&gt; Self {
+        NonZero(inner)
+    }
+
+    /// Creates an instance of NonZero with the provided value.
+    #[inline]
+    pub fn new(inner: T) -&gt; Option&lt;Self&gt; {
+        if inner.is_zero() {
+            None
+        } else {
+            Some(NonZero(inner))
+        }
+    }
+
+    /// Gets the inner value.
+    pub fn get(self) -&gt; T {
+        self.0
+    }
+}</pre>
+<p><kbd>Zeroable</kbd> is an unstable trait, which is pretty straightforward:</p>
+<pre>pub unsafe trait Zeroable {
+    fn is_zero(&amp;self) -&gt; bool;
+}</pre>
+<p>Every pointer type implements an <kbd>is_null() -&gt; bool</kbd> and this trait defers to that function, and <kbd>NonZero::new</kbd> defers to <kbd>Zeroable::is_zero</kbd>. The presence of a <kbd>Shared&lt;T&gt;</kbd>, then, gives the programmer the same freedom as <kbd>*mut T</kbd> but with added guarantees about the pointer's nullable situation. Jumping back up to <kbd>Rc::new</kbd>:</p>
+<pre style="padding-left: 30px">pub fn new(value: T) -&gt; Rc&lt;T&gt; {
+    Rc {
+        // there is an implicit weak pointer owned by all the strong
+        // pointers, which ensures that the weak destructor never frees
+        // the allocation while the strong destructor is running, even
+        // if the weak pointer is stored inside the strong one.
+        ptr: Shared::from(Box::into_unique(box RcBox {
+            strong: Cell::new(1),
+            weak: Cell::new(1),
+            value,
+        })),
+        phantom: PhantomData,
+    }
+}</pre>
+<p><kbd>Box::into_unique</kbd> converts a <kbd>Box&lt;T&gt;</kbd> into a <kbd>Unique&lt;T&gt;</kbd>—discussed previously in this chapter—which is then converted into a <kbd>Shared&lt;T&gt;</kbd>. This chain preserves the non-null guarantee needed and ensures uniqueness. Now, what about strong and weak in <kbd>RcBox</kbd>? <kbd>Rc&lt;T&gt;</kbd> provides a method, <kbd>Self::downgrade(&amp;self) -&gt; Weak&lt;T&gt;</kbd>, that produces a non-owning pointer, a pointer which does not guarantee the liveness of the referenced data and does not extend its lifetime. This is called a <em>weak reference</em>. Dropping a <kbd>Weak&lt;T&gt;</kbd>, likewise, does not imply that <kbd>T</kbd> is dropped. The trick here is that a strong reference does extend the liveness of the underlying <kbd>T</kbd>—the drop of <kbd>T</kbd> is only called when the internal counter of <kbd>Rc&lt;T&gt;</kbd> hits zero. For the most part, things rarely require a weak reference, except when a cycle of references exist. Suppose a graph structure were to be constructed where each node holds an <kbd>Rc&lt;T&gt;</kbd> to its connected nodes and a cycle exists in the graph. Calling drop on the current node will recursively call drop on the connected nodes, which will recurse again onto the current node and so forth. Were the graph to store a vector of all nodes and have each node store weak references to connections, then a drop of the vector would cause a drop of all nodes, cycles or not. We can see how this works in practice by inspecting the <kbd>Drop</kbd> implementation of <kbd>Rc&lt;T&gt;</kbd>:</p>
+<pre style="padding-left: 30px">unsafe impl&lt;#[may_dangle] T: ?Sized&gt; Drop for Rc&lt;T&gt; {
+    fn drop(&amp;mut self) {
+        unsafe {
+            let ptr = self.ptr.as_ptr();
+
+            self.dec_strong();
+            if self.strong() == 0 {
+                // destroy the contained object
+                ptr::drop_in_place(self.ptr.as_mut());
+
+                // remove the implicit "strong weak" pointer<br/>                // now that we've destroyed the contents.
+                self.dec_weak();
+
+                if self.weak() == 0 {
+                    Heap.dealloc(ptr as *mut u8, <br/>                    Layout::for_value(&amp;*ptr));
+                }
+            }
+        }
+    }
+}</pre>
+<p>This is trimmed some for clarity but the notion is as we've described—when the total number of strong references is zero, a full deallocation occurs. The referenced <kbd>Heap</kbd> and <kbd>Layout</kbd> are compiler internals and won't be discussed further here, but the interested reader is warmly encouraged to go spelunking on their own. Recall that in <kbd>Rc&lt;T&gt;::new</kbd>, both strong and weak counters started at <kbd>1</kbd>. To avoid invalidating the weak pointers, the actual <kbd>T</kbd> is only deallocated if there are no strong or weak pointers available. Let's have a look at <kbd>Drop for Weak&lt;T&gt;</kbd>, again trimmed some for clarity:</p>
+<pre>impl&lt;T: ?Sized&gt; Drop for Weak&lt;T&gt; {
+    fn drop(&amp;mut self) {
+        unsafe {
+            let ptr = self.ptr.as_ptr();
+
+            self.dec_weak();
+            // the weak count starts at 1, and will only go to<br/>            // zero if all the strong pointers have disappeared.
+            if self.weak() == 0 {
+                Heap.dealloc(ptr as *mut u8, Layout::for_value(&amp;*ptr));
+            }
+        }
+    }
+}</pre>
+<p>As expected, the <kbd>T</kbd> can only be deallocated when the weak pointer total falls to zero, which is only possible if there are no strong pointers left. That's <kbd>Rc&lt;T&gt;</kbd>—a handful of important traits, a specialized box, and a few compiler internals.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

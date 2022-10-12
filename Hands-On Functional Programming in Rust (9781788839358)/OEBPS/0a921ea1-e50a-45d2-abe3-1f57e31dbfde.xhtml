@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Making generics more generic</h1>
+                </header>
+            
+            <article>
+                
+<p class="p2"><span class="s1">Making generics more generic relates to the practice of</span> parameterizing <span class="s1">data structures and functions originated in functional languages. In Rust, and other languages, this is called <strong>generics</strong>. Types and functions can all be parameterized. One or more constraints may be placed on generic types to indicate requirements of a trait or lifetime.</span></p>
+<p class="p2"><span class="s1">Struct definitions can become redundant without generics. Here is a definition of three structs that define a common concept of a <kbd>Point</kbd>. However, the structs use different numerical types, so the singular concept is expanded into three separate <kbd>PointN</kbd> type definitions in <kbd>intro_generics.rs</kbd>:</span></p>
+<pre style="padding-left: 30px" class="p1"><span class="s1">struct PointU32 <br/>{<br/>    x: u32,<br/>    y: u32<br/>}<br/><br/>struct PointF32<br/>{<br/>    x: f32,<br/>    y: f32<br/>}<br/><br/>struct PointI32<br/>{<br/>    x: i32,<br/>    y: i32<br/>}</span></pre>
+<p class="p2"><span class="s1">Instead, we can use generics to remove duplicate code and make the code more robust. Generic code is more easily adaptable to new requirements because many behaviors (and thus requirements) can be parameterized. If a change is needed, it is better to only change one line rather than a hundred.</span></p>
+<p>This code snippet defines a parameterized <kbd>Point</kbd> struct. Now, a single definition can capture all possible numerical types for a <kbd>Point</kbd> in <kbd>intro_generics.rs</kbd>:</p>
+<pre style="padding-left: 30px">struct Point&lt;T&gt;<br/>{<br/>    x: T,<br/>    y: T<br/>}</pre>
+<p class="p2"><span class="s1">Functions are also problematic without generics.</span></p>
+<p>Here is a simple function to square a number. However, to capture possible numerical types, we define three different functions in <kbd>intro_generics.rs</kbd>:</p>
+<pre style="padding-left: 30px">fn foo_u32(x: u32) -&gt; u32<br/>{<br/>    x*x<br/>}<br/><br/>fn foo_f32(x: f32) -&gt; f32<br/>{<br/>    x*x<br/>}<br/><br/>fn foo_i32(x: i32) -&gt; i32<br/>{<br/>    x*x<br/>}</pre>
+<p class="p2"><span class="s1">Function parameters, such as this one, may need trait bounds (a constraint specifying one or more traits) to permit any behavior on that type that is used in the function body.</span></p>
+<p>Here is the <kbd>foo</kbd> function, redefined with a parameterized type. A single function can define the operation for all numerical types. Explicit bounds must be set for even basic operations, such as multiply or even copy, in <kbd>intro_generics.rs</kbd>:</p>
+<pre style="padding-left: 30px">fn foo&lt;T&gt;(x: T) -&gt; T<br/>where T: std::ops::Mul&lt;Output=T&gt; + Copy<br/>{<br/>    x*x<br/>}</pre>
+<p class="p2"><span class="s1">Even functions can be sent as parameters. We call these higher-order functions.</span></p>
+<p>Here is a trivial function that accepts a function and argument, then calls the function with the argument, returning the result. Note the trait bound  <kbd>Fn</kbd>, indicating that the provided function is a closure. For an object to be callable, it must implement one of the <kbd>fn</kbd>, <kbd>Fn</kbd>, <kbd>FnMut</kbd>, or <kbd>FnOnce</kbd> traits in <kbd>intro_generics.rs</kbd>:</p>
+<pre style="padding-left: 30px">fn bar&lt;F,T&gt;(f: F, x: T) -&gt; T<br/>where F: Fn(T) -&gt; T<br/>{<br/>    f(x)<br/>}</pre>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

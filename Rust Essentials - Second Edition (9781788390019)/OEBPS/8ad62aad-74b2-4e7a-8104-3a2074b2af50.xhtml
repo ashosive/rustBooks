@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style00.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style01.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Enums</h1>
+                </header>
+            
+            <article>
+                
+<p>If something can only be one of a limited number of named values, then we define it as an <kbd>enum</kbd>. For example, if our game needs the compass directions, we could define:</p>
+<pre>// from Chapter 4/code/enums.rs 
+enum Compass { 
+   North, South, East, West 
+} </pre>
+<p>And use it like this in function <kbd>main()</kbd> or any another function:</p>
+<pre>let direction = Compass::West; </pre>
+<p>The <kbd>enum</kbd>'s values can also be other types or structs, like in this example, where we define a type <kbd>species</kbd>:</p>
+<pre>type species = &amp;'static str; 
+ 
+enum PlanetaryMonster { 
+   VenusMonster(species, i32), 
+   MarsMonster(species, i32) 
+} 
+ 
+let martian = PlanetaryMonster::MarsMonster("Chela", 42); </pre>
+<p>The enums are sometimes called <strong>union types</strong> or <strong>algebraic data types</strong> in other languages.</p>
+<p>If we make a <kbd>use</kbd> at the start of the code file:</p>
+<pre>use PlanetaryMonster::MarsMonster; </pre>
+<p>Then the type can be shortened, like this:</p>
+<pre>let martian = MarsMonster("Chela", 42); </pre>
+<p>The enums are really nice to bring readability in your code, and they are used a lot in Rust. To apply them usefully in code, see the following section on <em>Matching patterns</em>.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

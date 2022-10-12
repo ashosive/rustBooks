@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style00.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style01.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">What about submodules?</h1>
+                </header>
+            
+            <article>
+                
+<p>When we declare top-level modules like this, Rust will expect there to be either a directory for each of these modules or four source files (<kbd>Trigonometry.rs</kbd>, <kbd>RegressionAnalysis.rs</kbd>, <kbd>Conversions.rs</kbd>, and <kbd>Bases.rs</kbd>). If the directory structure is used, Rust will expect a file called <kbd>mod.rs</kbd> in each directory.</p>
+<p>Let's compare how these two systems look, and then we can examine the relative benefits of each. The structure of <kbd>MathsLibMultiFile</kbd> will be as follows:</p>
+<div class="CDPAlignCenter CDPAlign"><img height="315" width="410" class=" image-border" src="Images/7f31d9a5-53fd-4a37-9862-3d8a60e2e9ae.png"/></div>
+<div class="packt_figref CDPAlignCenter CDPAlign">Figure 3a</div>
+<p>The structure of <kbd>MathsLibMultiFileDirs</kbd> will be as follows:</p>
+<div class="CDPAlignCenter CDPAlign"><img height="493" width="387" class=" image-border" src="Images/dec2cf82-a2ce-49e4-b687-074596df91b1.png"/></div>
+<div class="packt_figref CDPAlignCenter CDPAlign">Figure 3b</div>
+<p>At first glance, they seem to be very similar; the only difference is that multifiledir (<em>Fig 3b</em>) has modules broken down into separate files whereas multifile (<em>Fig 3a</em>) only has a single file for each module. This is a limitation of the non-directory structure; the submodules are kept in a single file, which is fine for a very small module but no good for larger modules.</p>
+<p>In the directory structure version, there is a <kbd>mod.rs</kbd> file. This is completely empty but is there to let the compiler know that we have submodules. If (say) <kbd>RegressionAnalysis::Statistics</kbd> were to be further broken down, it would be a case of creating a new directory within the <kbd>RegressionAnalysis</kbd> directory called <kbd>Statistics</kbd> (the directory must have the same name as the module) and adding a new <kbd>mod.rs</kbd> file as well as new submodules.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

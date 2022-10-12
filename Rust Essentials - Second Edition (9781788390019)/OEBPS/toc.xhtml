@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style00.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style01.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+            <header>
+                <h1>Table of Contents</h1>
+            </header>
+
+            <article>
+                <nav epub:type="toc" id="toc">
+                    <ol><li style="list-style-type:none">
+    <a href="7ad1f893-48e7-414b-8eb9-8107eb97c975.xhtml">Preface</a>
+    <ol><li style="list-style-type:none">
+    <a href="2d933f19-78bf-4df0-8bdb-3858c60c52d2.xhtml">What this book covers</a>
+    
+</li>
+<li style="list-style-type:none">
+    <a href="bdf0d5a3-1a84-48c2-8986-008755eed20a.xhtml">What you need for this book</a>
+    
+</li>
+<li style="list-style-type:none">
+    <a href="8292c794-29d2-40b0-8db7-65c072710b04.xhtml">Who this book is for</a>
+    
+</li>
+<li style="list-style-type:none">
+    <a href="49515b2e-b82f-4def-b953-38edb5fca094.xhtml">Conventions</a>
+    
+</li>
+<li style="list-style-type:none">
+    <a href="788500fe-7b46-4a89-a3e2-d68b30c3d829.xhtml">Customer support</a>
+    <ol><li style="list-style-type:none">
+    <a href="a28bce7c-1e39-4b15-9fa4-80fd30fe38c6.xhtml">Downloading the example code</a>
+    
+</li>
+<li style="list-style-type:none">
+    <a href="a66205ba-59d2-4f5a-8993-9ac1d33b2688.xhtml">Errata</a>
+    
+</li>
+<li style="list-style-type:none">
+    <a href="1e037e55-0cbe-4320-b6d2-670eff064ada.xhtml">Piracy</a>
+    
+</li>
+<li style="list-style-type:none">
+    <a href="5b517f8b-cf4d-49b7-952a-421e8c4de861.xhtml">Questions</a>
+    
+</li>
+</ol>
+</li>
+</ol>
+</li>
+<li style="list-style-type:decimal" value="1">
+    <a href="b77a4ac4-6a4c-42a6-aecf-63fd957f3d8a.xhtml">Starting with Rust</a>
+    <ol><li style="list-style-type:none">
+    <a href="93450c0c-0d8f-4866-9314-7c86c03f940f.xhtml">The advantages of Rust</a>
+    <ol><li style="list-style-type:none">
+    <a href="8d6ef6d0-f713-4782-abd1-14e6476346a1.xhtml">The trifecta of Rust - safe, fast, and concurrent</a>
+    
+</li>
+<li style="list-style-type:none">
+    <a href="6b561401-194c-46d8-8d15-cfcc800446d8.xhtml">Comparison with other languages</a>
+    
+</li>
+</ol>
+</li>
+<li style="list-style-type:none">
+    <a href="207ee76b-9c27-49c7-bc04-cb277edafd80.xhtml">The stability of Rust and its evolution</a>
+    
+</li>
+<li style="list-style-type:none">
+    <a href="927ae742-5b3a-4532-b6b4-58ac970c4040.xhtml">The success of Rust</a>
+    <ol><li style="list-style-type:none">
+    <a href="f0dfbcd0-95b3-42d6-b1bf-30d9a2b2fa93.xhtml">Where to use Rust</a>
+    
+</li>
+</ol>
+</li>
+<li style="list-style-type:none">
+    <a href="c5ebd317-181d-444a-b21c-94257e9ff5f8.xhtml">Servo</a>
+    
+</li>
+<li style="list-style-type:none">
+    <a href="3f3d28ae-c234-45b5-affe-38819a90707d.xhtml">Installing Rust</a>
+    
+</li>
+<li style="list-style-type:none">
+    <a href="663ab6c2-0d4b-481e-9622-214dd4e892ed.xhtml">rustc--the Rust compiler</a>
+    
+</li>
+<li style="list-style-type:none">
+    <a href="80788668-fce5-4de9-88a4-fc661e4c7dd3.xhtml">Our first program</a>
+    <ol><li style="list-style-type:none">
+    <a href="59026ac7-c3bc-4519-ac6d-0ba9b42c079b.xhtml">Working with Cargo</a>
+    
+</li>
+</ol>
+</li>
+<li style="list-style-type:none">
+    <a href="8a2131e4-d864-4c44-9b46-88aba464d872.xhtml">Developer tools</a>
+    <ol><li style="list-style-type:none">
+    <a href="ab38de2c-d441-4e74-9442-d978e9feba93.xhtml">Using Sublime Text</a>
+    
+</li>
+</ol>
+</li>
+<li style="list-style-type:none">
+    <a href="587a7e24-63cd-493f-9284-7ca77cf8cca7.xhtml">The Standard Library</a>
+    
+</li>
+<li style="list-style-type:none">
+    <a href="c756e8d2-fcc4-466e-bb06-b2efbd77e65e.xhtml">Summary</a>
+    
+</li>
+</ol>
+</li>
+<li style="list-style-type:decimal" value="2">
+    <a href="4e1f4309-1ce5-4eb2-9860-99a814bdd2ea.xhtml">Using Variables and Types</a>
+    <ol><li style="list-style-type:none">
+    <a href="1f1ea41c-1b40-40a8-a6bf-5c77b8f74a8f.xhtml">Comments</a>
+    
+</li>
+<li style="list-style-type:none">
+    <a href="bee5fe75-95ca-4ab5-98be-e2fc205a48b2.xhtml">Global constants</a>
+    <ol><li style="list-style-type:none">
+    <a href="6d1d8edb-b08c-4ab2-9041-1a8ac262c094.xhtml">Printing with string interpolation</a>
+    
+</li>
+</ol>
+</li>
+<li style="list-style-type:none">
+    <a href="88e3618b-aa25-4694-8495-e0a40f26ed31.xhtml">Values and primitive types</a>
+    <ol><li style="list-style-type:none">
+    <a href="808ec572-fc78-4e21-b277-add12e7cbdb1.xhtml">Consulting Rust documentation</a>
+    
+</li>
+</ol>
+</li>
+<li style="list-style-type:none">
+    <a href="08271300-7beb-4a1a-b857-b01a66c85b3b.xhtml">Binding variables to values</a>
+    <ol><li style="list-style-type:none">
+    <a href="75689517-2138-4871-99a6-a89f0d72b84a.xhtml">Mutable and immutable variables</a>
+    
+</li>
+</ol>
+</li>
+<li style="list-style-type:none">
+    <a href="d0ec2cfe-fa50-4263-8883-518ff0db7dd8.xhtml">Scope of a variable and shadowing</a>
+    
+</li>
+<li style="list-style-type:none">
+    <a href="624dde5b-e544-41f4-be2a-fcd1d50989ba.xhtml">Type checking and conversions</a>
+    <ol><li style="list-style-type:none">
+    <a href="77251e6a-f263-4cd3-b068-109473f859da.xhtml">Aliasing</a>
+    
+</li>
+</ol>
+</li>
+<li style="list-style-type:none">
+    <a href="188b7e89-3fe4-47d2-8b16-59309e775bab.xhtml">Expressions</a>
+    
+</li>
+<li style="list-style-type:none">
+    <a href="0b621954-95fa-4b2a-b4de-7ced61027a3e.xhtml">The stack and the heap</a>
+    
+</li>
+<li style="list-style-type:none">
+    <a href="7bcf35b5-3c73-4a29-92a2-3ea98ad53d1f.xhtml">Summary</a>
+    
+</li>
+</ol>
+</li>
+<li style="list-style-type:decimal" value="3">
+    <a href="59b7261a-67fa-4a7e-9928-27ae01a25ceb.xhtml">Using Functions and Control Structures</a>
+    <ol><li style="list-style-type:none">
+    <a href="51852e0e-0a90-4011-a67a-0272ba2ba3d5.xhtml">Branching on a condition</a>
+    
+</li>
+<li style="list-style-type:none">
+    <a href="87b1aa32-dbf6-44b5-a5d5-5bcc526f6d4b.xhtml">Looping</a>
+    
+</li>
+<li style="list-style-type:none">
+    <a href="9816583a-0a5c-41db-bf46-17ebee620259.xhtml">Functions</a>
+    <ol><li style="list-style-type:none">
+    <a href="67ec70d7-a913-48b9-8818-a8f940ec0c87.xhtml">Documenting a function</a>
+    
+</li>
+</ol>
+</li>
+<li style="list-style-type:none">
+    <a href="0ecdcd9a-f3b8-4cb7-9592-275a4056e714.xhtml">Attributes</a>
+    <ol><li style="list-style-type:none">
+    <a href="031141d4-5800-4751-ab51-f899c690e93d.xhtml">Conditional compilation</a>
+    
+</li>
+</ol>
+</li>
+<li style="list-style-type:none">
+    <a href="88cce6f3-423c-4180-9568-bd96baa3912c.xhtml">Testing</a>
+    <ol><li style="list-style-type:none">
+    <a href="cc0b2149-1696-4318-8bac-95ee94af21ad.xhtml">Testing with cargo</a>
+    <ol><li style="list-style-type:none">
+    <a href="21cb9cef-8ac3-4eba-b2c2-ccf1f64dab0f.xhtml">The tests module</a>
+    
+</li>
+</ol>
+</li>
+</ol>
+</li>
+<li style="list-style-type:none">
+    <a href="414c9daa-1b2b-4025-a11f-fda494b7b33f.xhtml">Summary</a>
+    
+</li>
+</ol>
+</li>
+<li style="list-style-type:decimal" value="4">
+    <a href="397a1a97-368f-4af7-a7fb-f44ad8c5aab9.xhtml">Structuring Data and Matching Patterns</a>
+    <ol><li style="list-style-type:none">
+    <a href="6ed67f4c-1bdf-4eda-978f-9be72d3c4d6a.xhtml">Strings</a>
+    
+</li>
+<li style="list-style-type:none">
+    <a href="85eece2c-fde9-4db7-9df6-53e74ebb1d36.xhtml">Arrays, vectors, and slices</a>
+    <ol><li style="list-style-type:none">
+    <a href="90ad242e-e073-43d7-849c-cbeab3005796.xhtml">Vectors</a>
+    
+</li>
+<li style="list-style-type:none">
+    <a href="31c9a174-374f-4480-a537-6a6194f0ebb4.xhtml">Slices</a>
+    
+</li>
+<li style="list-style-type:none">
+    <a href="d6fe439f-07ea-4b74-8c82-1ef790e7622b.xhtml">Strings and arrays</a>
+    
+</li>
+</ol>
+</li>
+<li style="list-style-type:none">
+    <a href="7ad82c05-671d-42c6-8b0d-7fe095028906.xhtml">Tuples</a>
+    
+</li>
+<li style="list-style-type:none">
+    <a href="4d3f596a-dc91-460a-81ac-10c3bf3ed6ba.xhtml">Structs</a>
+    
+</li>
+<li style="list-style-type:none">
+    <a href="8ad62aad-74b2-4e7a-8104-3a2074b2af50.xhtml">Enums</a>
+    <ol><li style="list-style-type:none">
+    <a href="28a40c2e-cafc-4be9-810e-24622793a78a.xhtml">Result and Option</a>
+    
+</li>
+</ol>
+</li>
+<li style="list-style-type:none">
+    <a href="85528d89-4995-4fa0-9b23-0885b8fdb831.xhtml">Getting input from the console</a>
+    
+</li>
+<li style="list-style-type:none">
+    <a href="4662d0ad-e18f-45b5-846b-165c84bab95a.xhtml">Matching patterns</a>
+    
+</li>
+<li style="list-style-type:none">
+    <a href="0ce0debf-e266-4bc9-a7c0-a11d8dda3393.xhtml">Program arguments</a>
+    
+</li>
+<li style="list-style-type:none">
+    <a href="65752f86-a81c-4848-a721-eeda8813f525.xhtml">Summary</a>
+    
+</li>
+</ol>
+</li>
+<li style="list-style-type:decimal" value="5">
+    <a href="680a0457-8a2d-4196-9ef4-ddc2476dd715.xhtml">Higher Order Functions and Error-Handling</a>
+    <ol><li style="list-style-type:none">
+    <a href="b2e2fe50-da93-409d-90d8-68295f4c1053.xhtml">Higher order functions and closures</a>
+    
+</li>
+<li style="list-style-type:none">
+    <a href="0521c80d-b132-4916-9c58-75c1433ee33e.xhtml">Iterators</a>
+    
+</li>
+<li style="list-style-type:none">
+    <a href="0b518804-9f9e-4766-bbbe-ffd7d503bcc2.xhtml">Consumers and adapters</a>
+    
+</li>
+<li style="list-style-type:none">
+    <a href="5cd96fb8-0859-4e89-8ac9-718aa25a94b0.xhtml">Generic data structures and functions</a>
+    
+</li>
+<li style="list-style-type:none">
+    <a href="51d8be4d-6960-4f26-ae7b-3ab42ad25896.xhtml">Error-handling</a>
+    <ol><li style="list-style-type:none">
+    <a href="88946401-64c3-452f-9191-dbc3155f1cd8.xhtml">Panics</a>
+    
+</li>
+<li style="list-style-type:none">
+    <a href="653525ad-8e4b-49d0-a304-b1307d3db9dd.xhtml">Testing for failure</a>
+    
+</li>
+<li style="list-style-type:none">
+    <a href="9543e8bd-e4ec-48f2-b769-6d669bc259af.xhtml">Some more examples of error-handling</a>
+    
+</li>
+<li style="list-style-type:none">
+    <a href="dc50d064-8ba1-4d2f-bd26-040ebd8ff5e6.xhtml">The try! macro and the ? operator</a>
+    
+</li>
+</ol>
+</li>
+<li style="list-style-type:none">
+    <a href="119031e0-b60c-411a-a54f-ff238d6957ce.xhtml">Summary</a>
+    
+</li>
+</ol>
+</li>
+<li style="list-style-type:decimal" value="6">
+    <a href="2535f67f-e1a7-4ef7-af15-dcebffd38149.xhtml">Using Traits and OOP in Rust</a>
+    <ol><li style="list-style-type:none">
+    <a href="da378e6c-918f-4f12-aca3-4b217d782ee0.xhtml">Associated functions on structs</a>
+    
+</li>
+<li style="list-style-type:none">
+    <a href="d7e51b97-80fc-4a3f-99c4-577a9a11c0c9.xhtml">Methods on structs</a>
+    
+</li>
+<li style="list-style-type:none">
+    <a href="2340511a-d495-4e56-9ee4-28a9af4cf529.xhtml">Using a constructor pattern</a>
+    
+</li>
+<li style="list-style-type:none">
+    <a href="502a23de-4e1b-4699-822d-188e2c985751.xhtml">Using a builder pattern</a>
+    
+</li>
+<li style="list-style-type:none">
+    <a href="87f2f54b-9706-4986-afbc-56f562cc766e.xhtml">Methods on tuples and enums</a>
+    
+</li>
+<li style="list-style-type:none">
+    <a href="fe08f684-521c-4a40-a464-96dcd2449618.xhtml">Traits</a>
+    
+</li>
+<li style="list-style-type:none">
+    <a href="737230be-ac23-4251-baaa-947dea31a27a.xhtml">Using trait constraints</a>
+    
+</li>
+<li style="list-style-type:none">
+    <a href="1b6b2db1-fa8a-4e59-b195-afab29cc664e.xhtml">Static and dynamic dispatch</a>
+    
+</li>
+<li style="list-style-type:none">
+    <a href="747e605e-72d4-4781-895e-f7ad8cb548fa.xhtml">Built-in traits and operator overloading</a>
+    
+</li>
+<li style="list-style-type:none">
+    <a href="4875c800-9bb8-4542-a4bb-8e23127e599d.xhtml">OOP in Rust</a>
+    
+</li>
+<li style="list-style-type:none">
+    <a href="b2d97b19-1d93-4e88-9707-49965fe587bc.xhtml">Inheritance with traits</a>
+    
+</li>
+<li style="list-style-type:none">
+    <a href="a18c9af4-e21f-4bef-b89a-1f93f8ad43ef.xhtml">Using the visitor pattern</a>
+    
+</li>
+<li style="list-style-type:none">
+    <a href="8f065c2d-8acb-4f83-8bd7-28cdbd72e9f2.xhtml">Summary</a>
+    
+</li>
+</ol>
+</li>
+<li style="list-style-type:decimal" value="7">
+    <a href="181718d1-5b78-4952-8082-796f69471c96.xhtml">Ensuring Memory Safety and Pointers</a>
+    <ol><li style="list-style-type:none">
+    <a href="3fc7edb8-b526-4298-a469-f2606aa3f4f5.xhtml">Pointers and references</a>
+    <ol><li style="list-style-type:none">
+    <a href="f664f575-82ed-405e-aff2-b1d92a4cc2c4.xhtml">Stack and heap</a>
+    
+</li>
+<li style="list-style-type:none">
+    <a href="d2254d68-5be6-4edc-ba01-d0eda2ede8bb.xhtml">Lifetimes</a>
+    
+</li>
+<li style="list-style-type:none">
+    <a href="8c9bd990-8b36-4ceb-8068-4cd2f37bf68e.xhtml">Copying and moving values - The copy trait</a>
+    <ol><li style="list-style-type:none">
+    <a href="cc06926b-cabc-459c-b059-6cf2754ef0cd.xhtml">Let's summarize</a>
+    
+</li>
+</ol>
+</li>
+<li style="list-style-type:none">
+    <a href="875bdc1d-b329-40bb-8669-ec1b7723f761.xhtml">Pointers</a>
+    
+</li>
+<li style="list-style-type:none">
+    <a href="d79ea38d-220b-46e0-a78e-1c5275a23a62.xhtml">References</a>
+    <ol><li style="list-style-type:none">
+    <a href="42713710-9e35-44ba-bfe8-b79126f8c1d8.xhtml">Match, struct, and ref</a>
+    
+</li>
+</ol>
+</li>
+</ol>
+</li>
+<li style="list-style-type:none">
+    <a href="fa43937c-8782-45aa-a512-19eff82103e9.xhtml">Ownership and borrowing</a>
+    <ol><li style="list-style-type:none">
+    <a href="b4665848-8de6-47ca-bfad-00740ba0c044.xhtml">Ownership</a>
+    
+</li>
+<li style="list-style-type:none">
+    <a href="13a26d16-a0f5-4258-98ff-85ca85f236e8.xhtml">Moving a value</a>
+    
+</li>
+<li style="list-style-type:none">
+    <a href="c46a81a8-4d79-4d8e-9ddb-ce31f81be2a4.xhtml">Borrowing a value</a>
+    
+</li>
+<li style="list-style-type:none">
+    <a href="bf549c4b-0290-47f6-abb9-4c95dc70c38a.xhtml">Implementing the Drop trait</a>
+    
+</li>
+<li style="list-style-type:none">
+    <a href="11b9dfd4-09d4-4677-af1a-5f0055b8e78b.xhtml">Moving closure</a>
+    
+</li>
+</ol>
+</li>
+<li style="list-style-type:none">
+    <a href="5268d349-e437-4c5e-a71f-e796d5d8d4ad.xhtml">Boxes</a>
+    
+</li>
+<li style="list-style-type:none">
+    <a href="14de6250-1963-4c62-8216-d997dcf3d1bc.xhtml">Reference counting</a>
+    
+</li>
+<li style="list-style-type:none">
+    <a href="7e9c59f1-0a17-42b5-b21c-91d0b8ecb230.xhtml">Overview of pointers</a>
+    
+</li>
+<li style="list-style-type:none">
+    <a href="f9733fee-55c1-41f5-8c3c-bd8b46c4c72a.xhtml">Summary</a>
+    
+</li>
+</ol>
+</li>
+<li style="list-style-type:decimal" value="8">
+    <a href="d271499e-5fd5-48a4-8395-e5efedc8a482.xhtml">Organizing Code and Macros</a>
+    <ol><li style="list-style-type:none">
+    <a href="7ca3976a-7fe9-4e2f-8ed4-68b1f7895faa.xhtml">Modules and crates</a>
+    <ol><li style="list-style-type:none">
+    <a href="f487bf6f-374e-4947-9e38-cda869ad6ef5.xhtml">Building crates</a>
+    
+</li>
+<li style="list-style-type:none">
+    <a href="a4b5abc2-5d6c-47d2-919a-fe5f183f5292.xhtml">Defining a module</a>
+    
+</li>
+<li style="list-style-type:none">
+    <a href="bab6dc97-53f8-40b9-9fdc-de01c5747c95.xhtml">Visibility of items</a>
+    
+</li>
+<li style="list-style-type:none">
+    <a href="b6339c0a-5bd9-4a0b-aeff-ab64255d77c1.xhtml">Importing modules and file hierarchy</a>
+    
+</li>
+<li style="list-style-type:none">
+    <a href="7924a38a-8bec-4bfd-a224-17c5645e11a4.xhtml">Importing external crates</a>
+    
+</li>
+<li style="list-style-type:none">
+    <a href="57e1a322-29e4-4a4f-a235-70d1b2845956.xhtml">Exporting a public interface</a>
+    
+</li>
+<li style="list-style-type:none">
+    <a href="5c12a301-63b5-4b72-8b19-e45f2e0a5da7.xhtml">Adding external crates to a project</a>
+    
+</li>
+<li style="list-style-type:none">
+    <a href="598665de-e0f4-40f2-b0ae-3a01961fbb19.xhtml">Working with random numbers</a>
+    
+</li>
+</ol>
+</li>
+<li style="list-style-type:none">
+    <a href="e09c5f73-e9b7-4a42-a7aa-1630667abf81.xhtml">Macros</a>
+    <ol><li style="list-style-type:none">
+    <a href="7764c555-3971-4be6-b876-67543894a2c6.xhtml">Why macros?</a>
+    
+</li>
+<li style="list-style-type:none">
+    <a href="89851352-efc5-4485-a192-b2a6d07df721.xhtml">Developing macros</a>
+    <ol><li style="list-style-type:none">
+    <a href="5ef8bb2d-9502-452c-bc37-50998fdc5cd4.xhtml">Repetition</a>
+    
+</li>
+<li style="list-style-type:none">
+    <a href="004aeecc-4276-4c3b-8267-b4536960130c.xhtml">Creating a new function</a>
+    
+</li>
+<li style="list-style-type:none">
+    <a href="42da0dc5-a5c2-440c-a998-d975e994c207.xhtml">Some other examples</a>
+    
+</li>
+</ol>
+</li>
+<li style="list-style-type:none">
+    <a href="0e7d9b23-eedf-4b1b-b864-30bb1f1f7b89.xhtml">Using macros from crates</a>
+    
+</li>
+<li style="list-style-type:none">
+    <a href="c63023f7-02a3-4e09-9bba-294f7b8a7d07.xhtml">Some other built-in macros</a>
+    
+</li>
+</ol>
+</li>
+<li style="list-style-type:none">
+    <a href="1eb4fcd1-2967-4a84-adae-dcd5b44ec6ab.xhtml">Summary</a>
+    
+</li>
+</ol>
+</li>
+<li style="list-style-type:decimal" value="9">
+    <a href="60543aaa-c7d6-43ec-9237-9fe71a0cad4d.xhtml">Concurrency - Coding for Multicore Execution</a>
+    <ol><li style="list-style-type:none">
+    <a href="b7188282-39e0-4f13-a02a-075b426f7c08.xhtml">Concurrency and threads</a>
+    <ol><li style="list-style-type:none">
+    <a href="52dc22bd-7aaa-4a18-9920-e31419430bb6.xhtml">Creating threads</a>
+    <ol><li style="list-style-type:none">
+    <a href="da03ece6-ce7a-4b9a-9565-c2bb7aa089e5.xhtml">Setting the thread's stack size</a>
+    
+</li>
+</ol>
+</li>
+<li style="list-style-type:none">
+    <a href="8a0ae04b-b495-43c9-a8fc-c421f9dcf39a.xhtml">Starting a number of threads</a>
+    
+</li>
+<li style="list-style-type:none">
+    <a href="b8d4960e-7e8f-497d-a2cf-6d63cb8dbec1.xhtml">Panicking threads</a>
+    
+</li>
+<li style="list-style-type:none">
+    <a href="d7610293-872f-41ba-9a8f-5647c64b19d4.xhtml">Thread safety</a>
+    
+</li>
+</ol>
+</li>
+<li style="list-style-type:none">
+    <a href="6c275caf-fbf3-4c0d-8ce0-ba1150231ca9.xhtml">Shared mutable states</a>
+    <ol><li style="list-style-type:none">
+    <a href="0398b5d6-257d-478e-b6fd-90dc82ec2bc0.xhtml">The Sync trait</a>
+    
+</li>
+</ol>
+</li>
+<li style="list-style-type:none">
+    <a href="3eec2ba5-4019-4931-afde-d7f1b8d48c2b.xhtml">Communication through channels</a>
+    <ol><li style="list-style-type:none">
+    <a href="2dd1f09a-d8f3-4af0-859b-44bb3611b675.xhtml">Sending and receiving data</a>
+    <ol><li style="list-style-type:none">
+    <a href="f69d26ce-f8ae-46c4-8094-948eaa0c8d37.xhtml">Making a channel</a>
+    
+</li>
+<li style="list-style-type:none">
+    <a href="f8806aec-a2be-401d-8a51-067fd1ff581c.xhtml">Sending struct values over a channel</a>
+    
+</li>
+<li style="list-style-type:none">
+    <a href="dd4032b8-1fa7-4ca8-b034-3e67c27a2d15.xhtml">Sending references over a channel</a>
+    
+</li>
+<li style="list-style-type:none">
+    <a href="9077c1ee-9de0-4bfa-8da1-220301ae4912.xhtml">Synchronous and asynchronous</a>
+    
+</li>
+</ol>
+</li>
+</ol>
+</li>
+<li style="list-style-type:none">
+    <a href="1b271374-e696-4ddd-92c4-8efa2cc2dd5c.xhtml">Summary</a>
+    
+</li>
+</ol>
+</li>
+<li style="list-style-type:decimal" value="10">
+    <a href="4b959ff8-fbf2-44e8-bb32-6055ef9fe740.xhtml">Programming at the Boundaries</a>
+    <ol><li style="list-style-type:none">
+    <a href="b1f1e087-ed85-4c97-b3c2-8ece882890e6.xhtml">When is code unsafe</a>
+    <ol><li style="list-style-type:none">
+    <a href="7882bc8e-a9db-4c6e-8a09-7ef826ed84ea.xhtml">Using std::mem</a>
+    
+</li>
+</ol>
+</li>
+<li style="list-style-type:none">
+    <a href="5307510b-b36f-40c4-9d80-3ff1e34b426a.xhtml">Raw pointers</a>
+    
+</li>
+<li style="list-style-type:none">
+    <a href="0167ca84-ce2a-4199-b53b-892615492279.xhtml">Interfacing with C</a>
+    <ol><li style="list-style-type:none">
+    <a href="ac36a75b-e904-4478-822f-fab05b380cda.xhtml">Using a C library</a>
+    
+</li>
+</ol>
+</li>
+<li style="list-style-type:none">
+    <a href="0947a7fa-9d4e-46e2-ab8d-c6a70df99561.xhtml">Inlining assembly code</a>
+    
+</li>
+<li style="list-style-type:none">
+    <a href="e39ec659-6303-47a4-8e44-e40af460340c.xhtml">Calling Rust from other languages</a>
+    
+</li>
+<li style="list-style-type:none">
+    <a href="22cccede-344e-4aab-999d-3df03992ba15.xhtml">Summary</a>
+    
+</li>
+</ol>
+</li>
+<li style="list-style-type:decimal" value="11">
+    <a href="575d229f-420f-45c3-acaf-779ef9494480.xhtml">Exploring the Standard Library</a>
+    <ol><li style="list-style-type:none">
+    <a href="d396b6d4-5eee-451a-a6ca-193b039ecd28.xhtml">Exploring std and the prelude module</a>
+    
+</li>
+<li style="list-style-type:none">
+    <a href="cf2742c8-eb29-497d-9675-756a48f59f6e.xhtml">Collections - using hashmaps and hashsets</a>
+    
+</li>
+<li style="list-style-type:none">
+    <a href="1f115370-80b3-4fa8-8a64-3a2999b46be8.xhtml">Working with files</a>
+    <ol><li style="list-style-type:none">
+    <a href="26d40d72-a046-4624-a625-b4b17f7e3bfb.xhtml">Paths</a>
+    
+</li>
+<li style="list-style-type:none">
+    <a href="aa985e77-367b-4db6-9b84-0d686388953c.xhtml">Reading a file</a>
+    
+</li>
+<li style="list-style-type:none">
+    <a href="035f8176-43a8-43a3-a2f1-953f52d2cb9c.xhtml">Error-handling with try!</a>
+    
+</li>
+<li style="list-style-type:none">
+    <a href="063ed382-c316-42e0-8b0f-7f4428f3ab2b.xhtml">Buffered reading</a>
+    
+</li>
+<li style="list-style-type:none">
+    <a href="18062abc-f7f4-4666-9bf8-014814307651.xhtml">Writing a file</a>
+    
+</li>
+<li style="list-style-type:none">
+    <a href="d87f1dce-afc0-4557-ae4d-98a6b29d984f.xhtml">Error-handling with try!</a>
+    
+</li>
+<li style="list-style-type:none">
+    <a href="e3970c88-87e2-40ad-834c-5999aa7b8e13.xhtml">Filesystem operations</a>
+    
+</li>
+</ol>
+</li>
+<li style="list-style-type:none">
+    <a href="a6254534-5679-4aba-a10b-b3657e583098.xhtml">Using Rust without the Standard Library</a>
+    
+</li>
+<li style="list-style-type:none">
+    <a href="01d31ed7-89bd-4b1f-8717-1627f21d7968.xhtml">Summary</a>
+    
+</li>
+</ol>
+</li>
+<li style="list-style-type:decimal" value="12">
+    <a href="dbbf7355-69c2-4829-a1ca-4abd4eba1809.xhtml">The Ecosystem of Crates</a>
+    <ol><li style="list-style-type:none">
+    <a href="7c8f4833-84ce-4eb1-8e62-b2fb547598d7.xhtml">The ecosystem of crates</a>
+    
+</li>
+<li style="list-style-type:none">
+    <a href="ec122db8-890a-4d36-892a-857fe252a8f8.xhtml">Working with dates and times</a>
+    
+</li>
+<li style="list-style-type:none">
+    <a href="9ddd92a5-e1ec-44ac-8d7a-f143bf1a7911.xhtml">File formats and databases</a>
+    
+</li>
+<li style="list-style-type:none">
+    <a href="a4984057-7a97-425c-bce4-8aba9f0ce390.xhtml">Web development</a>
+    
+</li>
+<li style="list-style-type:none">
+    <a href="98fb3c7e-fadd-412d-96bf-52855debdb62.xhtml">Graphics and games</a>
+    
+</li>
+<li style="list-style-type:none">
+    <a href="35d623bb-4b31-4498-a0c3-1f56ab136d4a.xhtml">OS and embedded system development</a>
+    
+</li>
+<li style="list-style-type:none">
+    <a href="5427b533-725e-4c21-926a-590ddde5b063.xhtml">Other resources for learning Rust</a>
+    
+</li>
+<li style="list-style-type:none">
+    <a href="2b97be9a-f91c-4666-af5f-3e9dce5535eb.xhtml">Summary</a>
+    
+</li>
+</ol>
+</li>
+</ol>
+                </nav>
+            </article>
+
+            <footer style="margin-top: 5em;"/>
+        </section>
+    </div></body>
+</html>

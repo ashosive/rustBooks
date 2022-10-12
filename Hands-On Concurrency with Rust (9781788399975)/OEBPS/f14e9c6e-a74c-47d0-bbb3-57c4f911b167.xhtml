@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style00.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style01.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Epoch-based reclamation</h1>
+                </header>
+            
+            <article>
+                
+<p>We touched on epoch-based memory reclamation in the last chapter. We'll now examine the concept in depth and in the context of a ready-to-use implementation via the crossbeam project (<a href="https://github.com/crossbeam-rs">https://github.com/crossbeam-rs</a>). Some of the developers of conc overlap with crossbeam, but there's been more work done to crossbeam in the pursuit of a general-purpose framework for low-level atomic programming in Rust. The developers note that they plan to support other memory management schemes, for example hazard pointers (HP) and quiescent state-based reclamation (QSBR). The crate is re-exported as the epoch module. Future editions of this book may well only cover crossbeam and simply discuss the various memory reclamation techniques embedded in it. The particular crate we'll be discussing in this section is crossbeam-epoch, at SHA <kbd>3179e799f384816a0a9f2a3da82a147850e14d38</kbd>. This coincides with the 0.4.1 release of the project.</p>
+<div class="packt_infobox"><span>The </span><span>crossbeam crates under discussion here are </span><span>not listed in their entirety. You can find the full listings in this book's source repository. </span></div>
+<p>Epoch-based memory reclamation was introduced by Keir Fraser in his 2004 PhD thesis, <em>Practical lock-freedom</em>. Fraser's work builds on previous limbo list approaches, whereby garbage is placed in a global list and reclaimed through periodic scanning when it can be demonstrated that the garbage is no longer referenced. The exact mechanism varies somewhat by author, but limbo lists have some serious correctness and performance downsides. Fraser's improvement is to separate limbo lists into three epochs, a current epoch, a middle, and an epoch from which garbage may be collected. Every participating thread is responsible for observing the current epoch on start, adds its garbage to the current epoch, and attempts to increase the epoch count when its operations complete. The last thread to complete is the one that succeeds in increasing the epoch and is responsible for performing garbage collection on the final epoch. Three total epochs are needed as threads move from epochs independently from one another: a thread at epoch n may still hold a reference from n-1, but not n-2, and so only n-2 is safe to reclaim. Fraser's thesis is quite long—being, well, being that it is sufficient work to acquire a PhD—but Hart et al's 2007 paper, <em>Performance of Memory Reclamation for Lockless Synchronization</em>, is warmly recommended to the reader pressed for time.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

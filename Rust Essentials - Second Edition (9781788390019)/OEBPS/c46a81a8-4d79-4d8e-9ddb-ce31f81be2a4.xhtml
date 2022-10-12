@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Borrowing a value</h1>
+                </header>
+            
+            <article>
+                
+<p>On the other hand we can borrow the resource by making a (mutable) reference <kbd>kl2</kbd> to <kbd>klaatu</kbd> with:</p>
+<pre>let kl2 = &amp;klaatu;         // a borrow or reference </pre>
+<p>Or:</p>
+<pre>let kl2 = &amp;mut klaatu; // a mutable borrow or reference </pre>
+<p>A borrow is a temporary reference, passing the address of the data structure through <kbd>&amp;</kbd>. The borrowed reference can access the contents of the memory location, but does not own the value. The owner gives up full control over a borrowed value while it is being borrowed.</p>
+<p>Now, in the case of the mutable borrow, <kbd>kl2</kbd> can change the object, for instance when our alien loses a tentacle in a battle:</p>
+<pre>   kl2.n_tentacles = 14; 
+   println!("{} - {}", kl2.planet, kl2.n_tentacles);  </pre>
+<p>This prints out the following output:</p>
+<pre>    <strong>Venus - 14</strong>  </pre>
+<p>But if we try to change the alien's planet through <kbd>klaatu</kbd>, we can do it as follows:</p>
+<pre>klaatu.planet = "Pluto".to_string(); </pre>
+<p>We get the following error:</p>
+<pre>    <strong>error: cannot assign to `klaatu.planet` because it is borrowed</strong>  </pre>
+<p>It was indeed borrowed by the <kbd>kl2</kbd> reference.</p>
+<p>Like in everyday life, while an object is borrowed, the owner does not have access to it as it is no longer in its possession. In order to change the resource, <kbd>klaatu</kbd> needs to own it, without the resource being borrowed at the same time.</p>
+<p>Rust even explains this to us with the note it adds:</p>
+<pre>    <strong>borrow of `klaatu.planet` occurs here ownership.rs:18    let kl2 = &amp;mut klaatu;</strong>  </pre>
+<p>Because <kbd>kl2</kbd> borrows the resource, Rust also even forbids us to access the instance with its former name <kbd>klaatu</kbd>:</p>
+<pre>println!("{} - {}", klaatu.planet, klaatu.n_tentacles); </pre>
+<p>The compiler then throws the following error:</p>
+<pre>    <strong>error: cannot borrow `klaatu.planet` as immutable because `klaatu` is also borrowed as mutable.</strong>  </pre>
+<p>When a resource is moved or borrowed, the (original) owner can no longer use it. This prevents the memory problem that is known as a <strong>dangling pointer</strong>, which is the use of a pointer that points to an invalid memory location.</p>
+<p>But here is a revelation: if we isolate the borrowing by <kbd>kl2</kbd> in its own block, like in:</p>
+<pre>// see code in Chapter 7/code/ownership2.rs 
+fn main() { 
+    let mut klaatu = Alien{ planet: "Venus".to_string(),    n_tentacles: 15 }; 
+    {   
+      let kl2 = &amp;mut klaatu; 
+      kl2.n_tentacles = 14; 
+      println!("{} - {}", kl2.planet, kl2.n_tentacles);  
+// prints: Venus - 14 
+    } 
+}</pre>
+<p>The former problems have disappeared! After the block <kbd>kl2</kbd> can no longer be used, but we can now do for example:</p>
+<pre>println!("{} - {}", klaatu.planet, klaatu.n_tentacles);<br/>klaatu.planet = "Pluto".to_string(); 
+println!("{} - {}", klaatu.planet, klaatu.n_tentacles);  </pre>
+<p>This prints the following output:</p>
+<pre>    <strong>Venus - 10</strong>
+    <strong>Pluto - 10</strong>  </pre>
+<p>Why is this? Because after the closing <kbd>}</kbd> of the code block in which the <kbd>kl2</kbd> reference was bound, its lifetime ended. The borrowing was over (a borrow has to end sometime) and <kbd>klaatu</kbd> reclaimed full ownership, and thus the right to change. When the compiler detects that the lifetime of the original owner <kbd>klaatu</kbd> eventually ends, the memory occupied by the struct instance is automatically freed.</p>
+<p>In fact this is a general rule in Rust: whenever an object goes out of scope and it doesn't have an owner anymore, its destructor is automatically called and the resources owned by it are freed, so that there never can be any memory (or other resource) leaks. This is described in technical terms as Rust obeys the <strong>Resource Acquisition Is Initialization</strong> (<strong>RAII</strong>) rule; for more info see <a href="http://en.wikipedia.org/wiki/Resource_Acquisition_Is_Initialization"><span class="URLPACKT">http://en.wikipedia.org/wiki/Resource_Acquisition_Is_Initialization</span></a>.</p>
+<p>As we experimented in the previous section on <em>References</em>, a resource can be immutably borrowed many times, but while immutably borrowed, the original data can't be mutably borrowed.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Getting back to safety</h1>
+                </header>
+            
+            <article>
+                
+<p>Like we discussed previously, the preceding examples were intentionally low-level and unsafe. How can we build something similar with the bits and pieces that Rust provides us with? Here's one approach:</p>
+<pre style="padding-left: 30px">use std::{mem, thread};
+use std::sync::{Arc, Mutex};
+
+struct Ring {
+    size: usize,
+    data: Vec&lt;Option&lt;u32&gt;&gt;,
+}
+
+impl Ring {
+    fn with_capacity(capacity: usize) -&gt; Ring {
+        let mut data: Vec&lt;Option&lt;u32&gt;&gt; = Vec::with_capacity(capacity);
+        for _ in 0..capacity {
+            data.push(None);
+        }
+        Ring {
+            size: 0,
+            data: data,
+        }
+    }
+
+    fn capacity(&amp;self) -&gt; usize {
+        self.data.capacity()
+    }
+
+    fn is_full(&amp;self) -&gt; bool {
+        self.size == self.data.capacity()
+    }
+
+    fn emplace(&amp;mut self, offset: usize, val: u32) -&gt; Option&lt;u32&gt; {
+        self.size += 1;
+        let res = mem::replace(&amp;mut self.data[offset], Some(val));
+        res
+    }
+
+    fn displace(&amp;mut self, offset: usize) -&gt; Option&lt;u32&gt; {
+        let res = mem::replace(&amp;mut self.data[offset], None);
+        if res.is_some() {
+            self.size -= 1;
+        }
+        res
+    }
+}
+
+fn writer(ring_lk: Arc&lt;Mutex&lt;Ring&gt;&gt;) -&gt; () {
+    let mut offset: usize = 0;
+    let mut cur: u32 = 0;
+    loop {
+        let mut ring = ring_lk.lock().unwrap();
+        if !ring.is_full() {
+            assert!(ring.emplace(offset, cur).is_none());
+            cur = cur.wrapping_add(1);
+            offset += 1;
+            offset %= ring.capacity();
+        } else {
+            thread::yield_now();
+        }
+    }
+}
+
+fn reader(read_limit: usize, ring_lk: Arc&lt;Mutex&lt;Ring&gt;&gt;) -&gt; () {
+    let mut offset: usize = 0;
+    let mut cur: u32 = 0;
+    while (cur as usize) &lt; read_limit {
+        let mut ring = ring_lk.lock().unwrap();
+        if let Some(num) = ring.displace(offset) {
+            assert_eq!(num, cur);
+            cur = cur.wrapping_add(1);
+            offset += 1;
+            offset %= ring.capacity();
+        } else {
+            drop(ring);
+            thread::yield_now();
+        }
+    }
+}
+
+fn main() {
+    let capacity = 10;
+    let read_limit = 1_000_000;
+    let ring = Arc::new(Mutex::new(Ring::with_capacity(capacity)));
+
+    let reader_ring = Arc::clone(&amp;ring);
+    let reader_jh = thread::spawn(move || {
+        reader(read_limit, reader_ring);
+    });
+    let _writer_jh = thread::spawn(move || {
+        writer(ring);
+    });
+
+    reader_jh.join().unwrap();
+}</pre>
+<p>This is awfully similar to the previous, racey programs. We have Ring, which holds a size and is a set of operations around a <kbd>Vec&lt;Option&lt;u32&gt;&gt;</kbd>. This time, the <kbd>vec</kbd> is not exploded into a raw pointer and the implementation of Ring is fleshed out some more. Actually, it was possible to provide more of an abstract implementation in our previous examples—as we have seen by poking around inside Rust itself—but indirection and unsafety make for a rough combination. It's sometimes the case that indirect, unsafe code is harder to recognize as flawed than direct, unsafe code. Anyhow, you'll note that <kbd>Ring: !Send</kbd> in this implementation. Instead, the writer and reader threads operate on <kbd>Arc&lt;Mutex&lt;Ring&gt;&gt;</kbd>.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

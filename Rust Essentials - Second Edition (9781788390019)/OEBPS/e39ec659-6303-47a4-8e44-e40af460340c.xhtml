@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Calling Rust from other languages</h1>
+                </header>
+            
+            <article>
+                
+<p>Rust code can be called from any language that can call C. The Rust library should have the <kbd>crate-type</kbd> value <kbd>"dylib"</kbd>. When <kbd>rustfn1</kbd> is the Rust function to be called, this must be declared as:</p>
+<pre>    <strong>#[no_mangle]</strong>
+    <strong>pub extern "C" fn rustfn1() { }</strong>  </pre>
+<p><kbd>#[no_mangle]</kbd> serves to keep the function names plain and simple, so that they are easier to link to. The <kbd>"C"</kbd> exports the function to the outside world with the C calling convention.</p>
+<p class="mce-root"/>
+<p>Some examples to call Rust from C itself, Python, Haskell, and Node.js can be found in this article <a href="https://zsiciarz.github.io/24daysofrust/book/vol1/day23.html"><span class="URLPACKT">https://zsiciarz.github.io/24daysofrust/book/vol1/day23.html</span></a>. How to call Rust from Perl and Julia is detailed at <a href="http://paul.woolcock.us/posts/rust-perl-julia-ffi.html"><span class="URLPACKT">http://paul.woolcock.us/posts/rust-perl-julia-ffi.html</span></a><a>.</a></p>
+<div class="packt_infobox">For a nice collection of examples, see <a href="http://jakegoulding.com/rust-ffi-omnibus/"><span class="URLPACKT">http://jakegoulding.com/rust-ffi-omnibus/</span></a>.</div>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

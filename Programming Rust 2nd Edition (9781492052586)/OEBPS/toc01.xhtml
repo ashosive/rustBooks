@@ -1,0 +1,1039 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style00.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style01.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><nav data-type="toc" epub:type="toc" id="idm45625529503208"><ol><li data-type="chapter"><a href="ch01.xhtml#why-rust">1. Why Rust?</a><ol>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li data-type="sect1"><a href="ch01.xhtml#type-safety">Type Safety</a></li>
+</ol></li><li data-type="chapter"><a href="ch02.xhtml#basic-types">2. Basic Types</a><ol>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li data-type="sect1"><a href="ch02.xhtml#machine-types">Machine Types</a><ol>
+
+
+
+
+
+
+
+
+
+
+
+
+<li data-type="sect2"><a href="ch02.xhtml#integer-types">Integer Types</a></li>
+
+<li data-type="sect2"><a href="ch02.xhtml#checked-wrapping-and-saturating-arithmetic">Checked, Wrapping, and Saturating Arithmetic</a></li>
+
+<li data-type="sect2"><a href="ch02.xhtml#floating-point-types">Floating-Point Types</a></li>
+
+<li data-type="sect2"><a href="ch02.xhtml#the-bool-type">The bool Type</a></li>
+
+<li data-type="sect2"><a href="ch02.xhtml#characters">Characters</a></li>
+</ol></li>
+
+<li data-type="sect1"><a href="ch02.xhtml#tuples">Tuples</a></li>
+
+<li data-type="sect1"><a href="ch02.xhtml#pointer-types">Pointer Types</a><ol>
+
+
+
+
+
+
+
+
+
+
+
+
+<li data-type="sect2"><a href="ch02.xhtml#pointers-references">References</a></li>
+
+<li data-type="sect2"><a href="ch02.xhtml#boxes">Boxes</a></li>
+
+<li data-type="sect2"><a href="ch02.xhtml#raw-pointers">Raw Pointers</a></li>
+</ol></li>
+
+<li data-type="sect1"><a href="ch02.xhtml#arrays-vectors-and-slices">Arrays, Vectors, and Slices</a><ol>
+
+
+
+
+
+
+
+
+<li data-type="sect2"><a href="ch02.xhtml#arrays">Arrays</a></li>
+
+<li data-type="sect2"><a href="ch02.xhtml#vectors">Vectors</a></li>
+
+<li data-type="sect2"><a href="ch02.xhtml#slices">Slices</a></li>
+</ol></li>
+
+<li data-type="sect1"><a href="ch02.xhtml#string-types">String Types</a><ol>
+
+
+
+
+
+
+<li data-type="sect2"><a href="ch02.xhtml#string-literals">String Literals</a></li>
+
+<li data-type="sect2"><a href="ch02.xhtml#byte-strings">Byte Strings</a></li>
+
+<li data-type="sect2"><a href="ch02.xhtml#strings-in-memory">Strings in Memory</a></li>
+
+<li data-type="sect2"><a href="ch02.xhtml#string">String</a></li>
+
+<li data-type="sect2"><a href="ch02.xhtml#using-strings">Using Strings</a></li>
+
+<li data-type="sect2"><a href="ch02.xhtml#other-string-like-types">Other String-Like Types</a></li>
+</ol></li>
+
+<li data-type="sect1"><a href="ch02.xhtml#beyond-the-basics">Beyond the Basics</a></li>
+</ol></li><li data-type="chapter"><a href="ch03.xhtml#ownership">3. Ownership</a><ol>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li data-type="sect1"><a href="ch03.xhtml#ownership-1">Ownership</a></li>
+
+<li data-type="sect1"><a href="ch03.xhtml#moves">Moves</a><ol>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li data-type="sect2"><a href="ch03.xhtml#more-operations-that-move">More Operations That Move</a></li>
+
+<li data-type="sect2"><a href="ch03.xhtml#moves-and-control-flow">Moves and Control Flow</a></li>
+
+<li data-type="sect2"><a href="ch03.xhtml#moves-and-indexed-content">Moves and Indexed Content</a></li>
+</ol></li>
+
+<li data-type="sect1"><a href="ch03.xhtml#copy-types-the-exception-to-moves">Copy Types: The Exception to Moves</a></li>
+
+<li data-type="sect1"><a href="ch03.xhtml#rc">Rc and Arc: Shared Ownership</a></li>
+</ol></li><li data-type="chapter"><a href="ch04.xhtml#references">4. References</a><ol>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li data-type="sect1"><a href="ch04.xhtml#references-as-values">References as Values</a><ol>
+
+
+
+
+<li data-type="sect2"><a href="ch04.xhtml#rust-references-versus-c-references">Rust References Versus C++ References</a></li>
+
+<li data-type="sect2"><a href="ch04.xhtml#assigning-references">Assigning References</a></li>
+
+<li data-type="sect2"><a href="ch04.xhtml#references-to-references">References to References</a></li>
+
+<li data-type="sect2"><a href="ch04.xhtml#comparing-references">Comparing References</a></li>
+
+<li data-type="sect2"><a href="ch04.xhtml#references-are-never-null">References Are Never Null</a></li>
+
+<li data-type="sect2"><a href="ch04.xhtml#borrowing-references-to-arbitrary-expressions">Borrowing References to Arbitrary Expressions</a></li>
+
+<li data-type="sect2"><a href="ch04.xhtml#references-to-slices-and-trait-objects">References to Slices and Trait Objects</a></li>
+</ol></li>
+
+<li data-type="sect1"><a href="ch04.xhtml#reference-safety">Reference Safety</a><ol>
+
+
+
+
+<li data-type="sect2"><a href="ch04.xhtml#borrowing-a-local-variable">Borrowing a Local Variable</a></li>
+
+<li data-type="sect2"><a href="ch04.xhtml#receiving-references-as-parameters">Receiving References as Parameters</a></li>
+
+<li data-type="sect2"><a href="ch04.xhtml#passing-references-as-arguments">Passing References as Arguments</a></li>
+
+<li data-type="sect2"><a href="ch04.xhtml#returning-references">Returning References</a></li>
+
+<li data-type="sect2"><a href="ch04.xhtml#structs-containing-references">Structs Containing References</a></li>
+
+<li data-type="sect2"><a href="ch04.xhtml#distinct-lifetime-parameters">Distinct Lifetime Parameters</a></li>
+
+<li data-type="sect2"><a href="ch04.xhtml#omitting-lifetime-parameters">Omitting Lifetime Parameters</a></li>
+</ol></li>
+
+<li data-type="sect1"><a href="ch04.xhtml#sharing-versus-mutation">Sharing Versus Mutation</a></li>
+
+<li data-type="sect1"><a href="ch04.xhtml#taking-arms-against-a-sea-of-objects">Taking Arms Against a Sea of Objects</a></li>
+</ol></li><li data-type="chapter"><a href="ch05.xhtml#expressions">5. Expressions</a><ol>
+
+
+
+
+
+
+
+
+<li data-type="sect1"><a href="ch05.xhtml#an-expression-language">An Expression Language</a></li>
+
+<li data-type="sect1"><a href="ch05.xhtml#blocks-and-semicolons">Blocks and Semicolons</a></li>
+
+<li data-type="sect1"><a href="ch05.xhtml#declarations">Declarations</a></li>
+
+<li data-type="sect1"><a href="ch05.xhtml#if-and-match">if and match</a><ol>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li data-type="sect2"><a href="ch05.xhtml#if-let">if let</a></li>
+</ol></li>
+
+<li data-type="sect1"><a href="ch05.xhtml#loops">Loops</a></li>
+
+<li data-type="sect1"><a href="ch05.xhtml#return-expressions">return Expressions</a></li>
+
+<li data-type="sect1"><a href="ch05.xhtml#why-rust-has-loop">Why Rust Has loop</a></li>
+
+<li data-type="sect1"><a href="ch05.xhtml#function-and-method-calls">Function and Method Calls</a></li>
+
+<li data-type="sect1"><a href="ch05.xhtml#fields-and-elements">Fields and Elements</a></li>
+
+<li data-type="sect1"><a href="ch05.xhtml#reference-operators">Reference Operators</a></li>
+
+<li data-type="sect1"><a href="ch05.xhtml#arithmetic-bitwise-comparison-and-logical-operators">Arithmetic, Bitwise, Comparison, and Logical Operators</a></li>
+
+<li data-type="sect1"><a href="ch05.xhtml#assignment">Assignment</a></li>
+
+<li data-type="sect1"><a href="ch05.xhtml#type-casts">Type Casts</a></li>
+
+<li data-type="sect1"><a href="ch05.xhtml#expressions-closures">Closures</a></li>
+
+<li data-type="sect1"><a href="ch05.xhtml#precedence-and-associativity">Precedence and Associativity</a></li>
+
+<li data-type="sect1"><a href="ch05.xhtml#onward">Onward</a></li>
+</ol></li><li data-type="chapter"><a href="ch06.xhtml#error-handling">6. Error Handling</a><ol>
+
+
+
+
+
+
+
+
+
+
+
+
+<li data-type="sect1"><a href="ch06.xhtml#panic">Panic</a><ol>
+
+
+
+
+
+
+
+
+
+
+
+
+<li data-type="sect2"><a href="ch06.xhtml#unwinding">Unwinding</a></li>
+
+<li data-type="sect2"><a href="ch06.xhtml#aborting">Aborting</a></li>
+</ol></li>
+
+<li data-type="sect1"><a href="ch06.xhtml#result">Result</a><ol>
+
+
+
+
+
+
+
+
+
+
+
+
+<li data-type="sect2"><a href="ch06.xhtml#catching-errors">Catching Errors</a></li>
+
+<li data-type="sect2"><a href="ch06.xhtml#result-type-aliases">Result Type Aliases</a></li>
+
+<li data-type="sect2"><a href="ch06.xhtml#printing-errors">Printing Errors</a></li>
+
+<li data-type="sect2"><a href="ch06.xhtml#propagating-errors">Propagating Errors</a></li>
+
+<li data-type="sect2"><a href="ch06.xhtml#working-with-multiple-error-types">Working with Multiple Error Types</a></li>
+
+<li data-type="sect2"><a href="ch06.xhtml#dealing-with-errors-that-cant-happen">Dealing with Errors That “Can’t Happen”</a></li>
+
+<li data-type="sect2"><a href="ch06.xhtml#ignoring-errors">Ignoring Errors</a></li>
+
+<li data-type="sect2"><a href="ch06.xhtml#handling-errors-in-main">Handling Errors in main()</a></li>
+
+<li data-type="sect2"><a href="ch06.xhtml#declaring-a-custom-error-type">Declaring a Custom Error Type</a></li>
+
+<li data-type="sect2"><a href="ch06.xhtml#why-results">Why Results?</a></li>
+</ol></li>
+</ol></li><li data-type="chapter"><a href="ch07.xhtml#crates-and-modules">7. Crates and Modules</a><ol>
+
+
+
+
+
+
+
+
+
+
+<li data-type="sect1"><a href="ch07.xhtml#crates">Crates</a><ol>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li data-type="sect2"><a href="ch07.xhtml#build-profiles">Build Profiles</a></li>
+
+<li data-type="sect2"><a href="ch07.xhtml#editions">Editions</a></li>
+</ol></li>
+
+<li data-type="sect1"><a href="ch07.xhtml#modules">Modules</a><ol>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li data-type="sect2"><a href="ch07.xhtml#modules-in-separate-files">Modules in Separate Files</a></li>
+
+<li data-type="sect2"><a href="ch07.xhtml#paths-and-imports">Paths and Imports</a></li>
+
+<li data-type="sect2"><a href="ch07.xhtml#the-standard-prelude">The Standard Prelude</a></li>
+
+<li data-type="sect2"><a href="ch07.xhtml#items">Items, the Building Blocks of Rust</a></li>
+</ol></li>
+
+<li data-type="sect1"><a href="ch07.xhtml#turning-a-program-into-a-library">Turning a Program into a Library</a></li>
+
+<li data-type="sect1"><a href="ch07.xhtml#the-srcbin-directory">The src/bin Directory</a></li>
+
+<li data-type="sect1"><a href="ch07.xhtml#attributes">Attributes</a></li>
+
+<li data-type="sect1"><a href="ch07.xhtml#tests-and-documentation">Tests and Documentation</a><ol>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li data-type="sect2"><a href="ch07.xhtml#integration-tests">Integration Tests</a></li>
+
+<li data-type="sect2"><a href="ch07.xhtml#documentation">Documentation</a></li>
+
+<li data-type="sect2"><a href="ch07.xhtml#doc-tests">Doc-Tests</a></li>
+</ol></li>
+
+<li data-type="sect1"><a href="ch07.xhtml#specifying-dependencies">Specifying Dependencies</a><ol>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li data-type="sect2"><a href="ch07.xhtml#versions">Versions</a></li>
+
+<li data-type="sect2"><a href="ch07.xhtml#cargo.lock">Cargo.lock</a></li>
+</ol></li>
+
+<li data-type="sect1"><a href="ch07.xhtml#publishing-crates-to-crates.io">Publishing Crates to crates.io</a></li>
+
+<li data-type="sect1"><a href="ch07.xhtml#workspaces">Workspaces</a></li>
+
+<li data-type="sect1"><a href="ch07.xhtml#more-nice-things">More Nice Things</a></li>
+</ol></li><li data-type="chapter"><a href="ch08.xhtml#structs">8. Structs</a><ol>
+
+
+
+
+
+
+
+
+
+
+
+
+<li data-type="sect1"><a href="ch08.xhtml#named-field-structs">Named-Field Structs</a></li>
+
+<li data-type="sect1"><a href="ch08.xhtml#tuple-like-structs">Tuple-Like Structs</a></li>
+
+<li data-type="sect1"><a href="ch08.xhtml#unit-like-structs">Unit-Like Structs</a></li>
+
+<li data-type="sect1"><a href="ch08.xhtml#struct-layout">Struct Layout</a></li>
+
+<li data-type="sect1"><a href="ch08.xhtml#defining-methods-with-impl">Defining Methods with impl</a><ol>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li data-type="sect2"><a href="ch08.xhtml#passing-self-as-a-box-rc-or-arc">Passing Self as a Box, Rc, or Arc</a></li>
+
+<li data-type="sect2"><a href="ch08.xhtml#static-methods">Static Methods</a></li>
+</ol></li>
+
+<li data-type="sect1"><a href="ch08.xhtml#static-values">Static Values</a></li>
+
+<li data-type="sect1"><a href="ch08.xhtml#generic-structs">Generic Structs</a></li>
+
+<li data-type="sect1"><a href="ch08.xhtml#structs-with-lifetime-parameters">Structs with Lifetime Parameters</a></li>
+
+<li data-type="sect1"><a href="ch08.xhtml#deriving-common-traits-for-struct-types">Deriving Common Traits for Struct Types</a></li>
+
+<li data-type="sect1"><a href="ch08.xhtml#interior-mutability">Interior Mutability</a></li>
+</ol></li><li data-type="chapter"><a href="ch09.xhtml#enums-and-patterns">9. Enums and Patterns</a><ol>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li data-type="sect1"><a href="ch09.xhtml#enums">Enums</a><ol>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li data-type="sect2"><a href="ch09.xhtml#enums-with-data">Enums with Data</a></li>
+
+<li data-type="sect2"><a href="ch09.xhtml#enums-in-memory">Enums in Memory</a></li>
+
+<li data-type="sect2"><a href="ch09.xhtml#rich-data-structures-using-enums">Rich Data Structures Using Enums</a></li>
+
+<li data-type="sect2"><a href="ch09.xhtml#generic-enums">Generic Enums</a></li>
+</ol></li>
+
+<li data-type="sect1"><a href="ch09.xhtml#patterns">Patterns</a><ol>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li data-type="sect2"><a href="ch09.xhtml#literals-variables-and-wildcards-in-patterns">Literals, Variables, and Wildcards in Patterns</a></li>
+
+<li data-type="sect2"><a href="ch09.xhtml#tuple-and-struct-patterns">Tuple and Struct Patterns</a></li>
+
+<li data-type="sect2"><a href="ch09.xhtml#array-and-slice-patterns">Array and Slice Patterns</a></li>
+
+<li data-type="sect2"><a href="ch09.xhtml#reference-patterns">Reference Patterns</a></li>
+
+<li data-type="sect2"><a href="ch09.xhtml#matching-multiple-possibilities">Matching Multiple Possibilities</a></li>
+
+<li data-type="sect2"><a href="ch09.xhtml#pattern-guards">Pattern Guards</a></li>
+
+<li data-type="sect2"><a href="ch09.xhtml#patterns-1">@ Patterns</a></li>
+
+<li data-type="sect2"><a href="ch09.xhtml#where-patterns-are-allowed">Where Patterns Are Allowed</a></li>
+
+<li data-type="sect2"><a href="ch09.xhtml#populating-a-binary-tree">Populating a Binary Tree</a></li>
+</ol></li>
+
+<li data-type="sect1"><a href="ch09.xhtml#the-big-picture">The Big Picture</a></li>
+</ol></li><li data-type="chapter"><a href="ch10.xhtml#traits-and-generics">10. Traits and Generics</a><ol>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li data-type="sect1"><a href="ch10.xhtml#using-traits">Using Traits</a><ol>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li data-type="sect2"><a href="ch10.xhtml#trait-objects">Trait Objects</a></li>
+
+<li data-type="sect2"><a href="ch10.xhtml#trait-object-layout">Trait Object Layout</a></li>
+
+<li data-type="sect2"><a href="ch10.xhtml#generic-functions">Generic Functions</a></li>
+
+<li data-type="sect2"><a href="ch10.xhtml#which-to-use">Which to Use</a></li>
+</ol></li>
+
+<li data-type="sect1"><a href="ch10.xhtml#defining-and-implementing-traits">Defining and Implementing Traits</a><ol>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li data-type="sect2"><a href="ch10.xhtml#default-methods">Default Methods</a></li>
+
+<li data-type="sect2"><a href="ch10.xhtml#traits-and-other-peoples-types">Traits and Other People’s Types</a></li>
+
+<li data-type="sect2"><a href="ch10.xhtml#self-in-traits">Self in Traits</a></li>
+
+<li data-type="sect2"><a href="ch10.xhtml#subtraits">Subtraits</a></li>
+
+<li data-type="sect2"><a href="ch10.xhtml#traits-with-static-methods">Static Methods</a></li>
+</ol></li>
+
+<li data-type="sect1"><a href="ch10.xhtml#fully-qualified-method-calls">Fully Qualified Method Calls</a></li>
+
+<li data-type="sect1"><a href="ch10.xhtml#traits-that-define-relationships-between-types">Traits That Define Relationships Between Types</a><ol>
+
+
+
+
+
+
+
+
+<li data-type="sect2"><a href="ch10.xhtml#associated-types-or-how-iterators-work">Associated Types (or How Iterators Work)</a></li>
+
+<li data-type="sect2"><a href="ch10.xhtml#generic-traits-or-how-operator-overloading-works">Generic Traits (or How Operator Overloading Works)</a></li>
+
+<li data-type="sect2"><a href="ch10.xhtml#impl-trait">impl Trait</a></li>
+
+<li data-type="sect2"><a href="ch10.xhtml#associated-consts">Associated Consts</a></li>
+
+<li data-type="sect2"><a href="ch10.xhtml#buddy-traits-or-how-randrandom-works">Buddy Traits (or How rand::random() Works)</a></li>
+</ol></li>
+
+<li data-type="sect1"><a href="ch10.xhtml#reverse-engineering-bounds">Reverse-Engineering Bounds</a></li>
+
+<li data-type="sect1"><a href="ch10.xhtml#conclusion">Conclusion</a></li>
+</ol></li></ol></nav></div></body>
+</html>

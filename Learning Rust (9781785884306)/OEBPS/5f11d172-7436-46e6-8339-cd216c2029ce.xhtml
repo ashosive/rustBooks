@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Positioning the output</h1>
+                </header>
+            
+            <article>
+                
+<p>One of the more useful extensions in C# is <kbd>string.Format(...);.</kbd> This allows for a string to be constructed based on parameters at particular positions. For example, the following statement constructs a string where the parameter at a position after the string literal is inserted into the string (here, the letter <kbd>B</kbd> is inserted twice in the middle of the string and then at the end):</p>
+<pre>var myString = string.Format("Hello {0}, I am a {1}{1}{2} computer model {1}", name, "B", "C"); </pre>
+<p>Rust also supports this form, but with the difference that the positioning may be omitted.</p>
+<p>Consider the following examples:</p>
+<pre>format!("{} {}", 2, 10); // output 2 10 
+format!("{1} {} {0} {}", "B", "A"); </pre>
+<p>The first example is what we've seen before. The format string gets filled with the parameters on the right, in order.</p>
+<p>In the second example, it would seem that we're asking for four parameters, but have only supplied two. The way this works is that the positional arguments are ignored when filling in the non-positional arguments. Indexing, as is usual in programming, starts at zero. This is how the arguments are processed:</p>
+<ul>
+<li><kbd>{1}</kbd> inserts the second parameter <kbd>A</kbd></li>
+<li><kbd>{}</kbd> inserts the first parameter <kbd>B</kbd></li>
+<li><kbd>{0}</kbd> inserts the first parameter <kbd>B</kbd></li>
+<li><kbd>{}</kbd> inserts the second parameter <kbd>A</kbd></li>
+</ul>
+<p>Therefore, the output is going to be <span class="packt_screen">A B B A</span>.</p>
+<p>The following are the two important rules governing the positional parameters:</p>
+<ol>
+<li>All of the arguments within the quotes must be used. Failure to do so will result in a compiler error.</li>
+<li>You can refer to the same argument as many times as you like within the format string.</li>
+</ol>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

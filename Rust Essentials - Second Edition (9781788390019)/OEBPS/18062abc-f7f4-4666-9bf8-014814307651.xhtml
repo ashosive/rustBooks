@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style00.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style01.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Writing a file</h1>
+                </header>
+            
+            <article>
+                
+<p>To open a file in write-only mode, use the <kbd>File::create</kbd> static method with a reference to its path. This method also returns an <kbd>io::Result</kbd>, so we need to pattern match this value:</p>
+<pre>// code from Chapter 11/code/write_file.rs: 
+static CONTENT: &amp;'static str = 
+"Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. 
+"; 
+ 
+use std::path::Path; 
+use std::fs::File; 
+use std::io::prelude::*; 
+use std::error::Error; 
+ 
+fn main() { 
+    let path = Path::new("lorem_ipsum.txt"); 
+    let display = path.display(); 
+ 
+<strong>    let mut file = match File::create(&amp;path) {</strong> 
+        Err(why) =&gt; panic!("couldn't create {}: {}", 
+                           display, 
+                           Error::description(&amp;why)), 
+        Ok(file) =&gt; file, 
+    }; 
+} </pre>
+<p>This command creates a new file or overwrites an existing one with that name, but it cannot create folders; if the path contains a subfolder, this must already exist. If you want to write a string (here a <kbd>static</kbd> string <kbd>CONTENT</kbd>) to that file, first convert the string with <kbd>as_bytes()</kbd> and then use the <kbd>write_all()</kbd> method, again matching the <kbd>Result</kbd> value:</p>
+<pre><strong>match file.write_all(CONTENT.as_bytes()) {</strong> 
+        Err(why) =&gt; { 
+            panic!("couldn't write to {}: {}",  
+                            display, 
+                            Error::description(&amp;why)) 
+        }, 
+        Ok(_) =&gt; println!("successfully wrote to {}", display), 
+} </pre>
+<p>This prints out:</p>
+<pre><strong>successfully</strong> <strong>wrote to lorem_ipsum.txt</strong></pre>
+<p>We need to write the string out as bytes; when writing a simple literal string like this to a file <kbd>file.write_all("line one\n");</kbd> we get <kbd>error: mismatched types: expected `&amp;[u8]`, found `&amp;'static str`(expected slice, found str) [E0308]</kbd>. To correct this, we must write (notice the b before the string for converting to bytes) this:</p>
+<pre>file.write_all(b"line one\n");</pre>
+<p>In fact, the <kbd>write_all</kbd> method continuously calls the <kbd>write</kbd> method until the buffer is written out completely. So we could just as well use <kbd>write</kbd>, and instead of a match we could also test on the successful outcome by checking <kbd>is_err</kbd>, like this:</p>
+<pre><strong>if file.write(CONTENT.as_bytes()).is_err() {</strong>  <br/>println!("Failed to save response.");<br/>return;<br/>}</pre>
+<p>Instead of panicking in the case of an error, thus ending the program, we could also just display the error and return to the calling function, as in this variant:</p>
+<pre>let mut file = match File::create(&amp;path) {<br/>    Err(why) =&gt; { println!("couldn't create {}: {}",<br/>                       display,<br/>                       Error::description(&amp;why));<br/><strong>                  return<br/></strong>              },<br/>    Ok(file) =&gt; file,<br/>};</pre>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

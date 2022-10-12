@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">std::cell</h1>
+                </header>
+            
+            <article>
+                
+<p>Used in conjunction with shared mutable containers:</p>
+<div class="packt_infobox">For details on using <kbd>Cells</kbd>, <kbd>RefCell</kbd>, and both interior and external references, see <a href="636b329f-0544-4c2d-9924-fcd12f105567.xhtml">Chapter 11</a>, <em>Concurrency in Rust</em>.</div>
+<ul>
+<li><kbd>Std::cell::BorrowError</kbd>: Returned by <kbd>RefCell::try_borrow</kbd></li>
+<li><kbd>impl Display for BorrowError</kbd>
+<ul>
+<li><kbd>fn fmt(&amp;self, f: &amp;mut Formatter) -&gt; Result&lt;(), Error&gt;</kbd>: Formats the value using the given formatter.</li>
+</ul>
+</li>
+<li><kbd>impl Debug for BorrowError</kbd>
+<ul>
+<li><kbd>fn fmt(&amp;self, f: &amp;mut Formatter) -&gt; Result&lt;(), Error&gt;</kbd>: Formats the value using the given formatter.</li>
+</ul>
+</li>
+<li><kbd>impl Error for BorrowError</kbd>
+<ul>
+<li><kbd>fn description(&amp;self) -&gt; &amp;str</kbd>: A short description of the error</li>
+<li><kbd>fn cause(&amp;self) -&gt; Option&lt;&amp;Error&gt;</kbd>: The lower-level cause of this error, if any</li>
+</ul>
+</li>
+</ul>
+<ul>
+<li><kbd>std::cell::BorrowMutError</kbd>: Returned by <kbd>RefCell::try_borrow_mut</kbd></li>
+<li><kbd>impl Display for BorrowMutError</kbd>
+<ul>
+<li><kbd>fn fmt(&amp;self, f: &amp;mut Formatter) -&gt; Result&lt;(), Error&gt;</kbd>: Formats the value using the given formatter</li>
+</ul>
+</li>
+<li><kbd>impl Debug for BorrowMutError</kbd>
+<ul>
+<li><kbd>fn fmt(&amp;self, f: &amp;mut Formatter) -&gt; Result&lt;(), Error&gt;</kbd>: Formats the value using the given formatter</li>
+</ul>
+</li>
+<li><kbd>impl Error for BorrowMutError</kbd>
+<ul>
+<li><kbd>fn description(&amp;self) -&gt; &amp;str</kbd>: A short description of the error</li>
+<li><kbd>fn cause(&amp;self) -&gt; Option&lt;&amp;Error&gt;</kbd>: The lower-level cause of this error, if any</li>
+</ul>
+</li>
+</ul>
+<ul>
+<li><kbd>std::cell::Cell</kbd>: A mutable memory location that admits only <kbd>Copy</kbd> data</li>
+</ul>
+<p><strong>Methods</strong></p>
+<ul>
+<li><kbd>impl&lt;T&gt; Cell&lt;T&gt; where T: Copy</kbd>
+<ul>
+<li><kbd>fn new(value: T) -&gt; Cell&lt;T&gt;</kbd>: Creates a new Cell containing the given value</li>
+<li><kbd>fn get(&amp;self) -&gt; T</kbd>: Returns a copy of the contained value</li>
+<li><kbd>fn set(&amp;self, value: T)</kbd>: Sets the contained value</li>
+<li><kbd>fn as_ptr(&amp;self) -&gt; *mut T</kbd>: Returns a raw pointer to the underlying data in this cell</li>
+<li><kbd>fn get_mut(&amp;mut self) -&gt; &amp;mut T</kbd>: Returns a mutable reference to the underlying data</li>
+</ul>
+</li>
+</ul>
+<p><strong>Traits</strong></p>
+<ul>
+<li><kbd>impl&lt;T&gt; PartialEq&lt;Cell&lt;T&gt;&gt; for Cell&lt;T&gt; where T: Copy + PartialEq&lt;T&gt;</kbd>
+<ul>
+<li><kbd>fn eq(&amp;self, other: &amp;Cell&lt;T&gt;) -&gt; bool</kbd>: Tests for self and other values being equal, and is used by <kbd>==</kbd></li>
+<li><kbd>fn ne(&amp;self, other: &amp;Rhs) -&gt; bool</kbd>: Tests for <kbd>!=</kbd></li>
+</ul>
+</li>
+<li><kbd>impl&lt;T&gt; Default for Cell&lt;T&gt; where T: Copy + Default</kbd>
+<ul>
+<li><kbd>fn default() -&gt; Cell&lt;T&gt;</kbd>: Creates a <kbd>Cell&lt;T&gt;</kbd>, with the <kbd>Default</kbd> value for <kbd>T</kbd></li>
+</ul>
+</li>
+<li><kbd>impl&lt;T&gt; Clone for Cell&lt;T&gt; where T: Copy</kbd>
+<ul>
+<li><kbd>fn clone(&amp;self) -&gt; Cell&lt;T&gt;</kbd>: Returns a copy of the value</li>
+<li><kbd>fn clone_from(&amp;mut self, source: &amp;Self)</kbd>: Performs copy-assignment from source</li>
+</ul>
+</li>
+<li><kbd>impl&lt;T&gt; From&lt;T&gt; for Cell&lt;T&gt; where T: Copy</kbd>
+<ul>
+<li><kbd>fn from(t: T) -&gt; Cell&lt;T&gt;</kbd>: Performs the conversion</li>
+</ul>
+</li>
+<li><kbd>impl&lt;T&gt; Ord for Cell&lt;T&gt; where T: Copy + Ord</kbd>
+<ul>
+<li><kbd>fn cmp(&amp;self, other: &amp;Cell&lt;T&gt;) -&gt; Ordering</kbd>: This method returns an <kbd>Ordering</kbd> between self and other</li>
+</ul>
+</li>
+<li><kbd>impl&lt;T&gt; Debug for Cell&lt;T&gt; where T: Copy + Debug</kbd>
+<ul>
+<li><kbd>fn fmt(&amp;self, f: &amp;mut Formatter) -&gt; Result&lt;(), Error&gt;</kbd>: Formats the value using the given formatter</li>
+</ul>
+</li>
+<li><kbd>impl&lt;T&gt; PartialOrd&lt;Cell&lt;T&gt;&gt; for Cell&lt;T&gt; where T: Copy + PartialOrd&lt;T&gt;</kbd>
+<ul>
+<li><kbd>fn partial_cmp(&amp;self, other: &amp;Cell&lt;T&gt;) -&gt; Option&lt;Ordering&gt;</kbd>: This method returns an ordering between self and other values if one exists</li>
+<li><kbd>fn lt(&amp;self, other: &amp;Cell&lt;T&gt;) -&gt; bool</kbd>: This method tests less than (for self and other) and is used by the <kbd>&lt;</kbd> operator</li>
+<li><kbd>fn le(&amp;self, other: &amp;Cell&lt;T&gt;) -&gt; bool</kbd>: This method tests less than or equal to (for self and other) and is used by the <kbd>&lt;=</kbd> operator</li>
+<li><kbd>fn gt(&amp;self, other: &amp;Cell&lt;T&gt;) -&gt; bool</kbd>: This method tests greater than (for self and other) and is used by the <kbd>&gt;</kbd> operator</li>
+<li><kbd>fn ge(&amp;self, other: &amp;Cell&lt;T&gt;) -&gt; bool</kbd>: This method tests greater than or equal to (for self and other) and is used by the <kbd>&gt;=</kbd> operator</li>
+</ul>
+</li>
+</ul>
+<ul>
+<li><kbd>Std::cell::Ref</kbd>: Wraps a borrowed reference to a value in a <kbd>RefCell</kbd> box</li>
+</ul>
+<p><strong>Methods</strong></p>
+<ul>
+<li><kbd>impl&lt;'b, T&gt; Ref&lt;'b, T&gt; where T: ?Sized</kbd>
+<ul>
+<li><kbd>fn clone(orig: &amp;Ref&lt;'b, T&gt;) -&gt; Ref&lt;'b, T&gt;</kbd>: Copies a <kbd>Ref</kbd>. The <kbd>RefCell</kbd> is already immutably borrowed, so this cannot fail.</li>
+<li><kbd>fn map&lt;U, F&gt;(orig: Ref&lt;'b, T&gt;, f: F) -&gt; Ref&lt;'b, U&gt;</kbd><br/>
+<kbd>where F: FnOnce(&amp;T) -&gt; &amp;U, U: ?Sized</kbd>: Makes a new <kbd>Ref</kbd> for a component of the borrowed data. The <kbd>RefCell</kbd> is already immutably borrowed, so this cannot fail.</li>
+</ul>
+</li>
+</ul>
+<p><strong>Trait implementation</strong></p>
+<ul>
+<li><kbd>impl&lt;'b, T&gt; Debug for Ref&lt;'b, T&gt; where T: Debug + ?Sized</kbd>
+<ul>
+<li><kbd>fn fmt(&amp;self, f: &amp;mut Formatter) -&gt; Result&lt;(), Error&gt;</kbd>: Formats the value using the given formatter</li>
+</ul>
+</li>
+<li><kbd>impl&lt;'b, T&gt; Deref for Ref&lt;'b, T&gt; where T: ?Sized</kbd>
+<ul>
+<li><kbd>fn deref(&amp;self) -&gt; &amp;T</kbd>: The method is called to dereference a value</li>
+</ul>
+</li>
+<li><kbd>Std::cell::RefCell</kbd>: A mutable memory location with dynamically checked borrow rules</li>
+</ul>
+<p><strong>Methods</strong></p>
+<ul>
+<li><kbd>impl&lt;T&gt; RefCell&lt;T&gt;</kbd>
+<ul>
+<li><kbd>fn new(value: T) -&gt; RefCell&lt;T&gt;</kbd>: Creates a new <kbd>RefCell</kbd> containing a value</li>
+<li><kbd>fn into_inner(self) -&gt; T</kbd>: Consumes the <kbd>RefCell</kbd>, returning the wrapped value.</li>
+</ul>
+</li>
+<li><kbd>impl&lt;T&gt; RefCell&lt;T&gt; where T: ?Sized</kbd>
+<ul>
+<li><kbd>fn borrow(&amp;self) -&gt; Ref&lt;T&gt;</kbd>: Immutably borrows the wrapped value.<br/>
+The borrow lasts until the returned <kbd>Ref</kbd> exits scope. Multiple immutable borrows can be taken out at the same time. Throws a panic if the value is currently mutably borrowed.</li>
+<li><kbd>fn try_borrow(&amp;self) -&gt; Result&lt;Ref&lt;T&gt;, BorrowError&gt;</kbd>: Immutably borrows the wrapped value, returning an error if the value is currently mutably borrowed. The borrow lasts until the returned <kbd>Ref</kbd> exits scope. Multiple immutable borrows can be taken out at the same time.</li>
+<li><kbd>fn borrow_mut(&amp;self) -&gt; RefMut&lt;T&gt;</kbd>: Mutably borrows the wrapped value. The borrow lasts until the returned <kbd>RefMut</kbd> exits scope. The value cannot be borrowed while this borrow is active (throws a panic).</li>
+<li><kbd>fn try_borrow_mut(&amp;self) -&gt; Result&lt;RefMut&lt;T&gt;, BorrowMutError&gt;</kbd>: Mutably borrows the wrapped value, returning an error if the value is currently borrowed. The borrow lasts until the returned <kbd>RefMut</kbd> exits scope. The value cannot be borrowed while this borrow is active.</li>
+<li><kbd>fn as_ptr(&amp;self) -&gt; *mut T</kbd>:  Returns a raw pointer to the underlying data in this cell.</li>
+<li><kbd>fn get_mut(&amp;mut self) -&gt; &amp;mut T</kbd>: Returns a mutable reference to the underlying data.</li>
+</ul>
+</li>
+</ul>
+<p><strong>Trait implementations</strong></p>
+<ul>
+<li><kbd>impl&lt;T&gt; PartialEq&lt;RefCell&lt;T&gt;&gt; for RefCell&lt;T&gt; where T: PartialEq&lt;T&gt; + ?Sized</kbd>
+<ul>
+<li><kbd>fn eq(&amp;self, other: &amp;RefCell&lt;T&gt;) -&gt; bool</kbd>: Tests for self and other values being equal, and is used by <kbd>==</kbd></li>
+<li><kbd>fn ne(&amp;self, other: &amp;Rhs) -&gt; bool</kbd>: Tests for <kbd>!=</kbd></li>
+</ul>
+</li>
+<li><kbd>impl&lt;T&gt; Default for RefCell&lt;T&gt; where T: Default</kbd>
+<ul>
+<li><kbd>fn default() -&gt; RefCell&lt;T&gt;</kbd>: Creates a <kbd>RefCell&lt;T&gt;</kbd>, with the <kbd>Default</kbd> value for <kbd>T</kbd></li>
+</ul>
+</li>
+<li><kbd>impl&lt;T&gt; Clone for RefCell&lt;T&gt; where T: Clone</kbd>
+<ul>
+<li><kbd>fn clone(&amp;self) -&gt; RefCell&lt;T&gt;</kbd>: Returns a copy of the value</li>
+<li><kbd>fn clone_from(&amp;mut self, source: &amp;Self)</kbd>: Performs copy-assignment from source</li>
+</ul>
+</li>
+<li><kbd>impl&lt;T&gt; From&lt;T&gt; for RefCell&lt;T&gt;</kbd>
+<ul>
+<li><kbd>fn from(t: T) -&gt; RefCell&lt;T&gt;</kbd>: Performs the conversion</li>
+</ul>
+</li>
+<li><kbd>impl&lt;T&gt; Ord for RefCell&lt;T&gt; where T: Ord + ?Sized</kbd>
+<ul>
+<li><kbd>fn cmp(&amp;self, other: &amp;RefCell&lt;T&gt;) -&gt; Ordering</kbd>: Returns an <kbd>Ordering</kbd> between self and other</li>
+</ul>
+</li>
+<li><kbd>impl&lt;T&gt; Debug for RefCell&lt;T&gt; where T: Debug + ?Sized</kbd>
+<ul>
+<li><kbd>fn fmt(&amp;self, f: &amp;mut Formatter) -&gt; Result&lt;(), Error&gt;</kbd>: Formats the value using the given formatter</li>
+</ul>
+</li>
+<li><kbd>impl&lt;T&gt; PartialOrd&lt;RefCell&lt;T&gt;&gt; for RefCell&lt;T&gt; where T: PartialOrd&lt;T&gt; + ?Sized</kbd><br/>
+<ul>
+<li><kbd>fn partial_cmp(&amp;self, other: &amp;RefCell&lt;T&gt;) -&gt; Option&lt;Ordering&gt;</kbd>: Returns an ordering between self and other values if one exists</li>
+<li><kbd>fn lt(&amp;self, other: &amp;RefCell&lt;T&gt;) -&gt; bool</kbd>: Tests less than (for self and other) and is used by the <kbd>&lt;</kbd> operator</li>
+<li><kbd>fn le(&amp;self, other: &amp;RefCell&lt;T&gt;) -&gt; bool</kbd>: Tests less than or equal to (for self and other) and is used by the <kbd>&lt;=</kbd> operator</li>
+<li><kbd>fn gt(&amp;self, other: &amp;RefCell&lt;T&gt;) -&gt; bool</kbd>: Tests greater than (for self and other) and is used by the <kbd>&gt;</kbd> operator</li>
+<li><kbd>fn ge(&amp;self, other: &amp;RefCell&lt;T&gt;) -&gt; bool</kbd>: Tests greater than or equal to (for self and other) and is used by the <kbd>&gt;=</kbd> operator</li>
+</ul>
+</li>
+</ul>
+<div class="packt_tip"><span>The code </span>examples are in <span class="ChapterrefPACKT"><a href="636b329f-0544-4c2d-9924-fcd12f105567.xhtml">Chapter 11</a>, <em>Concurrency in Rust</em></span>.</div>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

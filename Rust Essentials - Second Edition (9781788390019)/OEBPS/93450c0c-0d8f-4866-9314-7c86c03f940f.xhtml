@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">The advantages of Rust</h1>
+                </header>
+            
+            <article>
+                
+<p>Mozilla is a company known for its mission to develop tools for and drive the open standards web, most notably through its flagship browser Firefox. Every browser today, including Firefox, is written in C++, some 1,29,00,992 lines of code for Firefox, and 44,90,488 lines of code for Chrome. This makes them fast, but it is inherently unsafe because the memory manipulations allowed by C and C++ are not checked for validity. If the code is written without the utmost programming discipline on the part of the developers, program crashes, memory leaks, segmentation faults, buffer overflows, and null pointers can occur at program execution. Some of these can result in serious security vulnerabilities, all too familiar in existing browsers. Rust is designed from the ground up to avoid those kind of problems.</p>
+<p>Compared to C or C++, on the other side of the programming language spectrum we have Haskell, which is widely known to be a very safe and reliable language, but with very little or no control at the level of memory allocation and other hardware resources. We can plot different languages along this control that is safety axis, and it seems that when a language is safer, like Java compared to C++, it loses low-level control. The inverse is also true; a language that gives more control over resources like C++ provides much less safety.</p>
+<div class="packt_figure CDPAlignCenter CDPAlign"><img height="78" width="382" class=" image-border" src="Images/24bce67f-8cb4-444b-99a0-a66b1f76ac0f.png"/></div>
+<p>Rust is made to overcome this dilemma by providing:</p>
+<ul>
+<li>High safety through its strong type system and smart compiler</li>
+<li>Deep but safe control over low-level resources (as much as C or C++), so it runs close to the hardware</li>
+</ul>
+<p>Its main website, <a href="http://www.rust-lang.org/en-US/"><span class="URLPACKT">http://www.rust-lang.org/en-US/</span></a>, contains links to installation instructions, docs and the Rust community.</p>
+<p>Rust lets you specify exactly how your values are laid out in memory and how that memory is managed; that's why it works well at both ends of the control and safety line. This is the unique selling point of Rust, it breaks the safety-control dichotomy that, before Rust, existed among programming languages. With Rust they can be achieved together without losing performance.</p>
+<p>Rust can accomplish both these goals without a garbage collector, in contrast to most modern languages like Java, C#, Python, Ruby, Go, and the like. In fact Rust doesn't even have a garbage collector yet (though an optional garbage collector is being designed).</p>
+<p>Rust is a compiled language: the strict safety rules are enforced by the compiler, so they do not cause runtime overhead. As a consequence, Rust can work with a very small runtime, so it can be used for real-time or embedded projects and it can easily integrate with other languages or projects.</p>
+<p>Rust is meant for developers and projects where performance and low-level optimizations are important, but also where a safe and stable execution environment is needed. The robustness of the language is specifically suited for projects where that is important, leading to less pressure in the maintenance cycle. Moreover, Rust adds a lot of high-level functional programming techniques to the language, so that it feels at the same time like a low-level and a high-level language.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

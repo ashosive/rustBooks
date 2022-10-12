@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style00.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style01.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Web development</h1>
+                </header>
+            
+            <article>
+                
+<p>A general overview of the status of this domain can be found at <a href="http://arewewebyet.com/"><span class="URLPACKT">http://arewewebyet.com/</span></a>. At the time of writing, a number of web frameworks that provide vital support for basic needs are available. To get an initial idea of coding in practice, we have supplied a <kbd>"hello world"</kbd> example snippet for each of them:</p>
+<ul>
+<li><kbd>iron</kbd> is the oldest framework. It was built for high concurrency needs, so it scales very well. The codebase has a high degree of modularity. Here is how you say <kbd>"hello-world"</kbd> in <kbd>iron</kbd>:</li>
+</ul>
+<pre>extern crate iron; 
+ 
+use iron::prelude::*; 
+use iron::status; 
+ 
+fn main() { 
+    Iron::new(|_: &amp;mut Request| { 
+        Ok(Response::with((status::Ok, "Hello World!"))) 
+    }).http("localhost:3000").unwrap(); 
+} </pre>
+<ul>
+<li>Another useful web framework inspired by <kbd>express.js</kbd> is <kbd>nickel</kbd> (<a href="https://github.com/nickel-org/nickel.rs"><span class="URLPACKT">https://github.com/nickel-org/nickel.rs</span></a>). Say <kbd>"hello world"</kbd> in <kbd>nickel</kbd> like this:</li>
+</ul>
+<pre>#[macro_use] extern crate nickel; 
+ 
+use nickel::{Nickel, HttpRouter}; 
+ 
+fn main() { 
+    let mut server = Nickel::new(); 
+    server.get("**", middleware!("Hello World")); 
+    server.listen("127.0.0.1:6767"); 
+}</pre>
+<ul>
+<li><kbd>conduit</kbd> provides a common HTTP server interface.</li>
+</ul>
+<p>There is not yet the same level of functionality as the popular dynamically-typed web application frameworks (such as Rails, Phoenix, and Django) provide, but a few Rust frameworks, still under heavy development, are already emerging:</p>
+<ul>
+<li><kbd>Rocket</kbd>, which has very good starting info and documentation on its website, <a href="https://rocket.rs"><span class="URLPACKT">https://rocket.rs</span></a>. Say <kbd>"hello world<span>"</span></kbd> in <kbd>Rocket</kbd> like this:</li>
+</ul>
+<pre>#![feature(plugin)] 
+#![plugin(rocket_codegen)] 
+ 
+extern crate rocket; 
+ 
+#[get("/")] 
+fn index() -&gt; &amp;'static str { 
+    "Hello, world!" 
+} 
+ 
+fn main() { 
+    rocket::ignite().mount("/", routes![index]).launch(); 
+} </pre>
+<ul>
+<li><kbd>Gotham</kbd> (for more info, see <a href="https://github.com/gotham-rs/"><span class="URLPACKT">https://github.com/gotham-rs/</span></a>). Say <kbd>"hello world"</kbd> in <kbd>Gotham</kbd> like this:</li>
+</ul>
+<pre>extern crate futures; 
+extern crate hyper; 
+extern crate gotham; 
+extern crate mime; 
+ 
+use hyper::server::Http; 
+use hyper::{Request, Response, StatusCode}; 
+ 
+use gotham::http::response::create_response; 
+use gotham::state::State; 
+use gotham::handler::NewHandlerService; 
+ 
+pub fn say_hello(state: State, _req: Request) -&gt; (State, Response) { 
+    let res = create_response( 
+        &amp;state, 
+        StatusCode::Ok, 
+        Some(( 
+            String::from("Hello World!").into_bytes(), 
+            mime::TEXT_PLAIN, 
+        )), 
+    ); 
+ 
+    (state, res) 
+} 
+ 
+pub fn main() { 
+    let addr = "127.0.0.1:7878".parse().unwrap(); 
+ 
+    let server = Http::new() 
+        .bind(&amp;addr, NewHandlerService::new(|| Ok(say_hello))) 
+        .unwrap(); 
+ 
+    println!( 
+        "Listening on http://{}", 
+        server.local_addr().unwrap() 
+    ); 
+ 
+    server.run().unwrap(); 
+} </pre>
+<p>If you only need a light micro-web framework, <kbd>rustful</kbd> could be your choice.</p>
+<p>The most advanced and stable crate for developing HTTP applications at this moment is <kbd><strong>hyper</strong></kbd>. It is fast and contains both an HTTP client and server to build complex web applications. It is used by the <kbd>iron</kbd> web framework. To get started with it, read this introductory article <span class="URLPACKT"><a href="http://zsiciarz.github.io/24daysofrust/book/vol1/day5.html">http://zsiciarz.github.io/24daysofrust/book/vol1/day5.html</a>.</span></p>
+<p>For a lower-level library, you could start with <kbd>tiny_http</kbd>. <kbd>reqwest</kbd>, <kbd>curl</kbd>, and <kbd>tokio-curl</kbd> which are popular HTTP client libraries. If you need a <strong>Representational State Transfer</strong> (<strong>REST</strong>) framework, go for <kbd>rustless</kbd>.</p>
+<p>And of course, don't ignore the new <kbd>servo</kbd> browser that is emerging!</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

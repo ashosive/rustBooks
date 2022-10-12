@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Closures</h1>
+                </header>
+            
+            <article>
+                
+<p>Closures are a powerful piece of code present in many languages. Essentially, a closure wraps code or variables used only within the scope of the current code in a neat little package.</p>
+<p>In its simplest form, we can have something like this:</p>
+<pre>let add = |x : i32 | x + t; </pre>
+<p>The part within the <kbd>| |</kbd> defines a variable called <kbd>x</kbd> that is only used within the scope of the calculation, and it is of type <kbd>i32</kbd>.</p>
+<p>Okay, that may not seem that useful—after all, what we're doing here is adding two numbers together. Hold on though—if <kbd>x</kbd> is only defined within the scope of the calculation, what does <kbd>x</kbd> actually equal?</p>
+<p>This is where closures come into their own. Typically, when we create a binding, we create a binding to something definite. Here, we are creating a binding, but binding it to the content of the closure. Anything between the pipes (<kbd>| |</kbd>) is an argument, with the expression being whatever follows the end pipe.</p>
+<p>If you think about it, you've actually created something closer to the following:</p>
+<pre>fn add(x : i32) -&gt; i32 
+{ 
+     x + x 
+} </pre>
+<p>In answer to our question "what does <kbd>x</kbd> actually equal?", here it is equal to the only known parameter, <kbd>t</kbd>. Therefore, <kbd>x + t</kbd> is the same as saying <kbd>t + t</kbd>. The add variable isn't being bound directly (that is, in the same way that we bind under normal conditions), but is borrowing the binding. This means that we have to apply the same borrowing rules as before. Say that we have the following:</p>
+<pre>let m = &amp;mut t; </pre>
+<p>This will give the following error:</p>
+<div class="CDPAlignCenter CDPAlign"><img height="302" width="597" class=" image-border" src="Images/a05b094c-5b12-417a-96bb-797d611f93cd.png"/></div>
+<div class="CDPAlignCenter CDPAlign packt_figref">Figure 7</div>
+<div class="packt_infobox">You will find an example of this error in <kbd>Chapter 11/close_mut_error</kbd>.</div>
+<p>The important part of the throwback is that we're trying to borrow something that is being borrowed in an immutable line. We can fix this by changing the scope of the closure, as shown here:</p>
+<pre>let mut t = 10i32; 
+{ 
+    let add = |x : i32 | x + t; 
+} 
+let m = &amp;mut t; </pre>
+<p>This will result in the error going.</p>
+<p>With that in mind, we can start to expand on this. If the value between the pipes is the argument, then we can clearly do some interesting things with closures</p>
+<div class="packt_infobox">The code for this part can be found in <kbd>Chapter11/closures</kbd>.</div>
+<p>Take this code, for example:</p>
+<pre>let calc = |x|  
+{ 
+    let mut result: i32 = x; 
+    result *= 4; 
+    result += 2; 
+    result -= 1; 
+    result 
+}; </pre>
+<p>Rather than create a whole new function, we use the closure and create the function inline with <kbd>result</kbd> and <kbd>x</kbd> only existing within the scope of the enclosure <kbd>{ }</kbd>.</p>
+<p>A closure without any arguments is the inline equivalent of the following:</p>
+<pre>fn do_something() -&gt; T { ... } </pre>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

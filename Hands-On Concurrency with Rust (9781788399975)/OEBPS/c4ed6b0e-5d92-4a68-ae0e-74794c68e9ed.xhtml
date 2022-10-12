@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Memory and caches</h1>
+                </header>
+            
+            <article>
+                
+<p>The memory storage of a CPU, alluded to in the last section, is fairly minimal. It is limited to the handful of words in general-purpose registers, plus the special-purpose registers in some limited cases. Registers are very fast, owing to their construction and on-die location, but they are <em>not</em> suited for storage. Modern machines connect CPUs over a bus or buses to the <em>main memory</em>, a very large block of randomly addressable bytes. This random addressability is important as it means that, unlike other kinds of storage, the cost to retrieve the 0<sup>th</sup> byte from RAM is not distinct from retrieving the 1,000,000,000<sup>th</sup> byte. We programmers don't have to do any goofy trickery to ensure that our structures appear in the front of the RAM in order to be faster to retrieve or modify, whereas physical location in storage is a pressing concern for spinning hard disks and tape drives. Exactly how our CPUs interact with the memory varies between platforms, and the discussion that follows is heavily indebted to Mark Batty's description in his 2014 book, <em>The C11 and C++11</em> <em>Concurrency Model</em>.</p>
+<p>In a machine that exposes a sequentially consistent model of memory access, every memory load or store must be made in lockstep with one another, including in systems with multiple CPUs or multiple threads of execution per CPU. This limits important optimizations—consider the challenge of working around memory stalls in a sequentially consistent model—and so neither of the processors we'll be considering in this book offer this model. It <em>will</em> show up in literature by name because of the ease of reasoning about this model, and is worth knowing about, especially when studying atomics literature.</p>
+<p>The x86 platform behaves as if it were sequentially consistent, excepting that every thread of execution maintains a FIFO buffer for writes prior to their being flushed to the main memory. In addition, there is a global lock for the coordination of atomic reads and writes between threads of execution. There's a lot to unpack here. Firstly, I use the words <em>load</em> and <em>store</em> interchangeably with <em>read</em> and <em>write</em>, as does most literature. There is also a variant distinction between plain load/store and <em>atomic</em> load/store. Atomic loads/stores are special in that their effects can be coordinated between threads of execution, allowing for coordination with varying degrees of guarantees. The x86 processor platform provides fence instructions that force the flush of write buffers, stalling other threads of execution attempting to access the written range of main memory until the flush is completed. This is the purpose of the global lock. Without atomicity, writes will be flushed willy-nilly. On x86 platforms, writes to an addressable location in the memory are coherent, meaning they are globally ordered, and reads will see values from that location in the order of the writes. Compared to ARM, the way this works on x86 is very simple—writes happen directly to main memory.</p>
+<p>Let's look at an example. Taking inspiration from Batty's <em>excellent</em> dissertation, consider a setup where a parent thread sets two variables, <em>x</em> and <em>y</em>, to 0, then spawns two threads called, say, <kbd>A</kbd> and <kbd><em>B</em></kbd>. Thread <kbd>A</kbd> is responsible for setting <em>x</em> and then <em>y</em> to 1, whereas thread <kbd>B</kbd> is responsible for loading the value of <kbd><em>x</em></kbd> into a thread-local variable called <kbd>thr_x</kbd> and <kbd><em>y</em></kbd> into a thread-local variable called <kbd>thr_y</kbd>. This looks something like the following:</p>
+<pre style="padding-left: 30px">WRITE x := 0
+WRITE y := 0
+[A] WRITE x := 1
+[A] WRITE y := 1
+FLUSH A
+[B] READ x
+[B] WRITE thr_x := x
+[B] READ y
+[B] WRITE thr_y := y</pre>
+<p>In this specific example, <kbd>thr_x == 1</kbd> and <kbd>thr_y == 1</kbd>. Had the flushes been ordered differently by the CPU, this outcome would have been different. For instance, look at the following:</p>
+<pre style="padding-left: 30px">WRITE x := 0
+WRITE y := 0
+[A] WRITE x := 1
+[A] WRITE y := 1
+[B] READ x
+[B] WRITE thr_x := x
+FLUSH A
+[B] READ y
+[B] WRITE thr_y := y</pre>
+<p>The consequence of this is that <kbd>thr_x == 0 </kbd>and <kbd>thr_y == 1</kbd>. Without any other coordination, the only other valid interleaving is <kbd>thr_x == 0 </kbd>and  <kbd>thr_y == 0</kbd>. That is, as a result of the write buffer on x86, the write of <kbd><em>x</em></kbd> in thread A can never be reordered to occur after the write of <kbd>y: thr_x == 1 </kbd>and <kbd>thr_y == 0</kbd>. This kind of stinks, unless you enjoy this little program as a parlor trick. We want determinism out of our programs. To that end, x86 provides different fence and lock instructions that control how and when threads flush their local write buffers, and how and when threads may read byte ranges from the main memory. The exact interplay here is… complicated. We'll come back to it in great detail in <a href="605ce307-29ed-4b5a-961e-8d327467b84f.xhtml" target="_blank">Chapter 3</a>,  <span><em>The Rust Memory Model – Ownership, References, and Manipulation</em></span> and <a href="d42acb0b-a05e-4068-894f-81365d147bf4.xhtml" target="_blank">Chapter 6</a>, <em>Atomics – the Primitives of Synchronization</em>. Suffice it to say that, for now, there's an <kbd>SFENCE</kbd> instruction available that forces a sequential consistency. We can employ this instruction as follows:</p>
+<pre style="padding-left: 30px">WRITE x := 0
+WRITE y := 0
+[A] WRITE x := 1
+[A] WRITE y := 1
+[A] SFENCE        [B] SFENCE
+                  [B] READ x
+                  [B] WRITE thr_x := x
+                  [B] READ y
+                  [B] WRITE thr_y := y</pre>
+<p>From this, we get <kbd>thr_x == 1</kbd> and <kbd>thr_y == 1</kbd>. The ARM processor is a little different—1/0 is a valid interleaving. There is no global lock to the ARM, no fences, and no write buffer. In ARM, a string of instructions—called a propagation list, for reasons that will soon be clear—is maintained in an <em>uncommitted</em> state, meaning that the thread that originated the instructions will see them as <em>in-flight</em>, but they will not have been propagated to other threads. These <em>uncommitted</em> instructions may have been performed—resulting in side-effects in the memory—or not, allowing for speculative execution and the other performance tricks discussed in the previous section. Specifically, reads may be satisfied from a thread's local propagation list, but not writes. Branch instructions cause the propagation list that led to the branch instruction to be committed, potentially out of the order from that specified by the programmer. The memory subsystem keeps track of which propagation list has been sent to which thread, meaning that it is possible for a thread's private loads and stores to be out of order and for committed loads and stores to appear out of order between threads. Coherency is maintained on ARM with more active participation from the memory subsystem.</p>
+<p>Whereas on x86, the main memory is something that has actions done to it, on ARM, the memory subsystem responds to requests and may invalidate previous, uncommitted requests. A write request involves a read-response event, by which it is uniquely identified, and a read request must reference a write.</p>
+<p>This sets up a <em>data-dependency</em> chain. Responses to reads may be invalidated at a later time, but not writes. Each location receives a <em>coherence-commitment</em> ordering, which records a global order of writes, built up per-thread as propagation lists are propagated to threads.</p>
+<p>This is very complicated. The end result is that writes to a thread's view of the memory may be done out of programmer order, writes committed to main memory may also be done out of order, and reads can be requested out of programmer order. Therefore, the following code <span>is perfectly valid, owing to the lack of branches in our example:</span><span> </span></p>
+<pre style="padding-left: 30px">WRITE x := 0
+WRITE y := 0
+[A] WRITE x := 1
+[B] READ x
+[A] WRITE y := 1
+[B] WRITE thr_y := y
+[B] WRITE thr_x := x
+[B] READ y</pre>
+<p>ARM provides instructions for control of dependencies, called barriers. There are three types of dependency in ARM. The address dependency means a load is used to compute the address for access to the memory. The control dependency means that the program flow that leads to memory access depends on a load. W<span>e're already familiar with t</span><span>he</span> data <span>dependency.</span></p>
+<p>While there is a lot of main memory available, it's not particularly fast. Well, let's clarify that. Fast here is a relative term. A photon in a vacuum will go about 30.5 centimeters in 1 nanosecond, meaning that in ideal circumstances, I, on the west coast of the United States, ought to be able to send a message to the east coast of the United States and receive a response in about 80 milliseconds. Of course, I'm ignoring request-processing time, the realities of the internet, and other factors; we're just dealing with ballpark figures, here. Consider that 80 milliseconds is 80,000,000 nanoseconds. A read access from a CPU to the main memory is around 100 nanoseconds, give or take your specific computer architecture, the details of your chips, and other factors. All this is to clarify that, when we say, not particularly fast, we're working outside normal human time scales.</p>
+<p>It is difficult, sometimes, to keep from misjudging things as fast enough. Say, we have a 4 GHz processor. How many clock cycles do we get per nanosecond? Turns out, it's 4. Say, we have an instruction that needs to access main memory—which, remember, takes 100 nanoseconds—and happens to be able to do its work in exactly 4 cycles, or one nanosecond. That instruction will then be stalled for 99 nanoseconds while it waits, meaning we're potentially losing out on 99 instructions that could have been executed by the CPU. The CPU will make up some of that loss with its optimization tricks. These only go so far, unless our computation is very, very lucky.</p>
+<p>In an effort to avoid the performance impact of the main memory on computation, processor manufacturers introduced <em>caching</em> between the processor and the main memory. Many machines these days have three layers of <em>data cache,</em> as well as an <em>instruction cache</em>, called dCACHE and iCACHE, which are tools we'll be using later. You will see dCACHE often consists of three layers these days, each layer being successively larger than the last, but also slower for cost or power concerns. The lowest, smallest layer is called L1, the next L2, and so forth. CPUs read into caches from the main memory in working blocks—or simply blocks—that are the size of the cache being read into. Memory access will preferentially be done on the L1 cache, then L2, then L3, and so forth, with time penalties at each level for missing and block reads. Cache hits, however, are significantly faster than going directly to the main memory. L1 dCACHE references are 0.5 nanoseconds, or fast enough that our hypothetical 4-cycle instruction is 8<em> times</em> slower than the memory access it requires. L2 dCACHE references are 7 nanoseconds, still a fair sight better than the main memory. Of course, the exact numbers will vary from system to system, and we'll do quite a bit in the next chapter to measure them directly. Cache coherency—maintaining a high ratio of hits to misses—is a significant component of building fast software on modern machines. We'll never get away from the CPU cache in this book.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

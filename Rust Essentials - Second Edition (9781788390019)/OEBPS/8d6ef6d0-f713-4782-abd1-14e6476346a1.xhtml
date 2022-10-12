@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">The trifecta of Rust - safe, fast, and concurrent</h1>
+                </header>
+            
+            <article>
+                
+<p>Rust is not a revolutionary language with new cutting-edge features, but it incorporates a lot of proven techniques from older languages, while massively improving upon the design of C++ in matters of safe programming.</p>
+<p>The Rust developers designed Rust to be a general purpose and multi-paradigm language; like C++, it is an imperative, structured and object-oriented language. Besides that, it inherits a lot from functional languages on the one hand, while also incorporating advanced techniques for concurrent programming on the other hand.</p>
+<p>The typing of variables is static (because Rust is compiled) and strong. However, unlike in Java or C++, the developer is not forced to indicate types for everything; the Rust compiler is able to infer types in many cases.</p>
+<p>C and C++ applications are known to be haunted by problems that often lead to program crashes or memory leaks, and which are notoriously difficult to debug and solve. Think about dangling pointers, buffer overflows, null pointers, segmentation faults, data races, and so on. The Rust compiler (called <strong>rustc</strong>) is very intelligent and can detect all these problems while compiling your code, thereby guaranteeing memory safety during execution. This is done by the compiler, retaining complete control over memory layout, but without needing the runtime burden of garbage collection (see <a href="181718d1-5b78-4952-8082-796f69471c96.xhtml"><span class="ChapterrefPACKT">Chapter 6</span></a>, <em>Using Traits and OOP in Rust</em>). Of course, safety also implies much less possibility for security breaches.</p>
+<p>Rust compiles to native code like Go and Julia but, in contrast to the other two, Rust needs no runtime with garbage collection. In this respect, it also differs from Java and the languages that run on the JVM, like Scala and Clojure. Most other popular modern languages, like .NET with C# and F#, JavaScript, Python, Ruby, Dart, and so on, all need a virtual machine and garbage collection for their execution.</p>
+<p>Rust provides several mechanisms for concurrency and parallelism. The Standard Library gives a model that works with threads to perform work in parallel, where each thread maps to an operating system thread. They do not share heap memory, but communicate data through channels and data races are eliminated by the type system (see <a href="60543aaa-c7d6-43ec-9237-9fe71a0cad4d.xhtml"><span class="ChapterrefPACKT">Chapter 8</span></a>, <em>Organizing Code and Macros</em>). If needed in your project, several crates provide an actor-model approach with lightweight threads. These mechanisms make it easy for programmers to leverage the power of the many CPU cores available on current and future computing platforms.</p>
+<p>The <kbd>rustc</kbd> compiler is completely self-hosted, which means it is written in Rust and can compile itself by using a previous version. It uses the LLVM compiler framework as its backend (for more info, see <a href="http://en.wikipedia.org/wiki/LLVM"><span class="URLPACKT">http://en.wikipedia.org/wiki/LLVM</span></a>), and produces natively executable code that runs blazingly fast, because it compiles to the same low-level code as C++ ( see some benchmarks at <a href="http://benchmarksgame.alioth.debian.org/u64q/rust.php"><span class="URLPACKT">http://benchmarksgame.alioth.debian.org/u64q/rust.php</span></a>).</p>
+<p>Rust is designed to be as portable as C++ and to run on widely-used hardware and software platforms. At present, it runs on Linux, macOS X, Windows, FreeBSD, Android, and iOS. For a more complete overview of where Rust can run, see <a href="https://forge.rust-lang.org/platform-support.html"><span class="URLPACKT">https://forge.rust-lang.org/platform-support.html</span></a>.</p>
+<p>Rust can call C code as simply and efficiently as calling C code from C itself, and, conversely C code can also call Rust code (see <span class="ChapterrefPACKT"><a href="60543aaa-c7d6-43ec-9237-9fe71a0cad4d.xhtml">Chapter 9</a>, <em>Concurrency - Coding for Multicore Execution</em></span>).</p>
+<p>Rust developers are called <strong>rustaceans</strong>.</p>
+<p>Other Rust characteristics that will be discussed, in more detail in the later chapters are as follows:</p>
+<ul>
+<li>Variables are immutable by default (see <a href="4e1f4309-1ce5-4eb2-9860-99a814bdd2ea.xhtml"><span class="ChapterrefPACKT">Chapter 2</span></a><span class="NormalPACKTChar">,</span> <em>Using Variables and Types</em>)</li>
+<li>Enums (see <a href="397a1a97-368f-4af7-a7fb-f44ad8c5aab9.xhtml"><span class="ChapterrefPACKT">Chapter 4</span></a><span class="NormalPACKTChar">,</span> <em>Structuring Data and Matching Patterns</em>)</li>
+<li>Pattern matching (see also <a href="397a1a97-368f-4af7-a7fb-f44ad8c5aab9.xhtml"><span class="ChapterrefPACKT">Chapter 4</span></a><span class="NormalPACKTChar">,</span> <em>Structuring Data and Matching Patterns</em>)</li>
+<li>Generics (see <a href="680a0457-8a2d-4196-9ef4-ddc2476dd715.xhtml"><span class="ChapterrefPACKT">Chapter 5</span></a><span class="NormalPACKTChar">,</span> <em>Higher Order Functions and Error-Handling</em><span class="NormalPACKTChar">)</span></li>
+<li>Higher-order functions and closures (see also <a href="680a0457-8a2d-4196-9ef4-ddc2476dd715.xhtml"><span class="ChapterrefPACKT">Chapter 5</span></a><span class="NormalPACKTChar">,</span> <em>Higher Order Functions and Error-Handling</em>)</li>
+<li>An interface system called <strong>traits</strong> (see <a href="2535f67f-e1a7-4ef7-af15-dcebffd38149.xhtml"><span class="ChapterrefPACKT">Chapter 6</span></a><span class="NormalPACKTChar">,</span> <em>Using Traits and OOP in Rust</em>)</li>
+<li>A hygienic macro system (see <a href="d271499e-5fd5-48a4-8395-e5efedc8a482.xhtml"><span class="ChapterrefPACKT">Chapter 8</span></a><span class="NormalPACKTChar">,</span> <em>Organizing Code and Macros</em>)</li>
+<li>Zero-cost abstractions, which means that Rust has higher-language constructs, but these do not have an impact on performance</li>
+</ul>
+<p>In conclusion, Rust gives you ultimate power over memory allocation, as well as removing many security and stability problems commonly associated with native languages.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Iterators</h1>
+                </header>
+            
+            <article>
+                
+<p>An iterator is an object that returns the items of a collection in sequence, from the first to the last. To return the following item, it uses a <kbd>next()</kbd> method. Here, we have an opportunity to use an <kbd>Option</kbd>. Because an iterator can have no more values at the last <kbd>next()</kbd> call, <kbd>next()</kbd> always returns an <kbd>Option</kbd>, <kbd>Some(value)</kbd> when there is a value and <kbd>None</kbd> when there are no more values to return.</p>
+<p>The simplest object that has this behavior is a range of numbers <kbd>0..n</kbd> (remember <kbd>n</kbd> is excluded). Every time we used a <kbd>for</kbd> loop like <kbd>for i in 0..n</kbd> the underlying iterator mechanism was put to work. Let's see an example:</p>
+<pre>// see code in Chapter 5/code/iterators.rs 
+let mut rng = 0..7; 
+println!("&gt; {:?}", rng.next()); // 
+println!("&gt; {:?}", rng.next()); // 
+for n in rng { 
+    print!("{} - ", n); 
+} // prints 2 - 3 - 4 - 5 - 6 </pre>
+<p>This prints the following output:</p>
+<pre>    <strong>Some(0)</strong>
+    <strong>Some(1)</strong></pre>
+<p>We see here the function <kbd>next()</kbd> at work, producing <kbd>0</kbd> and <kbd>1</kbd>, and so on; the <kbd>for</kbd> loop continues until the end.</p>
+<div class="packt_tip"><span class="packt_screen">Exercise</span><span class="packt_screen">:</span><br/>
+In the previous example we saw that the function <kbd>next()</kbd> returns a <kbd>Some</kbd> type value, a variant of type <kbd>Option</kbd> (see the <em>Result and Option</em> section in <a href="397a1a97-368f-4af7-a7fb-f44ad8c5aab9.xhtml"><span class="ChapterrefPACKT">Chapter 4</span></a>, <em>Structuring Data and Matching Patterns</em>). Write an endless loop over the range <kbd>rng</kbd> with the function <kbd>next()</kbd> and see what happens. How would you break the endless loop? Use a match on the <kbd>Option</kbd> value (for an example, see <kbd>Chapter 5/exercises/range_next.rs</kbd>). In fact, the <kbd>for</kbd> loop we saw right before this exercise is syntactic sugar for this <kbd>loop - match</kbd> construct.</div>
+<p>Iterators are also the preferred way to loop over arrays or slices. Let's revisit the <kbd>aliens</kbd> array from <a href="397a1a97-368f-4af7-a7fb-f44ad8c5aab9.xhtml"><span class="ChapterrefPACKT">Chapter 4</span></a>, <em>Structuring Data and Matching Patterns</em>:</p>
+<pre>let aliens = ["Cherfer", "Fynock", "Shirack", "Zuxu"];" </pre>
+<p>Instead of using the index to show all the items one by one, let's do it the iterator way with the <kbd>iter()</kbd> function:</p>
+<pre>for alien in aliens.iter() { 
+   print!("{} / ", alien) 
+   // process alien 
+} </pre>
+<p>This prints out the following output:</p>
+<pre>    <strong>Cherfer / Fynock / Shirack / Zuxu /</strong>  </pre>
+<p>The <kbd>alien</kbd> variable is of type <kbd>&amp;str</kbd>, a reference to each of the items in turn (technically, it is here of type <kbd>&amp;str</kbd>, because the items themselves are of type <kbd>&amp;str</kbd>, but this is not relevant to the point being made here). This is much more performant and safe than using an index, because now Rust doesn't need to do index-bounds checking, we're always certain to move within the memory of the array.</p>
+<p>An even shorter way is to write the following:</p>
+<pre>for alien in &amp;aliens { 
+    print!("{} / ", alien) 
+} </pre>
+<p>The variable <kbd>alien</kbd> is also of type <kbd>&amp;str</kbd>, but the <kbd>print!</kbd> macro automatically dereferences this. If you want them to print out in reverse order, do <kbd>aliens.iter().rev()</kbd>. Other iterators we encountered in the previous chapter, where the <kbd>chars()</kbd> and <kbd>split()</kbd> methods on <kbd>Strings</kbd>.</p>
+<p>Iterators are lazy by nature, they do not generate values unless asked and we ask by calling the <kbd>next()</kbd> method or applying a <kbd>for in</kbd> loop. That makes sense, we don't want to allocate one million integers in the following binding:</p>
+<pre>let rng = 0..1000_000; // _ makes the number 1000000 more readable </pre>
+<p>We want to allocate memory only when we need it.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

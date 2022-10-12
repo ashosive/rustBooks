@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style00.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style01.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Recursive functions</h1>
+                </header>
+            
+            <article>
+                
+<p>The final form of loop to consider is known as a <strong>recursive function</strong>. This is a function that calls itself until a condition is met. In pseudocode, the function looks like this:</p>
+<pre>float my_function(i32:a: i32) 
+{ 
+    // do something with a 
+    if (a != 32) 
+    { 
+        my_function(a); 
+    } 
+    else 
+    { 
+        return a; 
+    } 
+} 
+ </pre>
+<p>An actual implementation of a recursive function would look like this:</p>
+<pre>// 04/recurse-1/src/main.rs<br/>fn recurse(n: i32)  
+{ 
+     let v = match n % 2  
+     { 
+         0 =&gt; n / 2, 
+         _ =&gt; 3 * n + 1 
+     }; 
+     println!("{}", v); 
+   
+     if v != 1  
+     {  
+         recurse(v)  
+     } 
+} 
+ 
+fn main()  
+{  
+     recurse(25)  
+} 
+ </pre>
+<p>The idea of a recursive function is very simple, but we need to consider two parts of this code. The first is the <kbd>let</kbd> line in the <kbd>recurse</kbd> function and what it means:</p>
+<pre>let v = match n % 2  
+     { 
+         0 =&gt; n / 2, 
+         _ =&gt; 3 * n + 1 
+     }; </pre>
+<p>Another way of writing this is as follows:</p>
+<pre>let mut v = 0i32; 
+if n % 2 == 0 
+{ 
+     v = n / 2; 
+} 
+else 
+{ 
+     v = 3 * n + 1; 
+} </pre>
+<p>The second part is that the semicolon is not being used everywhere. Consider the following example:</p>
+<pre>fn main()  
+{  
+     recurse(25)  
+} </pre>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

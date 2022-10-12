@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style00.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style01.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">The stack and the heap</h1>
+                </header>
+            
+            <article>
+                
+<p>Because memory allocation is very important in Rust, we must have a good mental picture of what is going on. A program's memory is divided into the stack and heap memory parts; to get more background on these concepts go to<a href="https://stackoverflow.com/questions/79923/what-and-where-are-the-stack-and-heap"><span class="URLPACKT">https://stackoverflow.com/questions/79923/what-and-where-are-the-stack-and-heap</span></a>.</p>
+<p>Primitive values as numbers (like <strong>32</strong> in the figure), characters, or <kbd>true</kbd> or <kbd>false</kbd> values are stored on the stack, but the value of more complex objects that could grow in size are stored in heap memory. Heap values are referenced by a variable on the stack, which contains the memory address of the object on the heap.</p>
+<div class="CDPAlignCenter CDPAlign"><img height="236" width="417" src="Images/f4ed44f6-fd70-4e90-bc1b-7034727b7fb8.png"/></div>
+<p>While the stack has a limited size, the size of the heap can grow as much as the space needed.</p>
+<p>Suppose we run the following program and try to visualize the program's memory:</p>
+<pre>// see Chapter 2/code/references.rs 
+let health = 32; 
+let mut game = "Space Invaders"; </pre>
+<p>Values are stored in memory and so have memory addresses. The variable <kbd>health</kbd> contains an integer value <kbd>32</kbd> which is stored in the stack on location <kbd>0x23fba4</kbd>, while the variable <kbd>game</kbd> contains a string, which is stored in the heap starting on location <kbd>0x23fb90</kbd> (these were the addresses when I executed the program, they will be different when you run the program).</p>
+<p>The variables to which the values are bound are pointers or references to these values, they point to them. The variable <kbd>game</kbd> is a reference to <kbd>"Space Invaders"</kbd>. The address of a value is given by the <kbd>&amp;</kbd> operator. So, the <kbd>&amp;health</kbd> pointer is the address where value <kbd>32</kbd> is stored, and the <kbd>&amp;game</kbd> pointer is the address where value <kbd>Space Invaders</kbd> is stored.</p>
+<p>We can print these addresses by using the format string <kbd>{:p}</kbd> for pointers, like this:</p>
+<pre>println!("address of health-value: {:p}", &amp;health); 
+// prints 0x23fba4 
+  println!("address of game-value: {:p}", &amp;game); // prints 0x23fb90 
+println!("game-value: {}", game); // prints "Space Invaders" </pre>
+<p>Now, we have the following situation in memory (memory addresses will be different at each execution):</p>
+<div class="packt_figure CDPAlignCenter CDPAlign"><img height="220" width="665" class=" image-border" src="Images/cb20a2f5-b370-4368-b2c1-14d446539bb4.png"/></div>
+<p>We can make an alias, which is another reference that points to the same place in memory, like this:</p>
+<pre>let game2 = &amp;game; 
+println!("{:p}", game2); // prints 0x23fb90 </pre>
+<p>To get the value being referred to rather than the reference <kbd>game2</kbd> itself, dereference it with the asterisk <kbd>*</kbd> operator, like this:</p>
+<pre>println!("{}", *game2); // prints "Space Invaders"</pre>
+<p>The <kbd>println!</kbd> macro is clever, so <kbd>println!("{}", game2);</kbd>will also print out the same value, as the following statement does:</p>
+<pre>println!("game: {}", &amp;game); </pre>
+<p>The story above is a bit simplified, because Rust will allocate values that do not change in size as much as possible on the stack, but it is meant to give you a better idea of what a reference to a value means.</p>
+<p>We know already that a <kbd>let</kbd> binding is immutable, so the value cannot be changed as <kbd>health = 33;</kbd>.</p>
+<p>This gives an error, as follows:</p>
+<pre><strong>error: re-assignment of immutable variable `health` </strong></pre>
+<p>If the variable <kbd>y</kbd> is declared with <kbd>let y = &amp;health;</kbd> then the reference <kbd>*y</kbd> is the value <kbd>32</kbd>. Reference variables can also be given a type like <kbd>let x: &amp;i64;</kbd> and such references can be passed around in code. After this <kbd>let</kbd> binding <kbd>x</kbd> does not really point yet to a value, it does not contain a memory address. In Rust, there is no way to create a null pointer as you can in other languages, trying to assign a <kbd>nil</kbd> or <kbd>null</kbd> or even unit value <kbd>()</kbd> to <kbd>x</kbd> results in an error. This alone saves Rust programmers from countless bugs. Furthermore, trying to use the variable <kbd>x</kbd> in an expression, for example, the statement:</p>
+<pre>println!("{:?}", x); </pre>
+<p>This results with an error, as follows:</p>
+<pre><strong>error: use of possibly uninitialized variable: `x`</strong></pre>
+<p>A mutable reference (indicated as the <kbd>&amp;mut</kbd> pointer) to an immutable variable is forbidden, otherwise the immutable variable could be changed through its mutable reference:</p>
+<pre>  let tricks = 10; 
+  let reftricks = &amp;mut tricks; </pre>
+<p>This gives an error, as follows:</p>
+<pre><strong>cannot borrow immutable local variable `tricks` as mutable</strong></pre>
+<p>A reference to a mutable variable <kbd>score</kbd> can either be immutable or mutable, like the <kbd>score2</kbd> and <kbd>score3</kbd> variables respectively in the example below:</p>
+<pre>  let mut score = 0; 
+  let score2 = &amp;score; </pre>
+<p>But you cannot change the value of <kbd>score</kbd> through an immutable reference to the <kbd>score2</kbd> variable, as this gives an error, as follows:</p>
+<pre><strong><span>*score2 = 5;</span><br/>This gives the an error: cannot assign to immutable borrowed content *score2</strong></pre>
+<p>The value of the variable <kbd>score</kbd> can only be changed through a mutable reference like <kbd>score3</kbd>:</p>
+<pre>   let mut score = 0; 
+   let score3 = &amp;mut score; 
+   *score3 = 5; </pre>
+<p>For reasons we will see later, you can only make one mutable reference to a mutable variable:</p>
+<pre>let score4 = &amp;mut score; </pre>
+<p>If you do this, an error is thrown as follows:</p>
+<pre><strong>error: cannot borrow `score` as mutable more than once at a time</strong></pre>
+<p>Here, we touch at the heart of Rust's memory safety system, borrowing a variable is one of its key concepts. We will explore this in more detail in the <a href="181718d1-5b78-4952-8082-796f69471c96.xhtml"><span class="ChapterrefPACKT">Chapter 7</span></a>, <em>Ensuring Memory Safety and Pointers</em>.</p>
+<p>The heap is a much larger memory part than the stack, so it is important that memory locations are freed as soon as they are no longer needed. Every variable in Rust has a certain lifetime, which says how long the variable lives in the program's memory. The Rust compiler sees when a variable's lifetime has come to an end (or in other words, the variable goes out of scope), and inserts code at compilation time to free its memory when executing that code. This behavior is unique to Rust and is not done in other commonly used languages.</p>
+<p>Stack values can be boxed, that is, allocated in the heap, by creating a <kbd>Box</kbd> around them, as is the case for the value of <kbd>x</kbd> in:</p>
+<pre>let x = Box::new(5i32); </pre>
+<p>The object <kbd>Box</kbd> references a value on the heap. We'll also look at it more closely in the section <em>Boxes</em> in <a href="181718d1-5b78-4952-8082-796f69471c96.xhtml"><span class="ChapterrefPACKT">Chapter 7</span></a>, <em>Ensuring Memory Safety and Pointers</em>.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Moving closure</h1>
+                </header>
+            
+            <article>
+                
+<p>In the previous chapter we introduced the concept of a moving closure, which takes ownership of its variables. The following code illustrates clearly the difference between a normal closure and a moving closure:</p>
+<pre>// see code in Chapter 7/code/moving_closure.rs 
+struct Block { 
+    number: i32 
+} 
+ 
+fn main() { 
+    let block = Block{ number:1 }; 
+    // ordinary closure: 
+    let closure = || { println!("n: {:?}", block.number); }; 
+    closure(); 
+    println!("n: {:?}", block.number); 
+ 
+    let block = Block{ number:1 }; 
+    // moving closure: 
+    // closure takes ownership of the block value 
+    let closure = move || {println!("n: {:?}", block.number); }; 
+    closure(); 
+    // error: use of moved value: `block.number` 
+    // println!("n: {:?}", block.number); 
+} </pre>
+<p>This prints out the following on three consecutive lines:</p>
+<pre><strong>n: 1</strong></pre>
+<p>After the moving closure is defined, the <kbd>block</kbd> reference can no longer be accessed.</p>
+<p>Another way to move a resource (thus transferring the ownership) is to pass it as argument to a function; try this out in the following exercise:</p>
+<div class="mce-root packt_infobox"><span class="packt_screen">Exercises:<br/>
+<br/></span> Examine the situation when <kbd>kl2</kbd> is not a mutable reference <kbd>let kl2 = &amp;klaatu;</kbd>.<br/>
+<span>Can you change the instance through</span> <kbd>kl2</kbd><span>?<br/></span><span>Can you change the instance through</span> <kbd>klaatu</kbd><span>?<br/></span> <span>Explain the error with what you know about ownership and borrowing (see</span> <kbd>Chapter 7/exercises/ownership3.rs</kbd><span>).<br/></span><span>What happens if in the previous program we do</span> <kbd>let klaatuc = klaatu;</kbd> <span>before we define the binding</span> <kbd>let kl2 = &amp;klaatu;</kbd><span>?<br/>
+<br/></span> <span>Examine if you can change the mutability of a resource by moving from an immutable owner to a mutable owner.<br/></span> For our struct Alien, write a method <kbd>grow_a_tentacle</kbd> that increases the number of tentacles <span>by one (see</span> <kbd>Chapter 7/exercises/grow_a_tentacle.rs</kbd><span>).<br/></span><span>Construct a vector</span> <kbd>p</kbd> <span>containing</span> <kbd>[1, 2, 3]</kbd><span>.<br/></span> <span>Then make a function</span> <kbd>increment</kbd> <span><span>that returns a copy of p with all values incremented.<br/></span></span><span>Now make a function</span> <kbd>increment_mut</kbd> <span>that increments all values of p in place. (see</span> <kbd>Chapter 7/exercises/increment_vector.rs</kbd><span>)<br/></span><span>Some exercises with mutable pointers (see</span> <kbd>Chapter 7/exercises/pointer_mutability.rs</kbd><span>).</span></div>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

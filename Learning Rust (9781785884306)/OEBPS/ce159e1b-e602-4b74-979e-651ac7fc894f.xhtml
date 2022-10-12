@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">std::io</h1>
+                </header>
+            
+            <article>
+                
+<p>This module provides a number of facilities for core input/output.</p>
+<div class="packt_infobox"><span>This module provides code </span><kbd>Read</kbd><span> and </span><kbd>Write</kbd><span> functionality for not only normal control, but also for various stream types (such as TCP and File). Access can be sequential or random. IO behavior also depends on the platform the application sits on, so testing is highly encouraged.</span></div>
+<p><strong>Structs, Traits, and Enums</strong></p>
+<ul>
+<li><strong>Structs</strong>: <kbd>BufReader</kbd> (adds buffering to any reader), <kbd>BufWriter</kbd> (buffers the writer output), <kbd>Bytes</kbd> (an iterator of values of a reader), <kbd>Chain</kbd> (chains two readers), <kbd>Cursor</kbd> (wraps another type and provides the Seek implementation), <kbd>Empty</kbd> (reader that is always at EOF), <kbd>Error</kbd> (error type for IO operations), <kbd>IntoInnerError</kbd> (error returned by <kbd>into_inner</kbd> that combines the error and buffered writer object, which may be recovered), <kbd>LineWriter</kbd> (wraps a writer and buffers into it), <kbd>Lines</kbd> (iterates over the lines of <kbd>BufRead</kbd>), <kbd>Repeat</kbd> (reader that continually returns a byte), <kbd>Sink</kbd> (writer that moves data to null), <kbd>Split</kbd> (an iterator over the contents of <kbd>BufRead</kbd> split at a point), <kbd>Stderr</kbd> (a handle for the process standard error stream), <kbd>StdErrLock</kbd> (locked ref. to <kbd>Stderr</kbd>), <kbd>Stdin</kbd> (standard input stream), <kbd>StdinLock</kbd> (locked ref. to <kbd>Stdin</kbd>), <kbd>Stdout</kbd> (global output stream), <kbd>StdoutLock</kbd> (locked ref. to <kbd>Stdout</kbd>), and <kbd>Take</kbd> (limits the bytes read from the reader).</li>
+<li><strong>Enums</strong>: <kbd>ErrorKind</kbd> and <kbd>SeekFrom</kbd>.</li>
+<li><strong>Traits</strong>: <kbd>BufRead</kbd> (buffered input read), <kbd>Read</kbd> (reads bytes from source), <kbd>Seek</kbd> (provides cursor that can be moved within the stream), and <kbd>Write</kbd>.</li>
+<li><strong>Functions</strong>: <kbd>copy</kbd> (copies contents of reader to writer), <kbd>empty</kbd> (new handle to an empty reader), <kbd>repeat</kbd> (creates an instance of reader that repeats 1 byte forever), <kbd>sink</kbd> (an instance of the writer that consumes all data), <kbd>stderr</kbd> (a new handle to <kbd>stderr</kbd>), <kbd>stdin</kbd> (a new handle to <kbd>stdin</kbd>), and <kbd>stdout</kbd> (a new handle to <kbd>stdout</kbd>).</li>
+</ul>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

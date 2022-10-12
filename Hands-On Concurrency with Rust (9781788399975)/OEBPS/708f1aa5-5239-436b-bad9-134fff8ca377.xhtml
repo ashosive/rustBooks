@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Blocking until the gang's all here - barrier</h1>
+                </header>
+            
+            <article>
+                
+<p>A barrier is a synchronization device that blocks threads until such time that a predefined number of threads have waited on the same barrier.  When a barrier's waiting threads wake up, one is declared leader—discoverable by inspecting the <kbd>BarrierWaitResult</kbd>—but this confers no scheduling advantage. A barrier becomes useful when you wish to delay threads behind an unsafe initialization of some resource—say a C library's internals that have no thread-safety at startup, or have a need to force participating threads to start a critical section at roughly the same time. The latter is the broader category, in your author's experience. When programming with atomic variables, you'll run into situations where a barrier will be useful. Also, consider for a second writings multi-threaded code for low-power devices. There are two strategies possible these days for power management: scaling the CPU to meet requirements, adjusting the runtime of your program live, or burning through a section of your program as quickly as possible and then shutting down the chip. In the latter approach, a barrier is just the primitive you need.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

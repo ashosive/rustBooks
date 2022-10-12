@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">rayon – parallel iterators</h1>
+                </header>
+            
+            <article>
+                
+<p>In the previous section, we built an iterator over Rust integer types. The essential computation of each <kbd>next</kbd> call was small—some branch checks, and possibly a negation or an addition. If we were to try to parallelize this, we'd drown out any potential performance bump with the time it takes to allocate a new thread from the operating systems. No matter how fast that becomes, it will still be slower than an addition. But, say we've gone all-in on writing in iteration style and do have computations that would benefit from being run in parallel. How do you make <kbd>std::iter::Iterator</kbd> parallel?</p>
+<p>You use rayon.</p>
+<p>The rayon crate is a <em>data-parallelism</em> library for Rust. That is, it extends Rust's basic <kbd>Iterator</kbd> concept to include a notion of implicit parallelism. Yep, implicit. Rust's memory safety means we can pull some pretty fun tricks on modern machines. Consider that the thread pool implementation we investigated previously in the chapter, which had no concerns for memory pollution. Well, it's the same deal with rayon. Every element in an iterator is isolated from each other, an invariant enforced by the type system. Which means, the rayon developers can focus on building a data-parallelism library to be as fast as possible while we, the end users, can focus on structuring out code in an iterator style.</p>
+<p>We'll examine rayon (<a href="https://crates.io/crates/rayon">https://crates.io/crates/rayon</a>) at SHA <kbd>5f98c019abc4d40697e83271c072cb2b92966f46</kbd>. The rayon project is split into sub-crates:</p>
+<ul>
+<li>rayon-core</li>
+<li>rayon-futures</li>
+</ul>
+<p>We'll discuss rayon—the top-level crate—and rayon-core in this chapter, touching on the fundamental technology behind rayon-futures in <a href="2dc30216-c606-471f-a94a-dc4891a0cb1b.xhtml" target="_blank">Chapter 10</a>, <em>Futurism<span> </span>–<span> </span>Near-Term</em> <em>Rus</em><em>t</em>. The interested reader can flag rayon-futures on to play with that interface but please do refer to the <kbd>README</kbd> at the top of that sub-crate for details.</p>
+<div class="packt_infobox"><span>The rayon crate is not listed in its entirety. You can find the full listing in this book's source repository. </span></div>
+<p>The dependencies of rayon are minimal, being that rayon-core is the sole dependency by default. The rayon-core dependencies are:</p>
+<pre>[dependencies]
+rand = "&gt;= 0.3, &lt; 0.5"
+num_cpus = "1.2"
+libc = "0.2.16"
+lazy_static = "1"</pre>
+<p>We've seen these dependencies before, except <kbd>libc</kbd>. This library exposes the <kbd>libc</kbd> platform in a stable interface. From the project's documentation:</p>
+<div class="packt_quote">"This crate does not strive to have any form of compatibility across platforms, but rather it is simply a straight binding to the system libraries on the platform in question."</div>
+<p>It's quite useful. Now, rayon is a large library and it can be a challenge to navigate. That's okay, though, because it's simple to use. To give ourselves an in, let's pull the example code from rayon's <kbd>README</kbd> and do an exploration from that point. The example is:</p>
+<pre>use rayon::prelude::*;
+
+fn sum_of_squares(input: &amp;[i32]) -&gt; i32 {
+    input.par_iter()
+         .map(|&amp;i| i * i)
+         .sum()
+}</pre>
+<p>Okay, so what's going on here? Well, let's first compare it against the sequential version of this example:</p>
+<pre>fn sum_of_squares(input: &amp;[i32]) -&gt; i32 {
+    input.iter()
+         .map(|&amp;i| i * i)
+         .sum()
+}</pre>
+<p>Spot the key difference? The sequential version is <kbd>input.iter()</kbd>, the parallel version is <kbd>input.par_iter()</kbd>. Okay, first, we have to understand that every slice exposes <kbd>iter(&amp;self) -&gt; std::slice::Iter</kbd>. This <kbd>Iter</kbd> implements <kbd>std::iter::Iterator</kbd>, which we recently discussed. rayon implements something similar, so that:</p>
+<ul>
+<li><kbd>input.iter() :: std::slice::Iter&lt;'_, u32&gt;</kbd></li>
+<li><kbd>input.par_iter() :: rayon::slice::Iter&lt;'_, i32&gt;</kbd></li>
+</ul>
+<p>Let's look at <kbd>rayon::slice::Iter</kbd>, in <kbd>src/slice/mod.rs</kbd>:</p>
+<pre>#[derive(Debug)]
+pub struct Iter&lt;'data, T: 'data + Sync&gt; {
+    slice: &amp;'data [T],
+}</pre>
+<p>Okay, nothing we haven't seen so far. There's a lifetime data, and every <kbd>T</kbd> has to be part of that lifetime plus <kbd>Sync</kbd>. Now, what is the type of rayon's <kbd>map</kbd>? By inspection, we can see it's <kbd>ParallelIterator::map&lt;F, R&gt;(self, map_op: F) -&gt; Map&lt;Self, F&gt;</kbd> where <kbd>F: Fn(Self::Item) -&gt; R + Sync + Send</kbd> and <kbd>R: Send</kbd>. Alright, <kbd>ParallelIterator</kbd>. That is new. There's an implementation for <kbd>Iter</kbd> just under the struct definition:</p>
+<pre>impl&lt;'data, T: Sync + 'data&gt; ParallelIterator for Iter&lt;'data, T&gt; {
+    type Item = &amp;'data T;
+
+    fn drive_unindexed&lt;C&gt;(self, consumer: C) -&gt; C::Result
+        where C: UnindexedConsumer&lt;Self::Item&gt;
+    {
+        bridge(self, consumer)
+    }
+
+    fn opt_len(&amp;self) -&gt; Option&lt;usize&gt; {
+        Some(self.len())
+    }
+}</pre>
+<p>Clearly, we need to understand <kbd>ParallelIterator</kbd>. This trait is defined in <kbd>src/iter/mod.rs</kbd> and is declared to be the parallel version of the standard iterator trait. Well, good! That gives us a pretty good anchor into its semantics. Now, we just have to figure out its implementation. The implementation of <kbd>ParallelIterator</kbd> for <kbd>Iter</kbd> defined two functions: <kbd>drive_unindexed</kbd> and <kbd>opt_len</kbd>. The latter function returns the optional length of the underlying structure, much like <kbd>Iterator::size_hint</kbd>.</p>
+<p>The rayon documentation notes that some of their functions can trigger fast-paths when <kbd>opt_len</kbd> returns a value: always a win. <kbd>drive_unindexed</kbd> is more complicated and introduces two unknowns. Let's figure out what <kbd>consumer: UnindexedConsumer</kbd> is first. The trait definition, in <kbd>src/iter/plumbing/mod.rs</kbd>, is very brief:</p>
+<pre>pub trait UnindexedConsumer&lt;I&gt;: Consumer&lt;I&gt; {
+    /// Splits off a "left" consumer and returns it. The `self`
+    /// consumer should then be used to consume the "right" portion of
+    /// the data. (The ordering matters for methods like find_first –
+    /// values produced by the returned value are given precedence
+    /// over values produced by `self`.) Once the left and right
+    /// halves have been fully consumed, you should reduce the results
+    /// with the result of `to_reducer`.
+    fn split_off_left(&amp;self) -&gt; Self;
+
+    /// Creates a reducer that can be used to combine the results from
+    /// a split consumer.
+    fn to_reducer(&amp;self) -&gt; Self::Reducer;
+}</pre>
+<p>Okay, we're missing some key pieces of information here. What is <kbd>Consumer</kbd>? This trait is defined in the same file, like so:</p>
+<pre>pub trait Consumer&lt;Item&gt;: Send + Sized {
+    /// The type of folder that this consumer can be converted into.
+    type Folder: Folder&lt;Item, Result = Self::Result&gt;;
+
+    /// The type of reducer that is produced if this consumer is split.
+    type Reducer: Reducer&lt;Self::Result&gt;;
+
+    /// The type of result that this consumer will ultimately produce.
+    type Result: Send;
+
+    /// Divide the consumer into two consumers, one processing items
+    /// `0..index` and one processing items from `index..`. Also
+    /// produces a reducer that can be used to reduce the results at
+    /// the end.
+    fn split_at(self, index: usize) -&gt; (Self, Self, Self::Reducer);
+
+    /// Convert the consumer into a folder that can consume items
+    /// sequentially, eventually producing a final result.
+    fn into_folder(self) -&gt; Self::Folder;
+
+    /// Hint whether this `Consumer` would like to stop processing
+    /// further items, e.g. if a search has been completed.
+    fn full(&amp;self) -&gt; bool;
+}</pre>
+<p>There are some key unknowns here, but the picture is getting a little clearer. <kbd>Consumer</kbd> is able to take in <kbd>Item</kbd> and subdivide it at an <kbd>index</kbd>. rayon is performing a divide and conquer, taking small chunks of the stream and dividing them over <em>something</em>. What are <kbd>Folder</kbd> and <kbd>Reducer</kbd>? This trait <em>folds</em> into itself, like the higher-order fold function. The trait definition is:</p>
+<pre>pub trait Folder&lt;Item&gt;: Sized {
+    type Result;
+
+    fn consume(self, item: Item) -&gt; Self;
+
+    fn consume_iter&lt;I&gt;(mut self, iter: I) -&gt; Self
+        where I: IntoIterator&lt;Item = Item&gt;
+    {
+        for item in iter {
+            self = self.consume(item);
+            if self.full() {
+                break;
+            }
+        }
+        self
+    }
+
+    fn complete(self) -&gt; Self::Result;
+
+    fn full(&amp;self) -&gt; bool;
+}</pre>
+<p>The important function here is <kbd>consume_iter</kbd>. Note that it calls <kbd>consume</kbd> for each element in the <kbd>iter</kbd> variable, folding the previous <kbd>self</kbd> into a new <kbd>self</kbd>, only stopping once the implementor of <kbd>Folder</kbd> signals that it is <em>full</em>. Note as well that a <kbd>Folder</kbd>, once complete is called on it, is turned into a  <kbd>Result</kbd>. Recall that <kbd>Result</kbd> is set in <kbd>Consumer</kbd>. Now, what is <kbd>Reducer</kbd>? It is:</p>
+<pre>pub trait Reducer&lt;Result&gt; {
+    fn reduce(self, left: Result, right: Result) -&gt; Result;
+}</pre>
+<p><kbd>Reducer</kbd> combines two <kbd>Result</kbd>s into one single <kbd>Result</kbd>. <kbd>Consumer</kbd> is then a type that can take an <kbd>Item</kbd>, apply <kbd>Folder</kbd> over chunks of the <kbd>Item</kbd>, and then reduce the many <kbd>Result</kbd>s down into a single <kbd>Result</kbd>. If you squint, <kbd>Consumer</kbd> <em>is</em> a fold. <kbd>UnindexedConsumer</kbd> is a specialization of <kbd>Consumer</kbd> that splits at an arbitrary point, where the plain <kbd>Consumer</kbd> requires an index. We understand, then, that the parallel iterator for the slice iterator is being driven by <kbd>drive_unindexed</kbd>. This function is passed <em>some</em> <kbd>consumer: C</kbd>, which is minimally <kbd>UnindexedConsumer</kbd> and the function entirely defers to <kbd>bridge</kbd> to do its work. Two questions: <em>what</em> is calling <kbd>drive_unindexed</kbd> and what is <kbd>bridge</kbd>? Let's look into the <kbd>bridge</kbd> function, defined in <kbd>src/iter/plumbing/mod.rs</kbd>. The header of the function immediately presents new information:</p>
+<pre>pub fn bridge&lt;I, C&gt;(par_iter: I, consumer: C) -&gt; C::Result
+    where I: IndexedParallelIterator,
+          C: Consumer&lt;I::Item&gt;</pre>
+<p>What is <kbd>IndexedParallelIterator</kbd>? I'll spare you the exploration, but it's a further specialization of <kbd>ParallelIterator</kbd> that can be <em>split at arbitrary indices</em>. This specialization has more functions than the <kbd>ParallelIterator</kbd> trait, and <kbd>rayon::slice::Iter</kbd> implements both. The definition is brief and something we'll need to know to understand bridge:</p>
+<pre>impl&lt;'data, T: Sync + 'data&gt; IndexedParallelIterator for Iter&lt;'data, T&gt; {
+    fn drive&lt;C&gt;(self, consumer: C) -&gt; C::Result
+        where C: Consumer&lt;Self::Item&gt;
+    {
+        bridge(self, consumer)
+    }
+
+    fn len(&amp;self) -&gt; usize {
+        self.slice.len()
+    }
+
+    fn with_producer&lt;CB&gt;(self, callback: CB) -&gt; CB::Output
+        where CB: ProducerCallback&lt;Self::Item&gt;
+    {
+        callback.callback(IterProducer { slice: self.slice })
+    }
+}</pre>
+<p>We see <kbd>bridge</kbd> backing a function <kbd>drive</kbd> and a new <kbd>with_producer</kbd> function with an unknown purpose. Back to <kbd>bridge</kbd>:</p>
+<pre>{
+    let len = par_iter.len();
+    return par_iter.with_producer(Callback {
+                                      len: len,
+                                      consumer: consumer,
+                                  });</pre>
+<p>We see <kbd>bridge</kbd> calculate the length of the underlying slice and then call <kbd>with_producer</kbd> on some <kbd>Callback</kbd> struct. We know from the trait implementation on <kbd>Iter</kbd> that <kbd>Callback: ProducerCallback</kbd>, which is itself an analogue to <kbd>FnOnce</kbd>, is taking some <kbd>T</kbd>, a <kbd>Producer&lt;T&gt;</kbd>, and emitting an <kbd>Output</kbd> from <kbd>ProducerCallback::callback</kbd>. If you squint hard enough, that's a closure. A <kbd>Producer</kbd> is more or less an <kbd>std::iter::IntoIterator</kbd>, but one that can be split at an index into two <kbd>Producer</kbd>s. Again, we see that rayon is dividing work into sub-pieces and that this method of operation extends through multiple types. But what is <kbd>Callback</kbd>? It turns out, this struct is defined inline with the function body of <kbd>bridge</kbd>:</p>
+<pre>    struct Callback&lt;C&gt; {
+        len: usize,
+        consumer: C,
+    }
+
+    impl&lt;C, I&gt; ProducerCallback&lt;I&gt; for Callback&lt;C&gt;
+        where C: Consumer&lt;I&gt;
+    {
+        type Output = C::Result;
+        fn callback&lt;P&gt;(self, producer: P) -&gt; C::Result
+            where P: Producer&lt;Item = I&gt;
+        {
+            bridge_producer_consumer(self.len, producer, self.consumer)
+        }
+    }
+}</pre>
+<p>I admit, that's pretty weird! The <kbd>producer: P</kbd> that is passed in the interior callback is an <kbd>IterProducer</kbd>, a type defined in <kbd>src/slice/mod.rs</kbd>, which holds a reference to the slice. The interesting thing is the implementation of <kbd>Producer</kbd> for <kbd>IterProducer</kbd>:</p>
+<pre>impl&lt;'data, T: 'data + Sync&gt; Producer for IterProducer&lt;'data, T&gt; {
+    type Item = &amp;'data T;
+    type IntoIter = ::std::slice::Iter&lt;'data, T&gt;;
+
+    fn into_iter(self) -&gt; Self::IntoIter {
+        self.slice.into_iter()
+    }
+
+    fn split_at(self, index: usize) -&gt; (Self, Self) {
+        let (left, right) = self.slice.split_at(index);
+        (IterProducer { slice: left }, IterProducer { slice: right })
+    }
+}</pre>
+<p>Look at that <kbd>split_at</kbd>! Whenever rayon needs to split a slice Producer, it calls <kbd>std::slice::split_at</kbd> and makes two new <kbd>Producer</kbd>s. Alright, so now we know <em>how</em> rayon is splitting things up but still not <em>to what</em>. Let's look further into the implementation of <kbd>bridge_producer_consumer</kbd>:</p>
+<pre>pub fn bridge_producer_consumer&lt;P, C&gt;(len: usize, producer: P,<br/>                                      consumer: C) -&gt; C::Result
+    where P: Producer,
+          C: Consumer&lt;P::Item&gt;
+{
+    let splitter = LengthSplitter::new(producer.min_len(), <br/>                                       producer.max_len(), len);
+    return helper(len, false, splitter, producer, consumer);</pre>
+<p>Okay, we are mostly familiar with these types. <kbd>LengthSplitter</kbd> is new and is a type that informs us whether a split of a certain length is valid for some minimum size. This is where rayon is able to decide how small to make split work and whether or not to split a workload further. The <kbd>helper</kbd> function rounds things out:</p>
+<pre>    fn helper&lt;P, C&gt;(len: usize,
+                    migrated: bool,
+                    mut splitter: LengthSplitter,
+                    producer: P,
+                    consumer: C)
+                    -&gt; C::Result
+        where P: Producer,
+              C: Consumer&lt;P::Item&gt;
+    {
+        if consumer.full() {
+            consumer.into_folder().complete()
+        } else if splitter.try(len, migrated) {
+            let mid = len / 2;
+            let (left_producer, right_producer) = producer.split_at(mid);
+            let (left_consumer, right_consumer, <br/>                 reducer) = consumer.split_at(mid);
+            let (left_result, right_result) =
+                join_context(|context| {
+                    helper(mid, context.migrated(), splitter,
+                           left_producer, left_consumer)
+                }, |context| {
+                    helper(len - mid, context.migrated(), splitter,
+                           right_producer, right_consumer)
+                });
+            reducer.reduce(left_result, right_result)
+        } else {
+            producer.fold_with(consumer.into_folder()).complete()
+        }
+    }
+}</pre>
+<p>This is dense. Most of this is to do with splitting the current <kbd>Producer</kbd> into appropriately sized chunks, but especially this block of code:</p>
+<pre>                join_context(|context| {
+                    helper(mid, context.migrated(), splitter,
+                           left_producer, left_consumer)
+                }, |context| {
+                    helper(len - mid, context.migrated(), splitter,
+                           right_producer, right_consumer)
+                });</pre>
+<p>Here we see newly split <kbd>Producers</kbd> that lazily make a recursive call to <kbd>helper</kbd> when executed by <kbd>join_context</kbd>. This function is defined in <kbd>rayon-core/src/join/mod.rs</kbd>:</p>
+<pre>pub fn join_context&lt;A, B, RA, RB&gt;(oper_a: A, oper_b: B) -&gt; (RA, RB)
+    where A: FnOnce(FnContext) -&gt; RA + Send,
+          B: FnOnce(FnContext) -&gt; RB + Send,
+          RA: Send,
+          RB: Send
+{</pre>
+<p>The new type here, <kbd>FnContext</kbd>, is a <kbd>Send + Sync</kbd> disabling boolean. The boolean interior to <kbd>FnContext</kbd> is called <kbd>migrated</kbd>, an interesting clue to the context's purpose. Let's continue in <kbd>join_context</kbd>:</p>
+<pre>    registry::in_worker(|worker_thread, injected| unsafe {
+        log!(Join { worker: worker_thread.index() });
+
+        // Create virtual wrapper for task b; this all has to be
+        // done here so that the stack frame can keep it all live
+        // long enough.
+        let job_b = StackJob::new(|migrated| <br/>                                  oper_b(FnContext::new(migrated)),
+                                  SpinLatch::new());
+        let job_b_ref = job_b.as_job_ref();
+        worker_thread.push(job_b_ref);</pre>
+<p>Well hey, it's a thread pool! We <em>know</em> thread pools! There's a lot more detail to rayon's thread pool implementation compared to the one we investigated earlier in this chapter, but it's a known concept. Each thread in rayon's pool maintains its own queue of work. Every thread queues up two new jobs—in this case, calls to helper with a specific <kbd>FnContext</kbd>—that may execute the function that <kbd>Consumer</kbd> and <kbd>Producer</kbd> combined represent, or split the work up into small chunks, pushing onto the thread's queue. Each thread in the pool is able to steal jobs from the others in the pool, spreading the load around the pool. In fact, what we've seen so far is that the caller of <kbd>join_context</kbd> immediately constructs <kbd>StackJob</kbd> out of <kbd>oper_b</kbd> and calls <kbd>worker_thread.push</kbd>. This function is defined in <kbd>rayon-core/src/registry.rs</kbd>:</p>
+<pre>    #[inline]
+    pub unsafe fn push(&amp;self, job: JobRef) {
+        self.worker.push(job);
+        self.registry.sleep.tickle(self.index);</pre>
+<p><kbd>sleep.tickle</kbd>, in addition to being amusingly named, is meant to notify threads waiting on condvar. This condvar is tracking whether or not there's work available, saving power when there's none, rather than have threads in the pool spin-looping. What happens when <kbd>self.worker.push</kbd> is called? It turns out, the <kbd>WorkerThread::worker</kbd> field is of the <kbd>crossbeam_deque::Deque&lt;job::JobRef&gt;</kbd> type. We discussed crossbeam in the previous chapter! Things are starting to come together for us. Let's look at the definition of <kbd>WorkerThread</kbd>:</p>
+<pre>pub struct WorkerThread {
+    /// the "worker" half of our local deque
+    worker: Deque&lt;JobRef&gt;,
+
+    index: usize,
+
+    /// are these workers configured to steal breadth-first or not?
+    breadth_first: bool,
+
+    /// A weak random number generator.
+    rng: UnsafeCell&lt;rand::XorShiftRng&gt;,
+
+    registry: Arc&lt;Registry&gt;,
+}</pre>
+<p>What is <kbd>Registry</kbd>? What's creating these <kbd>WorkerThread</kbd>s? Recall that in <kbd>join_context</kbd>, we're inside a call to <kbd>registry::in_worker</kbd>. That function is defined in <kbd>rayon-core/src/registry.rs</kbd> and is:</p>
+<pre>pub fn in_worker&lt;OP, R&gt;(op: OP) -&gt; R
+    where OP: FnOnce(&amp;WorkerThread, bool) -&gt; R + Send, R: Send
+{
+    unsafe {
+        let owner_thread = WorkerThread::current();
+        if !owner_thread.is_null() {
+            // Perfectly valid to give them a `&amp;T`: this is the
+            // current thread, so we know the data structure won't be
+            // invalidated until we return.
+            op(&amp;*owner_thread, false)
+        } else {
+            global_registry().in_worker_cold(op)
+        }
+    }
+}</pre>
+<p>The <kbd>WorkerThread::current()</kbd> call is polling a thread-local static variable called <kbd>WORKER_THREAD_STATE</kbd>, a <kbd>Cell&lt;*const WorkerThread&gt;</kbd> that may or may not be null in the event that no <kbd>WorkerThread</kbd> has been created inside the current operating system thread or has ceased to exist for some reason. If the <kbd>WorkerThread</kbd> does exist as thread-local, the passed <kbd>op</kbd> function is called, which is what we're investigating inside <kbd>join_context</kbd>. But, if the thread-local is null, <kbd>global_registry().in_worker_cold(op)</kbd> is called. The <kbd>global_registry</kbd> is:</p>
+<pre>static mut THE_REGISTRY: Option&lt;&amp;'static Arc&lt;Registry&gt;&gt; = None;
+static THE_REGISTRY_SET: Once = ONCE_INIT;
+
+/// Starts the worker threads (if that has not already happened). If
+/// initialization has not already occurred, use the default
+/// configuration.
+fn global_registry() -&gt; &amp;'static Arc&lt;Registry&gt; {
+    THE_REGISTRY_SET.call_once(|| unsafe { init_registry(ThreadPoolBuilder::new()).unwrap() });
+    unsafe { <br/>        THE_REGISTRY.expect("The global thread pool \<br/>                            has not been initialized.") <br/>    }
+}</pre>
+<p>That is, once <kbd>global_registry()</kbd> is called at least once, we've established a static <kbd>Registry</kbd> populated by the return of <kbd>init_registry</kbd>:</p>
+<pre>unsafe fn init_registry(builder: ThreadPoolBuilder) -&gt; Result&lt;(), ThreadPoolBuildError&gt; {
+    Registry::new(builder).map(|registry| <br/>                                THE_REGISTRY = Some(leak(registry))<br/>                              )
+}</pre>
+<p>That function further defers to <kbd>Registry::new</kbd> after having populated some builders for configuration purposes:</p>
+<pre>impl Registry {
+    pub fn new(mut builder: ThreadPoolBuilder) <br/>           -&gt; Result&lt;Arc&lt;Registry&gt;, ThreadPoolBuildError&gt; <br/>    {
+        let n_threads = builder.get_num_threads();
+        let breadth_first = builder.get_breadth_first();
+
+        let inj_worker = Deque::new();
+        let inj_stealer = inj_worker.stealer();
+        let workers: Vec&lt;_&gt; = (0..n_threads)
+            .map(|_| Deque::new())
+            .collect();
+        let stealers: Vec&lt;_&gt; = workers.iter().map(|d| <br/>                                                  d.stealer()<br/>                                              ).collect();
+
+        let registry = Arc::new(Registry {
+            thread_infos: stealers.into_iter()
+                .map(|s| ThreadInfo::new(s))
+                .collect(),
+            state: Mutex::new(RegistryState::new(inj_worker)),
+            sleep: Sleep::new(),
+            job_uninjector: inj_stealer,
+            terminate_latch: CountLatch::new(),
+            panic_handler: builder.take_panic_handler(),
+            start_handler: builder.take_start_handler(),
+            exit_handler: builder.take_exit_handler(),
+        });</pre>
+<p>Here, finally, we see threads being built:</p>
+<pre>        // If we return early or panic, make sure to terminate <br/>        // existing threads.
+        let t1000 = Terminator(&amp;registry);
+
+        for (index, worker) in workers.into_iter().enumerate() {
+            let registry = registry.clone();
+            let mut b = thread::Builder::new();
+            if let Some(name) = builder.get_thread_name(index) {
+                b = b.name(name);
+            }
+            if let Some(stack_size) = builder.get_stack_size() {
+                b = b.stack_size(stack_size);
+            }
+            if let Err(e) = b.spawn(move || unsafe { <br/>                main_loop(worker, registry, index, breadth_first) <br/>            }) {
+                return Err(ThreadPoolBuildError::new(<br/>                               ErrorKind::IOError(e))<br/>                           )
+            }
+        }
+
+        // Returning normally now, without termination.
+        mem::forget(t1000);
+
+        Ok(registry.clone())
+    }</pre>
+<p>Woo! Okay, a <kbd>Registry</kbd> is a static which, once created, spawns a number of threads and enters them into <kbd>main_loop</kbd>. This loop creates <kbd>WorkerThread</kbd>, notifies the <kbd>Registry</kbd> of <kbd>WorkerThread</kbd> being started, which marks the thread as alive. This is the <kbd>thread_infos</kbd> of the <kbd>Registry</kbd> and is why <kbd>WorkerThread</kbd> carries an index in itself. <kbd>main_thread</kbd> calls <kbd>WorkerThread::wait_until</kbd>, a function whose purpose is to probe the <kbd>Registry</kbd> for termination notice and, without that notice, calls <kbd>WorkerThread::wait_until_cold</kbd>. That cold condition is the status of <kbd>WorkerThread</kbd> when <kbd>take_local_job</kbd> or steal fail to return any items. Taking a local job looks like so:</p>
+<pre>    #[inline]
+    pub unsafe fn take_local_job(&amp;self) -&gt; Option&lt;JobRef&gt; {
+        if !self.breadth_first {
+            self.worker.pop()
+        } else {
+            loop {
+                match self.worker.steal() {
+                    Steal::Empty =&gt; return None,
+                    Steal::Data(d) =&gt; return Some(d),
+                    Steal::Retry =&gt; {},
+                }
+            }
+        }
+    }</pre>
+<p>The <kbd>self.worker</kbd> here is the deque from crossbeam and the breadth first option simply controls which end of the deque work is retrieved from. Stealing is a little more complicated, using the random number generator of <kbd>WorkerThread</kbd> to choose arbitrary threads—indexed through the <kbd>Registry</kbd>—to steal work from, seeking forward through the threads until work can be stolen from another thread's deque or until no work is found.</p>
+<p>No more mysteries! As we descend further into rayon, we understand that it's got quite a bit of machinery for representing split workloads that then gradually transition into the execution of those chunks of work on a thread pool. That thread pool performs work-stealing to keep the CPUs saturated. This understanding helps make the remainder of <kbd>join_context</kbd> more understandable:</p>
+<pre>        // Execute task a; hopefully b gets stolen in the meantime.
+        let status_a = unwind::halt_unwinding(move || <br/>                           oper_a(FnContext::new(injected)));
+        let result_a = match status_a {
+            Ok(v) =&gt; v,
+            Err(err) =&gt; join_recover_from_panic(worker_thread, <br/>                                                &amp;job_b.latch, <br/>                                                err),
+        };</pre>
+<p>The caller of <kbd>join_context</kbd> has packaged <kbd>oper_b</kbd> up, pushed it to the worker's queue, and executes <kbd>oper_a</kbd> in the hopes that the other operation will be executed as well. The remainder of the function is a loop, either pulling <kbd>oper_b</kbd> from the local deque or stealing from some other thread:</p>
+<pre>        while !job_b.latch.probe() {
+            if let Some(job) = worker_thread.take_local_job() {
+                if job == job_b_ref {
+                    // Found it! Let's run it.
+                    //
+                    // Note that this could panic, but it's ok if we <br/>                    // unwind here.
+                    log!(PoppedRhs { worker: worker_thread.index() });
+                    let result_b = job_b.run_inline(injected);
+                    return (result_a, result_b);
+                } else {
+                    log!(PoppedJob { worker: worker_thread.index() });
+                    worker_thread.execute(job);
+                }
+            } else {
+                // Local deque is empty. Time to steal from other
+                // threads.
+                log!(LostJob { worker: worker_thread.index() });
+                worker_thread.wait_until(&amp;job_b.latch);
+                debug_assert!(job_b.latch.probe());
+                break;
+            }
+        }
+
+        return (result_a, job_b.into_result());
+    })</pre>
+<p>Ordering is maintained through the latch mechanism, defined in <kbd>rayon-core/src/latch.rs</kbd>. You are encouraged to study this mechanism. It's very clever and well within the capabilities of the reader who has gotten this far in the book, bless you.</p>
+<p>That is <em>almost</em> it. We still have yet to discuss <kbd>map(|&amp;i| i * i).sum()</kbd>. The <kbd>map</kbd> there is defined on <kbd>ParallelIterator</kbd>, <kbd>IndexedParallelIterator</kbd>, and is:</p>
+<pre>    fn map&lt;F, R&gt;(self, map_op: F) -&gt; Map&lt;Self, F&gt;
+        where F: Fn(Self::Item) -&gt; R + Sync + Send,
+              R: Send
+    {
+        map::new(self, map_op)
+    }</pre>
+<p><kbd>Map</kbd> is, in turn, a <kbd>ParallelIterator</kbd> that consumes the individual <kbd>map_op</kbd> functions, producing <kbd>MapConsumer</kbd>s out of them, the details of which we'll skip as we are already familiar enough with rayon's <kbd>Consumer</kbd> concept. Finally, sum:</p>
+<pre>    fn sum&lt;S&gt;(self) -&gt; S
+        where S: Send + Sum&lt;Self::Item&gt; + Sum&lt;S&gt;
+    {
+        sum::sum(self)
+    }</pre>
+<p>This is, in turn, defined in <kbd>src/iter/sum.rs</kbd> as:</p>
+<pre>pub fn sum&lt;PI, S&gt;(pi: PI) -&gt; S
+    where PI: ParallelIterator,
+          S: Send + Sum&lt;PI::Item&gt; + Sum
+{
+    pi.drive_unindexed(SumConsumer::new())
+}</pre>
+<p>The producer is driven into a <kbd>SumConsumer</kbd> that splits the summation work up over the thread pool and then eventually folds it into a single value.</p>
+<p>And <em>that</em> is that. That's rayon. It's a thread pool that can automatically split workloads over the threads plus a series of <kbd>Iterator</kbd> adaptations that greatly reduce the effort required to exploit the thread-pooling model.</p>
+<p>Now you know! That's not all that rayon can do—it's a <em>very</em> useful library—but that's the central idea. I warmly encourage you to read through rayon's documentation.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

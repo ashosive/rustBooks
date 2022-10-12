@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style00.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style01.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Using Rust without the Standard Library</h1>
+                </header>
+            
+            <article>
+                
+<p>Rust is foremost a systems programming language and because the compiler can decide when a variable's lifetime ends, no garbage collection is needed for freeing memory. So when a Rust program executes, it runs in a very lightweight runtime<em>,</em> providing a heap, backtraces, stack guards, unwinding of the call stack when a panic occurs, and dynamic dispatching of methods on trait objects. Also, a small amount of initialization code is run before an executable project's <kbd>main</kbd> function starts up.</p>
+<p>As we have seen, the standard library gives a lot of functionality. It offers support for various features of its host system: threads, networking, heap allocation, and more. It also links to its C equivalent, which also does some runtime initialization.</p>
+<p>But Rust can also run on much more constrained systems that do not need (or do not have) this functionality. You can leave out the standard library from the compilation altogether by using the <kbd>#![no_std]</kbd> attribute at the start of the crate's code. In that case, Rust's runtime is roughly equivalent to that of C, and the size of the native code is greatly reduced.</p>
+<p>When working without the standard library, the <kbd>core</kbd> crate and its <kbd>prelude</kbd> module are automatically made available to your code. The <kbd>core</kbd> library provides the minimal foundation needed for all Rust code to work. It comprises the basic primitive types, traits, and macros. For an overview, see; <a href="https://doc.rust-lang.org/core/"><span class="URLPACKT">https://doc.rust-lang.org/core/</span></a>.</p>
+<p>At present, this only works for a library crate on the Rust stable version. Compiling an executable application without the standard library on Rust stable is much more involved; we refer you to <span class="URLPACKT"><a href="https://doc.rust-lang.org/unstable-book/language-features/lang-items.html">https://doc.rust-lang.org/unstable-book/language-features/lang-items.html</a></span>; <span class="URLPACKT"><kbd>#using-libc</kbd></span> for a thorough and up-to-date discussion.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

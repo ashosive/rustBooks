@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Associated functions on structs</h1>
+                </header>
+            
+            <article>
+                
+<p>Rust makes it possible to call a method in two ways. For example, when we want to obtain the length of a string, you can do:</p>
+<pre>// see code in Chapter 6/code/paradigm.rs 
+let str1 = "abc"; 
+println!("{}", str::len(str1)); // 3 
+println!("{}", str1.len());     // 3 </pre>
+<p>The first way is procedural and calls the <kbd>len</kbd> function from the <kbd>str</kbd> crate in the standard library and passes the string slice <kbd>str1</kbd> as a parameter. The second way which is more object-oriented and more commonly used calls the <kbd>len</kbd> method on the string slice <kbd>str1</kbd>. If you look it up in the API docs, you can see it has the signature:</p>
+<pre>   fn len(&amp;self) -&gt; usize </pre>
+<p>It effectively takes a reference (<kbd>&amp;</kbd>) to <kbd>self</kbd> as a parameter.</p>
+<p>So we see that Rust caters also for more object-oriented developers, who are used to the <kbd>object.method()</kbd> type of notation instead of <kbd>function(object)</kbd> type of notation. In Rust, we can define associated functions and methods on a <kbd>struct</kbd>, which pretty much compares to the traditional class and methods concept.</p>
+<p>Suppose we are building a game that takes place on a planet in a distant solar system, inhabited by hostile aliens. Let's define a <kbd>struct Alien</kbd> like this:</p>
+<pre>// see code in Chapter 6/code/methods.rs 
+struct Alien { 
+   health: u32, 
+   damage: u32 
+} </pre>
+<p>Where the variable <kbd>health</kbd> is the <kbd>Alien</kbd> struct's condition, and the variable <kbd>damage</kbd> is the amount your health is decreased when the alien attacks. We could make an <kbd>Alien</kbd> like this:</p>
+<pre>let mut bork = Alien{ health: 100, damage: 5 }; </pre>
+<p>The variable <kbd>health</kbd> cannot be more than <kbd>100</kbd>, but we cannot impose this constraint when making a <kbd>struct</kbd> instance like this.</p>
+<p>A solution is to define a new function for the <kbd>Alien</kbd> <span>implementor</span>, where we can test the value before it is being set:</p>
+<pre>impl Alien { 
+   fn new(mut h: u32, d: u32) -&gt; Alien { 
+      // constraints: 
+      if h &gt; 100 { h = 100; } 
+      Alien {health: h, damage: d} 
+   } 
+}   </pre>
+<p>And then construct a new <kbd>Alien</kbd> as follows:</p>
+<pre>let mut berserk = Alien::new(150, 15); </pre>
+<p>We define the new function (and all other functions and methods on the implementor <kbd>Alien</kbd>) inside an <kbd>impl Alien</kbd> block, which is separate from the <kbd>Alien</kbd> struct definition. It returns an <kbd>Alien</kbd> object after all constraints have been applied. We call it on the <kbd>Alien</kbd> struct itself as <kbd>Alien::new()</kbd>. It is a static function because we don't call it on an <kbd>Alien</kbd> strcuct instance.</p>
+<p>If we look at our new <kbd>Alien</kbd> struct, we see that the constraint was imposed:</p>
+<pre>println!("The berserk's health at birth is: {}", berserk.health); </pre>
+<p>This has the output as follows:</p>
+<pre>    <strong>The berserk's health at birth is: 100.</strong>  </pre>
+<p>Such a new function closely resembles a constructor from object-oriented languages. The fact that it is called new is merely by convention, we could have called it as the <kbd>create()</kbd>, or the <kbd>give_birth()</kbd> function.</p>
+<p>Another static function could be a warning given by all aliens:</p>
+<pre>fn warn() -&gt; &amp;'static str { 
+    "Leave this planet immediately or perish!" 
+} </pre>
+<p>This can be called like this:</p>
+<pre>println!("{}", Alien::warn()); </pre>
+<p>And this outputs the message:</p>
+<pre>    <strong>Leave this planet immediately or perish!</strong></pre>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

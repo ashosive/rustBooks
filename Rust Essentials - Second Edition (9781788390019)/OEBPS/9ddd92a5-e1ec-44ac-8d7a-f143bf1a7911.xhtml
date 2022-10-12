@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style00.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style01.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">File formats and databases</h1>
+                </header>
+            
+            <article>
+                
+<p>The standard library offers the <kbd>std::fs</kbd> module for filesystem manipulation, which we explored in <span class="ChapterrefPACKT"><a href="575d229f-420f-45c3-acaf-779ef9494480.xhtml">Chapter 11</a>, <em>Exploring the Standard Library</em>.</span></p>
+<ul>
+<li>If you have to work with <span><strong>Comma Separated Values</strong> (<strong>csv</strong>)</span> files, use one of the available crates such as <kbd>csv</kbd>, <kbd>quick_csv</kbd>, <kbd>simple_csv</kbd>, or <kbd>xsv</kbd>. The article on 24 days, <a href="http://zsiciarz.github.io/24daysofrust/book/vol1/day3.html"><span class="URLPACKT">http://zsiciarz.github.io/24daysofrust/book/vol1/day3.html</span></a>, can get you started.</li>
+<li>For working with JSON files, use a crate such as <kbd>json, simple_json, serde_json</kbd>, or <kbd>json_macros</kbd>; start with reading <a href="http://zsiciarz.github.io/24daysofrust/book/vol1/day6.html"><span class="URLPACKT">http://zsiciarz.github.io/24daysofrust/book/vol1/day6.html</span></a>.</li>
+<li>For XML format, there are also plenty of possibilities, such as the <kbd>xml-rs</kbd> or <kbd>quick-xml</kbd> crates.</li>
+</ul>
+<p>For databases, there are many crates available for working with:</p>
+<ul>
+<li><strong>sqlite3</strong> (crates <kbd>rusqlite</kbd> or <kbd>sqlite</kbd>)</li>
+</ul>
+<ul>
+<li><strong>PostgreSQL</strong> (crates <kbd>postgres</kbd> and <kbd>tokio-postgres</kbd>); get started by using <a href="http://zsiciarz.github.io/24daysofrust/book/vol1/day11.html"><span class="URLPACKT">http://zsiciarz.github.io/24daysofrust/book/vol1/day11.html</span></a></li>
+<li><strong>Mysql</strong> (crate <kbd>mysql</kbd> or <kbd>mysql_async</kbd>):</li>
+</ul>
+<p style="padding-left: 90px">Here is some code (<kbd>mysql.rs</kbd>) that connects to a local Mysql database, creates a <kbd>payment</kbd> table, and does some insert operations, and then finally reads back from that table:</p>
+<pre>#[macro_use] 
+<strong>extern crate mysql;</strong> 
+ 
+#[derive(Debug, PartialEq, Eq)] 
+struct Payment { 
+    customer_id: i32, 
+    amount: i32, 
+    account_name: Option&lt;String&gt;, 
+} 
+ 
+fn main() { 
+<strong>    let pool = mysql::Pool::new("mysql://root:password@localhost:3307").unwrap();</strong> 
+ 
+    // Let's create a payment table. 
+    // It is temporary so we do not need `tmp` database to exist. 
+    // Unwap just to make sure no error happened. 
+<strong>    pool.prep_exec(r"CREATE TEMPORARY TABLE tmp.payment (</strong> 
+                         customer_id int not null, 
+                         amount int not null, 
+                         account_name text 
+                     )", ()).unwrap(); 
+ 
+    let payments = vec![ 
+ Payment { customer_id: 1, amount: 2, account_name: None }, 
+ Payment { customer_id: 3, amount: 4, account_name: Some("foo".into()) }, 
+ Payment { customer_id: 5, amount: 6, account_name: None }, 
+ Payment { customer_id: 7, amount: 8, account_name: None }, 
+ Payment { customer_id: 9, amount: 10, account_name: Some("bar".into()) }, 
+    ]; 
+ 
+    // Let's insert payments to the database 
+    // We will use into_iter() because we do not need to map Stmt to anything else. 
+    // Also we assume that no error happened in `prepare`. 
+<strong>    for mut stmt in pool.prepare(r"INSERT INTO tmp.payment</strong> 
+     (customer_id, amount, account_name) 
+                            VALUES 
+     (:customer_id, :amount, :account_name)").into_iter() { 
+        for p in payments.iter() { 
+            // `execute` takes ownership of `params` so we pass account name by reference. 
+            // Unwrap each result just to make sure no errors happened. 
+            stmt.execute(params!{ 
+                "customer_id" =&gt; p.customer_id, 
+                "amount" =&gt; p.amount, 
+                "account_name" =&gt; &amp;p.account_name, 
+            }).unwrap(); 
+        } 
+    } 
+ 
+    // Let's select payments from database 
+    let selected_payments: Vec&lt;Payment&gt; = 
+<strong>    pool.prep_exec("SELECT customer_id, amount, account_name from tmp.payment", ())</strong> 
+    .map(|result| { // In this closure we will map `QueryResult` to `Vec&lt;Payment&gt;` 
+        // `QueryResult` is iterator over `MyResult&lt;row, err&gt;` so first call to `map` 
+        // will map each `MyResult` to contained `row` (no proper error handling) 
+        // and second call to `map` will map each `row` to `Payment` 
+        result.map(|x| x.unwrap()).map(|row| { 
+            let (customer_id, amount, account_name) = mysql::from_row(row); 
+            Payment { 
+                customer_id: customer_id, 
+                amount: amount, 
+                account_name: account_name, 
+            } 
+        }).collect() // Collect payments so now `QueryResult` is mapped to `Vec&lt;Payment&gt;` 
+    }).unwrap(); // Unwrap `Vec&lt;Payment&gt;` 
+} </pre>
+<ul>
+<li><strong>Oracle</strong> (crate <kbd>oci_rs</kbd>)</li>
+</ul>
+<ul>
+<li>For <strong>MongoDB</strong> there is the <kbd>mongodb</kbd> crate, among many others, developed by the MongoDB lab:</li>
+</ul>
+<p style="padding-left: 90px">To get an idea how this works, here is some code (<kbd>mongodb.rs</kbd>) that connects to a local MongoDB and does some <kbd>insert</kbd>, <kbd>update</kbd>, <kbd>delete</kbd>, and <kbd>find</kbd> operations on a collection of <kbd>movies</kbd>:</p>
+<pre>let client = Client::connect("localhost", 27017) 
+    .expect("Failed to initialize client."); 
+ 
+let coll = client.db("media").collection("movies"); 
+coll.insert_one(doc!{ "title" =&gt; "Back to the Future" }, None).unwrap(); 
+coll.update_one(doc!{}, doc!{ "director" =&gt; "Robert Zemeckis" }, None).unwrap(); 
+coll.delete_many(doc!{}, None).unwrap(); 
+ 
+let mut cursor = coll.find(None, None).unwrap(); 
+for result in cursor { 
+    if let Ok(item) = result { 
+        if let Some(&amp;Bson::String(ref title)) = item.get("title") { 
+            println!("title: {}", title); 
+        } 
+    } 
+} </pre>
+<ul>
+<li>For <strong>Redis,</strong> there are the <kbd>redis</kbd> or <kbd>simple_redis</kbd> crates; see <a href="http://zsiciarz.github.io/24daysofrust/book/vol1/day18.html"><span class="URLPACKT">http://zsiciarz.github.io/24daysofrust/book/vol1/day18.html</span></a> for a quick start</li>
+<li>If you are interested in <strong>Object Relational Mapper</strong> (<strong>ORM</strong>) frameworks, the <kbd>diesel</kbd> crate is the most popular (see <a href="http://zsiciarz.github.io/24daysofrust/book/vol2/day17.html"><span class="URLPACKT">http://zsiciarz.github.io/24daysofrust/book/vol2/day17.html</span></a>); it can be used for Sqlite, Mysql and Postgres; look at the <kbd>deuterium_orm</kbd> crate for a simpler framework</li>
+<li>If there is as yet no dedicated driver, you can probably use an ODBC connection through the <kbd>odbc-sys</kbd> or <kbd>odbc-safe</kbd> crates</li>
+<li>To use cypher queries for a neo4j database, use the <kbd>rusted_cypher</kbd> crate</li>
+<li>Furthermore, there are crates for leveldb, Cassandra (from Apache), RocksDB (from Facebook), Firebase, CouchDB, and InfluxDB</li>
+</ul>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

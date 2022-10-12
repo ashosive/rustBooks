@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style00.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style01.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Command-line arguments</h1>
+                </header>
+            
+            <article>
+                
+<p>When a program is started, it can be started with or without arguments. These arguments are normally fed in as parameters when the program is called. A simple example of this is starting the manual application (found on many BSD and Linux machines):</p>
+<pre>man ffmpeg </pre>
+<p>In the preceding statement, <kbd>man</kbd> is the name of the program or script to be called with the argument <kbd>ffmpeg</kbd>. Similarly, take a look at the following example for Windows users:</p>
+<div class="packt_figure CDPAlignCenter CDPAlign"><img height="303" width="335" class=" image-border" src="Images/aceef146-cbfe-4867-8a74-736a9b59cbbe.png"/></div>
+<p><kbd>Notepad</kbd> is the program name with the first argument being the file to read in (in this example, the file doesn't exist, so the UI asks if you wish to create it).</p>
+<p>It is not uncommon for one program to load another program to perform a task.</p>
+<p>In C, the parameter list for main is given as follows:</p>
+<pre>int main(int argc, char *argv[])</pre>
+<p><kbd>argc</kbd> is the maximum number of arguments with <kbd>argv</kbd> holding the arguments. Here, the program name is <kbd>argv[0]</kbd>, so all additional arguments start at 1.</p>
+<p>Rust's <kbd>main</kbd> takes no arguments like this. Command-line parameters are available through the standard library <kbd>std::env::args</kbd> (environment arguments). For simplicity, it is convenient to store the arguments in <kbd>Vec&lt;String&gt;</kbd>, because <kbd>env::args</kbd> returns an iterator that yields a <kbd>String</kbd>.</p>
+<p>No parameters are passed into <kbd>main</kbd> directly:</p>
+<pre>// 03/args/src/main.rs<br/>use std::env; 
+fn main() { 
+    let args: Vec&lt;String&gt; = env::args().collect(); 
+    println!("There was {:?} arguments passed in. They were {:?}.", args.len() - 1, &amp;args[1..]); 
+} </pre>
+<p>The <kbd>collect</kbd> method converts the iterator into a vector, making it possible to access it by indexing. Without it, we would have to go through the arguments one by one.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

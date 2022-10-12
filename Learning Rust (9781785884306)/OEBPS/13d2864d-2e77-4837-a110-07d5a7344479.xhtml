@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Including the dependency</h1>
+                </header>
+            
+            <article>
+                
+<p>As with using any library not provided by <kbd>Prelude</kbd>, the compiler has to know of the existence of the library. As we did in <a href="9764ae84-9948-4bc8-a9d7-7537b2f31723.xhtml"><span class="ChapterrefPACKT">Chapter 8</span></a>, <em>The Rust Application Lifetime</em>, we let the compiler know to expect an external library by including in the <kbd>Cargo.toml</kbd> file, as follows:</p>
+<pre>[dependency] 
+libc = "0.2.0" </pre>
+<p>The figure in quotes is the library version. This is useful to have in as it enables the compiled Rust application to only run against a particular version of the library, which guarantees the code required will be in the library. The downside is that in order to always ensure the library is available, the compiled binary will need to ship with that library. In this case (and this is the case for most external libraries), <kbd>libc</kbd> will need to be added.</p>
+<p>We also need to include the following line to the source file where the functions will be called:</p>
+<pre>extern crate libc; </pre>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Mutexes</h1>
+                </header>
+            
+            <article>
+                
+<p>Now that we understand linearizability and memory orderings, let's ask ourselves a question. What <em>exactly</em> is a mutex? We know its properties as an atomic object:</p>
+<ul>
+<li>Mutex supports two operations, <em>lock</em> and <em>unlock</em>.</li>
+<li>A mutex is either <em>locked</em> or <em>unlocked</em>.</li>
+<li>The operation <em>lock</em> will move a mutex into a <em>locked</em> state if and only if the mutex is <em>unlocked</em>. The thread that completes <em>lock</em> is said to hold the lock.</li>
+<li>The operation <em>unlock</em> will move a mutex into <em>unlocked</em> state if an only if the mutex is previously <em>locked</em> and the caller of <em>unlock</em> is the holder of the lock.</li>
+<li>All loads and stores which occur after and before a <em>lock</em> in program order must not be moved prior to or after the <em>lock</em> operation.</li>
+<li>All loads and stores that occur before an <em>unlock</em> in program order must not be moved to after the <em>unlock</em>.</li>
+</ul>
+<p>The second to last point is subtle. Consider a soft-mutex whose lock only keeps loads and stores after migrating up. This means that load/stores could migrate into the soft-mutex, which is all well and good unless your migration is the lock of another soft-mutex. Consider the following:</p>
+<pre style="padding-left: 30px">lock(m0)
+unlock(m0)
+lock(m1)
+unlock(m1)</pre>
+<p>This could be re-arranged to the following:</p>
+<pre style="padding-left: 30px">lock(m0)
+lock(m1)
+unlock(m0)
+unlock(m1)</pre>
+<p>Here, the <kbd>unlock(m0)</kbd> has migrated down in program order into the mutual exclusion zone of <kbd>m1</kbd>, deadlocking the program. That is a problem.</p>
+<p>You might not be surprised to learn that there's decades of research, at this point, into the question of mutual exclusion. How should a mutex be made? How does fairness factor into the implementation? The latter is a significantly broad topic, avoiding thread <em>starvation</em>, and is one we'll more or less dodge here. Much of the historical research is written with regard to machines that have no concept of concurrency control. Lamport's Bakery algorithm—see the <em>Further reading</em> section– provides mutual exclusion that's absent in any hardware support but assumes reads and writes are sequentially consistent, an assumption that does not hold on modern memory hierarchies. In no small sense do we live in a very happy time for concurrent programming: our machines expose synchronization primitives directly, greatly simplifying the production of fast and correct synchronization mechanisms.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

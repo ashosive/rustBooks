@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">An incorrect atomic queue</h1>
+                </header>
+            
+            <article>
+                
+<p>Before we build anything else, we're going to need a key data structure—a unbounded queue. In <a href="e2de1ba7-c291-494e-82da-37fee7323c1d.xhtml" target="_blank">Chapter 5</a>, <em>Locks – Mutex, Condvar, Barriers, and RWLock</em>, we discussed a bounded deque protected at either end by mutexes. We're in the business, now, of building synchronization and can't make use of the mutex approach. Our ambition is going to be to produce an unbounded first-in-first-out data structure that has no locks, never leaves an enqueuer or dequeuer deadlocked, and is linearizable to a sequential queue. It turns out there's a pretty straightforward data structure that achieves this aim; the Michael and Scott Queue, introduced in their 1995 paper <em>Simple, Fast, and Practical Non-Blocking and Blocking Concurrent Queue Algorithms</em>. The reader is encouraged to breeze through that paper before continuing on with our discussion here, but it's not strictly necessary.</p>
+<p>A word of warning. Our implementation will be <em>wrong</em>. The careful reader will note that we're following the paper closely. There are two, and maybe more, issues with the implementation we'll present, one major and unresolvable and the other addressable with some care. Both are fairly subtle. Let's dig in.</p>
+<p>Queue is defined in <kbd>src/queue.rs</kbd>, the preamble of which is:</p>
+<pre style="padding-left: 30px">use std::ptr::null_mut;
+use std::sync::atomic::{AtomicPtr, Ordering};
+
+unsafe impl&lt;T: Send&gt; Send for Queue&lt;T&gt; {}
+unsafe impl&lt;T: Send&gt; Sync for Queue&lt;T&gt; {}</pre>
+<p>Right off you can see from <kbd>null_mut</kbd> that we're going to be dealing with raw pointers. The <kbd>AtomicPtr</kbd> is new, though we did mention it in passing earlier in the chapter. An atomic pointer adapts a raw pointer—<kbd>*mut T</kbd>—to be suitable for atomic operations. There's no runtime overhead associated with AtomicPtr; the Rust documentation notes that the type has the same in-memory representation as a <kbd>*mut T</kbd>. Modern machines expose instructions, giving the programmer the ability to fiddle with memory atomically. Capabilities vary by processor, as you'd expect. LLVM and therefore Rust expose these atomic memory fiddling capabilities through <kbd>AtomicPtr</kbd>, allowing the range of pointer fiddling in the sequential language but atomically. What this means, in practice, is that we can start setting up happens-before/synchronizes-with causality relationships for pointer manipulation, which is essential for building data structures.</p>
+<p>Here's the next part:</p>
+<pre style="padding-left: 30px">struct Node&lt;T&gt; {
+    value: *const T,
+    next: AtomicPtr&lt;Node&lt;T&gt;&gt;,
+}
+
+impl&lt;T&gt; Default for Node&lt;T&gt; {
+    fn default() -&gt; Self {
+        Node {
+            value: null_mut(),
+            next: AtomicPtr::default(),
+        }
+    }
+}
+
+impl&lt;T&gt; Node&lt;T&gt; {
+    fn new(val: T) -&gt; Self {
+        Node {
+            value: Box::into_raw(Box::new(val)),
+            next: AtomicPtr::default(),
+        }
+    }
+}</pre>
+<p>The interior of deque from the previous chapter was a single, contiguous block. That's not the approach we're taking here. Instead, every element inserted into the queue will get a <kbd>Node</kbd> and that <kbd>Node</kbd> will point to the next <kbd>Node</kbd>, which may or may not exist yet. It's a linked list. The contiguous block approach is a bit harder to pull off in an atomic context—though it is entirely possible and there are discussions in the <em>Further reading</em> section papers—and would come down to a linked list of contiguous blocks. It's more trouble than it's worth for our purposes here:</p>
+<pre>struct InnerQueue&lt;T&gt; {
+    head: AtomicPtr&lt;Node&lt;T&gt;&gt;,
+    tail: AtomicPtr&lt;Node&lt;T&gt;&gt;,
+}</pre>
+<p>One key thing to note is that <kbd>Node</kbd> holds a pointer to a heap allocated <kbd>T</kbd>, not the <kbd>T</kbd> directly. In the preceding code, we have the <kbd>InnerQueue&lt;T&gt;</kbd> of <kbd>Queue&lt;T&gt;</kbd>, pulling the usual inner/outer structure detailed elsewhere in this book and in <kbd>rustc</kbd>. Why is it important to note that <kbd>Node</kbd> doesn't hold its <kbd>T</kbd> directly? The value inside of the head of the <kbd>Queue&lt;T&gt;</kbd> is never inspected. The head of the <kbd>Queue</kbd> is a sentinel. When the <kbd>InnerQueue</kbd> is created, we'll see the following:</p>
+<pre style="padding-left: 30px">impl&lt;T&gt; InnerQueue&lt;T&gt; {
+    pub fn new() -&gt; Self {
+        let node = Box::into_raw(Box::new(Node::default()));
+        InnerQueue {
+            head: AtomicPtr::new(node),
+            tail: AtomicPtr::new(node),
+        }
+    }</pre>
+<p>Both the <kbd>head</kbd> and <kbd>tail</kbd> of the <kbd>InnerQueue</kbd> point to the same nonsense-valued <kbd>Node</kbd>, as expected. The value at the outset is, in fact, null. Atomic data structures have issues with memory reclamation in that coordinating drops is problematic and must be done only once. It's possible to alleviate this issue somewhat by relying on Rust's type system, but it's still a non-trivial project and is an active area of research, generally. Here, we note that we're careful to hand out the ownership of the element only once. Being a raw pointer, it can be given away more than once at a time, but that path leads to double-frees. <kbd>InnerQueue</kbd> converts <kbd>*const T</kbd> into <kbd>T</kbd>—an unsafe operation—and just never dereferences the <kbd>*const T</kbd> again, allowing the caller to do the drop in its own sweet time:</p>
+<pre>    pub unsafe fn enq(&amp;mut self, val: T) -&gt; () {
+        let node = Box::new(Node::new(val));
+        let node: *mut Node&lt;T&gt; = Box::into_raw(node);
+
+        loop {
+            let tail: *mut Node&lt;T&gt; = self.tail.load(Ordering::Acquire);
+            let next: *mut Node&lt;T&gt; = <br/>            (*tail).next.load(Ordering::Relaxed);
+            if tail == self.tail.load(Ordering::Relaxed) {
+                if next.is_null() {
+                    if (*tail).next.compare_and_swap(next, node, <br/>                     Ordering::Relaxed) == next {
+                        self.tail.compare_and_swap(tail, node, <br/>                         Ordering::Release);
+                        return;
+                    }
+                }
+            } else {
+                self.tail.compare_and_swap(tail, next, <br/>                Ordering::Release);
+            }
+        }
+    }</pre>
+<p>This is the <kbd>enq</kbd> operation, marked unsafe because of the raw pointer manipulation going on. That's an important point to consider—<kbd>AtomicPtr</kbd> is necessarily going to be done with raw pointers. There's a lot going on here, so let's break it up into smaller chunks:</p>
+<pre>    pub unsafe fn enq(&amp;mut self, val: T) -&gt; () {
+        let node = Box::new(Node::new(val));
+        let node: *mut Node&lt;T&gt; = Box::into_raw(node);</pre>
+<p>Here, we're constructing the <kbd>Node</kbd> for <kbd>val</kbd>. Notice we're using the same boxing, the <kbd>into_raw</kbd> approach used so often in previous chapters. This node doesn't have a place in the queue yet and the calling thread does not hold an exclusive lock over the queue. Insertion will have to take place in the midst of other insertions:</p>
+<pre>        loop {
+            let tail: *mut Node&lt;T&gt; = self.tail.load(Ordering::Acquire);
+            let next: *mut Node&lt;T&gt; = <br/>            (*tail).next.load(Ordering::Relaxed);</pre>
+<p>With that in mind, it's entirely possible that an insertion attempt can fail. The enqueing of an element in a queue takes place at the <kbd>tail</kbd>, the pointer to which we load up and call last. The next node after <kbd>tail</kbd> is called <kbd>next</kbd>. In a sequential queue, we'd be guaranteed that the next of <kbd>tail</kbd> is null, but that's not so here. Consider that between the load of the <kbd>tail</kbd> pointer and the load of the <kbd>next</kbd> pointer an <kbd>enq</kbd> run by another thread may have already completed.</p>
+<p>Enqueing is, then, an operation that might take several attempts before we hit just the right conditions for it to succeed. Those conditions are last still being the <kbd>tail</kbd> of the structure and next being <kbd>null</kbd>:</p>
+<pre>            if tail == self.tail.load(Ordering::Relaxed) {
+                if next.is_null() {</pre>
+<p>Note that the first load of <kbd>tail</kbd> is <kbd>Acquire</kbd> and each of the possible stores of it, in either branch, are <kbd>Release</kbd>. This satisfies our <kbd>Acquire</kbd>/<kbd>Release</kbd> needs, with regard to locking primitives. All other stores and loads here are conspicuously <kbd>Relaxed</kbd>. How can we be sure we're not accidentally stomping writes or, since this is a linked list, cutting them loose in memory? That's where the <kbd>AtomicPtr</kbd> comes in:</p>
+<pre>                    if (*tail).next.compare_and_swap(next, node, <br/>                     Ordering::Relaxed) == next {
+                        self.tail.compare_and_swap(tail, node, <br/>                         Ordering::Release);
+                        return;
+                    }</pre>
+<p>It <em>is</em> entirely possible that by the time we've detected the proper conditions for enqueing another thread will have been scheduled in, have detected the proper conditions for enqueing, and have been enqueued. We attempt to slot our new node in with <kbd>(*last).next.compare_and_swap(next, node, Ordering::Relaxed)</kbd>, that is, we compare the current next of last and if and only if that succeeds—that's the <kbd>== next</kbd> bit—do we attempt to set <kbd>tail</kbd> to the node pointer, again with a compare and swap. If both of those succeed then the new element has been fully enqueued. It's possible that the swap of <kbd>tail</kbd> will fail, however, in which case the linked list is correctly set up but the <kbd>tail</kbd> pointer is off. Both the <kbd>enq</kbd> and <kbd>deq</kbd> operations must be aware they could stumble into a situation where the <kbd>tail</kbd> pointer needs to be adjusted. That is in fact how the <kbd>enq</kbd> function finishes off:</p>
+<pre>                }
+            } else {
+                self.tail.compare_and_swap(tail, next, <br/>                 Ordering::Release);
+            }
+        }
+    }</pre>
+<p>On an x86, all of these <kbd>Relaxed</kbd> operations are more strict but on ARMv8 there will be all sorts of reordering. It's very important, and difficult, to establish a causal relationship between all modifications. If, for example, we swapped the <kbd>tail</kbd> pointer and then the <kbd>next</kbd> of the <kbd>tail</kbd> pointer, we'd open ourselves up to breaking the linked list, or making whole isolated chains depending on the threads' view of memory. The <kbd>deq</kbd> operation is similar:</p>
+<pre>    pub unsafe fn deq(&amp;mut self) -&gt; Option&lt;T&gt; {
+        let mut head: *mut Node&lt;T&gt;;
+        let value: T;
+        loop {
+            head = self.head.load(Ordering::Acquire);
+            let tail: *mut Node&lt;T&gt; = self.tail.load(Ordering::Relaxed);
+            let next: *mut Node&lt;T&gt; = <br/>            (*head).next.load(Ordering::Relaxed);
+            if head == self.head.load(Ordering::Relaxed) {
+                if head == tail {
+                    if next.is_null() {
+                        return None;
+                    }
+                    self.tail.compare_and_swap(tail, next, <br/>                     Ordering::Relaxed);
+                } else {
+                    let val: *mut T = (*next).value as *mut T;
+                    if self.head.compare_and_swap(head, next, <br/>                    Ordering::Release) == head {
+                        value = *Box::from_raw(val);
+                        break;
+                    }
+                }
+            }
+        }
+        let head: Node&lt;T&gt; = *Box::from_raw(head);
+        drop(head);
+        Some(value)
+    }
+}</pre>
+<p>The function is a loop, like <kbd>enq</kbd>, in which we search for the correct conditions and circumstance to dequeue an element. The first outer if clause checks that head hasn't shifted on us, while the inner first branch is to do with a queue that has no elements, where first and last are pointers to the same storage. Note here that if next is not null we try and patch up a partially completed linked list of nodes before looping back around again for another pass at dequeing.</p>
+<p>This is because, as discussed previously, <kbd>enq</kbd> may not fully succeed. The second inner loop is hit when <kbd>head</kbd> and <kbd>tail</kbd> are not equal, meaning there's an element to be pulled. As the inline comment explains, we give out the ownership of the element <kbd>T</kbd> when the first hasn't shifted on us but are careful not to dereference the pointer until we can be sure we're the only thread that will ever manage that. We can be on account of only one thread that will ever manage to swap the particular first and next pair the calling thread currently holds.</p>
+<p>After all of that, the actual outer <kbd>Queue&lt;T&gt;</kbd> is a touch anti-climactic:</p>
+<pre style="padding-left: 30px">pub struct Queue&lt;T&gt; {
+    inner: *mut InnerQueue&lt;T&gt;,
+}
+
+impl&lt;T&gt; Clone for Queue&lt;T&gt; {
+    fn clone(&amp;self) -&gt; Queue&lt;T&gt; {
+        Queue { inner: self.inner }
+    }
+}
+
+impl&lt;T&gt; Queue&lt;T&gt; {
+    pub fn new() -&gt; Self {
+        Queue {
+            inner: Box::into_raw(Box::new(InnerQueue::new())),
+        }
+    }
+
+    pub fn enq(&amp;self, val: T) -&gt; () {
+        unsafe { (*self.inner).enq(val) }
+    }
+
+    pub fn deq(&amp;self) -&gt; Option&lt;T&gt; {
+        unsafe { (*self.inner).deq() }
+    }</pre>
+<p>We've already reasoned our way through the implementation and, hopefully, you, dear reader, are convinced that the idea should function. Where the rubber meets the road is in testing:</p>
+<pre style="padding-left: 30px">#[cfg(test)]
+mod test {
+    extern crate quickcheck;
+
+    use super::*;
+    use std::collections::VecDeque;
+    use std::sync::atomic::AtomicUsize;
+    use std::thread;
+    use std::sync::Arc;
+    use self::quickcheck::{Arbitrary, Gen, QuickCheck, TestResult};
+
+    #[derive(Clone, Debug)]
+    enum Op {
+        Enq(u32),
+        Deq,
+    }
+
+    impl Arbitrary for Op {
+        fn arbitrary&lt;G&gt;(g: &amp;mut G) -&gt; Self
+        where
+            G: Gen,
+        {
+            let i: usize = g.gen_range(0, 2);
+            match i {
+                0 =&gt; Op::Enq(g.gen()),
+                _ =&gt; Op::Deq,
+            }
+        }
+    }</pre>
+<p>This is the usual <kbd>test</kbd> preamble that we've seen elsewhere in the book. We define an <kbd>Op</kbd> enumeration to drive an interpreter style <kbd>quickcheck test</kbd>, which we call here <kbd>sequential</kbd>:</p>
+<pre>    #[test]
+    fn sequential() {
+        fn inner(ops: Vec&lt;Op&gt;) -&gt; TestResult {
+            let mut vd = VecDeque::new();
+            let q = Queue::new();
+
+            for op in ops {
+                match op {
+                    Op::Enq(v) =&gt; {
+                        vd.push_back(v);
+                        q.enq(v);
+                    }
+                    Op::Deq =&gt; {
+                        assert_eq!(vd.pop_front(), q.deq());
+                    }
+                }
+            }
+            TestResult::passed()
+        }
+        QuickCheck::new().quickcheck(inner as fn(Vec&lt;Op&gt;) -&gt; <br/>        TestResult);
+    }</pre>
+<p>We have a <kbd>VecDeque</kbd> as the model; we know it's a proper queue. Then, without dipping into any kind of real concurrency, we confirm that <kbd>Queue</kbd> behaves similarly to a <kbd>VecDeque</kbd>. At least in a sequential setting, <kbd>Queue</kbd> will work. Now, for a parallel <kbd>test</kbd>:</p>
+<pre>    fn parallel_exp(total: usize, enqs: u8, deqs: u8) -&gt; bool {
+        let q = Queue::new();
+        let total_expected = total * (enqs as usize);
+        let total_retrieved = Arc::new(AtomicUsize::new(0));
+
+        let mut ejhs = Vec::new();
+        for _ in 0..enqs {
+            let mut q = q.clone();
+            ejhs.push(
+                thread::Builder::new()
+                    .spawn(move || {
+                        for i in 0..total {
+                            q.enq(i);
+                        }
+                    })
+                    .unwrap(),
+            );
+        }
+
+        let mut djhs = Vec::new();
+        for _ in 0..deqs {
+            let mut q = q.clone();
+            let total_retrieved = Arc::clone(&amp;total_retrieved);
+            djhs.push(
+                thread::Builder::new()
+                    .spawn(move || {
+                        while total_retrieved.load(Ordering::Relaxed) <br/>                        != total_expected {
+                            if q.deq().is_some() {
+                                total_retrieved.fetch_add(1, <br/>                                Ordering::Relaxed);
+                            }
+                        }
+                    })
+                    .unwrap(),
+            );
+        }
+
+        for jh in ejhs {
+            jh.join().unwrap();
+        }
+        for jh in djhs {
+            jh.join().unwrap();
+        }
+
+        assert_eq!(total_retrieved.load(Ordering::Relaxed), <br/>        total_expected);
+        true
+    }</pre>
+<p>We set up two groups of threads, one responsible for enqueing and the other for dequeing. The enqueuing threads push a <kbd>total</kbd> number of items through the <kbd>Queue</kbd> and the dequeuers pull until a counter—shared between each of the dequeuers—hits bingo. Finally, back in the main <kbd>test</kbd> thread, we confirm that the total number of retrieved items is the same as the expected number of items. It's possible that our dequeing threads will read <em>past the end</em> of the queue because of a race between the check on the while loop and the call of <kbd>q.deq</kbd>, which works in our favor because confirming the queue allows the deque of no more elements than were enqueued. That, and there are no double-free crashes when the <kbd>test</kbd> is run. This inner <kbd>test</kbd> function is used twice, once in repeated runs and then again in a <kbd>quickcheck</kbd> setup:</p>
+<pre>    #[test]
+    fn repeated() {
+        for i in 0..10_000 {
+            println!("{}", i);
+            parallel_exp(73, 2, 2);
+        }
+    }
+
+    #[test]
+    fn parallel() {
+        fn inner(total: usize, enqs: u8, deqs: u8) -&gt; TestResult {
+            if enqs == 0 || deqs == 0 {
+                TestResult::discard()
+            } else {
+                TestResult::from_bool(parallel_exp(total, enqs, deqs))
+            }
+        }
+        QuickCheck::new().quickcheck(inner as fn(usize, u8, u8) -&gt; <br/>        TestResult);
+    }
+}</pre>
+<p>What's wrong here? If you run the <kbd>test</kbd> suite, you may or may not hit one of the issues. They are fairly improbable, though we'll shortly see a way to reliably trigger the worst. The first issue our implementation runs into is the ABA problem. In a compare-and-swap operation, pointer <kbd>A</kbd> is to be swapped by some thread with <kbd>B</kbd>. Before the check can be completed in the first thread, another thread swaps <kbd>A</kbd> with <kbd>C</kbd> and then <kbd>C</kbd> back again to <kbd>A</kbd>. The first thread is then rescheduled and performs its compare-and-swap of <kbd>A</kbd> to <kbd>B</kbd>, none the wiser that <kbd>A</kbd> is not really the <kbd>A</kbd> it had at the start of the swap. This will cause chunks of the queue's linked list to point incorrectly, possibly into the memory that the queue does not rightly own. That's bad enough. What could be worse?</p>
+<p>Let's cause a use-after-free violation with this structure. Our demonstration program is short and lives at <kbd>src/bin/queue_spin.rs</kbd>:</p>
+<pre style="padding-left: 30px">extern crate synchro;
+
+use synchro::Queue;
+use std::thread;
+
+fn main() {
+    let q = Queue::new();
+
+    let mut jhs = Vec::new();
+
+    for _ in 0..4 {
+        let eq = q.clone();
+        jhs.push(thread::spawn(move || {
+            let mut i = 0;
+            loop {
+                eq.enq(i);
+                i += 1;
+                eq.deq();
+            }
+        }))
+    }
+
+    for jh in jhs {
+        jh.join().unwrap();
+    }
+}</pre>
+<p>The program creates four threads, each of which enqueue and dequeue in sequence as rapidly as possible with no coordination between them. It's important to have at least two threads, else the queue is used sequentially and the issue does not exist:</p>
+<pre><strong>&gt; time cargo run --bin queue_spin
+    Finished dev [unoptimized + debuginfo] target(s) in 0.0 secs
+     Running `target/debug/queue_spin`
+Segmentation fault
+
+real    0m0.588s
+user    0m0.964s
+sys     0m0.016s</strong></pre>
+<p>Ouch. That took no time at all. Let's have a look at the program in a debugger. We'll use <kbd>lldb</kbd>, but if you're using <kbd>gdb</kbd>, the results will be the same:</p>
+<pre><strong>&gt; lldb-3.9 target/debug/queue_spin
+(lldb) target create "target/debug/queue_spin"
+Current executable set to 'target/debug/queue_spin' (x86_64).
+(lldb) run
+Process 12917 launched: '/home/blt/projects/us/troutwine/concurrency_in_rust/external_projects/synchro/target/debug/queue_spin' (x86_64)
+Process 12917 stopped
+* thread #2: tid = 12920, 0x0000555555560585 queue_spin`_$LT$synchro..queue..InnerQueue$LT$T$GT$$GT$::deq::heefaa8c9b1d410ee(self=0x00007ffff6c2a010) + 261 at queue.rs:78, name = 'queue_spin', stop reason = signal SIGSEGV: invalid address (fault address: 0x0)
+    frame #0: 0x0000555555560585 queue_spin`_$LT$synchro..queue..InnerQueue$LT$T$GT$$GT$::deq::heefaa8c9b1d410ee(self=0x00007ffff6c2a010) + 261 at queue.rs:78
+   75                       }
+   76                       self.tail.compare_and_swap(tail, next, <br/>                            Ordering::Relaxed);
+   77                   } else {
+-&gt; 78                       let val: *mut T = (*next).value as *mut T;
+   79                       if self.head.compare_and_swap(head, next, <br/>                            Ordering::Release) == head {
+   80                           value = *Box::from_raw(val);
+   81                           break;
+  thread #3: tid = 12921, 0x0000555555560585 queue_spin`_$LT$synchro..queue..InnerQueue$LT$T$GT$$GT$::deq::heefaa8c9b1d410ee(self=0x00007ffff6c2a010) + 261 at queue.rs:78, name = 'queue_spin', stop reason = signal SIGSEGV: invalid address (fault address: 0x0)
+    frame #0: 0x0000555555560585 queue_spin`_$LT$synchro..queue..InnerQueue$LT$T$GT$$GT$::deq::heefaa8c9b1d410ee(self=0x00007ffff6c2a010) + 261 at queue.rs:78
+   75                       }
+   76                       self.tail.compare_and_swap(tail, next, <br/>                            Ordering::Relaxed);
+   77                   } else {
+-&gt; 78                       let val: *mut T = (*next).value as *mut T;
+   79                       if self.head.compare_and_swap(head, next, <br/>                            Ordering::Release) == head {
+   80                           value = *Box::from_raw(val);
+   81                           break;</strong></pre>
+<p>Well look at that! And, just to confirm:</p>
+<pre><strong>(lldb) p next
+(synchro::queue::Node&lt;i32&gt; *) $0 = 0x0000000000000000</strong></pre>
+<p>Can we turn up another? Yes:</p>
+<pre><strong>(lldb) Process 12893 launched: '/home/blt/projects/us/troutwine/concurrency_in_rust/external_projects/synchro/target/debug/queue_spin' (x86_64)
+Process 12893 stopped
+* thread #2: tid = 12896, 0x000055555555fb3e queue_spin`core::sync::atomic::atomic_load::hd37078e3d501f11f(dst=0x0000000000000008, order=Relaxed) + 78 at atomic.rs:1502, name = 'queue_spin', stop reason = signal SIGSEGV: invalid address (fault address: 0x8)
+    frame #0: 0x000055555555fb3e queue_spin`core::sync::atomic::atomic_load::hd37078e3d501f11f(dst=0x0000000000000008, order=Relaxed) + 78 at atomic.rs:1502
+  thread #3: tid = 12897, 0x000055555555fb3e queue_spin`core::sync::atomic::atomic_load::hd37078e3d501f11f(dst=0x0000000000000008, order=Relaxed) + 78 at atomic.rs:1502, name = 'queue_spin', stop reason = signal SIGSEGV: invalid address (fault address: 0x8)
+    frame #0: 0x000055555555fb3e queue_spin`core::sync::atomic::atomic_load::hd37078e3d501f11f(dst=0x0000000000000008, order=Relaxed) + 78 at atomic.rs:1502
+  thread #4: tid = 12898, 0x000055555555fb3e queue_spin`core::sync::atomic::atomic_load::hd37078e3d501f11f(dst=0x0000000000000008, order=Relaxed) + 78 at atomic.rs:1502, name = 'queue_spin', stop reason = signal SIGSEGV: invalid address (fault address: 0x8)
+    frame #0: 0x000055555555fb3e queue_spin`core::sync::atomic::atomic_load::hd37078e3d501f11f(dst=0x0000000000000008, order=Relaxed) + 78 at atomic.rs:1502
+  thread #5: tid = 12899, 0x000055555555fb3e queue_spin`core::sync::atomic::atomic_load::hd37078e3d501f11f(dst=0x0000000000000008, order=Relaxed) + 78 at atomic.rs:1502, name = 'queue_spin', stop reason = signal SIGSEGV: invalid address (fault address: 0x8)
+    frame #0: 0x000055555555fb3e</strong></pre>
+<pre><strong>queue_spin`core::sync::atomic::atomic_load::hd37078e3d501f11f(dst=0x0000000000000008, order=Relaxed) + 78 at atomic.rs:1502</strong></pre>
+<p>In the first example, the head is pointing to null, which will happen when the queue is empty, but this particular branch is only hit when the queue is not empty. What's going on here? It turns out there's a nasty race and its down to deallocation. Let's look at <kbd>deq</kbd> again, this time with line numbers:</p>
+<pre> 64    pub unsafe fn deq(&amp;mut self) -&gt; Option&lt;T&gt; {
+ 65        let mut head: *mut Node&lt;T&gt;;
+ 66        let value: T;
+ 67        loop {
+ 68            head = self.head.load(Ordering::Acquire);
+ 69            let tail: *mut Node&lt;T&gt; = <br/>               self.tail.load(Ordering::Relaxed);
+ 70            let next: *mut Node&lt;T&gt; = <br/>               (*head).next.load(Ordering::Relaxed);
+ 71            if head == self.head.load(Ordering::Relaxed) {
+ 72                if head == tail {
+ 73                    if next.is_null() {
+ 74                        return None;
+ 75                    }
+ 76                    self.tail.compare_and_swap(tail, next, <br/>                       Ordering::Relaxed);
+ 77                } else {
+ 78                    let val: *mut T = (*next).value as *mut T;
+ 79                    if self.head.compare_and_swap(head, next,  <br/>                       Ordering::Release) == head {
+ 80                        value = *Box::from_raw(val);
+ 81                        break;
+ 82                    }
+ 83                }
+ 84            }
+ 85        }
+ 86        let head: Node&lt;T&gt; = *Box::from_raw(head);
+ 87        drop(head);
+ 88        Some(value)
+ 89    }</pre>
+<p>Say we have four threads, <kbd>A</kbd> through <kbd>D</kbd>. Thread <kbd>A</kbd> gets to line 78 and is stopped. Thread <kbd>A</kbd> is now in possession of a <kbd>head</kbd>, a <kbd>tail</kbd>, and a <kbd>next</kbd>, which point to a sensible linked-list in memory. Now, threads <kbd>B</kbd>, <kbd>C</kbd>, and <kbd>D</kbd> each perform multiple <kbd>enq</kbd> and <kbd>deq</kbd> operations such that when <kbd>A</kbd> wakes up the linked list pointed to by the head of <kbd>A</kbd> is long gone. In fact, head itself is actually deallocated, but <kbd>A</kbd> gets lucky and the OS hasn't overwritten its memory yet.</p>
+<p>Thread <kbd>A</kbd> wakes up and performs line 78 but next now points off to nonsense and the whole thing crashes. Alternatively, say we have two threads, <kbd>A</kbd> and <kbd>B</kbd>. Thread <kbd>A</kbd> wakes up and advances through to line 70 and is stopped. Thread <kbd>B</kbd> wakes up and is very fortunate and advances all the way through to line 88, deallocating head. The OS is feeling its oats and overwrites the memory that <kbd>A</kbd> is pointing at. Thread <kbd>A</kbd> then wakes up, fires <kbd>(*head).next.load(Ordering::Relaxed)</kbd>, and subsequently crashes. There are many alternatives here. What's common between them all is deallocation happening while there's still outstanding references to one or more nodes. In fact, Michael and Scott's paper does mention this as a problem, but briefly in a way that's easy to overlook:</p>
+<div class="packt_quote">
+<p>"To obtain consistent values of various pointers we rely on sequences of reads that re-check earlier values to be sure they haven't changed. These sequences of reads are similar to, but simpler than, the snapshots of Prakash et al. (we need to check only one shared variable rather than two). A similar technique can be used to prevent the race condition in Stone's blocking algorithm. We use Treiber's simple and efficient non-blocking stack algorithm to implement a non-blocking free list."</p>
+</div>
+<p>The key ideas here are <em>sequences of reads that re-check earlier values</em> and <em>free list</em>. What we've seen by inspection is that it's entirely possible to compare-and-swap a value that has changed—the ABA problem—which leaves our implementation pointing off into space. Also, immediately deallocating nodes will leave us open to crashes even absent a compare-and-swap. What Michael and Scott have done is create a minimal kind of memory management; rather than delete nodes, they move them into a <em>free list</em> to be reused or deleted at a later time. Free lists can be thread-local, in which case you avoid expensive synchronization, but it's still kind of tricky to be sure your thread-local free list doesn't have the same pointer as another thread.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

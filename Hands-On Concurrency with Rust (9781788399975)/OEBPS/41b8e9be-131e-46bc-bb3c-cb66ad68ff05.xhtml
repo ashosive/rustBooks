@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Naive HashMap</h1>
+                </header>
+            
+            <article>
+                
+<p>How else could we implement an associative array in Rust and how would it compare to standard library's <kbd>HashMap</kbd>? The standard library <kbd>HashMap</kbd> is clever, clearly, storing just enough information to reduce the total probes from ideal offsets by sharing information between modifications to the underlying table. In fact, the comments in the table module assert that the design we've just worked through is <em>a lot faster</em> than a table structured as <kbd>Vec&lt;Option&lt;(u64, K, V)&gt;&gt;</kbd>—where <kbd>u64</kbd> is the key hash, but presumably still using Robin Hood hashing and linear probing. What if we went even simpler? We'll support only two operations—<kbd>insert</kbd> and <kbd>lookup</kbd>—to keep things straightforward for ourselves. We'll also keep more or less the same type constraints as <kbd>HashMap</kbd> so we compare similar things.</p>
+<p>Start a new Rust project called <kbd>naive_hashmap</kbd>:</p>
+<pre><strong>&gt; cargo new naive_hashmap
+     Created library `naive_hashmap` project</strong></pre>
+<p>Edit <kbd>naive_hashmap/Cargo.toml</kbd> to look like so:</p>
+<pre>[package]
+name = "naive_hashmap"
+version = "0.1.0"
+
+[dependencies]
+rand = "0.4.2"
+
+[dev-dependencies]
+quickcheck = "0.6"
+criterion = "0.1"
+
+[[bench]]
+name = "naive"
+harness = false
+
+[[bin]]
+name = "naive_interpreter"
+doc = false
+
+[[bin]]
+name = "standard"
+doc = false
+
+[[bin]]
+name = "naive"
+doc = false
+
+[[bench]]
+name = "specialized"
+harness = false
+
+[[bin]]
+name = "specialized_interpreter"
+doc = false
+
+[[bin]]
+name = "specialized"
+doc = false</pre>
+<p>Don't worry too much right now about some of the development dependencies, they'll be explained in due course. Please note that in the following discussion we will run compilation commands against the project before all the code has been discussed. If you are following along with the book's pre-written source code open already, you should have no issues. If you are writing the source out as the book goes along, you will need to comment targets out. Now, open <kbd>naive_hashmap/src/lib.rs</kbd> and add the following preamble:</p>
+<pre style="padding-left: 30px">#[cfg(test)]
+extern crate quickcheck;
+
+use std::hash::{BuildHasher, Hash, Hasher};
+use std::borrow::Borrow;
+use std::collections::hash_map::RandomState;
+use std::{cmp, mem, ptr};</pre>
+<p>Most crate roots begin with a fairly long preamble, and <kbd>naive_hashmap</kbd> is no exception. Next up, our <kbd>HashMap</kbd> struct:</p>
+<pre style="padding-left: 30px">#[derive(Default)]
+pub struct HashMap&lt;K, V, S = RandomState&gt;
+where
+    K: Eq,
+    V: ::std::fmt::Debug,
+{
+    hash_builder: S,
+    data: Vec&lt;(u64, K, V)&gt;,
+}</pre>
+<p>How does our naive <kbd>HashMap</kbd> differ from the standard library's <kbd>HashMap</kbd> we've seen so far? The naive implementation maintains the parameterized hasher and type constraints, plus a constraint on <kbd>V</kbd> to implement the <kbd>Debug</kbd> trait for ease of fiddling. The primary difference, in terms of underlying structure, is the use of a <kbd>Vec</kbd>—as called out in the comments of the standard library <kbd>HashMap</kbd>—but without an <kbd>Option</kbd> wrapper. We're not implementing a delete operation so there's no reason to have an <kbd>Option</kbd> but, even if we were, the plan for this implementation would be to rely solely on <kbd>Vec::remove</kbd>. The fact that it is less than ideal that <kbd>Vec::remove</kbd> shifts all elements from the right of the removal index to the left should be well understood. Folks, this won't be a fast implementation. Now:</p>
+<pre style="padding-left: 30px">impl&lt;K: Eq, V&gt; HashMap&lt;K, V, RandomState&gt;
+where
+    K: Eq + Hash,
+    V: ::std::fmt::Debug,
+{
+    pub fn new() -&gt; HashMap&lt;K, V&gt; {
+        HashMap {
+            hash_builder: RandomState::new(),
+            data: Vec::new(),
+        }
+    }
+}
+
+fn make_hash&lt;T: ?Sized, S&gt;(hash_builder: &amp;S, t: &amp;T) -&gt; u64
+where
+    T: Hash,
+    S: BuildHasher,
+{
+    let mut state = hash_builder.build_hasher();
+    t.hash(&amp;mut state);
+    state.finish()
+}
+
+impl&lt;K, V, S&gt; HashMap&lt;K, V, S&gt;
+where
+    K: Eq + Hash,
+    S: BuildHasher,
+    V: ::std::fmt::Debug,
+{
+    pub fn with_hasher(hash_builder: S) -&gt; HashMap&lt;K, V, S&gt; {
+        HashMap {
+            hash_builder: hash_builder,
+            data: Vec::new(),
+        }
+    }</pre>
+<p class="mce-root">Our naive implementation is following along with the standard library here, implementing a <kbd>HashMap</kbd> that is parameterized on <kbd>RandomState</kbd>—so users don't have to think about the underlying hasher—and in which the hasher is swappable, via <kbd>HashMap::with_hasher</kbd>. The Rust team chose to implement <kbd>RandomState</kbd> in terms of a verified cryptographically secure hash algorithm, befitting a language that is intended for use on the public internet. Some users won't desire this property—opting instead for a much faster, potentially vulnerable hash—and will swap <kbd>RandomState</kbd> out for something else. Our naive <kbd>HashMap</kbd> retains this ability.</p>
+<p>Let's examine insertion into our naive <kbd>HashMap</kbd>:</p>
+<pre>    pub fn insert(&amp;mut self, k: K, v: V) -&gt; Option&lt;V&gt; {
+        let hash = make_hash(&amp;self.hash_builder, &amp;k);
+
+        let end = self.data.len();
+        for idx in 0..end {
+            match self.data[idx].0.cmp(&amp;hash) {
+                cmp::Ordering::Greater =&gt; {
+                    self.data.insert(idx, (hash, k, v));
+                    return None;
+                }
+                cmp::Ordering::Less =&gt; continue,
+                cmp::Ordering::Equal =&gt; {
+                    let old = mem::replace(&amp;mut self.data[idx].2, v);
+                    return Some(old);
+                }
+            }
+        }
+        self.data.push((hash, k, v));
+        None
+    }</pre>
+<p>Our naive implementation maintains the API of the standard library <kbd>HashMap</kbd> but that's about it. The key is hashed and then a linear search is done through the entire data store to find an index in that store where one of two conditions hold:</p>
+<ul>
+<li>Our new hash is greater than some hash in the store, in which case we can insert our key/value pair</li>
+<li>Our new hash is equal to some hash in the store, in which case we can replace the existing value</li>
+</ul>
+<p>Key/value pairs are stored in terms of their ordered hashes. The expense of an insert includes:</p>
+<ul>
+<li>Hashing the key</li>
+<li>Searching for the insert index, a linear operation to the number of stored key/value pairs</li>
+<li>Potentially shifting key/value pairs in memory to accommodate a new key to the store</li>
+</ul>
+<p>Lookup follows a similar scheme:</p>
+<pre>    pub fn get&lt;Q: ?Sized&gt;(&amp;mut self, k: &amp;Q) -&gt; Option&lt;&amp;V&gt;
+    where
+        K: Borrow&lt;Q&gt; + ::std::fmt::Debug,
+        Q: Hash + Eq + ::std::fmt::Debug,
+    {
+        let hash = make_hash(&amp;self.hash_builder, k);
+
+        for &amp;(bucket_hash, _, ref v) in &amp;self.data {
+            if hash == bucket_hash {
+                return Some(v);
+            }
+        }
+        None
+    }</pre>
+<p>The key is hashed and a linear search is done for that exact hash in storage. Here, we only pay the cost for:</p>
+<ul>
+<li>Hashing the key</li>
+<li>Searching for the retrieval offset, if one exists</li>
+</ul>
+<p>Let's take a moment and consider this before asking ourselves if our program is <em>fast</em> if it is <em>correct</em>. The usual way of demonstrating fitness for purpose of software is through unit testing, a minimal setup for which is built right into the Rust language. Unit testing is two processes wrapped into a single method. When writing unit tests, a programmer will:</p>
+<ul>
+<li>Produce <em>example data</em> that exercises some code path in the software</li>
+<li>Write further code to demonstrate that when the example data is applied to the system under test, a desirable property/properties holds</li>
+</ul>
+<p>This is a good testing methodology for demonstrating that the happy path of a system under test works as expected. The weak point of unit testing comes in the first process, where the programmer must think very hard and produce an example dataset that exercises the correct code paths, demonstrates the lack of edge cases, and so on. Human beings are poor at this task, owing to it being tedious, biased toward demonstrating the functioning of a thing made by one's own hands, chronic blind spots, or otherwise. What we <em>are</em> pretty good at doing is cooking up high-level properties for our systems that must always hold or hold in particular situations. Fortunately for us programmers, <em>computers</em> are exceptionally good at doing tedious, repetitive tasks and the generation of example data for tests is such a thing.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

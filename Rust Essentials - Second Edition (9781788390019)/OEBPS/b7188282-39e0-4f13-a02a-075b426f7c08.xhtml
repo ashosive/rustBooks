@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style00.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style01.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Concurrency and threads</h1>
+                </header>
+            
+            <article>
+                
+<p>A system is concurrent when several computations are executing at the same time and potentially interacting with each other. The computations can only run in parallel (that is, simultaneously) when they are executing on different cores or processors.</p>
+<p>An executing Rust program consists of a collection of native <strong>Operating System</strong> (<strong>OS</strong>) threads; the OS is also responsible for their scheduling. The unit of computation in Rust is called a <kbd>thread</kbd>, which is a type defined in the <kbd>std::thread</kbd> module. Each thread has its own stack and local state.</p>
+<p>Until now, our Rust programs only had one thread, the <kbd>main</kbd> thread, corresponding with the execution of the <kbd>main()</kbd> function. But a Rust program can create lots of threads to work simultaneously when needed. Each <kbd>thread</kbd> (not only <kbd>main()</kbd>) can act as a parent and generate any number of children threads.</p>
+<p>Data can either be:</p>
+<ul>
+<li>Shared across threads (see the <span class="ChapterrefPACKT">shared mutable states through atomic types</span> section)</li>
+<li>Sent between threads (see the <span class="ChapterrefPACKT">communication through channels</span> section)</li>
+</ul>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

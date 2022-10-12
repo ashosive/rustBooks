@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Slices</h1>
+                </header>
+            
+            <article>
+                
+<p>What if you want to do something with a part of an array or vector? Perhaps your first idea is to copy that part out to another array, but Rust has a safer and more efficient solution: take a slice of the array. No copy is needed, instead you get a view into the existing array, like a string slice is a view into a string.</p>
+<p>As an example, suppose I only need the numbers <kbd>42</kbd>, <kbd>47</kbd>, and <kbd>45</kbd> from our vector <kbd>magic_numbers</kbd>. Then I can take the following slice:</p>
+<pre>let slc = &amp;magic_numbers[1..4]; // only the items 42, 47 and 45 </pre>
+<p>The starting index <kbd>1</kbd> is the index of <kbd>42</kbd>, the last index <kbd>4</kbd> points to <kbd>54</kbd>, but this item is not included. The <kbd>&amp;</kbd> shows that we are referencing an existing memory allocation.</p>
+<p>Slices share the following with vectors:</p>
+<ul>
+<li>They are generic and have type <kbd>&amp;[T]</kbd> for a type <kbd>T</kbd></li>
+<li>Their size does not have to be known at compile time</li>
+</ul>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

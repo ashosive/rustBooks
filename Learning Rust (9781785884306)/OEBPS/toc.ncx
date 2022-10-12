@@ -1,0 +1,384 @@
+<?xml version="1.0" encoding="utf-8" standalone="no" ?>
+<!DOCTYPE ncx PUBLIC "-//NISO//DTD ncx 2005-1//EN" "http://www.daisy.org/z3986/2005/ncx-2005-1.dtd">
+<ncx xmlns="http://www.daisy.org/z3986/2005/ncx/" version="2005-1">
+<head>
+<meta content="ID:ISBN:9781785884306" name="dtb:uid"/>
+<meta content="5" name="dtb:depth"/>
+<meta content="0" name="dtb:totalPageCount"/>
+<meta content="0" name="dtb:maxPageNumber"/>
+</head>
+<docTitle><text>Learning Rust</text></docTitle>
+<docAuthor><text>Paul Johnson, Vesa Kaihlavirta</text></docAuthor>
+<navMap><navPoint id="uuid-ec8e91ea-6a95-48c0-8864-73b23c0f1179" playOrder="1"><navLabel><text>Preface</text></navLabel><content src="ec8e91ea-6a95-48c0-8864-73b23c0f1179.xhtml"/><navPoint id="uuid-928247db-4b1d-49df-bba0-cd57e7d73062" playOrder="2"><navLabel><text>What this book covers</text></navLabel><content src="928247db-4b1d-49df-bba0-cd57e7d73062.xhtml"/></navPoint>
+<navPoint id="uuid-3f894e75-b7f6-42ad-a1e6-7b16bd28f7d7" playOrder="3"><navLabel><text>What you need for this book</text></navLabel><content src="3f894e75-b7f6-42ad-a1e6-7b16bd28f7d7.xhtml"/></navPoint>
+<navPoint id="uuid-8ae10273-019a-4232-b8e5-1d65338721bd" playOrder="4"><navLabel><text>Who this book is for</text></navLabel><content src="8ae10273-019a-4232-b8e5-1d65338721bd.xhtml"/></navPoint>
+<navPoint id="uuid-d2965b88-7e56-43d7-864f-7a5d80f7b8b0" playOrder="5"><navLabel><text>Conventions</text></navLabel><content src="d2965b88-7e56-43d7-864f-7a5d80f7b8b0.xhtml"/></navPoint>
+<navPoint id="uuid-355de38f-92a3-4a7d-855e-da90f6fbc60f" playOrder="6"><navLabel><text>Reader feedback</text></navLabel><content src="355de38f-92a3-4a7d-855e-da90f6fbc60f.xhtml"/></navPoint>
+<navPoint id="uuid-172ea809-92d0-4ce0-ac45-6c9e98ba78fc" playOrder="7"><navLabel><text>Customer support</text></navLabel><content src="172ea809-92d0-4ce0-ac45-6c9e98ba78fc.xhtml"/><navPoint id="uuid-a529eff5-4ce5-4caa-b05a-57b0cc15f390" playOrder="8"><navLabel><text>Downloading the example code</text></navLabel><content src="a529eff5-4ce5-4caa-b05a-57b0cc15f390.xhtml"/></navPoint>
+<navPoint id="uuid-412dec7d-30c6-4100-b790-5b90029d46bb" playOrder="9"><navLabel><text>Errata</text></navLabel><content src="412dec7d-30c6-4100-b790-5b90029d46bb.xhtml"/></navPoint>
+<navPoint id="uuid-5f2a7195-5325-46b9-b707-932efe4fcf73" playOrder="10"><navLabel><text>Piracy</text></navLabel><content src="5f2a7195-5325-46b9-b707-932efe4fcf73.xhtml"/></navPoint>
+<navPoint id="uuid-8f08bfad-9f5c-4b5f-bd1c-69f022992c00" playOrder="11"><navLabel><text>Questions</text></navLabel><content src="8f08bfad-9f5c-4b5f-bd1c-69f022992c00.xhtml"/></navPoint>
+</navPoint>
+</navPoint>
+<navPoint id="uuid-67a55e55-a5f7-4ced-a2ae-b81f77614eec" playOrder="12"><navLabel><text>Introducing and Installing Rust</text></navLabel><content src="67a55e55-a5f7-4ced-a2ae-b81f77614eec.xhtml"/><navPoint id="uuid-b21d6b5c-8207-4e6c-ab7d-797ff998a001" playOrder="13"><navLabel><text>Installing Rust</text></navLabel><content src="b21d6b5c-8207-4e6c-ab7d-797ff998a001.xhtml"/><navPoint id="uuid-a9389dbb-17a1-4960-9178-d5a466126a9d" playOrder="14"><navLabel><text>Installing rustup on Linux</text></navLabel><content src="a9389dbb-17a1-4960-9178-d5a466126a9d.xhtml"/></navPoint>
+<navPoint id="uuid-0ae30bb6-151e-452f-b310-d8e1fe0dccb1" playOrder="15"><navLabel><text>gcc prerequisites</text></navLabel><content src="0ae30bb6-151e-452f-b310-d8e1fe0dccb1.xhtml"/><navPoint id="uuid-f6dac716-54a3-4f07-ba39-13da607ae934" playOrder="16"><navLabel><text>Testing your installation</text></navLabel><content src="f6dac716-54a3-4f07-ba39-13da607ae934.xhtml"/></navPoint>
+</navPoint>
+<navPoint id="uuid-3b351eaf-8c62-45e1-ad78-74bad6998688" playOrder="17"><navLabel><text>Integrated Development Environment</text></navLabel><content src="3b351eaf-8c62-45e1-ad78-74bad6998688.xhtml"/></navPoint>
+</navPoint>
+<navPoint id="uuid-ea815431-0fb5-4ff9-8266-beb9f52198b8" playOrder="18"><navLabel><text>Your first Rust project</text></navLabel><content src="ea815431-0fb5-4ff9-8266-beb9f52198b8.xhtml"/><navPoint id="uuid-ef4789a2-7f90-4207-91dc-dc85e899c79b" playOrder="19"><navLabel><text>Structure of a Rust project</text></navLabel><content src="ef4789a2-7f90-4207-91dc-dc85e899c79b.xhtml"/></navPoint>
+<navPoint id="uuid-e908d38b-f54d-47ce-9507-1bffc943d47a" playOrder="20"><navLabel><text>Automating things</text></navLabel><content src="e908d38b-f54d-47ce-9507-1bffc943d47a.xhtml"/><navPoint id="uuid-015fe80a-9722-4327-8b70-507dee7c1fab" playOrder="21"><navLabel><text>Creating a binary package using Cargo</text></navLabel><content src="015fe80a-9722-4327-8b70-507dee7c1fab.xhtml"/></navPoint>
+</navPoint>
+<navPoint id="uuid-d154b875-65bb-4044-a516-e7f0460d612f" playOrder="22"><navLabel><text>Using Cargo to build and run an application</text></navLabel><content src="d154b875-65bb-4044-a516-e7f0460d612f.xhtml"/><navPoint id="uuid-abae7a86-a668-4f3c-9a97-5ceed68c6af8" playOrder="23"><navLabel><text>Cleaning your source tree with Cargo</text></navLabel><content src="abae7a86-a668-4f3c-9a97-5ceed68c6af8.xhtml"/></navPoint>
+<navPoint id="uuid-63faff3b-e8a4-4283-9171-90e84ada6c62" playOrder="24"><navLabel><text>Creating documentation using Cargo</text></navLabel><content src="63faff3b-e8a4-4283-9171-90e84ada6c62.xhtml"/><navPoint id="uuid-7c2fd20f-7cd3-4621-9d07-d3af19f08bd7" playOrder="25"><navLabel><text>rustdoc versus Cargo</text></navLabel><content src="7c2fd20f-7cd3-4621-9d07-d3af19f08bd7.xhtml"/></navPoint>
+</navPoint>
+<navPoint id="uuid-39d6c6a5-fdc1-4504-a774-8e0f981c0441" playOrder="26"><navLabel><text>Using Cargo to help with your unit testing</text></navLabel><content src="39d6c6a5-fdc1-4504-a774-8e0f981c0441.xhtml"/><navPoint id="uuid-7503fffa-2967-4640-bd1d-ab5259922aa0" playOrder="27"><navLabel><text>Assert yourself!</text></navLabel><content src="7503fffa-2967-4640-bd1d-ab5259922aa0.xhtml"/></navPoint>
+</navPoint>
+<navPoint id="uuid-2d82d8a4-bdd8-40ce-a95e-a31760c2c364" playOrder="28"><navLabel><text>Is there anything Cargo can&#x27;t do?</text></navLabel><content src="2d82d8a4-bdd8-40ce-a95e-a31760c2c364.xhtml"/></navPoint>
+</navPoint>
+</navPoint>
+<navPoint id="uuid-e3f8e672-3671-45d6-bdba-30e9090be2d0" playOrder="29"><navLabel><text>Summary</text></navLabel><content src="e3f8e672-3671-45d6-bdba-30e9090be2d0.xhtml"/></navPoint>
+</navPoint>
+<navPoint id="uuid-d01e62f9-9349-4eaa-a63b-ab0e691c56cc" playOrder="30"><navLabel><text>Variables</text></navLabel><content src="d01e62f9-9349-4eaa-a63b-ab0e691c56cc.xhtml"/><navPoint id="uuid-0aa36b1b-6250-47be-8cb6-ba85d628c0ed" playOrder="31"><navLabel><text>Variable mutability</text></navLabel><content src="0aa36b1b-6250-47be-8cb6-ba85d628c0ed.xhtml"/><navPoint id="uuid-60b903b6-510c-4cc8-b653-9d11ab216e71" playOrder="32"><navLabel><text>Creating a variable</text></navLabel><content src="60b903b6-510c-4cc8-b653-9d11ab216e71.xhtml"/><navPoint id="uuid-b0cfd591-16e9-4ef9-ba41-e25d9995b31a" playOrder="33"><navLabel><text>How can we tell the compiler that we want x to be an int?</text></navLabel><content src="b0cfd591-16e9-4ef9-ba41-e25d9995b31a.xhtml"/></navPoint>
+</navPoint>
+<navPoint id="uuid-ba23ebdd-11a3-4ec0-bf2b-7475888533fe" playOrder="34"><navLabel><text>Defining other variable types</text></navLabel><content src="ba23ebdd-11a3-4ec0-bf2b-7475888533fe.xhtml"/><navPoint id="uuid-c1635fb1-bde9-4b8f-8b39-282f4049d4e4" playOrder="35"><navLabel><text>Float</text></navLabel><content src="c1635fb1-bde9-4b8f-8b39-282f4049d4e4.xhtml"/></navPoint>
+<navPoint id="uuid-ad238e98-b4ae-461e-8333-569632e6cce0" playOrder="36"><navLabel><text>Signed and unsigned integers</text></navLabel><content src="ad238e98-b4ae-461e-8333-569632e6cce0.xhtml"/></navPoint>
+<navPoint id="uuid-348e826a-e37b-4d9c-bb24-e4456f356a0d" playOrder="37"><navLabel><text>Const and static</text></navLabel><content src="348e826a-e37b-4d9c-bb24-e4456f356a0d.xhtml"/></navPoint>
+</navPoint>
+<navPoint id="uuid-c6808999-90fb-4d01-b811-a7fe2c60e6f0" playOrder="38"><navLabel><text>Defining the variable value before use</text></navLabel><content src="c6808999-90fb-4d01-b811-a7fe2c60e6f0.xhtml"/><navPoint id="uuid-c4d6c6dc-a4b2-4541-8a57-eced07225df7" playOrder="39"><navLabel><text>Strings</text></navLabel><content src="c4d6c6dc-a4b2-4541-8a57-eced07225df7.xhtml"/></navPoint>
+</navPoint>
+<navPoint id="uuid-07289ea0-5a93-47e2-a7b9-8026655e5fc5" playOrder="40"><navLabel><text>How Rust uses memory</text></navLabel><content src="07289ea0-5a93-47e2-a7b9-8026655e5fc5.xhtml"/><navPoint id="uuid-32149687-8113-452f-bf2f-fa2b808116f3" playOrder="41"><navLabel><text>Back to Strings</text></navLabel><content src="32149687-8113-452f-bf2f-fa2b808116f3.xhtml"/></navPoint>
+</navPoint>
+<navPoint id="uuid-5dd9d77b-4563-4924-8480-a3d70a597dbe" playOrder="42"><navLabel><text>String slices</text></navLabel><content src="5dd9d77b-4563-4924-8480-a3d70a597dbe.xhtml"/><navPoint id="uuid-a15b6658-33ae-45d9-8ffc-845a4f5f94d9" playOrder="43"><navLabel><text>What&#x27;s with the warnings?</text></navLabel><content src="a15b6658-33ae-45d9-8ffc-845a4f5f94d9.xhtml"/></navPoint>
+<navPoint id="uuid-bbff7e7c-9713-430d-9686-c37699ff84b0" playOrder="44"><navLabel><text>Using the format! macro</text></navLabel><content src="bbff7e7c-9713-430d-9686-c37699ff84b0.xhtml"/></navPoint>
+<navPoint id="uuid-35219f39-e447-4e32-a1a1-af1963d200fc" playOrder="45"><navLabel><text>Building a string</text></navLabel><content src="35219f39-e447-4e32-a1a1-af1963d200fc.xhtml"/></navPoint>
+<navPoint id="uuid-756f9ade-0212-4af7-b817-a8f5efdcf43c" playOrder="46"><navLabel><text>Code review</text></navLabel><content src="756f9ade-0212-4af7-b817-a8f5efdcf43c.xhtml"/></navPoint>
+</navPoint>
+<navPoint id="uuid-8a464c79-66c0-4f54-84f2-8e1bb7ec32be" playOrder="47"><navLabel><text>Casting</text></navLabel><content src="8a464c79-66c0-4f54-84f2-8e1bb7ec32be.xhtml"/></navPoint>
+<navPoint id="uuid-0e03d061-21eb-446f-955e-1531c0d5ef9a" playOrder="48"><navLabel><text>String methods</text></navLabel><content src="0e03d061-21eb-446f-955e-1531c0d5ef9a.xhtml"/></navPoint>
+<navPoint id="uuid-5a0d660c-8b66-48f5-92ac-3aceb9757367" playOrder="49"><navLabel><text>Generics and arrays</text></navLabel><content src="5a0d660c-8b66-48f5-92ac-3aceb9757367.xhtml"/></navPoint>
+<navPoint id="uuid-7e31d0ed-c148-498d-b49a-3dcea283cee5" playOrder="50"><navLabel><text>Arrays</text></navLabel><content src="7e31d0ed-c148-498d-b49a-3dcea283cee5.xhtml"/><navPoint id="uuid-b6924c14-eb60-439a-96f7-6ddabf95dc59" playOrder="51"><navLabel><text>Array performance</text></navLabel><content src="b6924c14-eb60-439a-96f7-6ddabf95dc59.xhtml"/></navPoint>
+<navPoint id="uuid-a509e955-cb1f-48a4-a6ca-e138eb11fd40" playOrder="52"><navLabel><text>Vectors</text></navLabel><content src="a509e955-cb1f-48a4-a6ca-e138eb11fd40.xhtml"/></navPoint>
+<navPoint id="uuid-c225a8ee-b376-47bb-ae48-26dd5a98211b" playOrder="53"><navLabel><text>Creating a vector with an initial size</text></navLabel><content src="c225a8ee-b376-47bb-ae48-26dd5a98211b.xhtml"/></navPoint>
+<navPoint id="uuid-3f219a23-02ea-4650-bc1c-8fc9f451225e" playOrder="54"><navLabel><text>Creating a vector via an iterator</text></navLabel><content src="3f219a23-02ea-4650-bc1c-8fc9f451225e.xhtml"/></navPoint>
+<navPoint id="uuid-e23bb071-459c-4565-93e5-59ce6ff049c5" playOrder="55"><navLabel><text>Adding and removing from the vector</text></navLabel><content src="e23bb071-459c-4565-93e5-59ce6ff049c5.xhtml"/></navPoint>
+</navPoint>
+<navPoint id="uuid-62d6f7d8-8bac-418a-bb31-03706c916e02" playOrder="56"><navLabel><text>Manipulating an array or vector via slices</text></navLabel><content src="62d6f7d8-8bac-418a-bb31-03706c916e02.xhtml"/></navPoint>
+<navPoint id="uuid-61b6e06f-8d77-403d-bd42-6ca0dfda9dcc" playOrder="57"><navLabel><text>Passing values around</text></navLabel><content src="61b6e06f-8d77-403d-bd42-6ca0dfda9dcc.xhtml"/></navPoint>
+<navPoint id="uuid-adbc4d8f-e650-4138-9c9e-4cffddc94d09" playOrder="58"><navLabel><text>Passing by value</text></navLabel><content src="adbc4d8f-e650-4138-9c9e-4cffddc94d09.xhtml"/></navPoint>
+<navPoint id="uuid-77e1b49e-bc6d-4837-89d3-5d7c1ec0b197" playOrder="59"><navLabel><text>Passing by reference</text></navLabel><content src="77e1b49e-bc6d-4837-89d3-5d7c1ec0b197.xhtml"/><navPoint id="uuid-d38f3a37-560d-4878-aeab-d7ddb576e83d" playOrder="60"><navLabel><text>The reference type</text></navLabel><content src="d38f3a37-560d-4878-aeab-d7ddb576e83d.xhtml"/></navPoint>
+<navPoint id="uuid-135817b0-0f3b-472b-9c0c-8c7ec1b1abec" playOrder="61"><navLabel><text>A practical example</text></navLabel><content src="135817b0-0f3b-472b-9c0c-8c7ec1b1abec.xhtml"/></navPoint>
+</navPoint>
+</navPoint>
+<navPoint id="uuid-01c5279a-d45a-4336-b46b-7d7e7010fefd" playOrder="62"><navLabel><text>Summary</text></navLabel><content src="01c5279a-d45a-4336-b46b-7d7e7010fefd.xhtml"/></navPoint>
+</navPoint>
+<navPoint id="uuid-967a5f58-da17-4dae-850c-448c405b45f5" playOrder="63"><navLabel><text>Input and Output</text></navLabel><content src="967a5f58-da17-4dae-850c-448c405b45f5.xhtml"/><navPoint id="uuid-11e9381a-3b43-4c8f-a455-67e2c9d9498e" playOrder="64"><navLabel><text>Functions and methods in Rust</text></navLabel><content src="11e9381a-3b43-4c8f-a455-67e2c9d9498e.xhtml"/><navPoint id="uuid-4108015b-2889-4e74-827a-c3dd3de3c9c5" playOrder="65"><navLabel><text>The difference between println! and println</text></navLabel><content src="4108015b-2889-4e74-827a-c3dd3de3c9c5.xhtml"/></navPoint>
+</navPoint>
+<navPoint id="uuid-e4dd0faf-13a7-47a2-8afc-133142c3b85a" playOrder="66"><navLabel><text>Introduction to the standard library</text></navLabel><content src="e4dd0faf-13a7-47a2-8afc-133142c3b85a.xhtml"/><navPoint id="uuid-3cb0bab8-7b0e-4229-a784-add3a9d368de" playOrder="67"><navLabel><text>The libraries</text></navLabel><content src="3cb0bab8-7b0e-4229-a784-add3a9d368de.xhtml"/></navPoint>
+<navPoint id="uuid-6c09bd4b-b3f4-4082-8b38-01f18df7a93a" playOrder="68"><navLabel><text>Controlling the output formatting</text></navLabel><content src="6c09bd4b-b3f4-4082-8b38-01f18df7a93a.xhtml"/><navPoint id="uuid-5f11d172-7436-46e6-8339-cd216c2029ce" playOrder="69"><navLabel><text>Positioning the output</text></navLabel><content src="5f11d172-7436-46e6-8339-cd216c2029ce.xhtml"/></navPoint>
+<navPoint id="uuid-61dd6807-b2b7-4610-b787-e761f878c073" playOrder="70"><navLabel><text>Named parameters</text></navLabel><content src="61dd6807-b2b7-4610-b787-e761f878c073.xhtml"/></navPoint>
+<navPoint id="uuid-aaa44811-57f1-4f17-80c3-110226b9408d" playOrder="71"><navLabel><text>Specifying the argument types</text></navLabel><content src="aaa44811-57f1-4f17-80c3-110226b9408d.xhtml"/></navPoint>
+<navPoint id="uuid-1dff6b88-f2db-4f8d-a373-2f43df5fd120" playOrder="72"><navLabel><text>Formatting traits</text></navLabel><content src="1dff6b88-f2db-4f8d-a373-2f43df5fd120.xhtml"/></navPoint>
+<navPoint id="uuid-bf768303-ff7e-44e1-9449-b4c2e86c7e15" playOrder="73"><navLabel><text>Formatting parameters</text></navLabel><content src="bf768303-ff7e-44e1-9449-b4c2e86c7e15.xhtml"/></navPoint>
+</navPoint>
+<navPoint id="uuid-18d7c2f8-6a8d-422f-bab2-c202c9252a9c" playOrder="74"><navLabel><text>Getting information in</text></navLabel><content src="18d7c2f8-6a8d-422f-bab2-c202c9252a9c.xhtml"/></navPoint>
+</navPoint>
+<navPoint id="uuid-abc13341-4ea3-4032-a85b-671dc3ba79dd" playOrder="75"><navLabel><text>Command-line arguments</text></navLabel><content src="abc13341-4ea3-4032-a85b-671dc3ba79dd.xhtml"/></navPoint>
+<navPoint id="uuid-61482290-d782-4e6e-a748-8ff751e3e0c1" playOrder="76"><navLabel><text>Handling files</text></navLabel><content src="61482290-d782-4e6e-a748-8ff751e3e0c1.xhtml"/><navPoint id="uuid-b1584de7-5500-408c-97fc-b7653c55c6e1" playOrder="77"><navLabel><text>Reading from a file</text></navLabel><content src="b1584de7-5500-408c-97fc-b7653c55c6e1.xhtml"/><navPoint id="uuid-15a092a8-0ba9-4207-a46d-c22848ea3ab8" playOrder="78"><navLabel><text>Loading a file</text></navLabel><content src="15a092a8-0ba9-4207-a46d-c22848ea3ab8.xhtml"/></navPoint>
+<navPoint id="uuid-d822a6d3-4439-4b33-a28b-ea8a42bcef59" playOrder="79"><navLabel><text>Writing a file</text></navLabel><content src="d822a6d3-4439-4b33-a28b-ea8a42bcef59.xhtml"/></navPoint>
+<navPoint id="uuid-c2c61efb-ddfd-4473-a76e-89db1d2366c2" playOrder="80"><navLabel><text>The use of expect</text></navLabel><content src="c2c61efb-ddfd-4473-a76e-89db1d2366c2.xhtml"/></navPoint>
+</navPoint>
+<navPoint id="uuid-94343c14-45e2-4819-9d9a-66671ae61c5d" playOrder="81"><navLabel><text>XML and Rust</text></navLabel><content src="94343c14-45e2-4819-9d9a-66671ae61c5d.xhtml"/><navPoint id="uuid-f921c79c-375e-4401-b1c2-d7ac7649b727" playOrder="82"><navLabel><text>Reading a file</text></navLabel><content src="f921c79c-375e-4401-b1c2-d7ac7649b727.xhtml"/></navPoint>
+<navPoint id="uuid-a8ace0a3-f962-4077-bb1e-aafbc9c0e522" playOrder="83"><navLabel><text>Writing a file</text></navLabel><content src="a8ace0a3-f962-4077-bb1e-aafbc9c0e522.xhtml"/></navPoint>
+</navPoint>
+</navPoint>
+<navPoint id="uuid-9243fd50-51de-412b-b491-61e7954f924c" playOrder="84"><navLabel><text>Summary</text></navLabel><content src="9243fd50-51de-412b-b491-61e7954f924c.xhtml"/></navPoint>
+</navPoint>
+<navPoint id="uuid-9a839bb4-2bb8-448c-9bfe-fef63fab99f1" playOrder="85"><navLabel><text>Conditions, Recursion, and Loops</text></navLabel><content src="9a839bb4-2bb8-448c-9bfe-fef63fab99f1.xhtml"/><navPoint id="uuid-d65f632a-bd97-4348-ab2c-eeef03fcd850" playOrder="86"><navLabel><text>Loops</text></navLabel><content src="d65f632a-bd97-4348-ab2c-eeef03fcd850.xhtml"/><navPoint id="uuid-eddc45f7-fb7d-4a91-a33f-72a00a26af2d" playOrder="87"><navLabel><text>The for loop</text></navLabel><content src="eddc45f7-fb7d-4a91-a33f-72a00a26af2d.xhtml"/><navPoint id="uuid-70af2a22-d0e1-46ab-ae11-72630a834c33" playOrder="88"><navLabel><text>Using enumerate</text></navLabel><content src="70af2a22-d0e1-46ab-ae11-72630a834c33.xhtml"/></navPoint>
+<navPoint id="uuid-191f2a05-e29b-49c4-8d2e-b7c3ae2e96a9" playOrder="89"><navLabel><text>The _ parameter</text></navLabel><content src="191f2a05-e29b-49c4-8d2e-b7c3ae2e96a9.xhtml"/></navPoint>
+<navPoint id="uuid-587dc5f1-3be5-4cfd-adf6-4544a177acab" playOrder="90"><navLabel><text>The simple loop</text></navLabel><content src="587dc5f1-3be5-4cfd-adf6-4544a177acab.xhtml"/></navPoint>
+<navPoint id="uuid-1fe6016f-d259-4ce8-9c6f-cc3f78ca0019" playOrder="91"><navLabel><text>The while condition</text></navLabel><content src="1fe6016f-d259-4ce8-9c6f-cc3f78ca0019.xhtml"/></navPoint>
+<navPoint id="uuid-0296095d-cc74-4244-9941-dd97d87d474d" playOrder="92"><navLabel><text>Prematurely terminating a loop</text></navLabel><content src="0296095d-cc74-4244-9941-dd97d87d474d.xhtml"/></navPoint>
+<navPoint id="uuid-bf97b9ee-7bd1-4c75-beec-417182000802" playOrder="93"><navLabel><text>Using loop labels</text></navLabel><content src="bf97b9ee-7bd1-4c75-beec-417182000802.xhtml"/></navPoint>
+</navPoint>
+<navPoint id="uuid-0af82f6d-078f-403c-a91b-8d49a626edfb" playOrder="94"><navLabel><text>Recursive functions</text></navLabel><content src="0af82f6d-078f-403c-a91b-8d49a626edfb.xhtml"/><navPoint id="uuid-910662cb-729c-4def-81e9-4fa024d4e0eb" playOrder="95"><navLabel><text>What is the difference between having and not having a semicolon?</text></navLabel><content src="910662cb-729c-4def-81e9-4fa024d4e0eb.xhtml"/></navPoint>
+</navPoint>
+</navPoint>
+<navPoint id="uuid-9039941c-b1dd-4e40-bdd1-119794808bfe" playOrder="96"><navLabel><text>Summary</text></navLabel><content src="9039941c-b1dd-4e40-bdd1-119794808bfe.xhtml"/></navPoint>
+</navPoint>
+<navPoint id="uuid-8fe31315-5c12-4aaa-ab08-e4c18c3919f9" playOrder="97"><navLabel><text>Remember, Remember</text></navLabel><content src="8fe31315-5c12-4aaa-ab08-e4c18c3919f9.xhtml"/><navPoint id="uuid-8a053d4f-c25d-40ea-acd7-88e5ab735267" playOrder="98"><navLabel><text>Let&#x27;s start at the beginning</text></navLabel><content src="8a053d4f-c25d-40ea-acd7-88e5ab735267.xhtml"/><navPoint id="uuid-e2697bfe-c361-4034-8da8-da48612c0671" playOrder="99"><navLabel><text>The stack frame</text></navLabel><content src="e2697bfe-c361-4034-8da8-da48612c0671.xhtml"/><navPoint id="uuid-6743574d-b2a2-4086-a4a4-9b8331d64c2d" playOrder="100"><navLabel><text>What is meant by the stack?</text></navLabel><content src="6743574d-b2a2-4086-a4a4-9b8331d64c2d.xhtml"/></navPoint>
+</navPoint>
+</navPoint>
+<navPoint id="uuid-7709c3dd-8f11-444e-99ae-aaf2e5dba1bb" playOrder="101"><navLabel><text>Let&#x27;s consider the heap</text></navLabel><content src="7709c3dd-8f11-444e-99ae-aaf2e5dba1bb.xhtml"/><navPoint id="uuid-536c2670-562f-495d-b0ec-1e22a30c896c" playOrder="102"><navLabel><text>Deallocation</text></navLabel><content src="536c2670-562f-495d-b0ec-1e22a30c896c.xhtml"/></navPoint>
+</navPoint>
+<navPoint id="uuid-8374ea09-8041-4c84-9de3-d380106c946a" playOrder="103"><navLabel><text>What about functions with arguments?</text></navLabel><content src="8374ea09-8041-4c84-9de3-d380106c946a.xhtml"/></navPoint>
+<navPoint id="uuid-4561390c-15c3-45d3-8135-6e9c7a0238d0" playOrder="104"><navLabel><text>Static memory allocation</text></navLabel><content src="4561390c-15c3-45d3-8135-6e9c7a0238d0.xhtml"/><navPoint id="uuid-1dfa43a1-e914-4b48-84ca-f25dc97e339d" playOrder="105"><navLabel><text>Garbage collecting time and ownership</text></navLabel><content src="1dfa43a1-e914-4b48-84ca-f25dc97e339d.xhtml"/><navPoint id="uuid-d4cc0ad3-8a4a-40d3-9fcc-e84fd33566b2" playOrder="106"><navLabel><text>An owned pointer example</text></navLabel><content src="d4cc0ad3-8a4a-40d3-9fcc-e84fd33566b2.xhtml"/></navPoint>
+</navPoint>
+<navPoint id="uuid-d0f02f49-92cb-4683-86e0-ac7f16fc1d7c" playOrder="107"><navLabel><text>Comparison to C</text></navLabel><content src="d0f02f49-92cb-4683-86e0-ac7f16fc1d7c.xhtml"/></navPoint>
+<navPoint id="uuid-9fcfb72f-f212-4875-bd18-ce8f5c30269a" playOrder="108"><navLabel><text>Let&#x27;s revisit some old code</text></navLabel><content src="9fcfb72f-f212-4875-bd18-ce8f5c30269a.xhtml"/></navPoint>
+<navPoint id="uuid-7cbc7948-83e7-4b80-b9a6-a8b757d34403" playOrder="109"><navLabel><text>Let&#x27;s not race ahead!</text></navLabel><content src="7cbc7948-83e7-4b80-b9a6-a8b757d34403.xhtml"/><navPoint id="uuid-2944c0b7-f394-424d-9fc7-3364ef02cc60" playOrder="110"><navLabel><text>Stop the race...</text></navLabel><content src="2944c0b7-f394-424d-9fc7-3364ef02cc60.xhtml"/></navPoint>
+</navPoint>
+</navPoint>
+<navPoint id="uuid-9264a1b1-4a0e-41b8-bb5f-9c2fb788a65c" playOrder="111"><navLabel><text>Summary</text></navLabel><content src="9264a1b1-4a0e-41b8-bb5f-9c2fb788a65c.xhtml"/></navPoint>
+</navPoint>
+<navPoint id="uuid-24651b17-6de3-4f1a-a182-f90810b48934" playOrder="112"><navLabel><text>Creating Your Own Rust Applications</text></navLabel><content src="24651b17-6de3-4f1a-a182-f90810b48934.xhtml"/><navPoint id="uuid-4e10e2e3-2e46-4a08-ab6c-913a18ca9f02" playOrder="113"><navLabel><text>Project 1 - let&#x27;s start with some math</text></navLabel><content src="4e10e2e3-2e46-4a08-ab6c-913a18ca9f02.xhtml"/><navPoint id="uuid-2cdfae39-a90f-412d-bcd5-8a047829835e" playOrder="114"><navLabel><text>Requirements</text></navLabel><content src="2cdfae39-a90f-412d-bcd5-8a047829835e.xhtml"/><navPoint id="uuid-4d6ed716-4553-41ee-af8b-ed1d0b5852e0" playOrder="115"><navLabel><text>Supplied data</text></navLabel><content src="4d6ed716-4553-41ee-af8b-ed1d0b5852e0.xhtml"/></navPoint>
+<navPoint id="uuid-71e9a309-1db0-472c-92de-8c24fac33df0" playOrder="116"><navLabel><text>Application output</text></navLabel><content src="71e9a309-1db0-472c-92de-8c24fac33df0.xhtml"/></navPoint>
+</navPoint>
+</navPoint>
+<navPoint id="uuid-05a2c877-2537-48b0-a16c-9d5a64b3a7cd" playOrder="117"><navLabel><text>Project 2 - some text manipulation</text></navLabel><content src="05a2c877-2537-48b0-a16c-9d5a64b3a7cd.xhtml"/><navPoint id="uuid-5d946635-c754-46c4-ac39-d602c7696a92" playOrder="118"><navLabel><text>Requirements</text></navLabel><content src="5d946635-c754-46c4-ac39-d602c7696a92.xhtml"/><navPoint id="uuid-c9ceb021-0276-4bcc-97cb-9948bbc86b88" playOrder="119"><navLabel><text>Code notes</text></navLabel><content src="c9ceb021-0276-4bcc-97cb-9948bbc86b88.xhtml"/></navPoint>
+</navPoint>
+</navPoint>
+<navPoint id="uuid-bcd7da42-c275-4751-8cfc-775f12d5dcc9" playOrder="120"><navLabel><text>Project 3 – area and volume</text></navLabel><content src="bcd7da42-c275-4751-8cfc-775f12d5dcc9.xhtml"/><navPoint id="uuid-e0b218d2-cd83-45b9-a213-b91ef74d2e04" playOrder="121"><navLabel><text>Shape types</text></navLabel><content src="e0b218d2-cd83-45b9-a213-b91ef74d2e04.xhtml"/><navPoint id="uuid-06d5b137-abae-4ed3-b6c2-ebebc8300a70" playOrder="122"><navLabel><text>Volume or area</text></navLabel><content src="06d5b137-abae-4ed3-b6c2-ebebc8300a70.xhtml"/></navPoint>
+<navPoint id="uuid-f3b2fae6-6aaf-4a19-bd60-88d2466b8eba" playOrder="123"><navLabel><text>User-defined shape</text></navLabel><content src="f3b2fae6-6aaf-4a19-bd60-88d2466b8eba.xhtml"/></navPoint>
+</navPoint>
+<navPoint id="uuid-04eef21e-6045-48b5-a9e1-a171227de1ed" playOrder="124"><navLabel><text>Formulae for calculations</text></navLabel><content src="04eef21e-6045-48b5-a9e1-a171227de1ed.xhtml"/></navPoint>
+<navPoint id="uuid-723184e9-fe3f-48a2-b680-22433dd732f9" playOrder="125"><navLabel><text>Testing criteria</text></navLabel><content src="723184e9-fe3f-48a2-b680-22433dd732f9.xhtml"/></navPoint>
+<navPoint id="uuid-0eedbec4-5164-465d-9179-46b1d6413c21" playOrder="126"><navLabel><text>Auto-documentation</text></navLabel><content src="0eedbec4-5164-465d-9179-46b1d6413c21.xhtml"/><navPoint id="uuid-d24746e7-e742-4bd4-af4d-0f9ae50b7a00" playOrder="127"><navLabel><text>Using regular expressions (regex)</text></navLabel><content src="d24746e7-e742-4bd4-af4d-0f9ae50b7a00.xhtml"/></navPoint>
+</navPoint>
+<navPoint id="uuid-b64dd02b-7ed8-4a4a-940d-97171cd4bcc9" playOrder="128"><navLabel><text>Input and output</text></navLabel><content src="b64dd02b-7ed8-4a4a-940d-97171cd4bcc9.xhtml"/></navPoint>
+</navPoint>
+<navPoint id="uuid-9b92057d-ab95-4063-bda3-194beb589a92" playOrder="129"><navLabel><text>Project 4 – memory</text></navLabel><content src="9b92057d-ab95-4063-bda3-194beb589a92.xhtml"/><navPoint id="uuid-ff67e4f9-69f2-4d1f-a90c-2c407a7d80d1" playOrder="130"><navLabel><text>Bitwise rotation</text></navLabel><content src="ff67e4f9-69f2-4d1f-a90c-2c407a7d80d1.xhtml"/><navPoint id="uuid-402651c0-865d-48af-a81c-242fdc40ad48" playOrder="131"><navLabel><text>Rotation caveat</text></navLabel><content src="402651c0-865d-48af-a81c-242fdc40ad48.xhtml"/></navPoint>
+</navPoint>
+<navPoint id="uuid-70ef2965-e35f-4bd9-8faf-d75f817b91e6" playOrder="132"><navLabel><text>Output</text></navLabel><content src="70ef2965-e35f-4bd9-8faf-d75f817b91e6.xhtml"/></navPoint>
+</navPoint>
+<navPoint id="uuid-e639bb1a-17c2-4957-8496-2354ad3a1582" playOrder="133"><navLabel><text>Summary</text></navLabel><content src="e639bb1a-17c2-4957-8496-2354ad3a1582.xhtml"/></navPoint>
+</navPoint>
+<navPoint id="uuid-c8b24f94-2b7a-474d-aa24-4fd0ceb615ce" playOrder="134"><navLabel><text>Matching and Structures</text></navLabel><content src="c8b24f94-2b7a-474d-aa24-4fd0ceb615ce.xhtml"/><navPoint id="uuid-59881fba-0177-4b53-8f10-55eba844dbc7" playOrder="135"><navLabel><text>Structs 101</text></navLabel><content src="59881fba-0177-4b53-8f10-55eba844dbc7.xhtml"/><navPoint id="uuid-2eab0fdc-487d-4bfe-bc01-fa1f8ea4de6e" playOrder="136"><navLabel><text>Variables, variables everywhere</text></navLabel><content src="2eab0fdc-487d-4bfe-bc01-fa1f8ea4de6e.xhtml"/><navPoint id="uuid-4d3f72de-e251-4569-b413-59c8d54772b6" playOrder="137"><navLabel><text>The structure of a struct</text></navLabel><content src="4d3f72de-e251-4569-b413-59c8d54772b6.xhtml"/></navPoint>
+<navPoint id="uuid-d6063bbe-57f9-451b-9712-aa8452b838e1" playOrder="138"><navLabel><text>Smaller is better</text></navLabel><content src="d6063bbe-57f9-451b-9712-aa8452b838e1.xhtml"/></navPoint>
+</navPoint>
+<navPoint id="uuid-56989b57-f5f6-4811-ad14-b85785933840" playOrder="139"><navLabel><text>Accessing a struct</text></navLabel><content src="56989b57-f5f6-4811-ad14-b85785933840.xhtml"/></navPoint>
+<navPoint id="uuid-87549d48-2e24-4438-99ec-81c65456702b" playOrder="140"><navLabel><text>Defining the child structures</text></navLabel><content src="87549d48-2e24-4438-99ec-81c65456702b.xhtml"/></navPoint>
+</navPoint>
+<navPoint id="uuid-9dd69d6c-007e-4ddd-882d-1ea1c290c919" playOrder="141"><navLabel><text>Multi-file version</text></navLabel><content src="9dd69d6c-007e-4ddd-882d-1ea1c290c919.xhtml"/><navPoint id="uuid-c9c3be69-759b-4670-b8b4-625c66335820" playOrder="142"><navLabel><text>Private versus public fields</text></navLabel><content src="c9c3be69-759b-4670-b8b4-625c66335820.xhtml"/></navPoint>
+<navPoint id="uuid-398d3d47-c852-44b6-94e8-d554512d5e1c" playOrder="143"><navLabel><text>Structs 102</text></navLabel><content src="398d3d47-c852-44b6-94e8-d554512d5e1c.xhtml"/></navPoint>
+<navPoint id="uuid-54d21e45-c8fc-4614-af2b-14abc2daf054" playOrder="144"><navLabel><text>Tuples</text></navLabel><content src="54d21e45-c8fc-4614-af2b-14abc2daf054.xhtml"/><navPoint id="uuid-909fd7f9-a50d-4723-a1eb-ece526bb89f7" playOrder="145"><navLabel><text>Using a tuple to define a variable</text></navLabel><content src="909fd7f9-a50d-4723-a1eb-ece526bb89f7.xhtml"/><navPoint id="uuid-2972bc0c-7d96-41f7-90dd-0e8e479f8796" playOrder="146"><navLabel><text>Tuple indexing</text></navLabel><content src="2972bc0c-7d96-41f7-90dd-0e8e479f8796.xhtml"/></navPoint>
+</navPoint>
+<navPoint id="uuid-da06d6a5-dba8-4c96-ab68-9075ee06947c" playOrder="147"><navLabel><text>Destructuring with let</text></navLabel><content src="da06d6a5-dba8-4c96-ab68-9075ee06947c.xhtml"/></navPoint>
+</navPoint>
+<navPoint id="uuid-7d27d2fc-a17f-4674-87ea-74844b82b161" playOrder="148"><navLabel><text>Tuple structs – the hybrid of two</text></navLabel><content src="7d27d2fc-a17f-4674-87ea-74844b82b161.xhtml"/><navPoint id="uuid-647b3e7b-4962-4a6a-9793-61c53eb97f65" playOrder="149"><navLabel><text>The single element tuple struct</text></navLabel><content src="647b3e7b-4962-4a6a-9793-61c53eb97f65.xhtml"/></navPoint>
+<navPoint id="uuid-7df62ab5-b644-4af7-8c44-fcdaba51a072" playOrder="150"><navLabel><text>Back to the unit-like struct</text></navLabel><content src="7df62ab5-b644-4af7-8c44-fcdaba51a072.xhtml"/></navPoint>
+</navPoint>
+</navPoint>
+<navPoint id="uuid-c07cc7de-fcfe-4e44-b1a4-be2b06c437ab" playOrder="151"><navLabel><text>Enumerations</text></navLabel><content src="c07cc7de-fcfe-4e44-b1a4-be2b06c437ab.xhtml"/><navPoint id="uuid-efb82292-c8dd-4e54-bf6f-7377ef26c9dd" playOrder="152"><navLabel><text>Accessing enumeration members</text></navLabel><content src="efb82292-c8dd-4e54-bf6f-7377ef26c9dd.xhtml"/><navPoint id="uuid-2d06e4e7-865e-418a-9869-5fa328b702ca" playOrder="153"><navLabel><text>The two questions you should be asking</text></navLabel><content src="2d06e4e7-865e-418a-9869-5fa328b702ca.xhtml"/></navPoint>
+</navPoint>
+</navPoint>
+<navPoint id="uuid-683e7269-9ea8-4f43-bfc0-c8f064652e87" playOrder="154"><navLabel><text>Patterns and matching</text></navLabel><content src="683e7269-9ea8-4f43-bfc0-c8f064652e87.xhtml"/><navPoint id="uuid-6b956f6d-33ee-4614-9e49-2bb000f806c0" playOrder="155"><navLabel><text>Matching</text></navLabel><content src="6b956f6d-33ee-4614-9e49-2bb000f806c0.xhtml"/><navPoint id="uuid-827cf450-a857-46d0-90f6-783f9be92599" playOrder="156"><navLabel><text>Let&#x27;s really make the function simple</text></navLabel><content src="827cf450-a857-46d0-90f6-783f9be92599.xhtml"/></navPoint>
+<navPoint id="uuid-23956e71-3887-4188-b240-3a961fbefa0a" playOrder="157"><navLabel><text>Using match with an enum</text></navLabel><content src="23956e71-3887-4188-b240-3a961fbefa0a.xhtml"/></navPoint>
+<navPoint id="uuid-7934bed4-a934-43b9-8611-3130e3be7af6" playOrder="158"><navLabel><text>Ignoring a parameter with match</text></navLabel><content src="7934bed4-a934-43b9-8611-3130e3be7af6.xhtml"/></navPoint>
+</navPoint>
+<navPoint id="uuid-c77139fe-4c3b-4bd0-9774-a1e40e023714" playOrder="159"><navLabel><text>Fall through patterns</text></navLabel><content src="c77139fe-4c3b-4bd0-9774-a1e40e023714.xhtml"/><navPoint id="uuid-0ac63828-f5a0-4b76-9ae6-a3f022891729" playOrder="160"><navLabel><text>Ranges</text></navLabel><content src="0ac63828-f5a0-4b76-9ae6-a3f022891729.xhtml"/></navPoint>
+<navPoint id="uuid-ed9de8ff-1abe-46e2-9156-46edb34f0a2c" playOrder="161"><navLabel><text>Creating a binding within a match pattern</text></navLabel><content src="ed9de8ff-1abe-46e2-9156-46edb34f0a2c.xhtml"/></navPoint>
+<navPoint id="uuid-ccbdd042-93a8-46ff-b0c0-ffdafb129727" playOrder="162"><navLabel><text>Let&#x27;s add an if into the mix</text></navLabel><content src="ccbdd042-93a8-46ff-b0c0-ffdafb129727.xhtml"/></navPoint>
+<navPoint id="uuid-2fcbe8b8-430c-47e5-93e0-83198e109da2" playOrder="163"><navLabel><text>Using match with a compound type</text></navLabel><content src="2fcbe8b8-430c-47e5-93e0-83198e109da2.xhtml"/></navPoint>
+</navPoint>
+<navPoint id="uuid-a8e8de98-69ad-4133-9155-ed707f7d2e1c" playOrder="164"><navLabel><text>And back to if let</text></navLabel><content src="a8e8de98-69ad-4133-9155-ed707f7d2e1c.xhtml"/></navPoint>
+</navPoint>
+<navPoint id="uuid-68038668-f9e7-4ca3-b987-017dbf0fb50f" playOrder="165"><navLabel><text>Summary</text></navLabel><content src="68038668-f9e7-4ca3-b987-017dbf0fb50f.xhtml"/></navPoint>
+</navPoint>
+<navPoint id="uuid-9764ae84-9948-4bc8-a9d7-7537b2f31723" playOrder="166"><navLabel><text>The Rust Application Lifetime</text></navLabel><content src="9764ae84-9948-4bc8-a9d7-7537b2f31723.xhtml"/><navPoint id="uuid-51446cd8-fcdb-42e9-8a1a-b83c18bb3ac3" playOrder="167"><navLabel><text>What are they?</text></navLabel><content src="51446cd8-fcdb-42e9-8a1a-b83c18bb3ac3.xhtml"/><navPoint id="uuid-93645dfa-1163-48f7-a7be-116ea5289509" playOrder="168"><navLabel><text>Ownership</text></navLabel><content src="93645dfa-1163-48f7-a7be-116ea5289509.xhtml"/></navPoint>
+<navPoint id="uuid-751e4f1a-2cef-4fe4-bbef-26ea732a56f1" playOrder="169"><navLabel><text>Borrowing</text></navLabel><content src="751e4f1a-2cef-4fe4-bbef-26ea732a56f1.xhtml"/></navPoint>
+<navPoint id="uuid-977dc0b8-ed35-47be-8b05-1801bf8a5585" playOrder="170"><navLabel><text>Lifetime</text></navLabel><content src="977dc0b8-ed35-47be-8b05-1801bf8a5585.xhtml"/></navPoint>
+</navPoint>
+<navPoint id="uuid-c709690d-fc57-4958-9bac-871e4402bfa9" playOrder="171"><navLabel><text>Ownership in Rust</text></navLabel><content src="c709690d-fc57-4958-9bac-871e4402bfa9.xhtml"/><navPoint id="uuid-ecd0bd2a-8da4-4f16-ace4-d9efc405de55" playOrder="172"><navLabel><text>Abstractions</text></navLabel><content src="ecd0bd2a-8da4-4f16-ace4-d9efc405de55.xhtml"/></navPoint>
+<navPoint id="uuid-c9c1f519-5327-48a1-908b-76e2098b9bae" playOrder="173"><navLabel><text>Ownership – from the beginning</text></navLabel><content src="c9c1f519-5327-48a1-908b-76e2098b9bae.xhtml"/><navPoint id="uuid-3a2ba78f-f867-4c0b-8f6c-f2855f4f5120" playOrder="174"><navLabel><text>Variable binding</text></navLabel><content src="3a2ba78f-f867-4c0b-8f6c-f2855f4f5120.xhtml"/></navPoint>
+</navPoint>
+<navPoint id="uuid-cb870656-435d-40f4-81aa-decd77ab75a7" playOrder="175"><navLabel><text>Stack and heap variables</text></navLabel><content src="cb870656-435d-40f4-81aa-decd77ab75a7.xhtml"/><navPoint id="uuid-49271b80-8724-44b3-bae4-b252cef0c4fa" playOrder="176"><navLabel><text>Why is this important?</text></navLabel><content src="49271b80-8724-44b3-bae4-b252cef0c4fa.xhtml"/></navPoint>
+</navPoint>
+<navPoint id="uuid-687ea5af-cf15-4f9d-93ca-3567b773da72" playOrder="177"><navLabel><text>The Copy trait</text></navLabel><content src="687ea5af-cf15-4f9d-93ca-3567b773da72.xhtml"/></navPoint>
+<navPoint id="uuid-199b2166-1ab5-4ac0-bd7d-876af83e1d89" playOrder="178"><navLabel><text>Borrowing in Rust</text></navLabel><content src="199b2166-1ab5-4ac0-bd7d-876af83e1d89.xhtml"/><navPoint id="uuid-19bf5441-b29d-4d26-b803-a1dc8828b701" playOrder="179"><navLabel><text>Borrow immutability</text></navLabel><content src="19bf5441-b29d-4d26-b803-a1dc8828b701.xhtml"/></navPoint>
+<navPoint id="uuid-ed42769d-45d5-4c27-968c-62c6bfde165c" playOrder="180"><navLabel><text>Mutable borrows</text></navLabel><content src="ed42769d-45d5-4c27-968c-62c6bfde165c.xhtml"/></navPoint>
+</navPoint>
+<navPoint id="uuid-3e8b0c0b-cf58-4af8-a965-98b6c31fabf9" playOrder="181"><navLabel><text>The Rust borrowing rules</text></navLabel><content src="3e8b0c0b-cf58-4af8-a965-98b6c31fabf9.xhtml"/></navPoint>
+<navPoint id="uuid-5de6e807-d21a-41f7-9a16-959ef9db8781" playOrder="182"><navLabel><text>Fixing the problem</text></navLabel><content src="5de6e807-d21a-41f7-9a16-959ef9db8781.xhtml"/><navPoint id="uuid-427c44fc-3555-4e92-b59e-abdfe71746cb" playOrder="183"><navLabel><text>Think about the scope</text></navLabel><content src="427c44fc-3555-4e92-b59e-abdfe71746cb.xhtml"/></navPoint>
+</navPoint>
+<navPoint id="uuid-fbcf8fbc-eee3-4cc4-8d0f-1ce0f9de72e0" playOrder="184"><navLabel><text>It&#x27;s all for your own good</text></navLabel><content src="fbcf8fbc-eee3-4cc4-8d0f-1ce0f9de72e0.xhtml"/></navPoint>
+</navPoint>
+<navPoint id="uuid-d5d705db-5812-4d95-80eb-8235d9c7bc07" playOrder="185"><navLabel><text>The lifetime</text></navLabel><content src="d5d705db-5812-4d95-80eb-8235d9c7bc07.xhtml"/><navPoint id="uuid-225cd3f0-9c9a-4062-afea-4d66a50af4a0" playOrder="186"><navLabel><text>The mythical bank account</text></navLabel><content src="225cd3f0-9c9a-4062-afea-4d66a50af4a0.xhtml"/></navPoint>
+<navPoint id="uuid-7ba06157-4733-4c40-8e9c-ebf55e8b20b2" playOrder="187"><navLabel><text>The lifetime variable - &#x27;</text></navLabel><content src="7ba06157-4733-4c40-8e9c-ebf55e8b20b2.xhtml"/></navPoint>
+<navPoint id="uuid-4f7f0941-1a36-43f9-9e0f-0f7b473e1647" playOrder="188"><navLabel><text>Lifetime of other types</text></navLabel><content src="4f7f0941-1a36-43f9-9e0f-0f7b473e1647.xhtml"/><navPoint id="uuid-d72f1d0e-b1f1-450b-b386-9662f03db1e2" playOrder="189"><navLabel><text>Lifetime within an struct</text></navLabel><content src="d72f1d0e-b1f1-450b-b386-9662f03db1e2.xhtml"/></navPoint>
+<navPoint id="uuid-70d565c5-9e4f-4a9e-b858-384e2d9cb2c9" playOrder="190"><navLabel><text>Multiple lifetimes</text></navLabel><content src="70d565c5-9e4f-4a9e-b858-384e2d9cb2c9.xhtml"/></navPoint>
+<navPoint id="uuid-53e5c189-0465-4913-a146-6752ad893337" playOrder="191"><navLabel><text>Always consider the scope</text></navLabel><content src="53e5c189-0465-4913-a146-6752ad893337.xhtml"/></navPoint>
+<navPoint id="uuid-c9543b1d-deac-45be-8960-2b16099d2720" playOrder="192"><navLabel><text>&#x27;struct</text></navLabel><content src="c9543b1d-deac-45be-8960-2b16099d2720.xhtml"/></navPoint>
+</navPoint>
+<navPoint id="uuid-702f7b48-bd12-47e9-8238-c60a5ebcc134" playOrder="193"><navLabel><text>Input and output lifetimes</text></navLabel><content src="702f7b48-bd12-47e9-8238-c60a5ebcc134.xhtml"/><navPoint id="uuid-5dc30584-8856-4285-8f9e-157dbe274005" playOrder="194"><navLabel><text>Input only</text></navLabel><content src="5dc30584-8856-4285-8f9e-157dbe274005.xhtml"/></navPoint>
+<navPoint id="uuid-a4b69682-5796-4ba4-974f-b3cb2c92c0b9" playOrder="195"><navLabel><text>Output only</text></navLabel><content src="a4b69682-5796-4ba4-974f-b3cb2c92c0b9.xhtml"/></navPoint>
+<navPoint id="uuid-4ed7fdd1-b060-4f7f-bc2e-68ab3a0aa3a4" playOrder="196"><navLabel><text>Input and output</text></navLabel><content src="4ed7fdd1-b060-4f7f-bc2e-68ab3a0aa3a4.xhtml"/></navPoint>
+</navPoint>
+</navPoint>
+<navPoint id="uuid-a849d2c2-2e2f-490e-87f6-51c757c687c8" playOrder="197"><navLabel><text>Summary</text></navLabel><content src="a849d2c2-2e2f-490e-87f6-51c757c687c8.xhtml"/></navPoint>
+</navPoint>
+<navPoint id="uuid-d6c48f90-429b-4465-ba88-6adb7ca437bb" playOrder="198"><navLabel><text>Introducing Generics, Impl, and Traits</text></navLabel><content src="d6c48f90-429b-4465-ba88-6adb7ca437bb.xhtml"/><navPoint id="uuid-5db4dd62-297e-4ebb-8d78-ca02f1929d8f" playOrder="199"><navLabel><text>Generics 101</text></navLabel><content src="5db4dd62-297e-4ebb-8d78-ca02f1929d8f.xhtml"/><navPoint id="uuid-5c7bfefa-b6f0-46be-96a5-69463971fa21" playOrder="200"><navLabel><text>Understanding the error</text></navLabel><content src="5c7bfefa-b6f0-46be-96a5-69463971fa21.xhtml"/></navPoint>
+<navPoint id="uuid-99be0bed-082c-443d-a7b2-4f63a07394e9" playOrder="201"><navLabel><text>A generic problem</text></navLabel><content src="99be0bed-082c-443d-a7b2-4f63a07394e9.xhtml"/><navPoint id="uuid-a6d2a4f2-e64e-4189-82c2-1be266e5eb0b" playOrder="202"><navLabel><text>The unsafe directive</text></navLabel><content src="a6d2a4f2-e64e-4189-82c2-1be266e5eb0b.xhtml"/></navPoint>
+<navPoint id="uuid-61c2344a-cfc3-4fc5-bb1c-9773c02d1bc3" playOrder="203"><navLabel><text>The whole #!</text></navLabel><content src="61c2344a-cfc3-4fc5-bb1c-9773c02d1bc3.xhtml"/></navPoint>
+</navPoint>
+</navPoint>
+<navPoint id="uuid-81672703-c1de-4da7-a46a-4f84b1b3e29c" playOrder="204"><navLabel><text>Traits and Impl</text></navLabel><content src="81672703-c1de-4da7-a46a-4f84b1b3e29c.xhtml"/><navPoint id="uuid-abe8aaa7-0ca1-419e-8952-efb265b61c22" playOrder="205"><navLabel><text>Impl</text></navLabel><content src="abe8aaa7-0ca1-419e-8952-efb265b61c22.xhtml"/></navPoint>
+<navPoint id="uuid-f69c3257-1c05-42df-8c72-c86bf913dc85" playOrder="206"><navLabel><text>The impl lifetime</text></navLabel><content src="f69c3257-1c05-42df-8c72-c86bf913dc85.xhtml"/></navPoint>
+<navPoint id="uuid-bead61b4-4f88-4e3b-879b-cb657ee9a80c" playOrder="207"><navLabel><text>And back to traits we go...</text></navLabel><content src="bead61b4-4f88-4e3b-879b-cb657ee9a80c.xhtml"/></navPoint>
+<navPoint id="uuid-789ab9d7-74ac-4030-93a8-d7de824d1975" playOrder="208"><navLabel><text>A simple crate example</text></navLabel><content src="789ab9d7-74ac-4030-93a8-d7de824d1975.xhtml"/></navPoint>
+</navPoint>
+<navPoint id="uuid-4e1503a9-afd0-41ff-9827-ae37503d4493" playOrder="209"><navLabel><text>Traits and generics</text></navLabel><content src="4e1503a9-afd0-41ff-9827-ae37503d4493.xhtml"/><navPoint id="uuid-9043d048-9198-4a0d-bd2d-0bb2b74d172a" playOrder="210"><navLabel><text>Defining the impl for specific types</text></navLabel><content src="9043d048-9198-4a0d-bd2d-0bb2b74d172a.xhtml"/></navPoint>
+<navPoint id="uuid-5efc2aa2-01c2-434c-8ee7-aba1adfd2009" playOrder="211"><navLabel><text>Using where</text></navLabel><content src="5efc2aa2-01c2-434c-8ee7-aba1adfd2009.xhtml"/></navPoint>
+<navPoint id="uuid-2ec4248a-2ef7-42d1-be1a-6ae752fa92bb" playOrder="212"><navLabel><text>Making it work</text></navLabel><content src="2ec4248a-2ef7-42d1-be1a-6ae752fa92bb.xhtml"/></navPoint>
+</navPoint>
+<navPoint id="uuid-3fc6fa76-e5e8-4807-a3b6-86c35d39040b" playOrder="213"><navLabel><text>Something you may have noticed</text></navLabel><content src="3fc6fa76-e5e8-4807-a3b6-86c35d39040b.xhtml"/><navPoint id="uuid-509bcb29-e735-4e2b-8872-6ed9a232956a" playOrder="214"><navLabel><text>Generics - a small aside</text></navLabel><content src="509bcb29-e735-4e2b-8872-6ed9a232956a.xhtml"/><navPoint id="uuid-5f34faa5-461b-4e1f-a779-dc8903ef4171" playOrder="215"><navLabel><text>So what does happen?</text></navLabel><content src="5f34faa5-461b-4e1f-a779-dc8903ef4171.xhtml"/></navPoint>
+</navPoint>
+</navPoint>
+<navPoint id="uuid-945d0d4f-3d50-4576-ad43-4ae5e271d0c5" playOrder="216"><navLabel><text>Back to the where version</text></navLabel><content src="945d0d4f-3d50-4576-ad43-4ae5e271d0c5.xhtml"/><navPoint id="uuid-1d682865-15b2-4410-9aa5-6de37dedc08c" playOrder="217"><navLabel><text>Try to compile</text></navLabel><content src="1d682865-15b2-4410-9aa5-6de37dedc08c.xhtml"/></navPoint>
+</navPoint>
+<navPoint id="uuid-959ea038-d48e-401f-b28e-854224f8f1c7" playOrder="218"><navLabel><text>Trait bounds</text></navLabel><content src="959ea038-d48e-401f-b28e-854224f8f1c7.xhtml"/></navPoint>
+<navPoint id="uuid-9c40362b-41ba-445c-847b-d1129b4f3c4b" playOrder="219"><navLabel><text>Can we reduce the amount of code further?</text></navLabel><content src="9c40362b-41ba-445c-847b-d1129b4f3c4b.xhtml"/><navPoint id="uuid-19c2e205-9505-447a-a324-2ab3a7f7d935" playOrder="220"><navLabel><text>Can the default method be overridden?</text></navLabel><content src="19c2e205-9505-447a-a324-2ab3a7f7d935.xhtml"/></navPoint>
+</navPoint>
+<navPoint id="uuid-11f1dfce-b48b-43a3-8073-c10cd96ea724" playOrder="221"><navLabel><text>Rounding off traits</text></navLabel><content src="11f1dfce-b48b-43a3-8073-c10cd96ea724.xhtml"/><navPoint id="uuid-f4342610-f8ca-46ab-bf51-21a1ef65f4d4" playOrder="222"><navLabel><text>Inheritance</text></navLabel><content src="f4342610-f8ca-46ab-bf51-21a1ef65f4d4.xhtml"/></navPoint>
+<navPoint id="uuid-4da4d8a2-8216-4040-82a4-40ef2dd74383" playOrder="223"><navLabel><text>Deriving</text></navLabel><content src="4da4d8a2-8216-4040-82a4-40ef2dd74383.xhtml"/></navPoint>
+</navPoint>
+<navPoint id="uuid-d47b7918-1546-4dac-bdf0-c55d395e0a4c" playOrder="224"><navLabel><text>Trait objects</text></navLabel><content src="d47b7918-1546-4dac-bdf0-c55d395e0a4c.xhtml"/><navPoint id="uuid-eee10c20-68b2-4eb0-b63a-f6a3a2e048b4" playOrder="225"><navLabel><text>Let&#x27;s create a sample test setup</text></navLabel><content src="eee10c20-68b2-4eb0-b63a-f6a3a2e048b4.xhtml"/></navPoint>
+<navPoint id="uuid-08520ddd-e19f-437a-a666-5be67d183ca5" playOrder="226"><navLabel><text>Let&#x27;s see dynamic dispatch</text></navLabel><content src="08520ddd-e19f-437a-a666-5be67d183ca5.xhtml"/></navPoint>
+<navPoint id="uuid-d6aebca7-e0df-47ed-8f59-00491701982e" playOrder="227"><navLabel><text>Keeping your object safe</text></navLabel><content src="d6aebca7-e0df-47ed-8f59-00491701982e.xhtml"/></navPoint>
+</navPoint>
+<navPoint id="uuid-b041c2e6-2573-49e9-a6f8-98c3dd9a05f2" playOrder="228"><navLabel><text>Summary</text></navLabel><content src="b041c2e6-2573-49e9-a6f8-98c3dd9a05f2.xhtml"/></navPoint>
+</navPoint>
+<navPoint id="uuid-4925c4c4-a4ec-4c62-8a2a-f5563e2592b6" playOrder="229"><navLabel><text>Creating Your Own Crate</text></navLabel><content src="4925c4c4-a4ec-4c62-8a2a-f5563e2592b6.xhtml"/><navPoint id="uuid-6ed3a8ec-fa87-4ece-8034-13727a7f2086" playOrder="230"><navLabel><text>What exactly is a crate?</text></navLabel><content src="6ed3a8ec-fa87-4ece-8034-13727a7f2086.xhtml"/><navPoint id="uuid-97298003-3f10-45f5-8e51-c0cf0cf74a9e" playOrder="231"><navLabel><text>Looking at modules</text></navLabel><content src="97298003-3f10-45f5-8e51-c0cf0cf74a9e.xhtml"/><navPoint id="uuid-5b1d3951-35b4-4b77-9a13-4e9b1328520d" playOrder="232"><navLabel><text>I can see a problem with this analogy</text></navLabel><content src="5b1d3951-35b4-4b77-9a13-4e9b1328520d.xhtml"/></navPoint>
+</navPoint>
+<navPoint id="uuid-fe62b086-51ff-46d1-b6a4-71a778229b5e" playOrder="233"><navLabel><text>Back to our math library</text></navLabel><content src="fe62b086-51ff-46d1-b6a4-71a778229b5e.xhtml"/><navPoint id="uuid-9ea2e6b2-7571-4556-85cd-d2ed7d0229a6" playOrder="234"><navLabel><text>Using a useful name</text></navLabel><content src="9ea2e6b2-7571-4556-85cd-d2ed7d0229a6.xhtml"/></navPoint>
+</navPoint>
+<navPoint id="uuid-0be3ba73-69ad-4f74-a8ac-39760758e695" playOrder="235"><navLabel><text>Let&#x27;s create!</text></navLabel><content src="0be3ba73-69ad-4f74-a8ac-39760758e695.xhtml"/><navPoint id="uuid-f3f055f0-f855-4da2-af77-96fef1e4d6f5" playOrder="236"><navLabel><text>Creating top-level modules</text></navLabel><content src="f3f055f0-f855-4da2-af77-96fef1e4d6f5.xhtml"/></navPoint>
+</navPoint>
+<navPoint id="uuid-48c88830-c6ea-4918-aa20-5401c583b4ea" playOrder="237"><navLabel><text>The multifile module</text></navLabel><content src="48c88830-c6ea-4918-aa20-5401c583b4ea.xhtml"/><navPoint id="uuid-739fbedc-46e0-41d5-b8c9-25c388f0b8d7" playOrder="238"><navLabel><text>What about submodules?</text></navLabel><content src="739fbedc-46e0-41d5-b8c9-25c388f0b8d7.xhtml"/></navPoint>
+<navPoint id="uuid-fcfa2417-6ccd-4812-8e26-414f462098fd" playOrder="239"><navLabel><text>The mod.rs file</text></navLabel><content src="fcfa2417-6ccd-4812-8e26-414f462098fd.xhtml"/></navPoint>
+</navPoint>
+<navPoint id="uuid-2f85d816-921a-44c9-b191-050935ec41f3" playOrder="240"><navLabel><text>Let&#x27;s add some code</text></navLabel><content src="2f85d816-921a-44c9-b191-050935ec41f3.xhtml"/></navPoint>
+</navPoint>
+<navPoint id="uuid-bd2cbda1-cc0c-444f-a364-62a0251341dd" playOrder="241"><navLabel><text>Beware of double name scopes</text></navLabel><content src="bd2cbda1-cc0c-444f-a364-62a0251341dd.xhtml"/><navPoint id="uuid-90eea39e-cebe-4c04-ac71-72eb6c36e2d9" playOrder="242"><navLabel><text>Adding unit tests to the library</text></navLabel><content src="90eea39e-cebe-4c04-ac71-72eb6c36e2d9.xhtml"/><navPoint id="uuid-d095fc4b-dc32-485c-b3c6-c2252e8380aa" playOrder="243"><navLabel><text>Making something public</text></navLabel><content src="d095fc4b-dc32-485c-b3c6-c2252e8380aa.xhtml"/></navPoint>
+</navPoint>
+<navPoint id="uuid-783fee66-c173-4d60-8936-8eea95bd2e6d" playOrder="244"><navLabel><text>Let&#x27;s give our crate a quick run out</text></navLabel><content src="783fee66-c173-4d60-8936-8eea95bd2e6d.xhtml"/><navPoint id="uuid-a8241251-2e64-420b-8a99-7c26fe8a65d3" playOrder="245"><navLabel><text>External dependencies</text></navLabel><content src="a8241251-2e64-420b-8a99-7c26fe8a65d3.xhtml"/></navPoint>
+</navPoint>
+<navPoint id="uuid-f53abdc6-18fc-438e-a50a-8f4bbd0c3e33" playOrder="246"><navLabel><text>Changing the scope</text></navLabel><content src="f53abdc6-18fc-438e-a50a-8f4bbd0c3e33.xhtml"/><navPoint id="uuid-a89e16c8-8312-4852-9283-4996da5b7610" playOrder="247"><navLabel><text>Altering the crate name</text></navLabel><content src="a89e16c8-8312-4852-9283-4996da5b7610.xhtml"/></navPoint>
+<navPoint id="uuid-a863a06e-9fd5-4456-bb8c-760cd0843604" playOrder="248"><navLabel><text>Optimizing your use statements</text></navLabel><content src="a863a06e-9fd5-4456-bb8c-760cd0843604.xhtml"/><navPoint id="uuid-51224780-aa88-410a-a1b9-ec3527f4c4df" playOrder="249"><navLabel><text>The use-everything approach</text></navLabel><content src="51224780-aa88-410a-a1b9-ec3527f4c4df.xhtml"/></navPoint>
+<navPoint id="uuid-bb63f5c0-01df-464e-9e08-578d9822b9ea" playOrder="250"><navLabel><text>The you-decide approach</text></navLabel><content src="bb63f5c0-01df-464e-9e08-578d9822b9ea.xhtml"/></navPoint>
+<navPoint id="uuid-cf557d7b-57d1-4586-bec0-fdc583a268f5" playOrder="251"><navLabel><text>The use-me approach</text></navLabel><content src="cf557d7b-57d1-4586-bec0-fdc583a268f5.xhtml"/></navPoint>
+<navPoint id="uuid-75dd70d6-205c-436d-8e89-0f640090fad5" playOrder="252"><navLabel><text>The use-me-but-call-me-something-else approach</text></navLabel><content src="75dd70d6-205c-436d-8e89-0f640090fad5.xhtml"/></navPoint>
+<navPoint id="uuid-6832bae7-ecfd-4566-b3e5-d9bbacb17a1f" playOrder="253"><navLabel><text>The use-glob approach</text></navLabel><content src="6832bae7-ecfd-4566-b3e5-d9bbacb17a1f.xhtml"/></navPoint>
+<navPoint id="uuid-fd7015f9-5c21-4551-8743-7b8d8dfd39bb" playOrder="254"><navLabel><text>The use-glob-self approach</text></navLabel><content src="fd7015f9-5c21-4551-8743-7b8d8dfd39bb.xhtml"/></navPoint>
+</navPoint>
+</navPoint>
+</navPoint>
+<navPoint id="uuid-754b91a3-8504-4b51-93e1-0310e7844fa8" playOrder="255"><navLabel><text>Summary</text></navLabel><content src="754b91a3-8504-4b51-93e1-0310e7844fa8.xhtml"/></navPoint>
+</navPoint>
+<navPoint id="uuid-636b329f-0544-4c2d-9924-fcd12f105567" playOrder="256"><navLabel><text>Concurrency in Rust</text></navLabel><content src="636b329f-0544-4c2d-9924-fcd12f105567.xhtml"/><navPoint id="uuid-f0cdc10b-1997-46cd-85cc-2103fc76e9e9" playOrder="257"><navLabel><text>A bit of a story</text></navLabel><content src="f0cdc10b-1997-46cd-85cc-2103fc76e9e9.xhtml"/><navPoint id="uuid-2cd58c83-6ef3-4ad4-8614-2a73117057df" playOrder="258"><navLabel><text>What was that all about?</text></navLabel><content src="2cd58c83-6ef3-4ad4-8614-2a73117057df.xhtml"/></navPoint>
+<navPoint id="uuid-0a15b27f-cb1a-406b-bcb7-ea0aaa3d5fdd" playOrder="259"><navLabel><text>Send</text></navLabel><content src="0a15b27f-cb1a-406b-bcb7-ea0aaa3d5fdd.xhtml"/></navPoint>
+<navPoint id="uuid-11273b91-aff9-4394-a29c-8230a392fd81" playOrder="260"><navLabel><text>Sync</text></navLabel><content src="11273b91-aff9-4394-a29c-8230a392fd81.xhtml"/><navPoint id="uuid-613ba4a7-a5b0-4989-8af1-07dc8b7be7b7" playOrder="261"><navLabel><text>When is an immutable variable not an immutable variable?</text></navLabel><content src="613ba4a7-a5b0-4989-8af1-07dc8b7be7b7.xhtml"/></navPoint>
+<navPoint id="uuid-5d544534-8c84-431d-8311-99c665a58a19" playOrder="262"><navLabel><text>And it&#x27;s obviously mutable, it has mut in the definition</text></navLabel><content src="5d544534-8c84-431d-8311-99c665a58a19.xhtml"/></navPoint>
+<navPoint id="uuid-93574f54-7e2f-49bd-882a-d143d02c26c3" playOrder="263"><navLabel><text>Interior mutability</text></navLabel><content src="93574f54-7e2f-49bd-882a-d143d02c26c3.xhtml"/></navPoint>
+</navPoint>
+<navPoint id="uuid-42e483ea-8e87-4cf7-aa2b-b00afe9ae3df" playOrder="264"><navLabel><text>Back to sync</text></navLabel><content src="42e483ea-8e87-4cf7-aa2b-b00afe9ae3df.xhtml"/></navPoint>
+<navPoint id="uuid-afbde2de-7afd-4585-b25d-196bbd3d830f" playOrder="265"><navLabel><text>A beginner&#x27;s guide to threading in Rust</text></navLabel><content src="afbde2de-7afd-4585-b25d-196bbd3d830f.xhtml"/><navPoint id="uuid-dbdfcd39-d75a-4502-9b39-fcc44b8b3309" playOrder="266"><navLabel><text>An easy approach to thinking about how threads work.</text></navLabel><content src="dbdfcd39-d75a-4502-9b39-fcc44b8b3309.xhtml"/></navPoint>
+<navPoint id="uuid-0173aea9-7e54-456c-8635-1d6ebde973fa" playOrder="267"><navLabel><text>Joining threads</text></navLabel><content src="0173aea9-7e54-456c-8635-1d6ebde973fa.xhtml"/></navPoint>
+</navPoint>
+<navPoint id="uuid-4615be78-0cab-4d63-b466-537c13766162" playOrder="268"><navLabel><text>Closures</text></navLabel><content src="4615be78-0cab-4d63-b466-537c13766162.xhtml"/><navPoint id="uuid-c0676d18-839c-400e-90e6-ec90bff4efb5" playOrder="269"><navLabel><text>Closures aren&#x27;t all they first appear to be</text></navLabel><content src="c0676d18-839c-400e-90e6-ec90bff4efb5.xhtml"/></navPoint>
+<navPoint id="uuid-72bc0c4c-aa34-4375-b977-e1d9372d692f" playOrder="270"><navLabel><text>Closures as function arguments</text></navLabel><content src="72bc0c4c-aa34-4375-b977-e1d9372d692f.xhtml"/></navPoint>
+<navPoint id="uuid-c47c5cc0-be00-46df-bcbf-1567b0009e03" playOrder="271"><navLabel><text>Closures with explicit lifetimes – a special case</text></navLabel><content src="c47c5cc0-be00-46df-bcbf-1567b0009e03.xhtml"/></navPoint>
+<navPoint id="uuid-9ad858af-333a-4dbd-8b87-97378794e8cf" playOrder="272"><navLabel><text>Returning a closure</text></navLabel><content src="9ad858af-333a-4dbd-8b87-97378794e8cf.xhtml"/></navPoint>
+<navPoint id="uuid-9e77dc34-8841-465e-b720-9d65ae06fecd" playOrder="273"><navLabel><text>What is the move parameter?</text></navLabel><content src="9e77dc34-8841-465e-b720-9d65ae06fecd.xhtml"/></navPoint>
+</navPoint>
+<navPoint id="uuid-714c9a2b-53cf-4e91-9219-ce643b07959c" playOrder="274"><navLabel><text>Back to threading</text></navLabel><content src="714c9a2b-53cf-4e91-9219-ce643b07959c.xhtml"/></navPoint>
+<navPoint id="uuid-255d6534-6ef2-4530-9f7e-2ddf2736f98a" playOrder="275"><navLabel><text>Ownership has its advantages</text></navLabel><content src="255d6534-6ef2-4530-9f7e-2ddf2736f98a.xhtml"/><navPoint id="uuid-8cc23044-6907-49fa-8087-71dd9aa7917b" playOrder="276"><navLabel><text>The reference counter</text></navLabel><content src="8cc23044-6907-49fa-8087-71dd9aa7917b.xhtml"/></navPoint>
+<navPoint id="uuid-25ee29ed-d8b8-4603-a14f-03d4be8dc587" playOrder="277"><navLabel><text>Problem solved – use Mutex</text></navLabel><content src="25ee29ed-d8b8-4603-a14f-03d4be8dc587.xhtml"/></navPoint>
+<navPoint id="uuid-d0322c12-5d65-418e-8658-d628009a43ef" playOrder="278"><navLabel><text>Why do we put the thread to sleep?</text></navLabel><content src="d0322c12-5d65-418e-8658-d628009a43ef.xhtml"/></navPoint>
+<navPoint id="uuid-7fa2aedb-fce0-43c3-abaa-1579beb80a17" playOrder="279"><navLabel><text>Thread synchronization</text></navLabel><content src="7fa2aedb-fce0-43c3-abaa-1579beb80a17.xhtml"/></navPoint>
+</navPoint>
+<navPoint id="uuid-b7f46265-4db6-477e-b4a7-e4cacdcc76d5" playOrder="280"><navLabel><text>Thread panics</text></navLabel><content src="b7f46265-4db6-477e-b4a7-e4cacdcc76d5.xhtml"/></navPoint>
+</navPoint>
+<navPoint id="uuid-6c9c50ae-6b2f-4a8c-87f5-56332bc125ef" playOrder="281"><navLabel><text>Summary</text></navLabel><content src="6c9c50ae-6b2f-4a8c-87f5-56332bc125ef.xhtml"/></navPoint>
+</navPoint>
+<navPoint id="uuid-bfda4ae5-51e3-4714-95c5-75e1a44106b5" playOrder="282"><navLabel><text>Now It&amp;#x27;s Your Turn!</text></navLabel><content src="bfda4ae5-51e3-4714-95c5-75e1a44106b5.xhtml"/><navPoint id="uuid-7afaa52d-f9b8-45a4-b368-1a9bcd0187a7" playOrder="283"><navLabel><text>Task 1 – cleaning the code (part 1)</text></navLabel><content src="7afaa52d-f9b8-45a4-b368-1a9bcd0187a7.xhtml"/><navPoint id="uuid-0f2d3411-fd35-475f-ac60-96cef2a094ff" playOrder="284"><navLabel><text>The problems with each option</text></navLabel><content src="0f2d3411-fd35-475f-ac60-96cef2a094ff.xhtml"/><navPoint id="uuid-0f201083-4b55-4860-9f3b-c11955bca4c6" playOrder="285"><navLabel><text>The String option</text></navLabel><content src="0f201083-4b55-4860-9f3b-c11955bca4c6.xhtml"/></navPoint>
+<navPoint id="uuid-ba608f97-b321-4a0c-a0ce-65c52b0bb853" playOrder="286"><navLabel><text>The struct option</text></navLabel><content src="ba608f97-b321-4a0c-a0ce-65c52b0bb853.xhtml"/></navPoint>
+<navPoint id="uuid-63cce0b1-30c3-4e7a-9036-035e1a44bf8a" playOrder="287"><navLabel><text>The task</text></navLabel><content src="63cce0b1-30c3-4e7a-9036-035e1a44bf8a.xhtml"/></navPoint>
+</navPoint>
+</navPoint>
+<navPoint id="uuid-b79fc971-7d1a-4a7e-bb66-2bd15df046d9" playOrder="288"><navLabel><text>Task 2 – cleaning the code (part 2)</text></navLabel><content src="b79fc971-7d1a-4a7e-bb66-2bd15df046d9.xhtml"/><navPoint id="uuid-4b7914d7-fafe-4634-8d2a-eb2172b67f4b" playOrder="289"><navLabel><text>The task</text></navLabel><content src="4b7914d7-fafe-4634-8d2a-eb2172b67f4b.xhtml"/></navPoint>
+</navPoint>
+<navPoint id="uuid-4064ca7d-2998-4d36-8f27-dd4b39fb1251" playOrder="290"><navLabel><text>Task 3 – extending the crate (part 1)</text></navLabel><content src="4064ca7d-2998-4d36-8f27-dd4b39fb1251.xhtml"/><navPoint id="uuid-9f9142ba-07c3-4cd5-aa51-873efe67017c" playOrder="291"><navLabel><text>The task</text></navLabel><content src="9f9142ba-07c3-4cd5-aa51-873efe67017c.xhtml"/></navPoint>
+</navPoint>
+<navPoint id="uuid-eb614ded-9d1f-4300-b922-da8a400decb4" playOrder="292"><navLabel><text>Task 4 – extending the crate (part 2)</text></navLabel><content src="eb614ded-9d1f-4300-b922-da8a400decb4.xhtml"/></navPoint>
+<navPoint id="uuid-00d174d7-9a18-4a65-addd-7eb6ed6ea8e4" playOrder="293"><navLabel><text>Summary</text></navLabel><content src="00d174d7-9a18-4a65-addd-7eb6ed6ea8e4.xhtml"/></navPoint>
+</navPoint>
+<navPoint id="uuid-b22d5775-6084-4eda-af26-6dd545f50dd6" playOrder="294"><navLabel><text>The Standard Library</text></navLabel><content src="b22d5775-6084-4eda-af26-6dd545f50dd6.xhtml"/><navPoint id="uuid-0ddfd482-9c03-49c8-8724-7e2b69d81967" playOrder="295"><navLabel><text>Chapter format</text></navLabel><content src="0ddfd482-9c03-49c8-8724-7e2b69d81967.xhtml"/></navPoint>
+<navPoint id="uuid-693c9269-ae21-4bf8-ad5d-e8d121fa95e9" playOrder="296"><navLabel><text>What is the standard library?</text></navLabel><content src="693c9269-ae21-4bf8-ad5d-e8d121fa95e9.xhtml"/><navPoint id="uuid-aa603edb-9587-4f52-b442-c4d888938179" playOrder="297"><navLabel><text>The standard modules (overview)</text></navLabel><content src="aa603edb-9587-4f52-b442-c4d888938179.xhtml"/></navPoint>
+<navPoint id="uuid-371a512e-840f-4a69-ba47-cf2bc3fc79b8" playOrder="298"><navLabel><text>Primitive types (overview)</text></navLabel><content src="371a512e-840f-4a69-ba47-cf2bc3fc79b8.xhtml"/></navPoint>
+<navPoint id="uuid-3f090a42-b0fb-4d8e-985d-a7de3cdc7fd2" playOrder="299"><navLabel><text>Macros (overview)</text></navLabel><content src="3f090a42-b0fb-4d8e-985d-a7de3cdc7fd2.xhtml"/></navPoint>
+<navPoint id="uuid-13871223-f721-4c23-92e8-36ab26be06eb" playOrder="300"><navLabel><text>Prelude</text></navLabel><content src="13871223-f721-4c23-92e8-36ab26be06eb.xhtml"/></navPoint>
+</navPoint>
+<navPoint id="uuid-930c12e5-6f8c-44aa-a688-62d916a4f357" playOrder="301"><navLabel><text>The standard modules</text></navLabel><content src="930c12e5-6f8c-44aa-a688-62d916a4f357.xhtml"/><navPoint id="uuid-63e7ac3d-4897-419c-a583-52eb310f5a9e" playOrder="302"><navLabel><text>std::Any</text></navLabel><content src="63e7ac3d-4897-419c-a583-52eb310f5a9e.xhtml"/></navPoint>
+<navPoint id="uuid-cd01f586-1053-4386-8492-6000df031111" playOrder="303"><navLabel><text>std::ascii</text></navLabel><content src="cd01f586-1053-4386-8492-6000df031111.xhtml"/></navPoint>
+<navPoint id="uuid-e959c8dd-f61a-45f6-85b1-ee6501e12446" playOrder="304"><navLabel><text>std::borrow</text></navLabel><content src="e959c8dd-f61a-45f6-85b1-ee6501e12446.xhtml"/></navPoint>
+<navPoint id="uuid-6e493079-3506-4fb2-bc7a-891b65af853c" playOrder="305"><navLabel><text>std::boxed</text></navLabel><content src="6e493079-3506-4fb2-bc7a-891b65af853c.xhtml"/></navPoint>
+<navPoint id="uuid-87693865-ce6b-4960-ab8b-6c99ebc548ed" playOrder="306"><navLabel><text>std::cell</text></navLabel><content src="87693865-ce6b-4960-ab8b-6c99ebc548ed.xhtml"/></navPoint>
+<navPoint id="uuid-ff0d56db-6a56-4596-a99c-e1625e65cba7" playOrder="307"><navLabel><text>std::char</text></navLabel><content src="ff0d56db-6a56-4596-a99c-e1625e65cba7.xhtml"/></navPoint>
+<navPoint id="uuid-7129adbf-1084-413d-bf7c-8c877cee888a" playOrder="308"><navLabel><text>std::clone</text></navLabel><content src="7129adbf-1084-413d-bf7c-8c877cee888a.xhtml"/></navPoint>
+<navPoint id="uuid-4d860c93-0e7e-4c25-a287-79bf201f5001" playOrder="309"><navLabel><text>std::cmp</text></navLabel><content src="4d860c93-0e7e-4c25-a287-79bf201f5001.xhtml"/></navPoint>
+<navPoint id="uuid-d22c9845-1d56-43f6-9c9d-e687c6ef0627" playOrder="310"><navLabel><text>std::collections</text></navLabel><content src="d22c9845-1d56-43f6-9c9d-e687c6ef0627.xhtml"/></navPoint>
+<navPoint id="uuid-22e04719-c0ed-4ddb-8cac-d18d39da3eed" playOrder="311"><navLabel><text>std::convert</text></navLabel><content src="22e04719-c0ed-4ddb-8cac-d18d39da3eed.xhtml"/></navPoint>
+<navPoint id="uuid-72d239b3-1171-45c5-be75-8219e7e781b6" playOrder="312"><navLabel><text>std::default</text></navLabel><content src="72d239b3-1171-45c5-be75-8219e7e781b6.xhtml"/></navPoint>
+<navPoint id="uuid-8c56ac60-06a0-4d1e-a340-8b00338c3270" playOrder="313"><navLabel><text>std:env</text></navLabel><content src="8c56ac60-06a0-4d1e-a340-8b00338c3270.xhtml"/></navPoint>
+<navPoint id="uuid-6846b89c-08e4-46c2-8cd0-e70f9978ca7c" playOrder="314"><navLabel><text>std:error</text></navLabel><content src="6846b89c-08e4-46c2-8cd0-e70f9978ca7c.xhtml"/></navPoint>
+<navPoint id="uuid-6180aa08-2a9a-4615-96e6-53a2c0c0d43d" playOrder="315"><navLabel><text>std::f32</text></navLabel><content src="6180aa08-2a9a-4615-96e6-53a2c0c0d43d.xhtml"/></navPoint>
+<navPoint id="uuid-2b3114d7-0569-45c6-87aa-e2fe170a63bb" playOrder="316"><navLabel><text>std::f64</text></navLabel><content src="2b3114d7-0569-45c6-87aa-e2fe170a63bb.xhtml"/></navPoint>
+<navPoint id="uuid-d88062c8-a1fc-496e-aa41-cad1ec08132a" playOrder="317"><navLabel><text>std:ffi</text></navLabel><content src="d88062c8-a1fc-496e-aa41-cad1ec08132a.xhtml"/></navPoint>
+<navPoint id="uuid-d46eabc3-935e-4574-8c19-34f48162bdc1" playOrder="318"><navLabel><text>std::fmt</text></navLabel><content src="d46eabc3-935e-4574-8c19-34f48162bdc1.xhtml"/></navPoint>
+<navPoint id="uuid-3677837c-f6c1-4802-8e63-e7675cd3bd87" playOrder="319"><navLabel><text>std::fs</text></navLabel><content src="3677837c-f6c1-4802-8e63-e7675cd3bd87.xhtml"/></navPoint>
+<navPoint id="uuid-42a5f4a8-8062-4e21-82b4-b8780c993e58" playOrder="320"><navLabel><text>std::hash</text></navLabel><content src="42a5f4a8-8062-4e21-82b4-b8780c993e58.xhtml"/></navPoint>
+<navPoint id="uuid-33825a50-1cef-4e97-8056-298739953097" playOrder="321"><navLabel><text>std::i8</text></navLabel><content src="33825a50-1cef-4e97-8056-298739953097.xhtml"/></navPoint>
+<navPoint id="uuid-6af9cb73-0454-44e4-8516-32ee861d7ccf" playOrder="322"><navLabel><text>std::i16</text></navLabel><content src="6af9cb73-0454-44e4-8516-32ee861d7ccf.xhtml"/></navPoint>
+<navPoint id="uuid-597acf8d-5c73-407d-b18c-70096a65319e" playOrder="323"><navLabel><text>std::i32</text></navLabel><content src="597acf8d-5c73-407d-b18c-70096a65319e.xhtml"/></navPoint>
+<navPoint id="uuid-e8a45183-b51c-4232-8ed0-d9fce0b35b4a" playOrder="324"><navLabel><text>std::i64</text></navLabel><content src="e8a45183-b51c-4232-8ed0-d9fce0b35b4a.xhtml"/></navPoint>
+<navPoint id="uuid-ce159e1b-e602-4b74-979e-651ac7fc894f" playOrder="325"><navLabel><text>std::io</text></navLabel><content src="ce159e1b-e602-4b74-979e-651ac7fc894f.xhtml"/></navPoint>
+<navPoint id="uuid-4ee3d1d4-ecf8-4f34-af7c-17029c51c691" playOrder="326"><navLabel><text>std::isize</text></navLabel><content src="4ee3d1d4-ecf8-4f34-af7c-17029c51c691.xhtml"/></navPoint>
+<navPoint id="uuid-5fae8e74-a76f-4a43-891c-1fea39e5ef9b" playOrder="327"><navLabel><text>std::iter</text></navLabel><content src="5fae8e74-a76f-4a43-891c-1fea39e5ef9b.xhtml"/></navPoint>
+<navPoint id="uuid-325f054f-261e-40c5-a7c2-f686bed0b3ef" playOrder="328"><navLabel><text>std::marker</text></navLabel><content src="325f054f-261e-40c5-a7c2-f686bed0b3ef.xhtml"/></navPoint>
+<navPoint id="uuid-e7a4adf5-711f-4bde-8e31-bb454e24f031" playOrder="329"><navLabel><text>std::mem</text></navLabel><content src="e7a4adf5-711f-4bde-8e31-bb454e24f031.xhtml"/></navPoint>
+<navPoint id="uuid-d113da65-7d49-4ab7-a325-0fb66d9e6f55" playOrder="330"><navLabel><text>std:net</text></navLabel><content src="d113da65-7d49-4ab7-a325-0fb66d9e6f55.xhtml"/></navPoint>
+<navPoint id="uuid-e9148989-0fab-4fe6-88b8-4567bb637dcc" playOrder="331"><navLabel><text>std::num</text></navLabel><content src="e9148989-0fab-4fe6-88b8-4567bb637dcc.xhtml"/></navPoint>
+<navPoint id="uuid-6173953f-56f8-43f7-85f8-7216a949517f" playOrder="332"><navLabel><text>std::os</text></navLabel><content src="6173953f-56f8-43f7-85f8-7216a949517f.xhtml"/></navPoint>
+<navPoint id="uuid-e6e43769-13fc-40ae-a80f-157e6273d0a3" playOrder="333"><navLabel><text>std::panic</text></navLabel><content src="e6e43769-13fc-40ae-a80f-157e6273d0a3.xhtml"/></navPoint>
+<navPoint id="uuid-54948fe7-66c1-4a77-85de-329262e2d747" playOrder="334"><navLabel><text>std::path</text></navLabel><content src="54948fe7-66c1-4a77-85de-329262e2d747.xhtml"/></navPoint>
+<navPoint id="uuid-01221a1a-cb80-47df-9c08-ff3dd5b477e8" playOrder="335"><navLabel><text>std::process</text></navLabel><content src="01221a1a-cb80-47df-9c08-ff3dd5b477e8.xhtml"/></navPoint>
+<navPoint id="uuid-74cede55-0965-45b3-801b-96f7daf4860d" playOrder="336"><navLabel><text>std::ptr</text></navLabel><content src="74cede55-0965-45b3-801b-96f7daf4860d.xhtml"/></navPoint>
+<navPoint id="uuid-cb1812e5-ccf8-4c50-98f9-c748e4c6cab4" playOrder="337"><navLabel><text>std::slice</text></navLabel><content src="cb1812e5-ccf8-4c50-98f9-c748e4c6cab4.xhtml"/></navPoint>
+<navPoint id="uuid-52373358-7a7d-4c45-9f76-5faeb22d81bf" playOrder="338"><navLabel><text>std::str</text></navLabel><content src="52373358-7a7d-4c45-9f76-5faeb22d81bf.xhtml"/></navPoint>
+<navPoint id="uuid-fbb40f8a-587b-45de-ade4-dc660eda23b6" playOrder="339"><navLabel><text>std::string</text></navLabel><content src="fbb40f8a-587b-45de-ade4-dc660eda23b6.xhtml"/></navPoint>
+<navPoint id="uuid-dfde2ac5-d52f-438c-8c4f-93e6add4e313" playOrder="340"><navLabel><text>std::sync</text></navLabel><content src="dfde2ac5-d52f-438c-8c4f-93e6add4e313.xhtml"/></navPoint>
+<navPoint id="uuid-cd4375ce-8e5f-4e5c-8b9b-610a0478571f" playOrder="341"><navLabel><text>std::thread</text></navLabel><content src="cd4375ce-8e5f-4e5c-8b9b-610a0478571f.xhtml"/></navPoint>
+<navPoint id="uuid-dc70f052-5d85-4c36-b447-894367cf4fa8" playOrder="342"><navLabel><text>std::time</text></navLabel><content src="dc70f052-5d85-4c36-b447-894367cf4fa8.xhtml"/></navPoint>
+<navPoint id="uuid-6167cabd-61d9-43ee-bb98-5e5481b4c2fd" playOrder="343"><navLabel><text>std::u8</text></navLabel><content src="6167cabd-61d9-43ee-bb98-5e5481b4c2fd.xhtml"/></navPoint>
+<navPoint id="uuid-5b994f94-4954-4e1f-afef-5aad462c81be" playOrder="344"><navLabel><text>std::u16</text></navLabel><content src="5b994f94-4954-4e1f-afef-5aad462c81be.xhtml"/></navPoint>
+<navPoint id="uuid-358b8b23-1fcb-4f50-be2c-b7d76f31c089" playOrder="345"><navLabel><text>std::u32</text></navLabel><content src="358b8b23-1fcb-4f50-be2c-b7d76f31c089.xhtml"/></navPoint>
+<navPoint id="uuid-19bb42e7-74e6-40ed-993f-5fc7a76b1ef9" playOrder="346"><navLabel><text>std::u64</text></navLabel><content src="19bb42e7-74e6-40ed-993f-5fc7a76b1ef9.xhtml"/></navPoint>
+<navPoint id="uuid-c050dd4b-4c7a-4fdc-97cd-e214e106e62c" playOrder="347"><navLabel><text>std::usize</text></navLabel><content src="c050dd4b-4c7a-4fdc-97cd-e214e106e62c.xhtml"/></navPoint>
+<navPoint id="uuid-be619f48-18a7-4092-b445-9caef93c872a" playOrder="348"><navLabel><text>std::vec</text></navLabel><content src="be619f48-18a7-4092-b445-9caef93c872a.xhtml"/></navPoint>
+</navPoint>
+<navPoint id="uuid-8e58c3e5-5ea5-4e33-bea3-22bb50ebf020" playOrder="349"><navLabel><text>Summary</text></navLabel><content src="8e58c3e5-5ea5-4e33-bea3-22bb50ebf020.xhtml"/></navPoint>
+</navPoint>
+<navPoint id="uuid-6392ba81-7725-47e5-a5ce-ce2f7384a1d5" playOrder="350"><navLabel><text>Foreign Function Interfaces</text></navLabel><content src="6392ba81-7725-47e5-a5ce-ce2f7384a1d5.xhtml"/><navPoint id="uuid-9cf9c6db-3a63-4897-b44a-770d9dc17d99" playOrder="351"><navLabel><text>Introducing our simple library</text></navLabel><content src="9cf9c6db-3a63-4897-b44a-770d9dc17d99.xhtml"/></navPoint>
+<navPoint id="uuid-dbf8b332-110f-46a0-97fb-3d9cf6e425ce" playOrder="352"><navLabel><text>The three-step program</text></navLabel><content src="dbf8b332-110f-46a0-97fb-3d9cf6e425ce.xhtml"/><navPoint id="uuid-13d2864d-2e77-4837-a110-07d5a7344479" playOrder="353"><navLabel><text>Including the dependency</text></navLabel><content src="13d2864d-2e77-4837-a110-07d5a7344479.xhtml"/></navPoint>
+<navPoint id="uuid-2eb57879-5363-4ff1-8abd-e73667c01ed5" playOrder="354"><navLabel><text>Creating the code</text></navLabel><content src="2eb57879-5363-4ff1-8abd-e73667c01ed5.xhtml"/><navPoint id="uuid-255da333-942d-46bf-9f52-226779f03fa4" playOrder="355"><navLabel><text>What&#x27;s the [link(name=&quot;&quot;)] for?</text></navLabel><content src="255da333-942d-46bf-9f52-226779f03fa4.xhtml"/></navPoint>
+<navPoint id="uuid-0b70ecc1-d68e-41d7-88e1-d75c3e3a62f1" playOrder="356"><navLabel><text>What&#x27;s the big deal? That was simple enough!</text></navLabel><content src="0b70ecc1-d68e-41d7-88e1-d75c3e3a62f1.xhtml"/></navPoint>
+</navPoint>
+<navPoint id="uuid-37223ac6-c9b3-4d1b-8d2a-df8116fc6122" playOrder="357"><navLabel><text>Let&#x27;s extend things a bit</text></navLabel><content src="37223ac6-c9b3-4d1b-8d2a-df8116fc6122.xhtml"/><navPoint id="uuid-bc42ac79-3343-4c9c-9071-63fe91cbd59b" playOrder="358"><navLabel><text>What happens if the types don&#x27;t match?</text></navLabel><content src="bc42ac79-3343-4c9c-9071-63fe91cbd59b.xhtml"/></navPoint>
+</navPoint>
+<navPoint id="uuid-88352cf3-c160-4ae3-9500-fe9ad8978a8f" playOrder="359"><navLabel><text>Can we make things safer?</text></navLabel><content src="88352cf3-c160-4ae3-9500-fe9ad8978a8f.xhtml"/><navPoint id="uuid-139d1bcd-745c-438e-a963-80139fb90c08" playOrder="360"><navLabel><text>Wrappers</text></navLabel><content src="139d1bcd-745c-438e-a963-80139fb90c08.xhtml"/></navPoint>
+<navPoint id="uuid-a807c514-371d-4962-9af8-21a2c95a5b8e" playOrder="361"><navLabel><text>A practical example</text></navLabel><content src="a807c514-371d-4962-9af8-21a2c95a5b8e.xhtml"/></navPoint>
+<navPoint id="uuid-aacf1e14-7854-4914-aa9f-cf2ac03a2c50" playOrder="362"><navLabel><text>Accessing global variables</text></navLabel><content src="aacf1e14-7854-4914-aa9f-cf2ac03a2c50.xhtml"/></navPoint>
+</navPoint>
+<navPoint id="uuid-12659b4d-b816-4d74-a2e5-d905a047c76c" playOrder="363"><navLabel><text>Cleaning up after yourself</text></navLabel><content src="12659b4d-b816-4d74-a2e5-d905a047c76c.xhtml"/><navPoint id="uuid-04bbf961-6fbe-4750-bb10-7b6b4b3559b2" playOrder="364"><navLabel><text>Drop it!</text></navLabel><content src="04bbf961-6fbe-4750-bb10-7b6b4b3559b2.xhtml"/></navPoint>
+</navPoint>
+<navPoint id="uuid-3f641a7e-1425-4133-8ced-cf50f34a7100" playOrder="365"><navLabel><text>Monitoring an external process within an FFI</text></navLabel><content src="3f641a7e-1425-4133-8ced-cf50f34a7100.xhtml"/><navPoint id="uuid-78d987c8-2c26-4c24-a727-96a78f135981" playOrder="366"><navLabel><text>Targeting synchronous callbacks</text></navLabel><content src="78d987c8-2c26-4c24-a727-96a78f135981.xhtml"/></navPoint>
+</navPoint>
+<navPoint id="uuid-88714dae-2fe3-42f5-847b-4f1575bcf5b9" playOrder="367"><navLabel><text>Targeting a Rust object</text></navLabel><content src="88714dae-2fe3-42f5-847b-4f1575bcf5b9.xhtml"/></navPoint>
+<navPoint id="uuid-338d5191-0bb4-4d32-9563-35b65b8bb0bd" playOrder="368"><navLabel><text>Calling Rust from another language</text></navLabel><content src="338d5191-0bb4-4d32-9563-35b65b8bb0bd.xhtml"/></navPoint>
+<navPoint id="uuid-7e1b6bc0-8549-4b35-9dea-146a51097668" playOrder="369"><navLabel><text>Dealing with the unknown</text></navLabel><content src="7e1b6bc0-8549-4b35-9dea-146a51097668.xhtml"/><navPoint id="uuid-73d96d88-3440-47d8-9a68-5ee990decd98" playOrder="370"><navLabel><text>C structs</text></navLabel><content src="73d96d88-3440-47d8-9a68-5ee990decd98.xhtml"/></navPoint>
+</navPoint>
+</navPoint>
+<navPoint id="uuid-0308ff70-f85f-4dc3-b67e-9d446ecc6018" playOrder="371"><navLabel><text>Summary</text></navLabel><content src="0308ff70-f85f-4dc3-b67e-9d446ecc6018.xhtml"/></navPoint>
+</navPoint>
+</navMap>
+</ncx>

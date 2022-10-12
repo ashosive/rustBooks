@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style00.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style01.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Exercizing the hazard-pointer Treiber stack</h1>
+                </header>
+            
+            <article>
+                
+<p>Let's put the conc, Treiber stack through the wringer to get an idea of the performance of this approach. Key areas of interest for us will be:</p>
+<ul>
+<li>Push/pop cycles per second</li>
+<li>Memory behavior, high-water mark, and what not</li>
+<li>Cache behavior</li>
+</ul>
+<p>We'll run our programs on x86 and ARM, as in previous chapters. One thing to note here, before we proceed, is that conc—at least as of version 0.5—requires the nightly channel to be compiled. Please read the section just before this one if you're jumping around in the book for full details.</p>
+<p>Because we have to run on an old version of nightly, we have to stick static <kbd>AtomicUsize</kbd> into <kbd>lazy_static!</kbd>, a technique you'll see in older Rust code but not in this book, usually. With that in mind, here is our exercise program:</p>
+<pre style="padding-left: 30px">extern crate conc;
+#[macro_use]
+extern crate lazy_static;
+extern crate num_cpus;
+extern crate quantiles;
+
+use conc::sync::Treiber;
+use quantiles::ckms::CKMS;
+use std::sync::Arc;
+use std::sync::atomic::{AtomicUsize, Ordering};
+use std::{thread, time};
+
+lazy_static! {
+    static ref WORKERS: AtomicUsize = AtomicUsize::new(0);
+    static ref COUNT: AtomicUsize = AtomicUsize::new(0);
+}
+static MAX_I: u32 = 67_108_864; // 2 ** 26
+
+fn main() {
+    let stk: Arc&lt;Treiber&lt;(u64, u64, u64)&gt;&gt; = Arc::new(Treiber::new());
+
+    let mut jhs = Vec::new();
+
+    let cpus = num_cpus::get();
+    WORKERS.store(cpus, Ordering::Release);
+
+    for _ in 0..cpus {
+        let stk = Arc::clone(&amp;stk);
+        jhs.push(thread::spawn(move || {
+            for i in 0..MAX_I {
+                stk.push((i as u64, i as u64, i as u64));
+                stk.pop();
+                COUNT.fetch_add(1, Ordering::Relaxed);
+            }
+            WORKERS.fetch_sub(1, Ordering::Relaxed)
+        }))
+    }
+
+    let one_second = time::Duration::from_millis(1_000);
+    let mut iter = 0;
+    let mut cycles: CKMS&lt;u32&gt; = CKMS::new(0.001);
+    while WORKERS.load(Ordering::Relaxed) != 0 {
+        let count = COUNT.swap(0, Ordering::Relaxed);
+        cycles.insert((count / cpus) as u32);
+        println!(
+            "CYCLES PER SECOND({}):\n  25th: \<br/>            {}\n  50th: {}\n  75th: \<br/>            {}\n  90th: {}\n  max:  {}\n",
+            iter,
+            cycles.query(0.25).unwrap().1,
+            cycles.query(0.50).unwrap().1,
+            cycles.query(0.75).unwrap().1,
+            cycles.query(0.90).unwrap().1,
+            cycles.query(1.0).unwrap().1
+        );
+        thread::sleep(one_second);
+        iter += 1;
+    }
+
+    for jh in jhs {
+        jh.join().unwrap();
+    }
+}</pre>
+<p>We have a number of worker threads equal to the total number of CPUs in the target machine, each doing one push and then an immediate pop on the stack. A <kbd>COUNT</kbd> is kept and the main thread swaps that value for <kbd>0</kbd> every second or so, tossing the value into a quantile estimate structure—discussed in more detail in <a href="5a332d94-37e4-4748-8920-1679b07e2880.xhtml" target="_blank">Chapter 4</a>, <em>Sync and Send<span> </span>–<span> </span>the Foundation of Rust Concurrency</em>—and printing out a summary of the recorded cycles per second, scaled to the number of CPUs. The worker threads the cycle up through to <kbd>MAX_I</kbd>, which is arbitrarily set to the smallish value of <kbd>2**26</kbd>. When the worker is finished cycling, it decreases <kbd>WORKERS</kbd> and exits. Once <kbd>WORKERS</kbd> hits zero, the main loop also exits.</p>
+<p>On my x86 machine, it takes approximately 58 seconds for this program to exit, with this output:</p>
+<pre><strong>CYCLES PER SECOND(0):
+  25th: 0
+  50th: 0
+  75th: 0
+  90th: 0
+  max:  0
+
+CYCLES PER SECOND(1):
+  25th: 0
+  50th: 0
+  75th: 1124493
+  90th: 1124493
+  max:  1124493
+
+...
+
+CYCLES PER SECOND(56):
+  25th: 1139055
+  50th: 1141656
+  75th: 1143781
+  90th: 1144324
+  max:  1145284
+
+CYCLES PER SECOND(57):
+  25th: 1139097
+  50th: 1141656
+  75th: 1143792
+  90th: 1144324
+  max:  1145284</strong></pre>
+<pre><strong>CYCLES PER SECOND(58):
+  25th: 1139097
+  50th: 1141809
+  75th: 1143792
+  90th: 1144398
+  max:  1152384</strong></pre>
+<p>The x86 perf run is as follows:</p>
+<pre><strong>&gt; perf stat --event task-clock,context-switches,page-faults,cycles,instructions,branches,branch-misses,cache-references,cache-misses target/release/conc_stack &gt; /dev/null
+
+ Performance counter stats for 'target/release/conc_stack':
+
+     230503.932161      task-clock (msec)         #    3.906 CPUs utilized
+               943      context-switches          #    0.004 K/sec
+             9,140      page-faults               #    0.040 K/sec
+   665,734,124,408      cycles                    #    2.888 GHz 
+   529,230,473,047      instructions              #    0.79  insn per cycle 
+    99,146,219,517      branches                  #  430.128 M/sec 
+     1,140,398,326      branch-misses             #    1.15% of all branches
+    12,759,284,944      cache-references          #   55.354 M/sec
+       124,487,844      cache-misses              #    0.976 % of all cache refs
+
+      59.006842741 seconds time elapsed</strong></pre>
+<p>The memory-allocation behavior of this program is very favorable as well.</p>
+<p>On my ARM machine, it takes approximately 460 seconds for the program to run to completion, with this output:</p>
+<pre><strong>CYCLES PER SECOND(0):
+  25th: 0
+  50th: 0
+  75th: 0
+  90th: 0
+  max:  0</strong></pre>
+<pre><strong>CYCLES PER SECOND(1):
+  25th: 0
+  50th: 0
+  75th: 150477
+  90th: 150477
+  max:  150477
+
+...
+
+CYCLES PER SECOND(462):
+  25th: 137736
+  50th: 150371
+  75th: 150928
+  90th: 151129
+  max:  151381
+
+CYCLES PER SECOND(463):
+  25th: 137721
+  50th: 150370
+  75th: 150928
+  90th: 151129
+  max:  151381</strong></pre>
+<p>This is about 7.5 times slower than the x86 machine, even though both machines have the same number of cores. The x86 machine has a faster clock and a faster memory bus than my ARM:</p>
+<pre><strong>&gt; perf stat --event task-clock,context-switches,page-faults,cycles,instructions,branches,branch-misses,cache
+-references,cache-misses target/release/conc_stack &gt; /dev/null
+
+ Performance counter stats for 'target/release/conc_stack':
+
+    1882745.172714      task-clock (msec)         #    3.955 CPUs utilized
+                 0      context-switches          #    0.000 K/sec
+             3,212      page-faults               #    0.002 K/sec
+ 2,109,536,434,019      cycles                    #    1.120 GHz
+ 1,457,344,087,067      instructions              #    0.69  insn per cycle
+   264,210,403,390      branches                  #  140.333 M/sec
+    36,052,283,984      branch-misses             #   13.65% of all branches
+   642,854,259,575      cache-references          #  341.445 M/sec
+     2,401,725,425      cache-misses              #    0.374 % of all cache refs
+
+     476.095973090 seconds time elapsed</strong></pre>
+<p>The fact that the branch misses on ARM are 12% higher than on x86 is an interesting result.</p>
+<p>Before moving on, do remember to execute the rustup default stable.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

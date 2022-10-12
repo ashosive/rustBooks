@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style00.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style01.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Slowloris – attacking thread-per-connection servers</h1>
+                </header>
+            
+            <article>
+                
+<p>The thread-per-connection architecture is a networking architecture that allocates one OS thread per inbound connection. This works well for servers that will receive a total number of connections relatively similar to the number of CPUs available to the server. Depending on the operating system, this architecture tends to reduce time-to-response latency of network transactions, as a nice bonus. The major defect with thread-per-connection systems has to do with slowloris attacks. In this style of attack, a malicious user opens a connection to the server<span>–</span>a relatively cheap operation, requiring only a single file-handler and simply holds it. Thread-per-connection systems can mitigate the slowloris attack by aggressively timing out idle connections, which the attacker can then mitigate by sending data through the connection at a very slow rate, say one byte per 100 milliseconds. The attacker, which could easily be just buggy software if you're deploying solely inside a trusted network, spends very little resources to carry out their attack. Meanwhile, for every new connection into the system, the server is forced to allocate a full stack frame and forced to cram another thread into the OS scheduler. That's not cheap.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Private versus public fields</h1>
+                </header>
+            
+            <article>
+                
+<p>By default, all fields within a <kbd>struct</kbd> are <kbd>private</kbd> to the module it is created in. This has its uses; for example, if you want to protect a value within the <kbd>struct</kbd>, you can make it only accessible via a <kbd>read</kbd>/<kbd>write</kbd> function, as shown in the following example:</p>
+<pre>// readwrite.rs 
+pub struct RWData 
+{ 
+    pub X: i32, 
+    Y: i32 
+} 
+ 
+static mut rwdata: RWData = RWData {X: 0, Y: 0}; 
+ 
+pub fn store_y(val: i32) 
+{ 
+    unsafe { rwdata.Y = val; }
+} 
+ 
+pub fn new_y() -&gt; i32 
+{ 
+    unsafe { rwdata.Y * 6 }
+} 
+ 
+// main.rs 
+mod readwrite; 
+use readwrite::*; 
+ 
+fn main() { 
+    
+ 
+        store_y(6); 
+        println!("Y is now {}", new_y()); 
+     
+} </pre>
+<div class="packt_infobox">The code for this section is in the <kbd>07/readwrite</kbd> folder, present in the supporting code bundle provided for this book.</div>
+<p>When we build and run this, we will get the following output:</p>
+<div class="packt_figure CDPAlignCenter CDPAlign"><img class=" image-border" src="Images/fe028358-6201-4f35-b50b-b7af74ef8178.png" width="1170" height="200"/></div>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style00.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style01.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Using Cargo to help with your unit testing</h1>
+                </header>
+            
+            <article>
+                
+<p>Hopefully, unit testing is not something you will be unfamiliar with. A unit test is a test that operates on a specific function or method rather than an entire class or namespace. It ensures that the function operates correctly on the data it is presented with.</p>
+<p>Unit tests within Rust are very simple to create (two examples are given in the <kbd>assert_unittest</kbd> and <kbd>unittest</kbd> directories). The following has been taken from the <kbd>unittest</kbd> example:</p>
+<pre>fn main() { 
+    println!("Tests have not been compiled, use rustc --test instead (or cargo test)"); 
+} 
+ 
+#[test] 
+fn multiply_test() 
+{ 
+   if 2 * 3 == 5 
+   { 
+      println!("The multiply worked"); 
+   } 
+} </pre>
+<p>When this is built and executed, you may be surprised by the following result:</p>
+<div class="packt_figure CDPAlignCenter CDPAlign"><img class=" image-border" src="Images/d2e82a2d-ca2f-4371-9c7a-67336b29672f.png"/></div>
+<div class="packt_infobox">The reason why this unit test has passed despite <em>2 x 3</em> not being <em>5</em> is because the unit test is not testing the result of the operation, but that the operation itself is working. It is very important that this distinction is understood from an early stage to prevent confusion later.</div>
+<p>We have hit a limitation of unit testing: if we are not testing the data but the operation, how can we know that the result itself is correct?</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">The Receiver</h1>
+                </header>
+            
+            <article>
+                
+<p>Now that we've covered the deque, let's jump on to the <kbd>Receiver</kbd>, defined in <kbd>src/receiver.rs</kbd>. As mentioned previously, the receiver is responsible for either pulling a value out of memory or from disk in the style of an iterator. The <kbd>Receiver</kbd> declares the usual machinery for transforming itself into an iterator, and we won't cover that in this book, mostly just because it's a touch on the tedious side. That said, there are two important functions to cover in the <kbd>Receiver</kbd>, and neither of them are in the public interface. The first is <kbd>Receiver::next_value</kbd>, called by the iterator version of the receiver. This function is defined as follows:</p>
+<pre>fn next_value(&amp;mut self) -&gt; Option&lt;T&gt; {
+    loop {
+        if self.disk_writes_to_read == 0 {
+            match self.mem_buffer.pop_front() {
+                private::Placement::Memory(ev) =&gt; {
+                    return Some(ev);
+                }
+                private::Placement::Disk(sz) =&gt; {
+                    self.disk_writes_to_read = sz;
+                    continue;
+                }
+            }
+        } else {
+            match self.read_disk_value() {
+                Ok(ev) =&gt; return Some(ev),
+                Err(_) =&gt; return None,
+            }
+        }
+    }
+}</pre>
+<p>A hopper defined to move <kbd>T</kbd> values does not define a deque—as discussed in the previous section—over <kbd>T</kbd>s. Instead, the deque actually holds <kbd>Placement&lt;T&gt;</kbd>. Placement, defined in <kbd>src/private.rs</kbd>, is a small enumeration:</p>
+<pre style="padding-left: 30px">pub enum Placement&lt;T&gt; {
+    Memory(T),
+    Disk(usize),
+}</pre>
+<p>This is the trick that makes hopper work. The primary challenge with a concurrent data structure is providing sufficient synchronization between threads that your results can remain coherent despite the chaotic nature of scheduling, but not require so much synchronization that you're underwater compared to a sequential solution.</p>
+<p>That does happen.</p>
+<p>Now, recall that maintaining order is a key design need for any channel-style queue. The Rust standard library MPSC achieves this with atomic flags, aided by the fact that, ultimately, there's only one place for inserted elements to be stored and one place for them to be removed from. Not so in hopper. But, that one-stop-shop is a very useful, low synchronization approach. That's where <kbd>Placement</kbd> comes in. When the <kbd>Memory</kbd> variant is hit, the <kbd>T</kbd> is present already and the receiver simply returns it. When <kbd>Disk(usize)</kbd> is returned, that sends a signal to the receiver to flip itself into <em>disk mode</em>. In disk mode, when <kbd>self.disk_writes_to_read</kbd> is not zero, the receiver preferentially reads a value from disk. Only when there are no more disk values to be read does the receiver attempt to read from memory again. This mode-flipping approach maintains ordering but also has the added benefit of requiring no synchronization when in disk mode, saving critical time when reading from a slow disk.</p>
+<p>The second important function to examine is <kbd>read_disk_value</kbd>, referenced in <kbd>next_value</kbd>. It's long and mostly book-keeping, but I did want to call out the first part of that function here:</p>
+<pre>    fn read_disk_value(&amp;mut self) -&gt; Result&lt;T, super::Error&gt; {
+        loop {
+            match self.fp.read_u32::&lt;BigEndian&gt;() {
+                Ok(payload_size_in_bytes) =&gt; {
+                    let mut payload_buf = vec![0; payload_size_in_bytes <br/>                     as usize];
+                    match self.fp.read_exact(&amp;mut payload_buf[..]) {
+                        Ok(()) =&gt; {
+                            let mut dec = <br/>                            DeflateDecoder::new(&amp;payload_buf[..]);
+                            match deserialize_from(&amp;mut dec) {
+                                Ok(event) =&gt; {
+                                    self.disk_writes_to_read -= 1;
+                                    return Ok(event);
+                                }
+                                Err(e) =&gt; panic!("Failed decoding. <br/>                                Skipping {:?}", e),
+                            }
+                        }</pre>
+<p>This small chunk of code uses two very useful libraries. Hopper stores its disk-slop elements to disk in bincode format. Bincode (<a href="https://crates.io/crates/bincode">https://crates.io/crates/bincode</a>) was invented for the servo project and is a serialization library intended for IPC - more or less the exact use hopper has for it. The advantage of bincode is that it's fast to serialize and deserialize but with the disadvantage of not being a standard and not having a guaranteed binary format from version to version. The second library to be called out is almost invisible in this example; byteorder. You can see it here: <kbd>self.fp.read_u32::&lt;BigEndian&gt;</kbd>. Byteorder extends <kbd>std::io::Read</kbd> to allow for the deserialization of primitive types from byte-buffers. It is possible to do this yourself by hand but it's error-prone and tedious to repeat. Use byteorder. So, what we're seeing here is hopper reading a 32-bit length big-ending length prefix from <kbd>self.fp</kbd>—a <kbd>std::io::BufReader</kbd> pointed to the current on-disk queue file—and using the said prefix to read exactly that many bytes from disk, before passing those on into the deserializer. That's it. All hopper on-disk slop elements are a 32 bit length prefix chased by that many bytes.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

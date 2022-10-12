@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style00.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style01.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Supplied data</h1>
+                </header>
+            
+            <article>
+                
+<p>The data required for this project is in the <kbd>Chapter 6</kbd> folder, <kbd>Projects/MathsData.txt</kbd>. The content of the file should be used within the application (copy and paste). If the data sets do not have the same number of elements, remove elements from the end of the set with the larger number of elements.</p>
+<p>Let's look at the math required:</p>
+<ul>
+<li><strong>The equation of a straight line</strong>:</li>
+</ul>
+<p style="padding-left: 90px">The equation is very simple:</p>
+<p style="padding-left: 120px"><em>y = mx + c</em>, where <em>m</em> is the gradient and <em>c</em> is the intercept on the y axis</p>
+<ul>
+<li><strong>Gradient of the regression line</strong>:</li>
+</ul>
+<p style="padding-left: 90px">The equation is as follows:</p>
+<div class="CDPAlignCenter CDPAlign">&amp;gt;<img height="50" width="221" class="fm-editor-equation" src="Images/cd030088-cc13-403d-943a-c03caf15a810.png"/></div>
+<p style="padding-left: 120px">This may look hairy but it's quite simple, so long as the following rule is remembered:</p>
+<p style="padding-left: 120px"><img height="19" width="32" class="fm-editor-equation inline-image" src="Images/df2037f3-9e20-4122-91ea-d35272cc4b69.png"/> is not equal to <img height="18" width="39" class="fm-editor-equation inline-image" src="Images/50086a5b-b0ec-4915-9549-6f64d8bf0571.png"/></p>
+<p>So, what is the difference?</p>
+<p class="mce-root"><img height="19" width="32" class="fm-editor-equation inline-image" src="Images/df2037f3-9e20-4122-91ea-d35272cc4b69.png"/> means that it is the sum of x<sup>2</sup> while <img height="18" width="39" class="fm-editor-equation inline-image" src="Images/50086a5b-b0ec-4915-9549-6f64d8bf0571.png"/> is the sum of x squared. Let's consider the following code as an example:</p>
+<div class="CDPAlignCenter CDPAlign"><img height="86" width="534" class="fm-editor-equation" src="Images/e5d7ab83-f277-47d5-901d-a2fc1446789b.png"/></div>
+<p>To save time at this point, it is worth performing the following calculations:</p>
+<ul>
+<li><em>xy</em> for each set, followed by ∑<em>xy</em> for each</li>
+<li><span>∑</span><em>x</em>, <span>∑</span><em>y</em>, <span>∑</span><em>x<sup>2</sup></em>, (<span>∑</span>x)<sup>2</sup>, <img height="12" width="8" class="fm-editor-equation inline-image" src="Images/b996d189-b82a-49da-a633-73b49ff508bc.png"/> (the average of <em>x</em>), ;<img height="10" width="6" class="fm-editor-equation inline-image" src="Images/15d1afd5-a1bb-4ea0-abe3-73e5e7b7fe3c.png"/> (the average of the <em>y</em> values)</li>
+</ul>
+<p>The data is needed for the regression gradient and intercepts on the <em>y</em> value. After that is performed, it is simply a case of plugging in the numbers.</p>
+<p>For example, <span>∑</span>y = 5.8907, <span>∑</span>x = 5, <span>∑</span>x<sup>2</sup> = 7.5, (<span>∑</span>x)<sup>2</sup> = 25, n = 4, <span>∑</span>xy = 8.8528</p>
+<div class="CDPAlignCenter CDPAlign"><img height="40" width="176" class="fm-editor-equation" src="Images/cd030088-cc13-403d-943a-c03caf15a810.png"/></div>
+<div class="mce-root CDPAlignCenter"><img height="177" width="205" class="fm-editor-equation" src="Images/3e811c89-4257-463d-9623-385468c8de5f.png"/></div>
+<p>Moreover, none of the math from here on in is any harder than that.</p>
+<ul>
+<li><strong>Getting the intercepts</strong>: </li>
+</ul>
+<p style="padding-left: 60px">We already have the formula for the intercept on the <em>y</em> axis (<em>c</em>) by the equation, which is as follows:</p>
+<div class="CDPAlignCenter CDPAlign"><img height="46" width="212" class="fm-editor-equation" src="Images/0b10a61d-b3c9-4228-8376-fe84ff0c1b49.png"/></div>
+<p>Again, using the same data as earlier, the numbers slot in and give an answer of -0.0167.</p>
+<p>Now, this is the intercept on y; however, we want the intercept on the x axis as well. To do this, we can say that we want to know the value of x when y = 0. The equation of the straight line is <em>y = mx + c</em>; therefore, to get <em>x</em> by itself, the equation will be as follows:</p>
+<div class="CDPAlignCenter CDPAlign"><img height="29" width="58" class="fm-editor-equation" src="Images/c2386465-3d3e-4b56-b238-b231261475bf.png"/></div>
+<p>Simple!</p>
+<ul>
+<li><strong>Deviation must be known</strong>:</li>
+</ul>
+<p>There are two more factors to be considered with the regression analysis-the standard deviation (better known as the error in the line) and the <em>r<sup>2</sup></em> value (the correlation coefficient; in other words, how good a straight line the line really is).</p>
+<p>The two equations are a tad more difficult than before, but not by much.</p>
+<p>First off, some more calculations will cover the standard deviation and the r<sup>2</sup> calculations.</p>
+<p>For the standard deviation, we will need to know <em>(y<sub>expt</sub> - y<sub>calc</sub>)<sup>2</sup></em>. This can be done in line, as follows:</p>
+<p>y<sub>expt</sub> is the value from your experiment, y<sub>calc</sub> can be read as mx + c (all three are known). Therefore, if we just plug in the numbers then square the result, we end up with (y<sub>expt</sub> - y<sub>calc</sub>)<sup>2</sup>. These numbers are then added together to give ∑(y<sub>expt</sub> - y<sub>calc</sub>)<sup>2</sup>.</p>
+<p>In the r<sup>2</sup> calculation, we will need to calculate <img height="13" width="58" class="fm-editor-equation inline-image" src="Images/fa175f19-7142-4098-ba96-f6bcf2c034ac.png"/> and then sum the results. This is easy, as are the parts in the denominator.</p>
+<p>However, wait a second; there is a common item in both the deviation and r<sup>2</sup> calculation, namely raising to the power ½. This is actually just another way of saying a square root.</p>
+<p>It is now just a case of plugging in the numbers.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style00.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style01.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">What about functions with arguments?</h1>
+                </header>
+            
+            <article>
+                
+<p>Consider the following piece of code:</p>
+<pre>    fn main() 
+    { 
+        let a = 32; 
+        let b = &amp;a; 
+    } </pre>
+<p>We have created two variable bindings, with the second one (<kbd>b</kbd>) pointing at the address for <kbd>a</kbd>. The <kbd>b</kbd> variable doesn't contain the value of the <kbd>a</kbd> variable, but it points to the position <kbd>a</kbd> is held at, from which it can obtain a value (in other words, the value of <kbd>b</kbd> is borrowed from <kbd>a</kbd>).</p>
+<p>In terms of our stack diagram, we have this:</p>
+<table class="MsoTableGrid">
+<tbody>
+<tr>
+<td>
+<p><strong>Function name</strong></p>
+</td>
+<td>
+<p><strong>Address</strong></p>
+</td>
+<td>
+<p><strong>Variable name</strong></p>
+</td>
+<td>
+<p><strong>Value</strong></p>
+</td>
+</tr>
+<tr>
+<td>
+<p><kbd>main</kbd></p>
+</td>
+<td>
+<p><kbd>1</kbd></p>
+</td>
+<td>
+<p><kbd>b</kbd></p>
+</td>
+<td>
+<p><kbd>→ address 0</kbd></p>
+</td>
+</tr>
+<tr>
+<td/>
+<td>
+<p><kbd>0</kbd></p>
+</td>
+<td>
+<p><kbd>a</kbd></p>
+</td>
+<td>
+<p><kbd>32</kbd></p>
+</td>
+</tr>
+</tbody>
+</table>
+<p>If we have a function call another function, but with a parameter, our stack will look slightly different:</p>
+<pre>    fn second(i: &amp;i32) 
+    { 
+        let c = 42; 
+        println!("{}", *i); 
+    } 
+ 
+    fn main()  
+    { 
+        let a = 32; 
+        let b = &amp;a; 
+        second(b); 
+    } 
+ </pre>
+<table class="MsoTableGrid">
+<tbody>
+<tr>
+<td>
+<p><strong>Function name</strong></p>
+</td>
+<td>
+<p><strong>Address</strong></p>
+</td>
+<td>
+<p><strong>Variable name</strong></p>
+</td>
+<td>
+<p><strong>Value</strong></p>
+</td>
+</tr>
+<tr>
+<td/>
+<td>
+<p><kbd>3</kbd></p>
+</td>
+<td>
+<p><kbd>c</kbd></p>
+</td>
+<td>
+<p><kbd>42</kbd></p>
+</td>
+</tr>
+<tr>
+<td>
+<p>second</p>
+</td>
+<td>
+<p><kbd>2</kbd></p>
+</td>
+<td>
+<p><kbd>i</kbd></p>
+</td>
+<td>
+<p><kbd>→ address 0</kbd></p>
+</td>
+</tr>
+<tr>
+<td/>
+<td>
+<p><kbd>1</kbd></p>
+</td>
+<td>
+<p><kbd>b</kbd></p>
+</td>
+<td>
+<p><kbd>→ address 0</kbd></p>
+</td>
+</tr>
+<tr>
+<td>
+<p>main</p>
+</td>
+<td>
+<p><kbd>0</kbd></p>
+</td>
+<td>
+<p><kbd>a</kbd></p>
+</td>
+<td>
+<p><kbd>32</kbd></p>
+</td>
+</tr>
+</tbody>
+</table>
+<p> </p>
+<p>The <kbd>i</kbd> binding points to <kbd>address <span class="packt_screen">0</span></kbd> and the <kbd>b</kbd> variable points to <kbd>address <span class="packt_screen">0</span></kbd>, and this is the parameter being passed to <kbd>second</kbd>.</p>
+<p>We can use this stack method to think about memory for a complex situation if you like.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

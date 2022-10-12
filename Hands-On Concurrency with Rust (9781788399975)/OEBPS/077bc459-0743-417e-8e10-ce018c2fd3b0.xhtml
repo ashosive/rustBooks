@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Searching for crashes with AFL</h1>
+                </header>
+            
+            <article>
+                
+<p>The repeat-loop variant of testing in the previous section is an interesting one. It's not, like QuickCheck, a test wholly focused on finding logic bugs. We know that the test will work for most iterations. What's being sought out there is a failure to properly control the indeterminism of the underlying machine. In some sense that variant of test is using a logical check to search for crashes. It is a kind of fuzz test.</p>
+<p>Hopper interacts with the filesystem, spawns threads, and manipulates bytes up from files. Each of these activities is subject to failure for want of resources, offsetting errors, or fundamental misunderstandings of the medium. An early version of hopper, for instance, assumed that small atomic writes to the disk would not interleave, which is true for XFS but not true for most other filesystems. Or, another version of hopper always created threads in-test by use of the more familiar <kbd>thread::spawn</kbd>. It turns out, however, that this function will panic if no thread can be created, which is why the tests use the <kbd>thread::Builder</kbd> pattern instead, allowing for recovery.</p>
+<p>Crashes are important to figure out in their own right. To this end, hopper has a fuzzing setup, based on AFL. To avoid producing an unnecessary binary on users' systems, the hopper project does not host its own fuzzing code as of this writing. Instead, it lives in <kbd>blt/hopper-fuzz</kbd> (<a href="https://github.com/blt/hopper-fuzz">https://github.com/blt/hopper-fuzz</a>). This is, admittedly, awkward, but fuzz testing, being uncommon, often is. Fuzz rounds easily run for multiples of days and do not fit well into modern CI systems. AFL itself is not a tool that admits easy automation, either, compounding the problem. Fuzz runs tend to be done in small batches on users' private machines, at least for open-source projects with small communities. Inside hopper-fuzz, there's a single program for fuzzing, the preamble of which is:</p>
+<pre style="padding-left: 30px">extern crate hopper;
+extern crate rand;
+#[macro_use]
+extern crate serde_derive;
+extern crate bincode;
+extern crate tempdir;
+
+use bincode::{deserialize_from, Bounded};
+use self::hopper::channel_with_explicit_capacity;
+use std::{io, process};
+use rand::{Rng, SeedableRng, XorShiftRng};</pre>
+<p>The fairly straightforward, based on what we've seen so far. Getting input into a fuzz program is sometimes non-trivial, especially when the input is not much more than a set of inputs rather than, say in the case of a parser, an actual unit of work for the program. Your author's approach is to rely on serde to deserialize the byte buffer that AFL will fling into the program, being aware that most payloads will fail to decode but not minding all that much. To that end, the top of your author's fuzz programs usually have an input struct filled with control data, and this program is no different:</p>
+<pre style="padding-left: 30px">#[derive(Debug, PartialEq, Deserialize)]
+struct Input { // 22 bytes
+    seed_a: u32, // 4
+    seed_b: u32, // 4
+    seed_c: u32, // 4
+    seed_d: u32, // 4
+    max_in_memory_bytes: u32, // 4
+    max_disk_bytes: u16, // 2
+}</pre>
+<p>The seeds are for <kbd>XorShiftRng</kbd>, whereas <kbd>max_in_memory_bytes</kbd> and <kbd>max_disk_bytes</kbd> are for hopper. A careful tally of the bytesize of input is made to avoid fuzz testing the bincode deserializer's ability to reject abnormally large inputs. While AFL is not blind—it has instrumented the branches of the program, after all—it is also not very smart. It's entirely possible that what you, the programmer, intends to fuzz is not what gets fuzzed to start. It's not unheard of to shake out bugs in any additional libraries brought into the fuzz project. It's to keep the libraries drawn in to a minimum and their use minimal.</p>
+<p>The <kbd>main</kbd> function of the fuzz program starts off with a setup similar to other hopper tests:</p>
+<pre style="padding-left: 30px">fn main() {
+    let stdin = io::stdin();
+    let mut stdin = stdin.lock();
+    if let Ok(input) = deserialize_from(&amp;mut stdin, Bounded(22)) {
+        let mut input: Input = input;
+        let mut rng: XorShiftRng =
+            SeedableRng::from_seed([input.seed_a, input.seed_b, <br/>                                    input.seed_c, input.seed_d]);
+
+        input.max_in_memory_bytes = <br/>          if input.max_in_memory_bytes &gt; 2 &lt;&lt; 25 {
+            2 &lt;&lt; 25
+        } else {
+            input.max_in_memory_bytes
+        };
+
+        // We need to be absolutely sure we don't run into another <br/>        // running process. Which, this isn't a guarantee but <br/>        // it's _pretty_ unlikely to hit jackpot.
+        let prefix = format!(
+            "hopper-{}-{}-{}",
+            rng.gen::&lt;u64&gt;(),
+            rng.gen::&lt;u64&gt;(),
+            rng.gen::&lt;u64&gt;()
+        );</pre>
+<p>The only oddity is the production of prefix. The entropy in the <kbd>tempdir</kbd> name is relatively low, compared to the many, many millions of tests that AFL will run. We want to be especially sure that no two hopper runs are given the same data directory, as that is undefined behavior:</p>
+<pre>        if let Ok(dir) = tempdir::TempDir::new(&amp;prefix) {
+            if let Ok((mut snd, mut rcv)) = <br/>            channel_with_explicit_capacity(
+                "afl",
+                dir.path(),
+                input.max_in_memory_bytes as usize,
+                input.max_disk_bytes as usize,
+            ) {</pre>
+<p>The meat of the AFL test is surprising:</p>
+<pre>                let mut writes = 0;
+                let mut rcv_iter = rcv.iter();
+                loop {
+                    match rng.gen_range(0, 102) {
+                        0...50 =&gt; {
+                            if writes != 0 {
+                                let _ = rcv_iter.next();
+                            }
+                        }
+                        50...100 =&gt; {
+                            snd.send(rng.gen::&lt;u64&gt;());
+                            writes += 1;
+                        }
+                        _ =&gt; {
+                            process::exit(0);
+                        }
+                    }
+                }
+            }
+        }
+    }
+}</pre>
+<p>This program pulled in a random number generator to switch off between performing a read and performing a write into the hopper channel. Why no threads? Well, it turns out, AFL struggles to accommodate threading in its model. AFL has a stability notion, which is its ability to re-run a program and achieve the same results in terms of instruction execution and the like. This is not going to fly with a multi-threaded use of hopper. Still, despite missing out on probing the potential races between sender and receiver threads, this fuzz test found:</p>
+<ul>
+<li>File-descriptor exhaustion crashes</li>
+<li>Incorrect offset computations in deque</li>
+<li>Incorrect offset computations at the Sender/Receiver level</li>
+<li>Deserialization of elements into a non-cleared buffer, resulting in phantom elements</li>
+<li>Arithmetic overflow/underflow crashes</li>
+<li>A failure to allocate enough space for serialization.</li>
+</ul>
+<p>Issues with the interior deque that happen only in a multi-threaded context will be missed, of course, but the preceding list is nothing to sneeze at.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

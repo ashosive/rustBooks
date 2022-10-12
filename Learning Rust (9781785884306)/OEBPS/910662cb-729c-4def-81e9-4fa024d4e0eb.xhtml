@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style00.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style01.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">What is the difference between having and not having a semicolon?</h1>
+                </header>
+            
+            <article>
+                
+<p>In Rust, almost everything is an expression. This means that almost everything returns a value. One exception is the variable binding statement <kbd>let</kbd>. In a <kbd>let</kbd> statement, and many others, the ending semicolon is a mandatory part of the syntax.</p>
+<p>However, in expressions, the semicolon has a double role: it throws away a return value of the expression in addition to allowing further expressions. So if the expression is the last in a block, having a semicolon there means that the last value is thrown away, and not having a semicolon there means to return the last value.</p>
+<p>An example should make it clear:</p>
+<pre>// 04/semicolon_block/src/main.rs<br/>fn main()  
+{ 
+    let x = 5u32; 
+ 
+    let y =  
+    { 
+        let x_squared = x * x; 
+        let x_cube = x_squared * x; 
+        x_cube + x_squared + x 
+    }; 
+ 
+    let z =  
+    { 
+        2 * x; 
+    }; 
+ 
+    println!("x is {:?}", x); 
+    println!("y is {:?}", y); 
+    println!("z is {:?}", z); 
+} </pre>
+<p>We have two different uses of the semicolon. Let's look at the <kbd>let y</kbd> line first:</p>
+<pre>let y =  
+    { 
+        let x_squared = x * x; 
+        let x_cube = x_squared * x; 
+        x_cube + x_squared + x // no semi-colon 
+    }; </pre>
+<p>This code does the following:</p>
+<ul>
+<li>The code within the braces is processed</li>
+<li>The final line, without the semicolon, is assigned to <kbd>y</kbd></li>
+</ul>
+<p>Essentially, this is considered as an inline function that returns the line without the semicolon into the variable.</p>
+<p>The second line to consider is for <kbd>z</kbd>:</p>
+<pre>    let z =  
+    { 
+        2 * x; 
+    }; </pre>
+<p>Again, the code within the braces is evaluated. In this case, the line ends with a semicolon, so the result is thrown away and the empty value <kbd>()</kbd> gets bound to <kbd>z</kbd>.</p>
+<p>When it is executed, we will get the following results:</p>
+<div class="packt_figure CDPAlignCenter CDPAlign"><img class=" image-border" src="Images/b3d313e2-f0a1-4665-b6f6-d45fa11336d2.png"/></div>
+<p>In the code example, the line within <kbd>fn main</kbd> calling <kbd>recurse</kbd> gives the same result with or without the semicolon, because the Rust runtime doesn't use <kbd>main</kbd>'s return value for anything.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

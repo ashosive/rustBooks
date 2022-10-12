@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style00.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style01.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Summary</h1>
+                </header>
+            
+            <article>
+                
+<p>In this chapter, we discussed three memory reclamation techniques: reference counting, hazard pointers, and epoch-based reclamation. Each, in turn, is faster than the last, though there are tradeoffs with each approach. Reference counting incurs the most overhead and has to be incorporated carefully into your data structure, unless Arc fits your needs, which it may well. Hazard pointers require the identification of hazards, memory accesses that result in memory that cannot be reclaimed without some type of coordination. This approach incurs overhead on each access to the hazard, which is costly if traversal of a hazardous structure must be done. Finally, epoch-based reclamation incurs overhead at thread-pinning, which denotes the start of an epoch and may require the newly pinned thread to participate in garage collection. Additional overhead is not incurred on memory accesses post-pin, a big win if you're doing traversal or can otherwise include many memory operations in a pinned section.</p>
+<p>The crossbeam library is exceptionally well done. Unless you have an atomic data structure specifically designed to not require allocations or to cope with allocations on a relaxed memory system without recourse to garbage collection, you are warmly encouraged to consider crossbeam as part and parcel with doing atomic programming in Rust, as of this writing.</p>
+<p>In the next chapter, we will leave the realm of atomic programming and discuss higher-level approaches to parallel programming, using thread pooling and data parallel iterators. </p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

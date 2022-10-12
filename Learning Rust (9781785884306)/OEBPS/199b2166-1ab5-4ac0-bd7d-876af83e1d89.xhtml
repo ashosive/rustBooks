@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style00.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style01.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Borrowing in Rust</h1>
+                </header>
+            
+            <article>
+                
+<p>Way back in <span class="ChapterrefPACKT">Chapter 2</span>, <em>Variables</em>, we referred to something known as a reference and it was said to be a copy of the pointer to some memory location. This is a big part of what is meant by borrowing in Rust.</p>
+<p>In our preceding example, we can make use of borrowing. Our code for it is as follows:</p>
+<pre>fn sumprod(v1: &amp;Vec&lt;i32&gt;, v2: &amp;Vec&lt;i32&gt;) -&gt; i32 
+{ 
+    let sum = v1.iter().fold(0i32, |a, &amp;b| a + b); 
+    let product = v2.iter().fold(1i32, |a, &amp;b| a * b); 
+    return sum + product;  
+} 
+ 
+fn main()  
+{ 
+    let vecone = vec![2,3,5]; 
+    let vectwo = vec![3,5];  
+    let ans = sumprod(&amp;vecone, &amp;vectwo);  
+    println!("ans = {}", ans); 
+} </pre>
+<div class="packt_tip">The code for this section can be found in the <kbd>08/handback</kbd> folder which can be found in the supporting code bundle of this book.</div>
+<p>We will no longer pass ownership, but rather we will pass the reference to the vector. When compiled, we will get the following result:</p>
+<div class="packt_figure CDPAlignCenter CDPAlign"><img height="62" width="353" class=" image-border" src="Images/4820dfca-e1de-4f5f-81fb-e9af381cddbf.png"/></div>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

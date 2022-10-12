@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style00.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style01.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Fuzzing</h1>
+                </header>
+            
+            <article>
+                
+<p>In previous chapters we've used AFL to validate that our programs did not exhibit crashing behavior. While AFL is very commonly used, it's not the only fuzzer available for Rust. LLVM has a native library—libfuzzer (<a href="https://llvm.org/docs/LibFuzzer.html">https://llvm.org/docs/LibFuzzer.html</a>)—covering the same space, and the cargo-fuzz (<a href="https://crates.io/crates/cargo-fuzz">https://crates.io/crates/cargo-fuzz</a>) project acts as an executor. You might also be interested in honggfuzz-rs (<a href="https://crates.io/crates/honggfuzz">https://crates.io/crates/honggfuzz</a>), a fuzzer developed at Google for searching out security related violations. It is natively multithreaded—there is no need to spin up multiple processes manually—and can do network fuzzing. My preference, traditionally, has been to fuzz with AFL. The honggfuzz project has real momentum, and readers should give it a try in their own projects.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

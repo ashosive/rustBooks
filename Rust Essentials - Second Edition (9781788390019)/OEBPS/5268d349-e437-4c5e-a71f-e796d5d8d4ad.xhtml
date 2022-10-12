@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Boxes</h1>
+                </header>
+            
+            <article>
+                
+<p>Another pointer type in Rust is called the boxed pointer <kbd>Box&lt;T&gt;</kbd>, which can be defined for a value of a generic type <kbd>T</kbd>. A box is a non-copyable value. This pointer type is used to allocate objects on the heap.</p>
+<pre>For example, here we allocate an Alien value on the heap with: 
+// see code in Chapter 7/code/boxes1.rs    
+let mut a1 = Box::new(Alien{ planet: "Mars".to_string(), n_tentacles: 4 }); 
+println!("{}", a1.n_tentacles); // 4 </pre>
+<p>The mutable variable <kbd>a1</kbd> is the only owner of this memory resource that may read from and write to it.</p>
+<p>We can make a reference to the value pointed to by the box pointer, and if both the original box and this new reference are mutable, we can change the object through this reference:</p>
+<pre>let a2 = &amp;mut a1; 
+println!("{}", a2.planet ); // Mars 
+a2.n_tentacles = 5; </pre>
+<p>After such a borrow the usual ownership rules as above hold: <kbd>a1</kbd> no longer has access, not even for reading:</p>
+<pre>// error: cannot borrow `a1.n_tentacles` as immutable because `a1` is also borrowed as mutable 
+println!("{}", a1.n_tentacles); // is error! 
+// error: cannot assign to `a1.planet` because it is borrowed 
+a1.planet = "Pluto".to_string();  // is error! </pre>
+<p>We can also use this mechanism to put simple values on the heap, like this:</p>
+<pre>let n = Box::new(42); </pre>
+<p>As always <kbd>n</kbd> points by default to an immutable value, and any attempt to change this with:</p>
+<pre>*n = 67; </pre>
+<p>Provokes the following error:</p>
+<pre>    <strong>error: cannot assign to immutable `Box` content `*n`.</strong>  </pre>
+<p>As usual we dereference a <kbd>Box</kbd> with <kbd>*</kbd>:</p>
+<pre>let p = *n; 
+println!("{}", p); // 42 </pre>
+<p>Another reference can also point to the dereferenced <kbd>Box</kbd> value:</p>
+<pre>let q = &amp;*n; 
+println!("{}", q); // 42</pre>
+<p>In the following example we see again a boxed value pointed to by n, but now the ownership of the value is given to a mutable pointer m:</p>
+<pre>// see code in Chapter 7/code/boxes2.rs    
+let n = Box::new(42); 
+let mut m = n; 
+*m = 67; 
+// println!("{}", n); // error: use of moved value: `n` 
+println!("{}", m); // 67 </pre>
+<p>By dereferencing the <kbd>m</kbd> variable and assigning a new value, this value is entered into the memory location originally pointed to by the variable <kbd>n</kbd>. Of course the <kbd>n</kbd> variable cannot be used anymore, we get the following error:</p>
+<pre>    <strong>error: use of moved value: `n`</strong>  </pre>
+<p>Because the variable <kbd>n</kbd> is no longer the owner of the value.</p>
+<pre>Here is another example where the ownership clearly has moved from a1 to a2: 
+let mut a1 = Box::new(Alien{ planet: "Mars".to_string(), n_tentacles: 4 }); 
+   let a2 = a1; 
+   println!("{}", a2.n_tentacles); // 4 </pre>
+<p>There is no data being copied here, only the address of the struct value. After the move <kbd>a1</kbd> can no longer be used to access the data, the variable <kbd>a2</kbd> is responsible for freeing the memory.</p>
+<p>If <kbd>a2</kbd> is given as argument to a function like <kbd>use_alien</kbd> below, <kbd>a2</kbd> in its turn gives up the ownership, which is transferred to the function:</p>
+<pre>   use_alien(a2); 
+   // Following line gives the error: use of moved value: `a2.n_tentacles` 
+   // println!("{}", a2.n_tentacles);  
+} // end of main() function 
+ 
+fn use_alien(a: Box&lt;Alien&gt;) { 
+    println!("An alien from planet {} is freed after the closing brace.", a.planet); 
+} </pre>
+<p>This prints out the following output:</p>
+<pre>    <strong>An alien from planet Mars is freed after the closing brace.</strong>  </pre>
+<p>Indeed when the <kbd>use_alien()</kbd> function is finished executing, the memory allocation for that value is freed.</p>
+<p>In general let your function always take a simple reference as parameter (as in the <kbd>square</kbd> function mentioned earlier in section <em>Pointers</em>), rather than a parameter of the <kbd>Box</kbd> type. We could improve our example by calling a function <kbd>use_alien2</kbd> as follows:</p>
+<pre>fn use_alien2(a: &amp;Alien) { 
+   println!("An alien from planet {} is freed", a.planet); 
+} </pre>
+<p>And calling it like this:</p>
+<pre><strong>use_alien2(&amp;*a2);</strong> </pre>
+<p>Boxes also allow for automatic dereferencing, as in this following code snippet:</p>
+<pre>let ua = Box::new([1, 2, 3]); 
+println!("{}", ua[0]); </pre>
+<p>Which prints the following output:</p>
+<pre><strong>1</strong> </pre>
+<p>Sometimes your program needs to manipulate a recursive data structure that refers to itself, like the following struct</p>
+<pre>struct Recurs { 
+    list: Vec&lt;u8&gt;, 
+    rec_list: Option&lt;Box&lt;Recurs&gt;&gt; 
+} </pre>
+<p>In the codefile <kbd>linked_list.rs</kbd>, you can find a working example of a recursive linked list datastructure:</p>
+<pre>enum List { 
+    Cons(u32, Box&lt;List&gt;), 
+    Nil, 
+} </pre>
+<p>A linked list node <kbd>List</kbd> can take on any of these two variants:</p>
+<ul>
+<li><kbd>Cons</kbd>: Which is a tuple struct that wraps an element of type <kbd>u32</kbd> and a <kbd>Box</kbd> pointer to the next node</li>
+<li><kbd>Nil</kbd>: Which is a node that signifies the end of the linked list</li>
+</ul>
+<pre>Especially note the 2 recursive methods like len and stringify. </pre>
+<p>This represents a list of lists of bytes. The <kbd>rec_list</kbd> variable is either a <kbd>Some&lt;Box&lt;Recurs&gt;&gt;</kbd> containing a <kbd>Box</kbd> pointer to another list, or a <kbd>None</kbd> value which means the list of lists ends there. Because the number of items in this list (and thus its size) is only known at runtime, such structures always must be constructed as a <kbd>Box</kbd> type.</p>
+<p>For other use-cases, prefer references over Boxes.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">The you-decide approach</h1>
+                </header>
+            
+            <article>
+                
+<p>This is the very minimum required to use the <kbd>module_name</kbd> scope:</p>
+<pre>use my_crate::module_name; </pre>
+<p>Here, you are telling the compiler that <kbd>module_name</kbd> exists and that, as long as the function name exists in the symbols, it can be used. However, in order to use <kbd>module_name</kbd>, the function will need to be preceded by <kbd>module_name</kbd>. For example, to use the <kbd>print_me(f32)</kbd> function, which exists in <kbd>module_name</kbd>, you will have the following:</p>
+<pre>let some_text = module_name::print_me(10.1f32);   </pre>
+<p>The <kbd>module_name::</kbd> has to be added to tell the compiler to use the <kbd>module_name</kbd> scope rather than the current scope of the application.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

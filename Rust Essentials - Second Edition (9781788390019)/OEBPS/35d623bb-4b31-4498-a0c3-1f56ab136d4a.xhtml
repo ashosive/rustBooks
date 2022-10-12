@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style00.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style01.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">OS and embedded system development</h1>
+                </header>
+            
+            <article>
+                
+<p>Several open source operating systems are written in Rust. Most of them are only proofs of concept, or suitable as demos in courses on operating systems. The only system that goes a step further is <kbd>redox</kbd> (see <a href="https://www.redox-os.org"><span class="URLPACKT">https://www.redox-os.org</span></a>), which is actively being developed. It has a microkernel architecture and comes with a window manager, as well as basic applications such as an editor and file manager. You can find a comparison of several Rust OS projects, as well as a great number of useful links on this site <a href="https://github.com/flosse/rust-os-comparison"><span class="URLPACKT">https://github.com/flosse/rust-os-comparison</span></a><span class="URLPACKT">.</span><a href="https://github.com/flosse/rust-os-comparison"/></p>
+<p><kbd>tock</kbd> (<a href="https://www.tockos.org"><span class="URLPACKT">https://www.tockos.org</span></a>) is an embedded operating system written in Rust and designed for running multiple concurrent, mutually distrustful applications on low-memory and low-power microcontrollers.</p>
+<p><kbd>cortex_m_rtfm</kbd> is a bare metal concurrency framework for Cortex-M microcontrollers geared towards robotics and control systems. <kbd>zinc</kbd> (<a href="http://zinc.rs/"><span class="URLPACKT">http://zinc.rs/</span></a>) is an example of a project that uses Rust to write a code stack for processors (currently ARM).</p>
+<p>If you need async I/O in your project, look at <kbd>tokio</kbd> (<span class="URLPACKT">https://tokio.rs</span>) and the many related crates. At the core of <kbd>tokio</kbd> is the <kbd>futures</kbd> crate to model asynchronous computations. Read <a href="https://lukesteensen.com/2016/12/getting-started-with-tokio/"><span class="URLPACKT">https://lukesteensen.com/2016/12/getting-started-with-tokio/</span></a> to get you started.</p>
+<p>Furthermore, crates exist for a lot of other categories, such as functional and embedded programming (see <a href="http://spin.atomicobject.com/2015/02/20/rust-language-c-embedded/"><span class="URLPACKT">http://spin.atomicobject.com/2015/02/20/rust-language-c-embedded/</span></a>), data structures, image processing (the <kbd>image</kbd> crate), audio, compression, encoding and encryption (such as <kbd>rust-crypto</kbd> and <kbd>crypto</kbd>), regular expressions, parsing, hashing, tooling, testing, template engines, and so on.</p>
+<p>Have a look at <span class="URLPACKT">crates.io</span> or the <em>Awesome Rust</em> compilation (see <a href="https://github.com/rust-unofficial/awesome-rust"><span class="URLPACKT">https://github.com/rust-unofficial/awesome-rust</span></a>) to get an idea of what is available.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

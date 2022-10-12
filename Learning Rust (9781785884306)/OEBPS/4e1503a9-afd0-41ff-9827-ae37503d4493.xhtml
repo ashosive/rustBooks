@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Traits and generics</h1>
+                </header>
+            
+            <article>
+                
+<p>If we look at the code, we have two structures that effectively do the same thing, with the only difference being the types for the parameters aren't the same. We can alter the member names for the structures without an issue to make life simpler:</p>
+<pre class="mce-root">struct Perimeter { side_one: i32, side_two: i32, } <br/>struct Oval { radius: f32, height: f32, }</pre>
+<p>This would become the following:</p>
+<pre class="mce-root">struct Shape&lt;T&gt; { line_one: T, line_two: T, }</pre>
+<p>The calculation cannot be altered as they are totally different, but will need the parameter names to be altered. The other aspect to alter will be the name for the functions. Let's create a version of the code that only uses part of the code.</p>
+<p>As we have the generic version of the <kbd>struct</kbd>, we next need to create the trait:</p>
+<pre class="mce-root">trait Calculate&lt;T&gt; { fn calc(&amp;self) -&gt; T; }</pre>
+<p>We have to use <kbd>&lt;T&gt;</kbd> as the <kbd>trait</kbd> has to take a generic.</p>
+<p>The construction for the implementation can be achieved in one of two ways.</p>
+<div class="packt_infobox"><span>The code for this section can be found in <kbd>09/generic_traits_simple</kbd></span><span>.</span></div>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

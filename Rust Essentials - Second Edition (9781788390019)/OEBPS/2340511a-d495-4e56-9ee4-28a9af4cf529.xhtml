@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Using a constructor pattern</h1>
+                </header>
+            
+            <article>
+                
+<p>No method overloading means that we can only define one new function (which is optional anyway). We could invent different names for our constructors, which is good from the point of view of code documentation. This is demonstrated in the following example:</p>
+<pre>// see code in Chapter 6/code/constructor_pattern.rs 
+struct Alien { 
+    name: &amp;'static str, 
+    health: u32, 
+    damage: u32 
+} 
+ 
+impl Alien { 
+    fn new(s: &amp;'static str, mut h: u32, d: u32) -&gt; Self { 
+        if h &gt; 100 { h = 100; } 
+        Alien { name: s, health: h, damage: d } 
+    } 
+ 
+    pub fn default() -&gt; Self { 
+        Alien::new("Walker", 100, 10) 
+    } 
+     
+    pub fn give_health(h: u32) -&gt; Self { 
+        Alien::new("Zombie", h, 5) 
+    } 
+}    
+ 
+fn main() { 
+    let al1 = Alien{ name: "Bork", health: 100, damage: 5 }; 
+    let al2 = Alien::new("Berserk", 150, 15); 
+    println!("Alien 1 is a {} and inflicts {} damage points", al1.name, al1.damage); 
+    let al3 = Alien::default(); 
+    println!("Alien 3 is a {} and inflicts {} damage points", al3.name, al3.damage); 
+    let al4 = Alien::give_health(75); 
+    println!("Alien 4 is a {} and inflicts {} damage points", al4.name, al4.damage); 
+ } </pre>
+<p>This prints out the following output:</p>
+<pre>    <strong>Alien 1 is a Bork and inflicts 5 damage points</strong>
+    <strong>Alien 3 is a Walker and inflicts 10 damage points</strong>
+    <strong>Alien 4 is a Zombie and inflicts 5 damage points</strong>  </pre>
+<p>Here our new constructor is not public, so an <kbd>Alien</kbd> <span>implementor</span> cannot be constructed in code that uses our code. But the <kbd>default()</kbd> and <kbd>give_health()</kbd> methods are public (indicated by the keyword <kbd>pub</kbd>, as in <kbd>pub fn default()</kbd>), so external code is restricted in creating either a default Walker or a Zombie with a given health amount.</p>
+<p>We see that all three constructors return a <kbd>Self</kbd> type, which is the <kbd>Alien</kbd> struct type in our context.</p>
+<p>Another way to go is called the <strong>builder pattern</strong>, which we discuss in the following section.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

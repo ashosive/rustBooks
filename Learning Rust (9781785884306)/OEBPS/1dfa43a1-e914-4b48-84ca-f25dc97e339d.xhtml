@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style00.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style01.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Garbage collecting time and ownership</h1>
+                </header>
+            
+            <article>
+                
+<p>If you're used to any of the .NET languages, you'll be more than accustomed to the <strong>garbage collector</strong> (<strong>GC</strong>). Essentially, when all references to an object have gone out of scope, the object's heap allocation is freed up by the garbage collector. The garbage collector comes around every once in a while, basically checks through the whole space of allocated memory to see if something isn't used anymore, and removes such content from memory; in other words, the garbage left behind by a deallocated pointer is collected and removed.</p>
+<p>Rust has a primitive garbage collector in the form of a reference counted container, <kbd>Rc&lt;T&gt;</kbd>. For most cases, it's not required though, as Rust uses a system known as <strong>ownership for allocation</strong>.</p>
+<p>Up to this point, when we created a variable, we created variables that mostly live on the stack. These have a very short life span. When we create an object that lives on the heap, we create a single variable that points to it, but then we can have any number of objects point to it, or even through a copy of the pointer, have the copy become the base and free up the original. It gets messy and deallocation of the heap memory can lead to a variety of memory issues.</p>
+<p>We can wrap any type in a generic container, <kbd>Box&lt;T&gt;</kbd>. This creates an owned pointer in Rust, which can only have a single owner, and when that pointer goes out of scope, the memory is automatically freed. In this way, Rust prevents a large number of the problems that we see in other languages. The point of this owned box is that we can hand out the box to other functions, thus being able to return heap allocated variables.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

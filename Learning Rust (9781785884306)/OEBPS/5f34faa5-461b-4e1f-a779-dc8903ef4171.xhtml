@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">So what does happen?</h1>
+                </header>
+            
+            <article>
+                
+<p>To give all of these generated functions unique names, compilers that work with generics use a process called <strong>name mangling</strong> (or <em>name munging</em>). This creates a unique name for each internally created function that takes generic parameters.</p>
+<p>For which one to use, during linking, the linker analyzes the code <em>signatures</em> required. If the linker sees a signature requiring <kbd>f32</kbd> for <kbd>T</kbd>, that munged name object code is included in the final object list. Once the linker has finished with the analysis, the unused objects (those not on the final list) are stripped out. The final binary therefore only contains the required code and not every variation of the types possible.</p>
+<div class="packt_infobox">While different compilers treat generics differently, the process for compilation, name munging, and then final stripping is common among them all!</div>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

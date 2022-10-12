@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style00.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style01.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Reorganizing the project</h1>
+                </header>
+            
+            <article>
+                
+<p>Now that we have some ideas of good project architecture, let's plan the project's reorganization. Let's list the possible workshop organization methods:</p>
+<ul>
+<li>By type</li>
+<li>By purpose</li>
+<li>By layer</li>
+<li>By convenience</li>
+</ul>
+<p>The by type organization should be used for workshop nuts and bolts type components. Nuts and bolts are highly uniform components that have a different diameter, length, grade, and so on. We have a few good matches here, so let's list objects and interfaces that could be grouped this way:</p>
+<ul>
+<li>Motors</li>
+<li>Buildings</li>
+<li>Elevator controllers/drivers</li>
+</ul>
+<p>The by purpose organization should be used for miscellaneous tools that have a common purpose. We have some good candidates for this style of organization, too:</p>
+<ul>
+<li>Transport planning (static/dynamic)</li>
+<li>The physical interface to an elevator</li>
+</ul>
+<p>The by layer organization should be used for distinct architectural components that fit well within normal program logic. An example of this would be our physics layer, which is logically independent of other modules. The physics layer exists solely to store constants, formulas, and modeling procedures. Here, we group this by layer:</p>
+<ul>
+<li>Physics modeling</li>
+</ul>
+<p>The by convenience organization should be used for common or difficult components. Executables are a good fit for this type of organization because they are always an endpoint, not a library, and don't typically fit into any other organization well:</p>
+<ul>
+<li>Simulation executable</li>
+<li>Analyze executable</li>
+<li>Physical elevator driver executable</li>
+</ul>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

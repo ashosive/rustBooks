@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Exploring the source</h1>
+                </header>
+            
+            <article>
+                
+<p>Let's look at feruscore's <kbd>Cargo.toml</kbd> first. It is:</p>
+<pre>[package]
+name = "feruscore"
+version = "0.1.0"
+authors = ["Brian L. Troutwine &lt;brian@troutwine.us&gt;"]
+
+[dependencies]
+rand = "0.4"
+rayon = "1.0"
+tempdir = "0.3"</pre>
+<p>We saw the tempdir crate back in <a href="e2de1ba7-c291-494e-82da-37fee7323c1d.xhtml" target="_blank">Chapter 5</a>, <em>Locks – Mutex, Condvar, Barriers and RWLock</em>; its purpose is to create temporary directories that get deleted when the directory handler is dropped. We discussed rayon earlier in the chapter. The rand crate is new, though we did mention it in passing in both <a href="8c61da2f-08c8-40be-89d4-d8afa8510850.xhtml" target="_blank">Chapter 2</a>, <em>Sequential Rust Performance and Testing</em>,  and <a href="e2de1ba7-c291-494e-82da-37fee7323c1d.xhtml" target="_blank">Chapter 5</a>, <em>Locks<span> </span>–<span> </span>Mutex, Condvar, Barriers and RWLock</em>, when we produced our own XorShift. The rand crate implements many different pseudo-random algorithms, in addition to providing a convenient interface to OS facilities for randomness. We'll be putting rand to good use.</p>
+<p>The project is a standard library/executable bundle. Unlike many other projects in this book, we are not creating multiple executables and so there's only a single <kbd>src/main.rs</kbd>. We'll talk through that in due course. The library root, in <kbd>src/lib.rs</kbd>:</p>
+<pre>extern crate rand;
+extern crate rayon;
+extern crate tempdir;
+
+pub mod individual;
+pub mod instruction;</pre>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

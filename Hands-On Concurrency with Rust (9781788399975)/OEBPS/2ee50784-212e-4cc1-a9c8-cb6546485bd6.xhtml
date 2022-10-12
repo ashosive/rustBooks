@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style00.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style01.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Further reading</h1>
+                </header>
+            
+            <article>
+                
+<p>The notes for the chapter are a bit unusual for the book. Rather than call out papers the reader could look to for further research these notes are, overwhelmingly, suggestions of codebases to read. Data parallel iterators are <em>amazing</em> but take a little getting used to.</p>
+<p>Nothing helps more than reading existing projects. Me, I figure every thousand lines of source code takes an hour to understand well. Makes for a peaceful afternoon:</p>
+<ul>
+<li><em>rayon</em>, available at <a href="https://github.com/rayon-rs/rayon">https://github.com/rayon-rs/rayon</a>. We discussed this crate quite a bit in the chapter but only skimmed the surface of it. I highly, highly recommend that the motivated reader go through ParallelIterator and work to understand the operators exposed there.</li>
+<li><em>xsv</em>, available at <a href="https://github.com/BurntSushi/xsv">https://github.com/BurntSushi/xsv</a>. Andrew Gallant is responsible for some of the fastest text-focused Rust code right now and xsv is no exception. This crate implements a toolkit for very fast, parallel CSV querying and manipulation. The threadpool crate discussed earlier drives the whole thing. Well worth reading if you've got ambitions for fast text processing and want to see the application of thread pooling to such.</li>
+<li><em>ripgrep</em>, available at <a href="https://github.com/BurntSushi/xsv">https://github.com/BurntSushi/xsv</a>. Andrew Gallant's ripgrep is one of the fastest grep implementations in the world. The reader will be interested to know that the implementation does not use any off-the-shelf threadpool crates nor rayon. Ripgrep spawns a result printing thread for every search, then a bounded many threads to perform actual searches on files. Each search thread communicates results to the print thread via an MPSC, thereby ensuring that printed results are not torn and search can exploit the available machine CPUs.</li>
+<li><em>tokei</em>, available at <a href="https://github.com/Aaronepower/tokei">https://github.com/Aaronepower/tokei</a>. There are many source-code line-counting programs in the world, but few cover as many languages or are as fast as Aaron Power's tokei. The implementation is well worth reading if you're interested in parsing alone. But, tokei also notably makes use of rayon. Where the project has chosen sequential std iterators over rayon's parallel iterators is something readers should discover for themselves. Then, they should ponder through the reasons why such choices were made.</li>
+<li><em>i8080</em>, available at <a href="https://github.com/Aaronepower/i8080">https://github.com/Aaronepower/i8080</a>. In addition to tokei, Aaron Power wrote an impressive Intel 8080 emulator in Rust. MARS is a deeply odd machine and the reader will probably have an excellent time discovering how an actual, simple CPU is emulated.</li>
+<li><em>QuickCheck: Lightweight Tool for Random Testing of Haskell Programs</em>, 2000, Koen Claessen and John Hughes. This paper introduces the QuickCheck tool for Haskell and introduces property-based testing to the world. The research here builds on previous work into randomized testing, but is novel for realizing that computers had got fast enough to support type-directed generation as well as shipping with the implementation in a single-page appendix. Many, many subsequent papers have built on this one to improve the probing ability of property testers.</li>
+<li><em>Smallcheck and Lazy Smallcheck: Automatic Exhaustive Testing for Small Values</em>, 2008, Colin Runciman, Matthew Naylor, and Fredrik Lindblad. This paper takes direct inspiration from Claessen and Hughes work but works the hypothesis that many program defects are to be found on s<em>mall</em> input first. The Lazy Smallcheck discussion in the second half of the paper is especially interesting. I found myself reading this with a growing ambition to implement a Prolog.</li>
+<li><em>Macros: The Rust Reference</em>, available at <a href="https://doc.rust-lang.org/reference/macros.html">https://doc.rust-lang.org/reference/macros.html</a>. Macro use in Rust is in a weird state. It's clearly useful but the current macro implementation is unloved and a new macro system is coming, gradually, to replace it. Meanwhile, if you want to build macros to use in code, you're going to need this reference.</li>
+<li><em>The C10K Problem</em>, available at <a href="http://www.kegel.com/c10k.html">http://www.kegel.com/c10k.html</a>. This page was much discussed when it first hit the internet. The problem discussed was that of getting 10,000 active connections to a single network server, processing them in a non-failing fashion. The author notes several resources for further reading, all of which are still useful today, and discusses the state-of-the-art operating systems at that time, in terms of kernal versions and the inclusion of new, better polling APIs. Though old—the many-connection problem is often now stated as C1M—it's still an excellent and informative read.</li>
+<li><em>Annotated Draft of the Proposed 1994 Core War Standard</em>, available at <a href="http://corewar.co.uk/standards/icws94.htm">http://corewar.co.uk/standards/icws94.htm</a>. Corewars is a subtle game, in terms of the effect of the assembly language, Redcode, on the machine and the function of the machine itself. This document is the attempt to standardize the behavior of both in 1994. The standard was not accepted—the standard body was dying—but the proposal document is very clear and even comes with a brief C implementation of a MARS.</li>
+</ul>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

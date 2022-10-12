@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Interfacing with C</h1>
+                </header>
+            
+            <article>
+                
+<p>Because of the vast functionality that exists in C code, it can sometimes be useful to delegate processing to a C routine, instead of writing everything in Rust.</p>
+<p>You can call all functions and types from the C standard library by using the <kbd>libc</kbd> crate, which must be obtained through Cargo.</p>
+<p>You have to add the following to <kbd>Cargo.toml:</kbd></p>
+<pre> [dependencies] 
+    libc = "*" </pre>
+<p>If you use Rust's nightly version, this is not necessary, but you have to use a feature attribute (or a feature gate, as they are also called) at the start of your code:</p>
+<pre>    #![feature(libc)]</pre>
+<div class="packt_infobox"><strong>Feature gates</strong> are common in Rust to enable the use of a certain functionality, but they are not available in stable Rust, only in the current development branch (nightly release).</div>
+<p>If you have both the stable and nightly versions installed, you can easily switch between them using the commands <kbd>rustup default nightly</kbd> and <kbd>rustup default stable</kbd>.</p>
+<p>Then, simply add the following to your Rust code:</p>
+<pre>extern crate libc; </pre>
+<p>To import C functions and types, you can sum them up like this:</p>
+<pre>use libc::{c_void, size_t, malloc, free}; </pre>
+<p>You can also use the wildcard <kbd>*</kbd> to make them all available, like in use <kbd>libc::*;</kbd>.</p>
+<p>To work with C (or another language) from Rust, you will have to use the <strong>Foreign Function Interface</strong> (<strong>FFI</strong>); its utilities are in the <kbd>std::ffi</kbd> module. A foreign function interface is a mechanism by which a program written in one programming language can call routines or make use of services written in another language. But do realize that FFI calls cause significant overhead, so use them only when it is worth it.</p>
+<p>Here is a simple example of calling C to print out a Rust <kbd>String</kbd> with the C function <kbd>puts</kbd>:</p>
+<pre>// code from Chapter 10/code/calling_libc.rs: 
+<strong>extern crate libc;<br/></strong><strong>use libc::puts;<br/></strong><strong>use std::ffi::CString;</strong> 
+ 
+fn main() { 
+   let sentence = "Merlin is the greatest magician!"; 
+<strong>   let to_print = CString::new(sentence).unwrap();<br/></strong><strong>   unsafe {<br/></strong><strong>       puts(to_print.as_ptr());</strong><strong>    }</strong> 
+   } </pre>
+<p>This prints out the sentence:</p>
+<pre><strong>Merlin is the greatest magician!</strong></pre>
+<p>The <kbd>new()</kbd> method of <kbd>CString</kbd> will produce a C-compatible string (ending with 0 bytes) from the Rust <kbd>String</kbd>. The <kbd>as_ptr()</kbd> method returns a pointer to this C string.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

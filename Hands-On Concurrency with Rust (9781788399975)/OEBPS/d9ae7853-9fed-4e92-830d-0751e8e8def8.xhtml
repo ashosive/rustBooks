@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Option</h1>
+                </header>
+            
+            <article>
+                
+<p>Let's examine <kbd>Option&lt;T&gt;</kbd>. We've already discussed <kbd>Option&lt;T&gt;</kbd> in this chapter; that it's subject to <em>null pointer optimization</em> on account of its empty <kbd>None</kbd> variant in particular. <kbd>Option</kbd> is as simple as you might imagine, being defined in <kbd>src/libcore/option.rs</kbd>:</p>
+<pre style="padding-left: 30px">#[derive(Clone, Copy, PartialEq, PartialOrd, Eq, Ord, Debug, Hash)]
+#[stable(feature = "rust1", since = "1.0.0")]
+pub enum Option&lt;T&gt; {
+    /// No value
+    #[stable(feature = "rust1", since = "1.0.0")]
+    None,
+    /// Some value `T`
+    #[stable(feature = "rust1", since = "1.0.0")]
+    Some(#[stable(feature = "rust1", since = "1.0.0")] T),
+}</pre>
+<p>As is often the case with Rust internals, there are a great deal of flags around to control when and where new features land in which channel and how documentation is generated. A slightly tidier expression of <kbd>Option&lt;T&gt;</kbd> is:</p>
+<pre style="padding-left: 30px">#[derive(Clone, Copy, PartialEq, PartialOrd, Eq, Ord, Debug, Hash)]
+pub enum Option&lt;T&gt; {
+    None,
+    Some(T),
+}</pre>
+<p>This is refreshingly simple, much like how you may have implemented an option type yourself up on first thinking of it. <kbd>Option</kbd> is the owner of its inner <kbd>T</kbd> and is able to pass out references to that inner data per the usual restrictions. As an example:</p>
+<pre>    pub fn as_mut(&amp;mut self) -&gt; Option&lt;&amp;mut T&gt; {
+        match *self {
+            Some(ref mut x) =&gt; Some(x),
+            None =&gt; None,
+        }
+    }</pre>
+<p>Rust exposes a special trait type inside each <kbd>trait: Self</kbd>. It desugars simply to the referent trait type, in this case, <kbd>Option&lt;T&gt;</kbd>. The <kbd>&amp;mut self</kbd> is shorthand for <kbd>self: &amp;mut Self</kbd>, as is <kbd>&amp;self</kbd> for <kbd>self: &amp;Self</kbd> . <kbd>as_mut</kbd>  is then allocating a new option whose inner type is a mutable reference to the original inner type. Now, consider the humble <kbd>map</kbd>:</p>
+<pre>    pub fn map&lt;U, F: FnOnce(T) -&gt; U&gt;(self, f: F) -&gt; Option&lt;U&gt; {
+        match self {
+            Some(x) =&gt; Some(f(x)),
+            None =&gt; None,
+        }
+    }</pre>
+<p>Rust allows closures as arguments to functions. In this way, Rust is similar to higher-level and, especially, functional programming languages. Unlike these higher-level programming languages, Rust has restrictions on closures in terms of the way <em>variable capture</em> occurs and with regard to call totals and mutability. Here, we see the <kbd>FnOnce</kbd> trait being used, restricting the closure being passed in as <kbd>f</kbd> to the map function as being single-use. The function traits, all defined in <kbd>std::ops</kbd>, are:</p>
+<ul>
+<li><kbd>Fn</kbd></li>
+<li><kbd>FnMut</kbd></li>
+<li><kbd>FnOnce</kbd></li>
+</ul>
+<p>The first trait, <kbd>Fn</kbd>, is described by the Rust documentation as being a <em>call operator that takes an immutable receiver</em>. This is maybe a little obscure until we look at the definition of <kbd>Fn</kbd> in <kbd>src/libcore/ops/function.rs</kbd>:</p>
+<pre style="padding-left: 30px">pub trait Fn&lt;Args&gt;: FnMut&lt;Args&gt; {
+    /// Performs the call operation.
+    #[unstable(feature = "fn_traits", issue = "29625")]
+    extern "rust-call" fn call(&amp;self, args: Args) -&gt; Self::Output;
+}</pre>
+<p>Now it's more obscure! But, we can work that back. <kbd>Args</kbd> is distinct from <kbd>std::env::Args</kbd> but plays a similar role of being a placeholder for function arguments, save at a type-level. <kbd>: FnMut&lt;Args&gt;</kbd> means that the <kbd>FnMut&lt;Args&gt;</kbd> is a <em>supertrait</em> of <kbd>Fn&lt;Args&gt;:</kbd> all of the methods available to <kbd>FnMut</kbd> are available to <kbd>Fn</kbd> when used as a trait object. Recall that trait objects find use in dynamic dispatch, discussed previously. This also means that any instance of <kbd>Fn</kbd> can be used where an <kbd>FnMut</kbd> is expected, in cases of static dispatch. Of particular interest to understanding <kbd>Fn</kbd> is:</p>
+<pre style="padding-left: 30px">extern "rust-call" fn call(&amp;self, args: Args) -&gt; Self::Output;</pre>
+<p>We'll approach this in parts. Firstly, <kbd>extern "rust-call"</kbd>. Here, we are defining an inline extern block that uses the <kbd>"rust-call"</kbd> ABI. Rust supports many ABIs, three of which are cross-platform and guaranteed to be supported no matter the platform:</p>
+<ul>
+<li><kbd>extern "Rust" fn</kbd>, implicit for all Rust functions unless otherwise specified</li>
+<li><kbd>extern "C" fn</kbd>, often used in FFI and shorthanded to <kbd>extern fn</kbd> </li>
+<li><kbd>extern "system" fn</kbd>, equivalent to <kbd>extern "C" fn</kbd> save for some special platforms</li>
+</ul>
+<p><kbd>"rust-call"</kbd> does not appear in that list because it is a rust-specific ABI, which also includes:</p>
+<ul>
+<li><kbd>extern "rust-intrinsic" fn</kbd>, specific to <kbd>rustc</kbd> intrinsics</li>
+<li><kbd>extern "rust-call" fn</kbd>, the ABI for all <kbd>Fn::call</kbd> functions</li>
+<li><kbd>extern "platform-intrinsic" fn</kbd>, which the documentation notes as being something the programmer should never have to deal with</li>
+</ul>
+<p>Here, we're signalling to the Rust compiler that the function is to be treated with a special call ABI. This particular <kbd>extern</kbd> is important when writing traits that implement the <kbd>Fn</kbd> trait, as box will when the unstable <kbd>fnbox</kbd> feature flag is enabled:</p>
+<pre style="padding-left: 30px">impl&lt;'a, A, R&gt; FnOnce&lt;A&gt; for Box&lt;FnBox&lt;A, Output = R&gt; + 'a&gt; {
+    type Output = R;
+
+    extern "rust-call" fn call_once(self, args: A) -&gt; R {
+        self.call_box(args)
+    }
+}</pre>
+<p>Secondly, <kbd>fn call(&amp;self, args: Args)</kbd>. The implementing type is taken in as an immutable reference, in addition to the passed args; this is the immutable receiver mentioned in the documentation. The final piece here is <kbd>-&gt; Self::Output</kbd>, the returned type after the call operator is used. This associated type defaults to <kbd>Self</kbd> but can be set by the implementer.</p>
+<p><kbd>FnMut</kbd> is similar to <kbd>Fn</kbd> save that it takes <kbd>&amp;mut self</kbd> rather than <kbd>&amp;self</kbd>, and <kbd>FnOnce</kbd> is its supertrait:</p>
+<pre style="padding-left: 30px">pub trait FnMut&lt;Args&gt;: FnOnce&lt;Args&gt; {
+    /// Performs the call operation.
+    #[unstable(feature = "fn_traits", issue = "29625")]
+    extern "rust-call" fn call_mut(&amp;mut self, args: Args) <br/>        -&gt; Self::Output;
+}</pre>
+<p>Only <kbd>FnOnce</kbd> deviates in its definition:</p>
+<pre>pub trait FnOnce&lt;Args&gt; {
+    /// The returned type after the call operator is used.
+    #[stable(feature = "fn_once_output", since = "1.12.0")]
+    type Output;
+
+    /// Performs the call operation.
+    #[unstable(feature = "fn_traits", issue = "29625")]
+    extern "rust-call" fn call_once(self, args: Args) -&gt; Self::Output;
+}</pre>
+<p>Here, we see where <kbd>Self::Output</kbd> makes its appearance as an associated type and note that the implementations of <kbd>FnOnce</kbd> are in terms of <kbd>call_once</kbd> rather than <kbd>call.</kbd> Also, we now know that <kbd>FnOnce</kbd> is a supertrait of <kbd>FnMut</kbd>, which is a supertrait of <kbd>Fn</kbd> and it just so happens that this property is transitive: if an <kbd>FnOnce</kbd> is called for an <kbd>Fn</kbd>, it can be used. Much of the exact implementation of the function traits are kept internal to the compiler, the details of which kind of jump around some as internals change. In fact, the <kbd>"rust-call"</kbd>, <kbd>extern</kbd> means that <kbd>Fn traits</kbd> cannot be implemented outside of special, compiler-specific contexts; the exact feature flags that need to be enabled in a nightly build, their use, and upcoming changes are not documented. Happily, closures and function pointers implement function traits implicitly. For example:</p>
+<pre style="padding-left: 30px">fn mlen(input: &amp;str) -&gt; usize {
+    input.len()
+}
+
+fn main() {
+    let v: Option&lt;&amp;str&gt; = Some("hope");
+
+    assert_eq!(v.map(|s| s.len()), v.map(mlen));
+}</pre>
+<p>The compiler is good enough to figure out the details for us.</p>
+<p>Conceptually, <kbd>Result&lt;T&gt;</kbd> is a type similar to <kbd>Option&lt;T&gt;</kbd>, save that it is able to communicate an extra piece of information in its <kbd>Err</kbd> variant. In fact, the implementation in <kbd>src/libcore/result.rs</kbd> is awfully similar to the way we'd likely write this at first though, as with <kbd>Option</kbd>:</p>
+<pre style="padding-left: 30px">pub enum Result&lt;T, E&gt; {
+    /// Contains the success value
+    #[stable(feature = "rust1", since = "1.0.0")]
+    Ok(#[stable(feature = "rust1", since = "1.0.0")] T),
+
+    /// Contains the error value
+    #[stable(feature = "rust1", since = "1.0.0")]
+    Err(#[stable(feature = "rust1", since = "1.0.0")] E),
+}</pre>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

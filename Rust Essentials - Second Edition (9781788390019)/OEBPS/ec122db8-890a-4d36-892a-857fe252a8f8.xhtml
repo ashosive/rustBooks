@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style00.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style01.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Working with dates and times</h1>
+                </header>
+            
+            <article>
+                
+<p>The module <kbd>std::time</kbd> lets you work with the system time, and provides you with only the basic concepts of <kbd>Instant</kbd> and <kbd>Duration</kbd> (which we used in working with threads, see <span class="ChapterrefPACKT"><a href="60543aaa-c7d6-43ec-9237-9fe71a0cad4d.xhtml">Chapter 9</a>, <em>Concurrency - Coding for Multicore Execution</em></span>).</p>
+<p>For any functionality beyond that, you need a crate. There are more than a dozen of them, with some specialized towards friendly output or games. The <kbd>chrono</kbd> crate is the most popular, however, and provides you with the most functionality, for example dates and times, timezones, and a wealth of formatting possibilities<a>.</a> Consult the docs for a complete overview <a href="https://docs.rs/chrono/0.4.0/chrono/"><span class="URLPACKT">https://docs.rs/chrono/0.4.0/chrono/</span></a>.</p>
+<p>Let's use a simple example to write the current local time to a file, applying what we learned in the previous chapter.</p>
+<p>Start your project with <kbd>cargo new <span>file_time --bin</span></kbd>.</p>
+<p>In order to use the <kbd>chrono</kbd> crate, edit the dependencies section of your <kbd>Cargo.tml</kbd> to add this:</p>
+<pre>[dependencies] 
+chrono = "0.4"</pre>
+<p>Add the following to your crate root (here <kbd>main.rs</kbd>):</p>
+<pre>extern crate chrono; 
+use chrono::prelude::*; </pre>
+<p>Replace the code in <kbd>main.rs</kbd> with this:</p>
+<pre>let local: DateTime&lt;Local&gt; = Local::now(); 
+println!("{}", local); </pre>
+<p>Then test this by giving the command <kbd>cargo run</kbd> in the <kbd>file_time</kbd> folder, which will download <kbd>chrono</kbd>, install and compile it, and then compile and run the <kbd>file_time</kbd> app. This provides the local time, for example:</p>
+<pre><strong>    2017-08-17 10:41:40.539165700 +02:00  </strong></pre>
+<p>We now format this to a somewhat prettier output such as <kbd>Thu, Aug 17 2017 10:41:40 AM</kbd>, and write it to a <kbd>log.txt</kbd> file with the <kbd>log_info</kbd> function. Here is the complete code of <kbd>main.rs</kbd>:</p>
+<pre>extern crate chrono; 
+ 
+use chrono::prelude::*; 
+use std::io::prelude::*; 
+use std::fs::File; 
+use std::io; 
+ 
+fn main() { 
+    let local: DateTime&lt;Local&gt; = Local::now(); 
+    let formatted = local.format("%a, %b %d %Y %I:%M:%S %p\n").to_string(); 
+     
+    match log_info("log.txt", &amp;formatted) { 
+        Ok(_) =&gt; println!("Time is written to file!"), 
+        Err(_) =&gt; println!("Error: could not create file.") 
+    } 
+} 
+ 
+fn log_info(filename: &amp;str, string: &amp;str) -&gt; io::Result&lt;()&gt; { 
+    let mut f = try!(File::create(filename)); 
+    try!(f.write_all(string.as_bytes())); 
+    Ok(()) 
+}<br/> </pre>
+<p>The text <kbd>Time</kbd> is written to <kbd>file!</kbd>, which is printed on the terminal.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Adding unit tests to the library</h1>
+                </header>
+            
+            <article>
+                
+<p>We can create tests in one of the two ways: either by adding a <kbd>tests</kbd> directory with a <kbd>lib.rs</kbd> file or by simply adding a file with the tests for that module. As we are already using a directory structure, let's stay with that for the unit tests.</p>
+<p>As previously discussed in <a href="67a55e55-a5f7-4ced-a2ae-b81f77614eec.xhtml"><span class="ChapterrefPACKT">Chapter 1</span></a>, <em>Introducing and Installing Rust</em>, to add a unit test, we precede the code with the following:</p>
+<pre>#[test] </pre>
+<p>Then to build, we need to do the following:</p>
+<pre><strong>cargo test</strong> </pre>
+<p>When we do this, though, we hit a problem. Our unit test file looks like this:</p>
+<pre>extern crate mathslib; 
+use mathsLib::conversions::temperature; 
+ 
+#[cfg(test)] 
+mod temperature_tests 
+{ 
+    #[test] 
+    fn test_kelvin_to_celcius_pass() 
+    { 
+        let calc = kelvin_to_celcius(14.5); 
+        assert_eq!(calc.0, true); 
+    } 
+     
+    #[test] 
+    #[should_panic(expected = "assertion failed")] 
+    fn test_kelvin_to_celcius_fail() 
+    { 
+        let calc = kelvin_to_celcius(-4f32); 
+        assert_eq!(calc.0,true); 
+    } 
+} </pre>
+<p>On the face of it, this should work, but it comes back with something that is somewhat perplexing:</p>
+<div class="CDPAlignCenter CDPAlign"><img src="Images/9fd60999-5012-45c5-8e70-8d2da903b0c7.png" width="1140" height="316"/></div>
+<div class="CDPAlignCenter CDPAlign packt_figref">Figure 5</div>
+<p>This doesn't make sense; we know there is a module called <kbd>Temperature</kbd>, so why are we getting this message? The answer is that it's all down to the privacy of the module and functions.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Locks – Mutex, Condvar, Barriers and RWLock</h1>
+                </header>
+            
+            <article>
+                
+<p>In this chapter, we're going to do a deep-dive on hopper, the grown-up version of Ring from <a href="5a332d94-37e4-4748-8920-1679b07e2880.xhtml" target="_blank">Chapter 4</a>, <em>Sync and Send – the Foundation of Rust Concurren</em><em>cy</em>. Hopper's approach to back-pressure<span>—</span>the weakness we identified in telem<em>—</em>is to block when filled to capacity, as <kbd>SyncSender</kbd> does. Hopper's special trick is that it pages out to disk. The hopper user defines how many bytes of in-memory space hopper is allowed to consume, like <kbd>SyncSender</kbd>, except in terms of bytes rather than total elements of <kbd>T</kbd>. Furthermore, the user is able to configure the number of on-disk bytes that are consumed when hopper's in-memory capacity is filled and it has to page out to disk. The other properties of MSPC are held, in-order delivery, retention of data once stored, and so on.</p>
+<p>Before we can dig through hopper, however, we need to introduce more of Rust's concurrency primitives. We'll work on some puzzles from <em>The Little Book of Semaphores</em> to explain them, which will get a touch hairy in some places on account of how Rust does not have a semaphore available.</p>
+<p><span>By the close of this chapter, we will have:</span></p>
+<ul>
+<li>Discussed the purpose and use of Mutex, Condvar, Barriers, and RWLock</li>
+<li>Investigated a disk-backed specialization of the standard library's MPSC called hopper </li>
+<li>Seen how to apply QuickCheck, AFL, and comprehensive benchmarks in a production setting</li>
+</ul>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

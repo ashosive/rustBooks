@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Creating the code</h1>
+                </header>
+            
+            <article>
+                
+<div class="packt_infobox">The code for this part is in <kbd>Chapter 14/firstexample</kbd>.</div>
+<p>When we are dealing with code from outside our application, we need to be able to tell the compiler something akin to "<em>Hey look, build this code and just leave a hook to something that may or may not exist and that may or may not take these parameters but that will return something hopefully.</em>" It's like handing a blank check to a fraudster with your signature on and hoping they won't write something in and cash it!</p>
+<p>In Rust, we do this by using the link directive and enclosing the function in an <kbd>extern</kbd> block. The code inside the <kbd>extern</kbd> calls the function held within the library. It must be the same as the name of the function within the library:</p>
+<pre>[link(name="mathlib")] 
+extern 
+ { 
+     fn add_two_int_numbers(a: i32, b: i32) -&gt; i32; 
+} </pre>
+<p>This code is then accessed using the following:</p>
+<pre>fn main() 
+ { 
+    let ans = unsafe { add_two_int_numbers(10,20) }; 
+    println!("10 + 20 = {}", ans); 
+} </pre>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Deactivating active sessions</h1>
+                </header>
+            
+            <article>
+                
+<p>Deactivating active sessions is an error that attempts to authorize two sessions simultaneously, as follows:</p>
+<pre>#[test]<br/>fn double_override_failure() {<br/>   unsafe {<br/>      magic::override_reset_state();<br/>      magic::issue_override_code(1);<br/>      magic::issue_override_code(1);<br/>      assert!(magic::poll_override_session() == (0 as *const c_void));<br/>      assert!(magic::poll_override_error() == 1);<br/>   }<br/>}<br/><br/>#[test]<br/>fn double_privileged_failure() {<br/>   unsafe {<br/>      magic::override_reset_state();<br/>      magic::issue_override_code(2);<br/>      magic::issue_override_code(2);<br/>      assert!(magic::poll_physical_override_privileged_session() == (0 as *const c_void));<br/>      assert!(magic::poll_override_error() == 1);<br/>   }<br/>}<br/><br/>#[test]<br/>fn double_admin_failure() {<br/>   unsafe {<br/>      magic::override_reset_state();<br/>      magic::issue_override_code(3);<br/>      magic::issue_override_code(3);<br/>      assert!(magic::poll_physical_override_admin_session() == (0 as *const c_void));<br/>      assert!(magic::poll_override_error() == 1);<br/>   }<br/>}</pre>
+<p>It is also disallowed to call a free session on the same object twice. Calling deconstructors in foreign libraries multiple times is highly discouraged due to possible memory corruption:</p>
+<pre>#[test]<br/>fn double_free_override_failure() {<br/>   unsafe {<br/>      magic::override_reset_state();<br/>      magic::issue_override_code(1);<br/>      let session = magic::poll_override_session();<br/>      assert!(session != (0 as *const c_void));<br/>      magic::free_override_session(session);<br/>      magic::free_override_session(session);<br/>      assert!(magic::poll_override_error() == 2);<br/>   }<br/>}<br/><br/>#[test]<br/>fn double_free_privileged_failure() {<br/>   unsafe {<br/>      magic::override_reset_state();<br/>      magic::issue_override_code(2);<br/>      let session = magic::poll_physical_override_privileged_session();<br/>      assert!(session != (0 as *const c_void));<br/>      magic::free_override_session(session);<br/>      magic::free_override_session(session);<br/>      assert!(magic::poll_override_error() == 2);<br/>   }<br/>}<br/><br/>#[test]<br/>fn double_free_admin_failure() {<br/>   unsafe {<br/>      magic::override_reset_state();<br/>      magic::issue_override_code(3);<br/>      let session = magic::poll_physical_override_admin_session();<br/>      assert!(session != (0 as *const c_void));<br/>      magic::free_override_session(session);<br/>      magic::free_override_session(session);<br/>      assert!(magic::poll_override_error() == 2);<br/>   }<br/>}</pre>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

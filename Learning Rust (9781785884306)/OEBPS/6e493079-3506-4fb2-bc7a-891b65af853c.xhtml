@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">std::boxed</h1>
+                </header>
+            
+            <article>
+                
+<p>This module is used for heap allocation.</p>
+<div class="mce-root packt_infobox">A very simple way to allocate memory on the heap, provide ownership, and drop when out of scope.</div>
+<ul>
+<li><kbd>impl&lt;T&gt; Box&lt;T&gt;</kbd>
+<ul>
+<li><kbd>fn new(x:T) -&gt; Box&lt;T&gt;</kbd>: Allocates memory on the heap and places <kbd>x</kbd> into it</li>
+</ul>
+</li>
+<li><kbd>impl &lt;T&gt; Box&lt;T&gt; where T: ?Sized</kbd>
+<ul>
+<li><kbd>unsafe fn from_raw(raw: *mut T) -&gt; Box&lt;T&gt;</kbd>: Constructs a box from a raw pointer. After creation, the pointer is owned by the new <kbd>Box</kbd>. It is unsafe for this very reason; the <kbd>Box</kbd> destructor will call the destructor of <kbd>T</kbd> and free the allocated memory. This may lead to double freeing that will cause a crash.</li>
+<li><kbd>fn into_raw(b: Box&lt;T&gt; -&gt; *mut T</kbd>: Consumes the box and returns the wrapped raw pointer.</li>
+</ul>
+</li>
+<li><kbd>impl Box&lt;Any + 'static&gt;</kbd>
+<ul>
+<li><kbd>fn downcast&lt;T&gt;(self) -&gt; Result&lt;Box&lt;T&gt;, Box&lt;Any + 'static&gt;&gt; where T:Any</kbd>: Attempts to downcast the box to a concrete type.</li>
+</ul>
+</li>
+<li><kbd>impl Box&lt;Any + 'static + Send&gt;</kbd>
+<ul>
+<li><kbd>fn downcast&lt;T&gt;(self) -&gt; Result&lt;Box&lt;T&gt;, Box&lt;Any + ‘static + Send&gt;&gt; where T:Any</kbd>: Attempts to downcast the box to a concrete type</li>
+</ul>
+</li>
+</ul>
+<p style="font-size: 16px">Methods</p>
+<p style="font-size: 16px">Trait Implementations</p>
+<ul>
+<li><kbd>Impl &lt;T&gt; Default for Box&lt;T&gt; where T:Default</kbd>
+<ul>
+<li><kbd>fn default() -&gt; Box&lt;T&gt;</kbd>: Returns the default value for the type</li>
+</ul>
+</li>
+<li><kbd>impl&lt;T&gt; Default for Box&lt;[T]&gt;</kbd>
+<ul>
+<li><kbd>fn default() -&gt; Box&lt;T&gt;</kbd>: Returns the default value for the type</li>
+</ul>
+</li>
+<li><kbd>impl&lt;T&gt; Clone for Box&lt;T&gt; where T:Clone</kbd>
+<ul>
+<li><kbd>fn clone(&amp;self) -&gt; Box&lt;T&gt;</kbd>: Returns a new box with a clone of the box's contents</li>
+<li><kbd>fn clone_from(&amp;mut self, source: &amp;Box&lt;T&gt;)</kbd>: Copies <em>sources</em> contents into self without creating a new allocation</li>
+</ul>
+</li>
+<li><kbd>impl Clone for Box&lt;str&gt;</kbd>
+<ul>
+<li><kbd>fn clone(&amp;self) -&gt; Box&lt;str&gt;</kbd>: Returns a copy of the value</li>
+<li><kbd>fn clone_from(&amp;mut self, source: &amp;Self)</kbd>: Performs a copy-assignment from <em>source</em></li>
+</ul>
+</li>
+<li><kbd>impl&lt;T&gt; PartialEq&lt;Box&lt;T&gt;&gt; for Box&lt;T&gt; where T:PartialEq&lt;T&gt; + ?Sized</kbd>
+<ul>
+<li><kbd>fn eq(&amp;self, other: &amp;Box&lt;T&gt;) -&gt; bool</kbd>: Test self and other to be equal. Used by <kbd>==</kbd></li>
+<li><kbd>fn ne(&amp;self, other: &amp;Box&lt;T&gt;) -&gt;</kbd>: Tests for inequality. Used by <kbd>!=</kbd></li>
+</ul>
+</li>
+<li><kbd>impl&lt;T&gt; PartialOrd&lt;Box&lt;T&gt;&gt; for Box&lt;T&gt; where T:PartialOrd&lt;T&gt; + ?Sized</kbd>
+<ul>
+<li><kbd>fn partial_cmp(&amp;self, other: &amp;Box&lt;T&gt;) -&gt; Option&lt;Ordering&gt;</kbd>: Returns an ordering between self and other values if it exists</li>
+<li><kbd>fn lt(&amp;self, other: &amp;Box&lt;T&gt;) -&gt; bool</kbd>: Tests whether self is less than other. Used by <kbd>&lt;</kbd></li>
+<li><kbd>fn le(&amp;self, other: &amp;Box&lt;T&gt;) -&gt; bool</kbd>: Tests whether self is less than or equal to other. Used by <kbd>&lt;=</kbd></li>
+<li><kbd>fn ge(&amp;self, other: &amp;Box&lt;T&gt;) -&gt; bool</kbd>: Tests whether self is greater than or equal to other. Used by <kbd>&gt;=</kbd></li>
+<li><kbd>Fn gt(&amp;self, other: &amp;Box&lt;T&gt;) -&gt; bool</kbd>: Tests whether self is greater than other. Used by <kbd>&gt;</kbd></li>
+</ul>
+</li>
+<li><kbd>impl &lt;T&gt; Ord for Box&lt;T&gt; where T:Ord + ?Sized</kbd>
+<ul>
+<li><kbd>fn cmp(&amp;self, other: &amp;Box&lt;T&gt;) -&gt; Ordering</kbd>: Returns an ordering between self and other</li>
+</ul>
+</li>
+<li><kbd>impl &lt;T&gt; Hash for Box&lt;T&gt; where T: Hash + ?Sized</kbd>
+<ul>
+<li><kbd>fn hash&lt;H&gt;(&amp;self, state: &amp;mut H) where H: Hasher</kbd>: Feeds the value into the state and updates the hasher if required</li>
+<li><kbd>fn hash_slice&lt;H&gt;(data: &amp;[Self], state &amp;mut H) where H: Hasher</kbd>: Feeds the slice of this type into the state</li>
+</ul>
+</li>
+<li><kbd>impl&lt;T&gt; From&lt;T&gt; for Box&lt;T&gt;</kbd>
+<ul>
+<li><kbd>fn from(t: T) -&gt; Box&lt;T&gt;</kbd>: Performs a conversion</li>
+</ul>
+</li>
+<li><kbd>impl&lt;T&gt; Display for Box&lt;T&gt; where T: Display + ?Sized</kbd>
+<ul>
+<li><kbd>fn fmt(&amp;self, f: &amp;mut Formatter) -&gt; Result&lt;(), Error&gt;</kbd>: Formats the value using the given formatter</li>
+</ul>
+</li>
+<li><kbd>impl&lt;T&gt; Debug for Box&lt;T&gt; where T:Debug + ?Sized</kbd>
+<ul>
+<li><kbd>fn fmt(&amp;self, f: &amp;mut Formatter) -&gt; Result&lt;(), Error&gt;</kbd>: Formats the value using the given formatter</li>
+</ul>
+</li>
+<li><kbd>impl&lt;T&gt; Pointer for Box&lt;T&gt; where T: ?Sized</kbd>
+<ul>
+<li><kbd>fn fmt(&amp;self, f: &amp;mut Formatter) -&gt; Result&lt;(), Error&gt;</kbd>: Formats the value using the given formatter</li>
+</ul>
+</li>
+<li><kbd>impl&lt;T&gt; Deref for Box&lt;T&gt; where T: ?Sized</kbd>
+<ul>
+<li><kbd>fn deref(&amp;self) -&gt; &amp;T</kbd>: Dereference a value</li>
+</ul>
+</li>
+<li><kbd>impl&lt;T&gt; DerefMut for Box&lt;T&gt; where T: ?Sized</kbd>
+<ul>
+<li><kbd>fn deref_mut(&amp;mut self) -&gt; &amp;mut T</kbd>: Mutably dereference a value</li>
+</ul>
+</li>
+<li><kbd>impl&lt;I&gt; Iterator for Box&lt;I&gt; where I: Iterator + ?Sized</kbd>
+<ul>
+<li><kbd>fn next(&amp;mut self) -&gt; Option&lt;I::Item&gt;</kbd>: Advances the iterator and returns the next value</li>
+<li><kbd>fn size_hint(&amp;self) -&gt; (usize, Option&lt;usize&gt;)</kbd>: Returns the bounds on the remaining length of the iterator</li>
+<li><kbd>fn count(self) -&gt; usize</kbd>: Returns the number of iterations</li>
+<li><kbd>fn last(self) -&gt; Option&lt;Self::Item&gt;</kbd>: Returns the last element</li>
+<li><kbd>fn nth(&amp;mut self, n: usize) -&gt; Option&lt;Self::Item&gt;</kbd>: Consumes <em>n</em> elements of the iterator and returns the next one after that</li>
+<li><kbd>fn chain&lt;U&gt;(self, other: U) -&gt; Chain&lt;Self, U::Iterator&gt; where U: IntoIterator &lt;Item=Self::Item&gt;</kbd>: Takes two iterators and creates a new one over both in sequence</li>
+<li><kbd>fn zip&lt;U&gt;(self, other: U) -&gt; Zip&lt;Self, U::IntoIter&gt; where U: IntoIter</kbd>: Zips two iterators into a single pair</li>
+<li><kbd>fn map&lt;B, F&gt;(self, f: F) -&gt; Map&lt;Self, F&gt; where F: FnMut(Self::Item) -&gt; B</kbd>: Takes a closure and creates an iterator that calls that closure on each element</li>
+<li><kbd>fn filter&lt;P&gt;(self, predicate: P) -&gt; Filter&lt;Self, P&gt; where P: FnMut(&amp;Self::Item) -&gt; bool</kbd>: Creates an iterator that uses a closure to see if an element should be yielded</li>
+<li><kbd>Fn filter_map&lt;B, F&gt;(self, f: F) -&gt; FilterMap&lt;Self, F&gt; where F: FnMut(Self::Item) -&gt; Option&lt;B&lt;</kbd>: Creates an iterator that filters and maps</li>
+<li><kbd>fn enumerate(self) -&gt; Enumerate&lt;Self&gt;</kbd>: Creates an iterator that gives the current iteration count and the next value</li>
+<li><kbd>fn peekable(self) -&gt; Peekable&lt;Self&gt;</kbd>: Creates an iterator to peek at the next element of the iterator without consuming</li>
+<li><kbd>fn skip_while&lt;P&gt;(self, predicate: P)-&gt; SkipWhile&lt;Self, P&gt; where P: FnMut(&amp;Self::Item) -&gt; bool</kbd>: Creates an iterator that skips elements based on the predicate</li>
+<li><kbd>fn skip(self, n: usize) -&gt; Skip&lt;Self&gt;</kbd>: Creates an iterator that skips the first <em>n</em> elements</li>
+<li><kbd>fn take(self, n:usize) -&gt; Take&lt;Self&gt;</kbd>: Creates an iterator that yields the first <em>n</em> elements</li>
+<li><kbd>fn take_while&lt;P&gt;(self, predicate: P) -&gt; TakeWhile&lt;Self. P&gt; where P:FnMut(&amp;Self::Item) -&gt; bool</kbd>: Creates an iterator that yields elements based on the predicate</li>
+<li><kbd>fn scan&lt;St, B, F&gt;(self, init_state: St, f : F) -&gt; Scan&lt;Self, St, F&gt; where F: FnMut(&amp;mut St, Self::Item) -&gt; Option&lt;B&gt;</kbd>: An iterator adaptor similar to <kbd>fold()</kbd> that holds the internal state and produces a new iterator</li>
+<li><kbd>fn flat_map&lt;U, F&gt;(self f: F) -&gt; FlatMap&lt;Self, U, F&gt; where F: FnMut(Self::Item) -&gt; U, U:IntoIterator</kbd>: Creates a flattened nested structure. Works like map.</li>
+<li><kbd>fn fuse(self) -&gt; Fuse&lt;Self&gt;</kbd>: Creates an iterator that ends after the first instance of <kbd>None</kbd></li>
+<li><kbd>fn inspect&lt;F&gt;(self, f: F) -&gt; Inspect&lt;Self, F&gt; where F:FnMut(&amp;Self::Item) -&gt; ()</kbd>: Does something with each element and passes the value on</li>
+<li><kbd>fn by_ref(&amp;mut self) -&gt; &amp;mut Self</kbd>: Borrow the iterator. Doesn’t consume it.</li>
+<li><kbd>fn collect&lt;B&gt;(self) -&gt; B where B: FromIterator &lt;Self::Item&gt;</kbd>: Changes the iterator to a collection</li>
+<li><kbd>fn partition&lt;B, F&gt;(self, f: F) -&gt; (B, B) where B: Default + Extend&lt;Self::Item&gt;, F: FnMut(&amp;Self::Item) -&gt; bool</kbd>: Consumes an iterator, creating two collections from it</li>
+<li><kbd>fn fold&lt;B, F&gt;(self, init: B, f: F) -&gt; B where F: FnMut(B, Self::Item) -&gt; B</kbd>: An iterator adaptor that applies a function, producing a single, final value</li>
+<li><kbd>fn all&lt;F&gt;(&amp;mut self, f: F) -&gt; bool where F: FnMut(Self::Item) -&gt; bool</kbd>: Tests if every element of the iterator matches a predicate</li>
+<li><kbd>fn any&lt;F&gt;(&amp;mut self, f: F) -&gt; bool where F: FnMut(Self::Item) -&gt; bool</kbd>: Tests if any element of the iterator matches a predicate</li>
+<li><kbd>fn find&lt;P&gt;(&amp;mut self, predicate: P) -&gt; Option&lt;Self::Item&gt; where P: FnMut(&amp;Self::Item) -&gt; bool</kbd>: Searches for an element of an iterator that satisfies a predicate</li>
+<li><kbd>fn position&lt;P&gt;(&amp;mut self, predicate: P) -&gt; Option&lt;usize&gt; where P: FnMut(Self::Item) -&gt; bool</kbd>: Searches for an element in an iterator, returning its index</li>
+<li><kbd>fn rposition&lt;P&gt;(&amp;mut self, predicate: P) -&gt; Option&lt;usize&gt; where P: FnMut(Self::Item) -&gt; bool, Self: ExactSizeIterator + DoubleEndedIterator</kbd>: Searches for an element in an iterator from the right, returning its index</li>
+<li><kbd>fn max(self) -&gt; Option&lt;Self::Item&gt; where Self::Item: Ord</kbd>: Returns the maximum element of an iterator</li>
+<li><kbd>fn min(self) -&gt; Option&lt;Self::Item&gt; where Self::Item: Ord</kbd>: Returns the minimum element of an iterator</li>
+<li><kbd>fn max_by_key&lt;B, F&gt;(self, f: F) -&gt; Option&lt;Self::Item&gt; where B: Ord, F: FnMut(&amp;Self::Item) -&gt; B</kbd>: Returns the element that gives the maximum value from the specified function</li>
+<li><kbd>fn min_by_key&lt;B, F&gt;(self, f: F) -&gt; Option&lt;Self::Item&gt; where B: Ord, F: FnMut(&amp;Self::Item) -&gt; B</kbd>: Returns the element that gives the minimum value from the specified function</li>
+<li><kbd>fn rev(self) -&gt; Rev&lt;Self&gt; where Self: DoubleEndedIterator</kbd>: Reverses an iterator's direction</li>
+<li><kbd>fn unzip &lt;A, B, FromA, FromB&gt; (self) -&gt; (FromA, FromB) where FromA: Default + Extend&lt;A&gt;, FromB: Default + Extend&lt;B&gt;, Self: Iterator&lt;Item=(A, B)&gt;</kbd>: Converts an iterator of pairs into a pair of containers</li>
+<li><kbd>fn cloned&lt;'a, T&gt;(self) -&gt; Cloned&lt;Self&gt; where Self: Iterator&lt;Item=&amp;'a T&gt;, T: 'a + Clone</kbd>: Creates an iterator that clones all of its elements</li>
+<li><kbd>fn cycle(self) -&gt; Cycle&lt;Self&gt; where Self: Clone</kbd>: Repeats an iterator endlessly</li>
+<li><kbd>fn sum&lt;S&gt;(self) -&gt; S where S: Sum&lt;Self::Item&gt;</kbd>: Sums the elements of an iterator</li>
+<li><kbd>fn product&lt;P&gt;(self) -&gt; P where P: Product&lt;Self::Item&gt;</kbd>: Iterates over the entire iterator, multiplying all the elements</li>
+<li><kbd>fn cmp&lt;I&gt;(self, other: I) -&gt; Ordering where I: IntoIterator &lt;Item=Self::Item&gt;, Self::Item: Ord</kbd>: Compares the elements of this Iterator with those of another</li>
+<li><kbd>fn partial_cmp&lt;I&gt;(self, other: I) -&gt; Option&lt;Ordering&gt; where I: IntoIterator, Self::Item: PartialOrd&lt;I::Item&gt;</kbd>: Compares the elements of this Iterator with those of another</li>
+<li><kbd>fn eq&lt;I&gt;(self, other: I) -&gt; bool where I: IntoIterator, Self::Item: PartialEq&lt;I::Item&gt;</kbd>: Determines if the elements of this Iterator are equal to those of another</li>
+<li><kbd>fn ne&lt;I&gt;(self, other: I) -&gt; bool where I: IntoIterator, Self::Item: PartialEq&lt;I::Item&gt;</kbd>: Determines if the elements of this <kbd>Iterator</kbd> are unequal to those of another</li>
+<li><kbd>fn lt&lt;I&gt;(self, other: I) -&gt; bool where I: IntoIterator, Self::Item: PartialOrd&lt;I::Item&gt;</kbd>: Determines if the elements of this Iterator are less than those of another</li>
+<li><kbd>fn le&lt;I&gt;(self, other: I) -&gt; bool where I: IntoIterator, Self::Item: PartialOrd&lt;I::Item&gt;</kbd>: Determines if the elements of this Iterator are less than or equal to those of another</li>
+<li><kbd>fn gt&lt;I&gt;(self, other: I) -&gt; bool where I: IntoIterator, Self::Item: PartialOrd&lt;I::Item&gt;</kbd>: Determines if the elements of this Iterator are greater than those of another</li>
+<li><kbd>fn ge&lt;I&gt;(self, other: I) -&gt; bool where I: IntoIterator, Self::Item: PartialOrd&lt;I::Item&gt;</kbd>: Determines if the elements of this Iterator are greater than or equal to those of another</li>
+</ul>
+</li>
+<li><kbd>impl&lt;I&gt; DoubleEndedIterator for Box&lt;I&gt; where I: DoubleEndedIterator + ?Sized</kbd>
+<ul>
+<li><kbd>fn next_back(&amp;mut self) -&gt; Option&lt;I::Item&gt;</kbd>: Removes and returns an element from the end of the iterator</li>
+</ul>
+</li>
+<li><kbd>impl &lt;T&gt; ExactSizeIterator for Box&lt;I&gt; where I: ExactSizeIterator + ?Sized</kbd>
+<ul>
+<li><kbd>fn len(&amp;self) -&gt; usize</kbd>: Returns the exact number of times the iterator will iterate.</li>
+</ul>
+</li>
+<li><kbd>impl&lt;T&gt; Clone for Box&lt;[T]&gt; where T:Clone</kbd>
+<ul>
+<li><kbd>fn clone(&amp;self) -&gt; Box&lt;[T]&gt;</kbd>: Returns a copy of the value</li>
+<li><kbd>fn clone_from(&amp;mut self, source: &amp;Self)</kbd>: Performs copy-assignment from source</li>
+</ul>
+</li>
+<li><kbd>impl&lt;T&gt; Borrow&lt;T&gt; for Box&lt;T&gt; where T:?Sized</kbd>
+<ul>
+<li><kbd>fn borrow(&amp;self) -&gt; &amp;T</kbd>: Immutably borrows from an owned value</li>
+</ul>
+</li>
+<li><kbd>impl&lt;T&gt; BorrowMut&lt;T&gt; for Box&lt;T&gt; where T:?Sized</kbd>
+<ul>
+<li><kbd>fn borrow_mut(&amp;mut self) -&gt; &amp;mut T</kbd>: Mutably borrows from an owned value</li>
+</ul>
+</li>
+<li><kbd>impl&lt;T&gt; AsRef&lt;T&gt; for Box&lt;T&gt; where T:?Sized</kbd>
+<ul>
+<li><kbd>fn as_ref(&amp;self) -&gt; &amp;T</kbd>: Performs the conversion</li>
+</ul>
+</li>
+<li><kbd>impl&lt;T&gt; AsMut for Box&lt;T&gt; where T:?Sized</kbd>
+<ul>
+<li><kbd>fn as_mut(&amp;mut self) -&gt; &amp;mut T</kbd>: Performs the conversion</li>
+</ul>
+</li>
+<li><kbd>impl&lt;’a, E: Error + ‘a&gt; From&lt;E&gt; from Box&lt;Error + ‘a&gt;</kbd>
+<ul>
+<li><kbd>fn from(err: E) -&gt; Box&lt;Error + 'a&gt;</kbd>: Performs the conversion</li>
+</ul>
+</li>
+<li><kbd>impl From&lt;String&gt; for Box&lt;Error + Send + Sync&gt;</kbd>
+<ul>
+<li><kbd>fn from(err: String) -&gt; Box&lt;Error + Send + Sync&gt;</kbd>: Performs the conversion</li>
+</ul>
+</li>
+<li><kbd>impl From&lt;’a, ‘b&gt; From&lt;&amp;’b str&gt; for Box&lt;Error + Send + Sync + ‘a&gt;</kbd>
+<ul>
+<li><kbd>fn from(err: &amp;'b str) -&gt; Box&lt;Error + Send + Sync + 'a&gt;</kbd>: Performs the conversion</li>
+</ul>
+</li>
+<li><kbd>impl&lt;T: Error&gt; Error for Box&lt;T&gt;</kbd>
+<ul>
+<li><kbd>fn description(&amp;self) -&gt; &amp;str</kbd>: Short description of the error</li>
+<li><kbd>fn cause(&amp;self) -&gt; Option&lt;&amp;Error&gt;</kbd>: Lower-level cause of this error, if any</li>
+</ul>
+</li>
+<li><kbd>impl&lt;R: Read + ?Sized&gt; Read for Box&lt;R&gt;</kbd>
+<ul>
+<li><kbd>fn read(&amp;mut self, buf: &amp;mut [u8]) -&gt; Result&lt;usize&gt;</kbd>: Pulls some bytes from this source into the specified buffer, returning how many bytes were read</li>
+<li><kbd>fn read_to_end(&amp;mut self, buf: &amp;mut Vec&lt;u8&gt;) -&gt; Result&lt;usize&gt;</kbd>: Reads all bytes until EOF in this source, placing them into <kbd>buf</kbd></li>
+<li><kbd>fn read_to_string(&amp;mut self, buf: &amp;mut String) -&gt; Result&lt;usize&gt;</kbd>: Reads all bytes until EOF in this source, placing them into <kbd>buf</kbd></li>
+<li><kbd>fn read_exact(&amp;mut self, buf: &amp;mut [u8]) -&gt; Result&lt;()&gt;</kbd>: Reads the exact number of bytes required to fill <kbd>buf</kbd></li>
+<li><kbd>fn by_ref(&amp;mut self) -&gt; &amp;mut Self where Self: Sized</kbd>: Creates a <em>by reference</em> adaptor for this instance of <kbd>Read</kbd></li>
+<li><kbd>fn bytes(self) -&gt; Bytes&lt;Self&gt; where Self: Sized</kbd>: Transforms this <kbd>Read</kbd> instance to an Iterator over its bytes</li>
+<li><kbd>fn chain&lt;R: Read&gt;(self, next: R) -&gt; Chain&lt;Self, R&gt; where Self: Sized</kbd>: Creates an adaptor that will chain this stream with another</li>
+<li><kbd>fn take(self, limit: u64) -&gt; Take&lt;Self&gt; where Self: Sized</kbd>: Creates an adaptor that will read at most limit bytes from it</li>
+</ul>
+</li>
+<li><kbd>impl &lt;W: Write + ?Sized&gt; Write for Box&lt;W&gt;</kbd>
+<ul>
+<li><kbd>fn write(&amp;mut self, buf: &amp;[u8]) -&gt; Result&lt;usize&gt;</kbd>: Writes a buffer into this object, returning how many bytes were written</li>
+<li><kbd>fn flush(&amp;mut self) -&gt; Result&lt;()&gt;</kbd>: Flushes this output stream, ensuring that all intermediately buffered contents reach their destination</li>
+<li><kbd>fn write_all(&amp;mut self, buf: &amp;[u8]) -&gt; Result&lt;()&gt;</kbd>: Attempts to write an entire buffer into this write</li>
+<li><kbd>fn write_fmt(&amp;mut self, fmt: Arguments) -&gt; Result&lt;()&gt;</kbd>: Writes a formatted string into this writer, returning any error encountered</li>
+<li><kbd>fn by_ref(&amp;mut self) -&gt; &amp;mut Self where Self: Sized</kbd>: Creates a <em>by reference</em> adaptor for this instance of <kbd>Write</kbd></li>
+</ul>
+</li>
+<li><kbd>impl&lt;S: Seek + ?Sized&gt; Seek for Box&lt;S&gt;</kbd>
+<ul>
+<li><kbd>fn seek(&amp;mut self, pos: SeekFrom) -&gt; Result&lt;u64&gt;</kbd>: Seeks to an offset, in bytes, in a stream</li>
+</ul>
+</li>
+<li><kbd>impl&lt;B: BufRead + ?Sized&gt; BufRead for Box&lt;B&gt;</kbd>
+<ul>
+<li><kbd>fn fill_buf(&amp;mut self) -&gt; Result&lt;&amp;[u8]&gt;</kbd>: Fills the internal buffer of this object, returning the buffer contents</li>
+<li><kbd>fn consume(&amp;mut self, amt: usize)</kbd>: Tells this buffer that amt bytes have been consumed from the buffer, so they should no longer be returned in calls to be read</li>
+<li><kbd>fn read_until(&amp;mut self, byte: u8, buf: &amp;mut Vec&lt;u8&gt;) -&gt; Result&lt;usize&gt;</kbd>: Reads all bytes into <kbd>buf</kbd> until the delimiter byte is reached</li>
+<li><kbd>fn read_line(&amp;mut self, buf: &amp;mut String) -&gt; Result&lt;usize&gt;</kbd>: Reads all bytes until a newline (the 0 x A byte) is reached, and appends them to the provided buffer</li>
+<li><kbd>fn split(self, byte: u8) -&gt; Split&lt;Self&gt; where Self: Sized</kbd>: Returns an iterator over the contents of this reader split on the byte byte</li>
+<li><kbd>fn lines(self) -&gt; Lines&lt;Self&gt; where Self: Sized</kbd>: Returns an iterator over the lines of this reader</li>
+</ul>
+</li>
+</ul>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

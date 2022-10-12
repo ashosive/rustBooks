@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style00.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style01.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Starting a number of threads</h1>
+                </header>
+            
+            <article>
+                
+<p>Each thread has its own stack and local state, and by default no data is shared between threads unless it is immutable data. Generating threads is a very lightweight process; for example, starting tens of thousands of threads only takes a few seconds. The following program does just that, and prints out the numbers 0 to 9,999:</p>
+<pre>// code from Chapter 9/code/many_threads.rs:  
+use std::thread; 
+ 
+static NTHREADS: i32 = 10000; 
+ 
+fn main() { 
+println!("************************** Before the start of the threads"); 
+for i in 0..NTHREADS { 
+         let _ = thread::spawn(move || { 
+              println!("this is thread number {}", i) 
+         }); 
+      } 
+thread::sleep(time::Duration::from_millis(500)); 
+println!("************************** All threads finished!"); 
+} </pre>
+<p>Because the numbers are printed in independent threads, the order is not preserved in the output, so it could start with this:</p>
+<pre>    <strong>************************** Before the start of the threads</strong>
+    <strong>this is thread number 1</strong>
+    <strong>this is thread number 3</strong>
+    <strong>this is thread number 4</strong>
+    <strong>this is thread number 2</strong>
+    <strong>this is thread number 6</strong>
+    <strong>this is thread number 5</strong>
+    <strong>this is thread number 0</strong>
+    <strong>...</strong>
+    <strong>************************** All threads finished!</strong>  </pre>
+<p>Notice we need to add a <kbd>sleep()</kbd> method to ensure all spawned threads get finished, otherwise we get error messages such as this:</p>
+<pre><strong>thread '&lt;unnamed&gt;' panicked at 'cannot access stdout during shutdown'</strong>  </pre>
+<p>A question that often arises is how many threads do I have to spawn? The basic rule is, for CPU intensive tasks, have the same number of threads as CPU cores.</p>
+<p>This number can be retrieved in Rust by using the <kbd>num_cpus</kbd> crate.</p>
+<p>Let's make a new project with <kbd>cargo new many_threads --bin</kbd>:</p>
+<ol>
+<li>Add the crate dependency to <kbd>Cargo.toml</kbd>:</li>
+</ol>
+<pre>[dependencies] 
+num_cpus = "*" </pre>
+<ol start="2">
+<li>Then change <kbd>main.rs</kbd> to this:</li>
+</ol>
+<pre>extern crate num_cpus; 
+ 
+fn main() { 
+   let ncpus = num_cpus::get(); 
+    println!("The number of cpus in this machine is: {}", ncpus); 
+} </pre>
+<ol start="3">
+<li>From within the <kbd>many_threads</kbd> folder, do a <kbd>cargo build</kbd> to install the crate and compile the code. Executing the program with <kbd>cargo run</kbd> gives us the following output (dependent on the computer):</li>
+</ol>
+<pre><strong>The number of cpus in this machine is: 8</strong>  </pre>
+<p>For efficiency, it is best to start with this, or any other number of threads in a pool. This functionality is provided by the <kbd>threadpool</kbd> crate, which we can get by adding the <kbd>threadpool = "*"</kbd> dependency to <kbd>Cargo.toml</kbd> and doing a <kbd>cargo build</kbd>.</p>
+<p>Add the following code to the start of the file:</p>
+<pre>extern crate threadpool; 
+ 
+use std::thread; 
+use std::time;<br/> use threadpool::ThreadPool; 
+Add this code to the main() function: 
+let pool = ThreadPool::new(ncpus); 
+ 
+for i in 0..ncpus { 
+      pool.execute(move || { 
+         println!("this is thread number {}", i) 
+   }); 
+} 
+   thread::sleep(time::Duration::from_millis(50)); </pre>
+<p>When executed, this yields the following output:</p>
+<pre>    <strong>this is thread number 0</strong>
+    <strong>this is thread number 5</strong>
+    <strong>this is thread number 7</strong>
+    <strong>this is thread number 3</strong>
+    <strong>this is thread number 4</strong>
+    <strong>this is thread number 1</strong>
+    <strong>this is thread number 6</strong>
+    <strong>this is thread number 2</strong>  </pre>
+<p>A thread pool is used for running a number of jobs on a fixed set of parallel worker threads; it creates the given number of worker threads and replenishes the pool if any thread panics.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

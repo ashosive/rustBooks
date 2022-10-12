@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Binary semaphore, or, a less wasteful mutex</h1>
+                </header>
+            
+            <article>
+                
+<p>How does our semaphore stack up against standard library's Mutex? How about our spinlock <kbd>Mutex</kbd>? Apply this <kbd>diff</kbd> to <kbd>status_demo</kbd>:</p>
+<pre>diff --git a/external_projects/synchro/src/bin/status_demo.rs b/external_projects/synchro/src/bin/status_demo.rs
+index cb3e850..fef2955 100644
+--- a/external_projects/synchro/src/bin/status_demo.rs
++++ b/external_projects/synchro/src/bin/status_demo.rs
+@@ -21,7 +21,7 @@ fn worker(id: usize, gate: Arc&lt;Semaphore&gt;) -&gt; () {
+ }
+
+ fn main() {
+-    let semaphore = Arc::new(Semaphore::new(2));
++    let semaphore = Arc::new(Semaphore::new(1));
+
+     for i in 0..THRS {
+         let semaphore = Arc::clone(&amp;semaphore);</pre>
+<p>You'll create a mutex variant of the semaphore status demo. The numbers for that on my x86 test article look like this:</p>
+<pre><strong>| false; 0000090992/sec |  true; 0000090993/sec |  true; 0000091000/sec | false; 0000090993/sec |
+| false; 0000090469/sec | false; 0000090468/sec |  true; 0000090467/sec |  true; 0000090469/sec |
+|  true; 0000090093/sec | false; 0000090093/sec | false; 0000090095/sec | false; 0000090093/sec |</strong></pre>
+<p>The numbers at capacity two were 170,000 per second, so there's quite a dip. Let's compare that against standard library mutex first. The adaptation is in <kbd>src/bin/mutex_status_demo.rs</kbd>:</p>
+<pre style="padding-left: 30px">use std::sync::{Arc, Mutex};
+use std::{thread, time};
+
+const THRS: usize = 4;
+static mut COUNTS: &amp;'static mut [u64] = &amp;mut [0; THRS];
+static mut STATUS: &amp;'static mut [bool] = &amp;mut [false; THRS];
+
+fn worker(id: usize, gate: Arc&lt;Mutex&lt;()&gt;&gt;) -&gt; () {
+    unsafe {
+        loop {
+            let guard = gate.lock().unwrap();
+            STATUS[id] = true;
+            COUNTS[id] += 1;
+            STATUS[id] = false;
+            drop(guard);
+        }
+    }
+}
+
+fn main() {
+    let mutex = Arc::new(Mutex::new(()));
+
+    for i in 0..THRS {
+        let mutex = Arc::clone(&amp;mutex);
+        thread::spawn(move || worker(i, mutex));
+    }
+
+    let mut counts: [u64; THRS] = [0; THRS];
+    loop {
+        unsafe {
+            thread::sleep(time::Duration::from_millis(1_000));
+            print!("|");
+            for i in 0..THRS {
+                print!(" {:&gt;5}; {:010}/sec |", STATUS[i], <br/>                       COUNTS[i] - counts[i]);
+                counts[i] = COUNTS[i];
+            }
+            println!();
+        }
+    }
+}</pre>
+<p>Straightforward, yeah? The numbers from that on the same x86 test article are as follows:</p>
+<pre><strong>| false; 0001856267/sec | false; 0002109238/sec |  true; 0002036852/sec |  true; 0002172337/sec |
+| false; 0001887803/sec |  true; 0002072647/sec | false; 0002065467/sec |  true; 0002143558/sec |
+| false; 0001848387/sec | false; 0002044828/sec |  true; 0002098595/sec |  true; 0002178304/sec |</strong></pre>
+<p>Let's be a little generous and say that the standard library mutex is clocking in at 2,000,000 per second, while our binary semaphore is getting 170,000 per second. How about the spinlock? At this point, I will avoid the source listing. Just be sure to import <kbd>SwapMutex</kbd> and adjust it from the <span>standard library </span><kbd>Mutex</kbd> accordingly. The numbers for that are as follows:</p>
+<pre><strong>|  true; 0012527450/sec | false; 0011959925/sec |  true; 0011863078/sec | false; 0012509126/sec |
+|  true; 0012573119/sec | false; 0011949160/sec |  true; 0011894659/sec | false; 0012495174/sec |
+| false; 0012481696/sec |  true; 0011952472/sec |  true; 0011856956/sec | false; 0012595455/sec |</strong></pre>
+<p>Which, you know what, makes sense. The spinlock is doing the least amount of work and every thread is burning up CPU time to be right there when it's time to enter their critical section. Here is a summary of our results:</p>
+<ul>
+<li>Spinlock mutex: 11,000,000/sec</li>
+<li><span>Standard library </span>mutex: 2,000,000/sec</li>
+<li>Binary semaphore: 170,000/sec</li>
+</ul>
+<p>The reader is warmly encouraged to investigate each of these implementations in Linux perf. The key thing to understand, from these results, is not that any of these implementations is better or worse than the other. Rather, that they are suitable for different purposes.</p>
+<p>We could, for instance, use techniques from the next chapter to reduce the CPU consumption of the spinlock mutex. This would slow it down some, likely bringing it within the range of <span>standard library </span>Mutex. In this case, use the <span>standard library </span>Mutex.</p>
+<p>Atomics programming is not a thing to take lightly. It's difficult to get right, and an implementation that may <em>seem</em> right might well not obey the causal properties of the memory model. Furthermore, just because a thing is lock-free does not mean that it is <em>faster</em> to execute.</p>
+<p>Writing software is about recognizing and adapting to trade-offs. Atomics demonstrates that in abundance.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">The C side</h1>
+                </header>
+            
+            <article>
+                
+<p>Our C program is <kbd>c_src/main.c</kbd>. We need a few system headers before we can define the <kbd>embed_quantiles</kbd> interface:</p>
+<pre>#include &lt;stdint.h&gt;
+#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;time.h&gt;</pre>
+<p>The only slightly unusual one is <kbd>time.h</kbd>. We pull that in because we're going to be pushing random floats into the <kbd>CKMS</kbd> structure. Not cryptographically secure randomness, mind. Here's the C view of the Rust API we just created:</p>
+<pre style="padding-left: 30px">struct ckms;
+
+struct ckms* alloc_ckms(double error);
+void free_ckms(struct ckms* ckms);
+void ckms_insert(struct ckms* ckms, float value);
+int8_t query(struct ckms* ckms, double q, float* quant);</pre>
+<p>Notice the <kbd>CKMS</kbd> struct . That's the opaque struct. C is now aware there is a structure but it doesn't know how big it is. That's okay. Each of our functions only operate on a pointer to this structure, which C does know the size of. The <kbd>main</kbd> function is brief:</p>
+<pre style="padding-left: 30px">int main(void) {
+  srand(time(NULL));
+
+  struct ckms* ckms = alloc_ckms(0.001);
+
+  for (int i=1; i &lt;= 1000000; i++) {
+    ckms_insert(ckms, (float)rand()/(float)(RAND_MAX/10000));
+  }
+
+  float quant = 0.0;
+  if (query(ckms, 0.75, &amp;quant) &lt; 0) {
+    printf("ERROR IN QUERY");
+    return 1;
+  }
+  printf("75th percentile: %f\n", quant);
+
+  free_ckms(ckms);
+  return 0;
+}</pre>
+<p>We allocate a <kbd>CKMS</kbd>, whose error bound is 0.001, load 1 million random floats into the <kbd>CKMS</kbd>, and then query for the 75th quantile, which should be around 7,500. Finally, the function frees the <kbd>CKMS</kbd> and exits. Short and sweet.</p>
+<p>Now, building and linking <kbd>libembed_quantiles.a</kbd> is fairly easy with a clang compiler, and a little fiddly with GCC. I've gone ahead and included a Makefile, which has been tested on OS X and Linux:</p>
+<pre>CC ?= $(shell which cc)
+CARGO ?= $(shell which cargo)
+OS := $(shell uname)
+
+run: clean build
+        ./target/release/embed_quantiles
+
+clean:
+        $(CARGO) clean
+        rm -f ./target/release/embed_quantiles
+
+build:
+        $(CARGO) build --release
+ifeq ($(OS),Darwin) # Assumption: CC == Clang
+        $(CC) -std=c11 -Wall -Werror -Wpedantic -O3 c_src/main.c \
+                -L target/release/ -l embed_quantiles \
+                -o target/release/embed_quantiles
+else # Assumption: CC == GCC
+        $(CC) -std=c11 -Wall -Werror -Wpedantic -O3 c_src/main.c \
+                -L target/release/ -lpthread -Wl,–no-as-needed -ldl \<br/>                -lm -lembed_quantiles \
+                -o target/release/embed_quantiles
+endif
+
+.PHONY: clean run</pre>
+<p>I don't have a Windows machine to test with so, uh, when this inevitably doesn't work I really do apologize. Hopefully there's enough here to figure it out quickly. Once you have the Makefile in place, you should be able to run make run and see something similar to the following:</p>
+<pre><strong>&gt; make run
+/home/blt/.cargo/bin/cargo clean
+rm -f ./target/release/embed_quantiles
+/home/blt/.cargo/bin/cargo build --release
+   Compiling quantiles v0.7.1
+   Compiling embed_quantiles v0.1.0
+    Finished release [optimized] target(s) in 0.91 secs
+cc -std=c11 -Wall -Werror -Wpedantic -O3 c_src/main.c \
+        -L target/release/ -lpthread -Wl,–no-as-needed -ldl \<br/>        -lm -lembed_quantiles \
+        -o target/release/embed_quantiles
+./target/release/embed_quantiles
+75th percentile: 7499.636230</strong></pre>
+<p>The percentile value will move around some, but it ought to be close to 7,500, as it is here.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

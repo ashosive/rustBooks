@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style00.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style01.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">A thread-pooling server</h1>
+                </header>
+            
+            <article>
+                
+<p>Let's adapt our overwhelmed TCP server to use a fixed number of threads. We'll start a new project whose <kbd>Cargo.toml</kbd> looks like:</p>
+<pre>[package]
+name = "fixed_threads_server"
+version = "0.1.0"
+authors = ["Brian L. Troutwine &lt;brian@troutwine.us&gt;"]
+
+[dependencies]
+clap = "2.31"
+slog = "2.2"
+slog-term = "2.4"
+slog-async = "2.3"
+threadpool = "1.7"
+
+[[bin]]
+name = "server"
+
+[[bin]]
+name = "client"</pre>
+<p>This is almost exactly the same as the unbounded thread project, save that the name has been changed from <kbd>overwhelmed_tpc_server</kbd> to <kbd>fixed_threads_tcp_server</kbd> and we've added a new dependency<span>–</span>threadpool. There are a few different, stable thread-pool libraries available in crates, each with a slightly different feature set or focus. The workerpool project (<a href="https://crates.io/crates/workerpool">https://crates.io/crates/workerpool</a>), for example, sports almost the same API as threadpool, save that it comes rigged up so in/out communication with the worker thread is enforced at the type-level, where threadpool requires the user to establish this themselves if they want. In this project, we don't have a need to communicate with the worker thread.</p>
+<p>The server preamble is only slightly altered from the previous project:</p>
+<pre>#[macro_use]
+extern crate slog;
+extern crate clap;
+extern crate slog_async;
+extern crate slog_term;
+extern crate threadpool;
+
+use clap::{App, Arg};
+use slog::Drain;
+use std::io::{BufRead, BufReader, BufWriter, Write};
+use std::net::{TcpListener, TcpStream};
+use std::sync::atomic::{AtomicUsize, Ordering};
+use threadpool::ThreadPool;
+
+static TOTAL_STREAMS: AtomicUsize = AtomicUsize::new(0);</pre>
+<p>The only changes here are the introduction of the thread-pooling library and the removal of some unused imports. Our <kbd>handle_client</kbd> implementation is also basically the same, but is notably not spawning a thread:</p>
+<pre>fn handle_client(
+    log: slog::Logger,
+    mut reader: BufReader&lt;TcpStream&gt;,
+    mut writer: BufWriter&lt;TcpStream&gt;,
+) -&gt; () {
+    let mut buf = String::with_capacity(2048);
+
+    while let Ok(sz) = reader.read_line(&amp;mut buf) {
+        info!(log, "Received a {} bytes: {}", sz, buf);
+        writer
+            .write_all(&amp;buf.as_bytes())
+            .expect("could not write line");
+        buf.clear();
+    }
+    TOTAL_STREAMS.fetch_sub(1, Ordering::Relaxed);
+}</pre>
+<p>Our main function, likewise, is very similar. We set up the logger and parse application options, adding in a new <kbd>max_connections</kbd> option:</p>
+<pre>fn main() {
+    let decorator = slog_term::TermDecorator::new().build();
+    let drain = slog_term::CompactFormat::new(decorator).build().fuse();
+    let drain = slog_async::Async::new(drain).build().fuse();
+    let root = slog::Logger::root(drain, o!());
+
+    let matches = App::new("server")
+        .arg(
+            Arg::with_name("host")
+                .long("host")
+                .value_name("HOST")
+                .help("Sets which hostname to listen on")
+                .takes_value(true),
+        )
+        .arg(
+            Arg::with_name("port")
+                .long("port")
+                .value_name("PORT")
+                .help("Sets which port to listen on")
+                .takes_value(true),
+        )
+        .arg(
+            Arg::with_name("max_connections")
+                .long("max_connections")
+                .value_name("CONNECTIONS")
+                .help("Sets how many connections (thus,\<br/>                       threads) to allow simultaneously")
+                .takes_value(true),
+        )
+        .get_matches();
+
+    let host: &amp;str = matches.value_of("host").unwrap_or("localhost");
+    let port = matches
+        .value_of("port")
+        .unwrap_or("1987")
+        .parse::&lt;u16&gt;()
+        .expect("port-no not valid");
+    let max_connections = matches
+        .value_of("max_connections")
+        .unwrap_or("256")
+        .parse::&lt;u16&gt;()
+        .expect("max_connections not valid");</pre>
+<p>Note that <kbd>max_connections</kbd> is <kbd>u16</kbd>. This is arbitrary and will under-consume some of the larger machines available in special circumstances. But this is a reasonable range for most hardware today. Just the same as before, we adapt the logger to include the host and port information:</p>
+<pre>    let listener = TcpListener::bind((host, port)).unwrap();
+    let server = root.new(o!("host" =&gt; host.to_string(), "port" =&gt; port));
+    info!(server, "Server open for business! :D");</pre>
+<p>So far, so good. Before the server can start accepting incoming connections, it needs a thread pool. Like so:</p>
+<pre>    let pool: ThreadPool = threadpool::Builder::new()
+        .num_threads(max_connections as usize)
+        .build();</pre>
+<p>Exactly what <kbd>threadpool::Builder</kbd> does and how it works we defer to the next section, relying only on documentation to guide us. As such, we now have <kbd>ThreadPool</kbd> with <kbd>max_connection</kbd> possible active threads. This pool implementation does not bound the total number of jobs that can be run against the pool, collecting them in a queue, instead. This is not ideal for our purposes, where we aim to reject connections that can't be serviced. This is something we can address:</p>
+<pre>    for stream in listener.incoming() {
+        if let Ok(stream) = stream {
+            if pool.active_count() == (max_connections as usize) {
+                info!(
+                    server,
+                    "Max connection condition reached, rejecting incoming"
+                );
+            } else {
+                let stream_no = TOTAL_STREAMS.fetch_add(<br/>                                    1, <br/>                                    Ordering::Relaxed<br/>                                );
+                let log = root.new(o!("stream-no" =&gt; stream_no,
+                   "peer-addr" =&gt; stream.peer_addr()<br/>                                  .expect("no peer address")<br/>                                  .to_string()));
+                let writer = BufWriter::new(stream.try_clone()<br/>                             .expect("could not clone stream"));
+                let reader = BufReader::new(stream);
+                pool.execute(move || handle_client(log, reader, writer));
+            }
+        } else {
+            info!(root, "Shutting down! {:?}", stream);
+        }
+    }</pre>
+<p>The accept loop is more or less the same as in the previous server, except at the top of the loop we check <kbd>pool.active_count()</kbd> against the configured <kbd>max_connections</kbd>, reject the connection if the number of running workers is at capacity; otherwise we accept the connection and execute it against the pool. Finally, much as before, the server drains connections when the incoming socket is closed:</p>
+<pre>    info!(
+        server,
+        "No more incoming connections. \<br/>         Draining existing connections."
+    );
+    pool.join();
+}</pre>
+<p>The client presented in the previous section can be applied to this server without any changes. If the reader inspects the book's source repository, they will find that the clients are identical between projects. </p>
+<p>This server implementation does not suffer from an ever-growing <kbd>JoinHandle</kbd> vector, as the last server did. The pool takes care to remove panicked threads from its internal buffers and we take care to never allow more workers than there are threads available to work them. Let's find out how that works!</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

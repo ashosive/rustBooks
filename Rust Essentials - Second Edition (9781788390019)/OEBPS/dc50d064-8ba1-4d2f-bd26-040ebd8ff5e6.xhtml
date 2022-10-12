@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">The try! macro and the ? operator</h1>
+                </header>
+            
+            <article>
+                
+<p>When, during a computation, several function calls return a <kbd>Result</kbd> type value, the handling of the error propagation through pattern matching can become quite tedious-each returned <kbd>Result</kbd> type value requires a match to differentiate between an <kbd>Ok</kbd> value and an <kbd>Err</kbd> value.</p>
+<p>We had exactly such a situation in the <kbd>input_number.rs program</kbd>, where we read an input from the terminal and tried to parse it into an unsigned integer, both operations can fail.</p>
+<p>The <kbd>try!</kbd> macro was specifically made in order to simplify such code and make error-handling more elegant and readable.</p>
+<p>The <kbd>try!</kbd> macro can only be used from inside a function that returns a <kbd>Result</kbd> type value, so not from within the <kbd>main()</kbd> function. Also, it can only be used on functions that return a <kbd>Result</kbd> type value. It returns the <kbd>Ok</kbd> value, and then continues with the function's code. But in case of an error the <kbd>Err</kbd> value is returned, returning immediately from the enclosing function. If we apply this to <kbd>input_number.rs</kbd>, we get much more readable code, as follows:</p>
+<pre>// see code in Chapter 5/code/try_input_number.rs 
+use std::io; 
+use std::error; 
+ 
+fn main() { 
+    println!("Give a positive secret number: "); 
+    match input_num() { 
+        Ok(v) =&gt; println!("Input value is: {}", v), 
+  Err(e) =&gt; println!("Error - Please input an integer number!: {}", e) 
+    } 
+} 
+ 
+fn input_num() -&gt; Result&lt;u32, Box&lt;error::Error&gt;&gt; { 
+    let mut input = String::new(); 
+    try!(io::stdin().read_line(&amp;mut input)); 
+    Ok(try!(input.trim().parse())) 
+} </pre>
+<p>When there is no input, the program prints out the following error:</p>
+<pre>    <strong>Error - Please input an integer number!: cannot parse integer from empty string</strong>  </pre>
+<p>Then, the program exits normally. When a non-digit input is given, the program prints out to give a positive secret number, as follows:</p>
+<pre>    <strong>Error - Please input an integer number!: invalid digit found in string</strong>  </pre>
+<p>Then, it exits normally.</p>
+<p>The dangerous operations are wrapped inside the function <kbd>input_num</kbd>. We can use the <kbd>try!</kbd> macro on these operations because the <kbd>input_num</kbd> function returns a <kbd>Result</kbd> type value.</p>
+<p>Our code becomes even shorter when we use the error propagation operator <kbd>?</kbd>, which works the same way as the <kbd>try!</kbd> macro:</p>
+<pre>  fn input_num() -&gt; Result&lt;u32, Box&lt;error::Error&gt;&gt; { 
+       let mut input = String::new(); 
+    io::stdin().read_line(&amp;mut input)?; 
+    Ok(input.trim().parse()?) 
+} </pre>
+<p>The <kbd>Box&lt;error::Error&gt;&gt;</kbd> is a so called boxed pointer, a reference to an <kbd>Error</kbd> instance from the <kbd>std::error</kbd> module. We talk more about the <kbd>Box</kbd> pointer in <a href="181718d1-5b78-4952-8082-796f69471c96.xhtml"><span class="ChapterrefPACKT">Chapter 7</span></a>, <em>Ensuring Memory Safety and Pointers</em>. We need to use a <kbd>Box</kbd> pointer here to let the compiler know that we don't know the size of the error instance.</p>
+<p>If all you need from errors is their string content, you could simplify error-handling by using the simple error crate (<a href="https://crates.io/crates/simple-error"><span class="URLPACKT">https://crates.io/crates/simple-error</span></a>).</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

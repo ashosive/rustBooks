@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">std::borrow</h1>
+                </header>
+            
+            <article>
+                
+<p>This module is used for working with borrowed data.</p>
+<p>enum <kbd>Cow</kbd> (clone-on-write smarter pointer)</p>
+<p>The <kbd>Cow</kbd> allows for immutable access to borrowed data (and can enclose this data) and permits cloning lazily when mutation or ownership is required. It is designed to work using the <kbd>Borrow</kbd> trait. It also implements <kbd>Deref</kbd>, which will allow access to non-mutating methods on the data <kbd>Cow</kbd> has enclosed. <kbd>to_mut</kbd> will provide a mutable reference to the owned value.</p>
+<p> </p>
+<ul>
+<li><kbd>Trait std::borrow::Borrow</kbd>: Data can be borrowed in a number of different ways: shared borrowing (<kbd>T</kbd> and <kbd>&amp;T</kbd>), mutable borrowing (<kbd>&amp;mut T</kbd>), and borrowed slices from the likes of <kbd>Vec&lt;T&gt; (&amp;[T]</kbd>, and <kbd>&amp;mut[T])</kbd>.<br/>
+The <kbd>Borrow</kbd> trait provides a convenient method to abstract over the given type. For example: <kbd>T: Borrow&lt;U&gt;</kbd> means that <kbd>&amp;U</kbd> is borrowed from <kbd>&amp;T</kbd>
+<ul>
+<li><kbd>fn borrow(&amp;self) -&gt; &amp;Borrowed</kbd>: Immutably borrows from an owned value</li>
+</ul>
+</li>
+<li>
+<p style="font-size: 16px"><kbd>Trait std::borrow::BorrowMut</kbd>: Used for mutably borrowing data</p>
+<ul>
+<li><kbd>fn borrow_mut(&amp;mut self) -&gt; &amp;mut Borrowed</kbd>: Mutably borrows from an owned value</li>
+</ul>
+</li>
+<li>
+<p><kbd>Trait std::borrow:ToOwned</kbd>: A generalization of <kbd>Clone</kbd> for borrowing data. <kbd>Clone</kbd> only works when going from <kbd>&amp;T</kbd> to <kbd>T</kbd>. <kbd>ToOwned</kbd> generalizes <kbd>Clone</kbd> to construct owned data from any borrow of a given type.</p>
+<ul>
+<li><kbd>fn to_owned(&amp;self) -&gt; Self::Owned</kbd>: Creates owned data from borrowed data</li>
+</ul>
+</li>
+</ul>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

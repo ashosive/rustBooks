@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style00.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style01.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">What is meant by the stack?</h1>
+                </header>
+            
+            <article>
+                
+<p>The simplest way to think about the stack is to consider memory as a series of boxes. For these examples, think of the boxes in groups of four: the function name, the address, the variable name, and the value. Here's a <kbd>main</kbd> function with a single local variable:</p>
+<pre>    fn main() 
+    { 
+        let i = 32; 
+    } </pre>
+<p>The stack boxes will look like this<a>:</a></p>
+<table class="MsoTableGrid">
+<tbody>
+<tr>
+<td>
+<p><strong>Function name</strong></p>
+</td>
+<td>
+<p><strong>Address</strong></p>
+</td>
+<td>
+<p><strong>Variable name</strong></p>
+</td>
+<td>
+<p><strong>Value</strong></p>
+</td>
+</tr>
+<tr>
+<td>
+<p><kbd>main</kbd></p>
+</td>
+<td>
+<p><kbd>0</kbd></p>
+</td>
+<td>
+<p><kbd>i</kbd></p>
+</td>
+<td>
+<p><kbd>32</kbd></p>
+</td>
+</tr>
+</tbody>
+</table>
+<p>A slightly different example is as follows:</p>
+<pre>    fn second() 
+    { 
+        let a = 32; 
+        let b = 12; 
+    } 
+    fn main() 
+    { 
+        let d = 100; 
+    } </pre>
+<p>Here, we will have two unconnected stack boxes. Since the <kbd>second</kbd> function is never called, we never actually allocate memory on the stack for it. The memory allocations are therefore exactly same as in the first example.</p>
+<p>Our third example is where we have the <kbd>main</kbd> function call to the <kbd>second</kbd> function; in this case, we actually reserve memory for the <kbd>second</kbd> function:</p>
+<pre>    fn second() 
+    { 
+        let a = 32; 
+        let b = 12; 
+    } 
+    fn main() 
+    { 
+        let d = 100; 
+        second(); 
+    } </pre>
+<p>In terms of our stack boxes, we have the following:</p>
+<table class="MsoTableGrid">
+<tbody>
+<tr>
+<td>
+<p><strong>Function name</strong></p>
+</td>
+<td>
+<p><strong>Address</strong></p>
+</td>
+<td>
+<p><strong>Variable name</strong></p>
+</td>
+<td>
+<p><strong>Value</strong></p>
+</td>
+</tr>
+<tr>
+<td>
+<p><kbd>second</kbd></p>
+</td>
+<td>
+<p><kbd>2</kbd></p>
+</td>
+<td>
+<p><kbd>a</kbd></p>
+</td>
+<td>
+<p><kbd>32</kbd></p>
+</td>
+</tr>
+<tr>
+<td/>
+<td>
+<p><kbd>1</kbd></p>
+</td>
+<td>
+<p><kbd>b</kbd></p>
+</td>
+<td>
+<p><kbd>12</kbd></p>
+</td>
+</tr>
+<tr>
+<td>
+<p><kbd>main</kbd></p>
+</td>
+<td>
+<p><kbd>0</kbd></p>
+</td>
+<td>
+<p><kbd>d</kbd></p>
+</td>
+<td>
+<p><kbd>100</kbd></p>
+</td>
+</tr>
+</tbody>
+</table>
+<p> </p>
+<p>The variable from the <kbd>main</kbd> function has the address of 0 as it is from the top frame-the frame that calls the other function. The value for the address is purely for this example; it can be anywhere and, typically, different types require a different amount of the stack to hold them. For instance, if the <kbd>number</kbd> type is 4 bytes in length, the address will be the base address of the stack to store <kbd>d</kbd>, then the address + 4 for <kbd>b</kbd>, and finally the address + 8 for <kbd>a</kbd>.</p>
+<p>Once <kbd>foo</kbd> has returned, the stack reverts to this:</p>
+<table class="MsoTableGrid">
+<tbody>
+<tr>
+<td>
+<p><strong>Function name</strong></p>
+</td>
+<td>
+<p><strong>Address</strong></p>
+</td>
+<td>
+<p><strong>Variable name</strong></p>
+</td>
+<td>
+<p><strong>Value</strong></p>
+</td>
+</tr>
+<tr>
+<td>
+<p><kbd>main</kbd></p>
+</td>
+<td>
+<p><kbd>0</kbd></p>
+</td>
+<td>
+<p><kbd>d</kbd></p>
+</td>
+<td>
+<p><kbd>100</kbd></p>
+</td>
+</tr>
+</tbody>
+</table>
+<p> </p>
+<p>As soon as the <kbd>main</kbd> function has finished, the stack is empty.</p>
+<p>This stacking continues for as many different functions as the application has, and they always work in the same way.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

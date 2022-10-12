@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style00.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style01.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Higher order functions and closures</h1>
+                </header>
+            
+            <article>
+                
+<p>By now, we know how to use functions, like in the following example where function <kbd>triples</kbd> changes our <kbd>strength</kbd> variable, but only if the return value of the function <kbd>triples</kbd> is assigned to the variable <kbd>strength</kbd>:</p>
+<pre>// see code in Chapter 5/code/higher_functions.rs 
+let mut strength = 26; 
+println!("My tripled strength equals {}",triples(strength)); // 78 
+println!("My strength is still {}", strength); // 26 
+strength = triples(strength); 
+println!("My strength is now {}", strength); // 78 </pre>
+<p>Here, the function <kbd>triples</kbd> is defined as the following function:</p>
+<pre>fn triples(s: i32) -&gt; i32 { 3 * s } </pre>
+<p>In the preceding code, <kbd>s</kbd> represents a value for the <kbd>strength</kbd> variable.</p>
+<p>Suppose our player smashes an amazing power stone, so that his strength is tripled and the resulting strength tripled again; we could write it as follows:</p>
+<pre>triples(triples(s)) </pre>
+<p>We can also write a function to do this, but it would be even more general to have a function, let's call it <kbd>again</kbd>, that could apply a certain function <kbd>f</kbd> of type <kbd>F</kbd> upon its result, enabling us to create all kinds of new game tricks, like this:</p>
+<pre>fn again (f: F, s: i32) -&gt; i32  { f(f(s)) } </pre>
+<p>However, this is not enough information for Rust; the compiler asks us to say what that type <kbd>F</kbd> is. We can make this clear by adding <kbd>&lt;F: Fn(i32) -&gt; i32&gt;</kbd> before the parameter list:</p>
+<pre>fn again&lt;F: Fn(i32) -&gt; i32&gt;(f: F , s: i32) -&gt; i32 { 
+    f(f(s)) 
+} </pre>
+<p>The expression between <kbd>&lt; &gt;</kbd> (angle brackets) tells us that <kbd>F</kbd> is of type function <kbd>Fn</kbd> that takes an <kbd>i32</kbd> as parameter and returns an <kbd>i32</kbd> value.</p>
+<p>Now, look at the definition of <kbd>triples</kbd>, that's exactly what this function does, the function <kbd>triples</kbd> has the signature of type <kbd>F</kbd>, so we can call again with <kbd>triples</kbd> as the first parameter:</p>
+<pre>strength = again(triples, strength); 
+println!("I got so lucky to turn my strength into {}", strength); // 702 (= 3 * 3 * 78) </pre>
+<p>The function <kbd>again</kbd> is an example of a <strong>higher order function</strong>, which is a function that takes another function (or more than one) as parameter.</p>
+<p>Often, simple functions like <kbd>triples</kbd> are not even defined as a named function:</p>
+<pre>strength = 78; 
+let triples = |n| { 3 * n }; 
+strength = again(triples, strength); 
+println!("My strength is now {}", strength); // 702 </pre>
+<p>Here we have an anonymous function or closure <kbd>|n| { 3 * n }</kbd>, that takes a parameter <kbd>n</kbd> and returns its tripled value. The <kbd>||</kbd> (vertical bars) mark the start of a closure, and they contain the parameters passed to it (when there are no parameters it is written as <kbd>||</kbd>). There is no need to indicate the type of the parameters or that of the return value: a closure can infer these types from the context in which it is called.</p>
+<p>The function <kbd>triples</kbd> is only a binding to a name, so that we can refer to the closure in other code. We could even leave that name out and inline the closure, like this:</p>
+<pre>strength = 78; 
+strength = again(|n| { 3 * n }, strength); 
+println!("My strength is now {}", strength); // 702 </pre>
+<p>The closure is called with the parameter <kbd>n</kbd> taking the value of <kbd>s</kbd>, which is a copy of the variable <kbd>strength</kbd>. The braces can also be left out, simplifying the closure to the following:</p>
+<pre>strength = again(|n| 3 * n , strength); </pre>
+<p>Why is it called a closure? This becomes more apparent in the following example:</p>
+<pre>let x: i32 = 42; 
+let print_add = |s| { 
+    println!("x is {}", x); 
+    x + s 
+}; 
+let res = print_add(strength); // &lt;- here the closure is     // 
+assert_eq!(res, 744); // 42 + 702 </pre>
+<p>This prints the following output:</p>
+<pre>    <strong>x is 42</strong>  </pre>
+<p>The closure <kbd>print_add()</kbd> has one argument and returns a 32 bit integer. The closure <kbd>print_add()</kbd> knows the value of <kbd>x</kbd> and all other variables that are available in its surrounding scope; it closes them in. A closure with no arguments has the empty parameter list <kbd>||</kbd>.</p>
+<p>There is also a special kind of closure, called a moving closure, indicated by the <kbd>move</kbd> keyword. A normal closure only takes a reference to the variables it encloses, but a moving closure takes ownership of all the enclosing variables. It is self-contained and has its own stack-frame.</p>
+<p>The preceding example would be written with a moving closure, like this:</p>
+<pre>let m: i32 = 42; 
+let print_add_move = move |s| { 
+    println!("m is {}", m); 
+    m + s 
+}; 
+let res = print_add_move(strength); // strength == 702 
+m = 52; 
+assert_eq!(res, 744); // 42 + 702 </pre>
+<p>Moving closures are mostly used when your program works with different concurrent threads (we will see more on this in <a href="60543aaa-c7d6-43ec-9237-9fe71a0cad4d.xhtml"><span class="ChapterrefPACKT">Chapter 9</span></a>, <em>Concurrency - Coding for Multicore Execution</em>).</p>
+<p>As you will see in the following sections, higher order functions and closures are used throughout Rust, because they can make code much more concise and readable.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

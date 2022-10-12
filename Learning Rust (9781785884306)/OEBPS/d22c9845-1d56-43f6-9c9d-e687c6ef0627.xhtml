@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style00.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style01.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">std::collections</h1>
+                </header>
+            
+            <article>
+                
+<p>This covers the vectors, maps, sets, and binary heaps.</p>
+<p>There are four main categories of collection, but for the majority of the time <kbd>Vec</kbd> and <kbd>HashMap</kbd> should be used.</p>
+<p style="font-size: 16px">The collection types are</p>
+<ul style="font-size: 16px">
+<li>Sequences (<kbd>Vec</kbd>, <kbd>VecDeque</kbd>, <kbd>LinkedList</kbd> - if you're used to C#, these provide the functionality of <kbd>List&lt;T&gt;</kbd>)</li>
+<li>Maps (<kbd>HashMap</kbd>, <kbd>BTreeMap</kbd>. For C# users, these equate roughly to <kbd>Dictionary&lt;T, U&gt;</kbd>, and <kbd>Map</kbd>)</li>
+<li>Sets (<kbd>HashSet</kbd>, <kbd>BTreeSet</kbd>)</li>
+<li>BinaryHeap</li>
+</ul>
+<p>Which collection should be used depends on what you want to do. Each will have a performance impact depending on what you're doing, though usually it's only <kbd>HashMap</kbd> that will give a negative impact.</p>
+<p><span>Examples of use:</span></p>
+<ul>
+<li><kbd>Vec</kbd>: <span>Creates a collection of type <kbd>T</kbd> that can be resized; elements can be added to the end</span></li>
+<li><kbd>VecDeque</kbd>: Creates a collection of type <kbd>T</kbd>, but with elements insertable at both ends; needs a queue or double-ended queue (deque)</li>
+<li><kbd>LinkedList</kbd>: Used when you want a <kbd>Vec</kbd> or <kbd>VecDeque</kbd>, and to split and append lists</li>
+<li><kbd>HashMap</kbd>: Creates a cached association of keys with values</li>
+<li>BTreeMap: Use with key-pair values where in general you want the largest and smallest key-pair values</li>
+<li>BinaryHeap: Stores elements, but only processes the biggest or most important ones when you want them</li>
+</ul>
+<p>Each of these collections deals with its own memory handling. This is important as collections are able to allocate more space as required (and within the limitations of the hardware capacity of the machine they are running on).</p>
+<p>Consider the following: I create a <kbd>Vec&lt;T&gt;</kbd> without setting a capacity. Let <kbd>T</kbd> be a structure. This is not an uncommon occurrence. I add a number of objects to the <kbd>Vec</kbd>, and each is then allocated on the heap. The heap expands, which is fine. I then delete a number of these objects. Rust then <em>repositions</em> the other members of the heap belonging to the <kbd>Vec</kbd>.</p>
+<p>If I allocated space using <kbd>with_capacity</kbd>, then we have a maximum allocation available, which further helps with memory handling. We can help memory allocation further by using <kbd>shrink_to_fit</kbd>, which reduces the size of our <kbd>Vec</kbd> to fit the size required.</p>
+<p style="font-size: 16px"><strong>Iterators</strong></p>
+<p>Iterators are very useful and used in libraries. Primarily, an iterator is used in a for loop. Almost all collections provide three iterators: <kbd>iter</kbd>, <kbd>iter_mut</kbd>, and <kbd>into_iter</kbd>. Each of the iterator types performs a different function:</p>
+<ul style="font-size: 16px">
+<li><kbd>iter</kbd>: This provides an iterator of immutable references to all contents of the collection in the order that best suits the collection type.</li>
+<li><kbd>iter_mut</kbd>: This provides an iterator of mutable references in the same order as <kbd>iter</kbd>.</li>
+<li><kbd>into_iter</kbd>: This transforms the collection into an iterator. Very useful when the collection isn't needed, but its contents are. The <kbd>into_iter</kbd> iterator also includes the ability to extend a vector.</li>
+</ul>
+<p><strong>Structs</strong>: <kbd>BTreeMap</kbd>, <kbd>BTreeSet</kbd>, <kbd>BinaryHeap</kbd>, <kbd>HashMap</kbd>, <kbd>HashSet</kbd>, <kbd>LinkedList</kbd>, and <kbd>VecDeque</kbd>.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

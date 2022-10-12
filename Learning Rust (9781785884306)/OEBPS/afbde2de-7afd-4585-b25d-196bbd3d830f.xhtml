@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">A beginner's guide to threading in Rust</h1>
+                </header>
+            
+            <article>
+                
+<p>Threads allow multiple processes to execute at the same time. The following is a very simple example of a threaded program:</p>
+<pre>use std::thread;  
+fn main()  
+{ 
+    thread::spawn(||  
+    { 
+        println!("Hello from a thread in your Rust program"); 
+    }); 
+} </pre>
+<div class="packt_infobox">Code files can be found in <kbd>Chapter11/SimpleThreadExample</kbd>.</div>
+<p>When compiled, you may expect the <kbd>println!</kbd> to show. However, what you get is this:</p>
+<div class="CDPAlignCenter CDPAlign"><img class=" image-border" src="Images/2b705779-463d-4044-be53-44c62b3660d9.png" width="1170" height="200"/></div>
+<div class="packt_figref CDPAlignCenter CDPAlign">Figure 1</div>
+<p>Why is the <kbd>println!</kbd> not showing?</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

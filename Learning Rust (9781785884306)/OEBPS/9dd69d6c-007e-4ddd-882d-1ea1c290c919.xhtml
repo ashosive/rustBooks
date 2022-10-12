@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Multi-file version</h1>
+                </header>
+            
+            <article>
+                
+<p>If you look at the source code in the <kbd>simplestruct</kbd> file, you'll find the structures at the start with the code under it. There is nothing wrong with that, but after a while, it becomes cumbersome, especially if we have a lot of structures and enumerations.</p>
+<p>To remove this problem, we can split the structures and code over two files.</p>
+<p>However, before we build the code, we will have to provide the <kbd>main.rs</kbd> file with some sort of pointer to the structures. We can do this in one of three ways. The simplest is to use the <kbd>include!</kbd> macro:</p>
+<pre>include!("structs.rs"); </pre>
+<div class="packt_infobox">The source for this section is in the <kbd>Chapter 7/multifile</kbd> folder, present in the supporting code bundle provided for this book.</div>
+<p>This just inserts the contents of the file in the place of the macro call, so it's not the most elegant way and completely sidesteps Rust's module system. So let's look at a better way.</p>
+<p>The better way is to reference the module using the following snippet:</p>
+<pre>mod structs; 
+use structs::*; </pre>
+<p>This can lead to a large number of issues, the biggest being the protection level, <kbd>public</kbd> or <kbd>private</kbd>. When compiled like this, many errors, such as the following example, occur:</p>
+<div class="packt_figure CDPAlignCenter CDPAlign"><img class=" image-border" src="Images/b506e102-d4fc-4460-a3c0-65a43c489a75.png" width="1170" height="228"/></div>
+<p>The error will indicate that, though the structure is <kbd>public</kbd>, the fields within it aren't, so they can't be accessed. The solution is to make all of the fields <kbd>public</kbd>.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Making something public</h1>
+                </header>
+            
+            <article>
+                
+<p>We saw in <span class="ChapterrefPACKT"><a href="c8b24f94-2b7a-474d-aa24-4fd0ceb615ce.xhtml">Chapter 7</a>, <em>Matching and Structures</em>,</span> how Rust, by default, sets all the functions, <kbd>structs</kbd>, and so on to be private. This is fine, as it prevents some of the nuts and bolts of the code from being exposed to the public interface.</p>
+<p>This does mean, though, that we have to explicitly set the module, and all of the functions we want the user to have access to, to be <kbd>pub</kbd> (public). Therefore, our functions for the temperature conversion will be as follows:</p>
+<pre>pub mod Temperature 
+{ 
+    pub fn fahrenheit_to_celcius(f: f32) -&gt; f32 
+    { 
+        (f - 32f32) * 5f32/9f32 
+    } </pre>
+<p>The next time we come to run the unit tests, we should not have this issue, except for the following snag:</p>
+<div class="CDPAlignCenter CDPAlign"><img src="Images/b366c8a0-7d2f-4ee6-b83d-f37f1118d2dd.png" width="1143" height="167"/></div>
+<div class="CDPAlignCenter CDPAlign packt_figref">Figure 6</div>
+<p>We have definitely got a <kbd>pub</kbd> function in the <kbd>Temperature</kbd> module called <kbd>kelvin_to_celcius</kbd>. The issue is the following line:</p>
+<pre>use mathslib::conversions::temperature; </pre>
+<p>What this does is import only the module and none of the symbols (the functions). We can fix this in one of the following four ways:</p>
+<ul>
+<li>We can use the following:</li>
+</ul>
+<pre style="padding-left: 60px">use mathslib::conversions::temperature::*; </pre>
+<ul>
+<li>We use the following:</li>
+</ul>
+<pre style="padding-left: 60px">use mathslib::conversions::temperature::kelvin_to_celcius; </pre>
+<ul>
+<li>We use the following:</li>
+</ul>
+<p style="padding-left: 60px"><kbd>use mathslib::conversions::temperature;</kbd> then precede <kbd>kelvin_to_celcius</kbd> with <kbd>temperature::</kbd></p>
+<ul>
+<li>We remove the <kbd>use mathslib</kbd> line and add the following line inside <kbd>mod temperature_tests</kbd>:</li>
+</ul>
+<pre style="padding-left: 60px">use super::*; </pre>
+<p>Using any of these should allow the tests to compile and run. The output you will see should be something like this:</p>
+<div class="CDPAlignCenter CDPAlign"><img src="Images/86365c45-beeb-434f-89ef-cf0ad975404f.png" width="1144" height="684"/></div>
+<div class="CDPAlignCenter CDPAlign packt_figref">Fig 7: chap10_unittest</div>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

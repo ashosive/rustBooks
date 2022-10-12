@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Data parallelism and OS processes – evolving corewars players</h1>
+                </header>
+            
+            <article>
+                
+<p>In this final section of the chapter, I'd like to introduce a project that will carry us over into the next chapter. This project will tie together the concepts we've introduced so far in this chapter and introduce a new one: processes. Compared to threads, processes have a lot to recommend them: memory isolation, independent priority scheduling, convenient integration of existing programs into your own, and a long history of standardized syscalls (in Unix) to deal with them. But, memory isolation is less ideal when your aim is to fiddle with the same memory from multiple concurrent actors—as in atomic programming—or when you otherwise have to set up expensive IPC channels. Worse, some operating systems are not fast to spawn new processes, limiting a multi-processesing program's ability to exploit CPUs on a few fronts. All that said, knowing how to spawn and manipulate OS processes <em>is</em> very useful and we'd be remiss not to cover it in this book.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

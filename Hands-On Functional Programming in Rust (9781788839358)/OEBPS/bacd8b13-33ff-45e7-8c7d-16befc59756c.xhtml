@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Exponential growth</h1>
+                </header>
+            
+            <article>
+                
+<p>Exponential performance in engineering is almost always a bug or a dead end. This is the wall that separates algorithms that we use from algorithms that we would like to use but can't due to performance reasons.</p>
+<p>Exponential growth in programs is often accompanied by the term <kbd>bomb</kbd>:</p>
+<pre class="p1"><span class="s1">fn bomb(n: u64) -&gt; u64 {<br/></span><span class="s1">   if n &gt; 0 {<br/></span><span class="s1">      bomb(n-1);<br/></span><span class="s1">      bomb(n-1);<br/></span><span class="s1">   }<br/></span><span class="s1">   n<br/></span><span class="s1">}<br/><br/></span><span class="s1">fn main() {<br/></span><span class="s1">   bomb(1000);<br/></span><span class="s1">}</span></pre>
+<p>This program is only <em>O</em>(2<sup>n</sup>) and therefore barely even exponential!</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style00.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style01.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">The MARS C interface</h1>
+                </header>
+            
+            <article>
+                
+<p>Corewars is a venerable game and there are many implementations of MARS out there. pMARS, like I mentioned, is the defacto standard, implementing the '94 ICWS draft and adding later additions, such as new instructions and a thing called <em>p-space</em>, that we won't go into here. Corewars has never been serious business. Many of the MARS available online today have traded code back and forth over the years, have been written with varying levels of attention to correctness, and sometimes programmed for older machines where multiprocessing was a concern for research labs. Most make no distinction between their internal library interface and executable consumer, like Rust programs do. Some blessed few are designed to be embedded, or, at least, are extractions of older MARS codebases that can be extended. Some blessed few of those don't use static globals in their implementations and can be embedded in a multiprocessing environment, such as feruscore.</p>
+<p>In the grand tradition of MARS implementations, we will take an existing, public domain MARS, whittle it down to a manageable core, and put a new spin on it. Specifically, the feruscore introduced in this chapter embeds exhaust 1.9.2 (<a href="http://corewar.co.uk/pihlaja/exhaust/">http://corewar.co.uk/pihlaja/exhaust/</a>), written by M. Joonas Pihlaja in the early 2000s. Pihlaja seems to have extracted select code from pMARS, especially in and around exhaust's main and parser functions. We aren't after any of that code. What we need is the simulator. This means that we can toss out anything to do with parsing, and any support code needed for exhaust's <kbd>main</kbd> function. The extracted code we require lives in the feruscore project root, in <kbd>c_src/</kbd>. The functions we'll embed are all implemented in <kbd>c_src/sim.c</kbd>. These are from <kbd>c_src/sim.h</kbd>:</p>
+<pre>void sim_free_bufs(mars_t* mars);
+void sim_clear_core(mars_t* mars);
+
+int sim_alloc_bufs(mars_t* mars);
+int sim_load_warrior(mars_t* mars, uint32_t pos, <br/>                     const insn_t* const code, uint16_t len);
+int sim_mw(mars_t* mars, const uint16_t * const war_pos_tab,<br/>           uint32_t *death_tab );</pre>
+<p>The <kbd>sim_alloc_bufs</kbd> function is responsible for allocating the internal storage of a blank <kbd>mars_t</kbd>, the structure on which simulation is performed. <kbd>sim_clear_core</kbd> clears <kbd>mars_t</kbd> between rounds, setting core memory to <kbd>DAT</kbd>, and resetting any warrior queues. <kbd>sim_load_warrior</kbd> loads the warrior into core memory, the warrior really just being a pointer to an array of instructions—<kbd>insn_t</kbd>—with the <kbd>len</kbd> passed length. <kbd>sim_mw</kbd> runs the simulation, reading the warrior positions from <kbd>war_pos_tab</kbd>, and writing to <kbd>death_tab</kbd> when a warrior completely dies.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

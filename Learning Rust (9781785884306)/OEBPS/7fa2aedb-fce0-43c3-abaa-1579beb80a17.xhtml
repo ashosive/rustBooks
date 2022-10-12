@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Thread synchronization</h1>
+                </header>
+            
+            <article>
+                
+<p>The best way to think of a channel is to see it as a walkie-talkie. At one end you have the transmitter (send) and at the other end, the receiver:</p>
+<pre>use std::thread; 
+use std::sync::mpsc; 
+ 
+fn main() { 
+    // tx = transmission = sender 
+    // rx = receiver 
+    let (tx, rx) = mpsc::channel(); 
+ 
+    for i in 0..10  
+    { 
+        let tx = tx.clone(); 
+ 
+        thread::spawn(move ||  
+        { 
+            let answer = (i * 2) * i; 
+ 
+            tx.send(answer).unwrap(); 
+        }); 
+    } 
+ 
+    for _ in 0..10  
+    { 
+        println!("{}", rx.recv().unwrap()); 
+    } 
+} </pre>
+<div class="packt_infobox">The code for this example is in <kbd>Chapter 11/channels</kbd>.</div>
+<p>When we run this, we get the following:</p>
+<div class="CDPAlignCenter CDPAlign"><img class=" image-border" src="Images/fdc8deaa-40a1-492b-9dd8-584cd744fee4.png" width="1170" height="508"/></div>
+<div class="CDPAlignCenter CDPAlign packt_figref">Figure 13</div>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

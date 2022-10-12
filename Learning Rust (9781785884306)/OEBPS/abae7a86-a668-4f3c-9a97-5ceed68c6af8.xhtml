@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style00.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style01.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Cleaning your source tree with Cargo</h1>
+                </header>
+            
+            <article>
+                
+<p>When the Rust compiler compiles the source files, it generates something known as an object file. The object file takes the source file (which we can read and understand) and compiles this into a form that can be joined with other libraries to create a binary.</p>
+<p>This is a good idea, as it cuts down on compilation time; if a source file has not been changed, there is no need to recompile the file, as the object file will be the same.</p>
+<p>Sometimes, the object file becomes out of date, or code in another object file causes a panic due to conflicts. In this case, it is not uncommon to "clean" the build. This removes the object files, and the compiler then has to recompile all the source files.</p>
+<p>Also, it should always be performed prior to creating a release build.</p>
+<p>The standard Unix <kbd>make</kbd> program performs this with the <kbd>clean</kbd> command (<kbd>make clean</kbd>). Cargo performs the clean operation in a way similar to the <kbd>make</kbd> utility in Unix:</p>
+<pre><strong>cargo clean</strong>  </pre>
+<p>A comparison of the directories shows what happens when using the preceding Cargo command:</p>
+<div class="packt_figure CDPAlignCenter CDPAlign"><img height="394" width="323" class=" image-border" src="Images/d09d07a9-7278-4cbf-a912-9bd9a349f7c4.png"/></div>
+<p>The entire target directory structure has simply been removed (the preceding screenshot was from a Mac, hence the <kbd>dSYM</kbd> and <kbd>plist</kbd> files. These do not exist on Linux and Windows).</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

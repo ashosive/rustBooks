@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style00.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style01.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Let's revisit some old code</h1>
+                </header>
+            
+            <article>
+                
+<p>Back in <a href="9a839bb4-2bb8-448c-9bfe-fef63fab99f1.xhtml">Chapter 4</a><em>, Conditions, Recursion, and Loops</em>, we had some code that looked like this:</p>
+<pre>let x = 2; 
+let y =  
+    { 
+        let x_squared = x * x; 
+        let x_cube = x_squared * x; 
+        x_cube + x_squared + x 
+    }; </pre>
+<p>It was explained that what it did was assign the result of <kbd>x_cube + x_squared + x to y</kbd>. If, outside of that, we attempted to access either <kbd>x_squared</kbd> or <kbd>x_cubed</kbd>, then we wouldn't be able to, as they only existed within the scope of that calculation for <kbd>y</kbd>.</p>
+<p>Consider, then, what would happen if we made <kbd>y</kbd> a reference and tried to point it to a temporary value:</p>
+<pre>    // 05/refs-1/src/main.rs<br/>    fn main() { 
+        let x = 2; 
+        let y: &amp;i32; 
+        { 
+            let x_squared = x * x; 
+            let x_cube = x_squared * x; 
+            y = &amp;(x_cube + x_squared + x); <br/>            // this value goes away after this line 
+        }; 
+        println!("Y = {}", *y); 
+    } </pre>
+<p>We are assigning <kbd>y</kbd> to the value of a variable that only exists in a small scope (the temporary unnamed value of the computation), then we're trying to access that value giving rise to undefined behavior. As we've seen, the Rust compiler will do everything it can to prevent this sort of error. In this case, the compiler keeps track of each and every reference and fails to build if a reference lasts longer than the pointer in use.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

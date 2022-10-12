@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Lifetimes</h1>
+                </header>
+            
+            <article>
+                
+<p>All variables in Rust code have a lifetime, which is the area of code in which the variable is defined. Suppose we declare a variable <kbd>n</kbd> with the binding <kbd>let n = 42u32;</kbd> Such a value is valid from where it is declared to when it is no longer referenced; its lifetime ends there. This is illustrated in the following code snippet:</p>
+<pre>// see code in Chapter 7/code/lifetimes.rs    
+fn main() { 
+    let n = 42u32; 
+    let n2 = n; // a copy of the value from n to n2 
+    println!("The value of n2 is {}, the same as n", n2); 
+    let p = life(n); 
+    println!("p is: {}", p); // p is: 42 
+    println!("{}", m);  // error: unresolved name `m`. 
+    println!("{}", o);  // error: unresolved name `o`. 
+} 
+ 
+fn life(m: u32) -&gt; u32 { 
+    let o = m; 
+    o 
+} </pre>
+<p>The lifetime of <kbd>n</kbd> ends when the <kbd>main()</kbd> function ends; in general the start and end of a lifetime happen in the same scope, here a function. The words lifetime and scope are synonymous, but we generally use the word lifetime for referring to the extent of a reference. As in other languages, local variables or parameters declared in a function do not exist anymore when the function has finished executing: in Rust we say their lifetime has ended. When the lifetime of a variable has ended, its memory is freed automatically, so the variable can no longer be used in the following code. This is the case for variables <kbd>m</kbd> and <kbd>o</kbd> in the code snippet mentioned earlier, which are only known in the function <kbd>life</kbd>.</p>
+<p>Likewise the lifetime of a variable declared in a nested block is restricted to that block, like the <kbd>phi</kbd> variable in the following example:</p>
+<pre>   { 
+      let phi = 1.618; 
+   } 
+   println!("The value of phi is {}", phi); // error </pre>
+<p>Trying to use the <kbd>phi</kbd> variable when its lifetime is over results in an error:</p>
+<pre>    <strong>error: cannot find value `phi` in this scope`</strong></pre>
+<p>The lifetime of a value can be indicated in code by an annotation and it is sometimes mandatory to do so. A lifetime is written as: <kbd>'a</kbd>, which reads as: lifetime a, where <kbd>a</kbd> is simply an indicator; it could also be written as <kbd>'b</kbd>, <kbd>'n</kbd> or <kbd>'life</kbd>. It's common to see single letters used to represent lifetimes. In the preceding example, an explicit lifetime indication was not necessary, since there were no references involved. All values tagged with the same lifetime have at its maximum that same lifetime.</p>
+<p>We know this notation already from <kbd>'static</kbd>, which, as we saw in <a href="59b7261a-67fa-4a7e-9928-27ae01a25ceb.xhtml"><span class="ChapterrefPACKT">Chapter 3</span></a>, <em>Using Functions And Control Structures</em> in the section <em>Functions</em>, is the lifetime of things that last for the entire length of the program.</p>
+<p>In the following example we have a function <kbd>transform</kbd> which explicitly declares the lifetime of its parameter <kbd>s</kbd> of type <kbd>&amp;str</kbd> to be <kbd>'a</kbd>:</p>
+<pre>fn transform&lt;'a&gt;(s: &amp;'a str) { /* ... */ } </pre>
+<div class="packt_tip">Note the <kbd>&lt;'a&gt;</kbd> indication right after the name of the function.</div>
+<p>In nearly all cases this explicit indication is not needed because the compiler is smart enough to deduce the lifetimes, so we could simply write:</p>
+<pre>fn transform_without_lifetime(s: &amp;str) { /* ... */ } </pre>
+<p>In fact, only things relating to references (such as a struct which contains a reference, or a function that has parameters that are a reference) need lifetimes.</p>
+<p>Here is an example where, even when we indicate a lifetime specifier <kbd>'a</kbd>, the compiler does not allow our code. Suppose we have defined a struct <kbd>Magician</kbd> as:</p>
+<pre>struct Magician { 
+    name: &amp;'static str, 
+    power: u32 
+} </pre>
+<p>Here <kbd>'static</kbd> is mandatory, if we leave it out, we get the error:</p>
+<pre><strong>error[E0106]: missing lifetime specifier</strong></pre>
+<p>If we define the following function:</p>
+<pre>fn return_magician&lt;'a&gt;() -&gt; &amp;'a Magician { 
+    let mag = Magician { name: "Gandalf", power: 4625}; 
+  &amp;mag  
+}</pre>
+<p>We get the following error:</p>
+<pre><strong>error: `mag` does not live long enough</strong></pre>
+<p>Why is this? The lifetime of the <kbd>mag</kbd> value ends when the function <kbd>return_magician</kbd> ends, but nevertheless this function tries to return a reference to that <kbd>Magician</kbd> value, which no longer exists. Such an invalid reference is known as a <strong>dangling pointer</strong>. This is a situation which clearly would lead to errors and cannot be allowed.</p>
+<p>The lifetime of a pointer must always be shorter or equal than that of the value which it points to, thus avoiding dangling (or null) references.</p>
+<p>In some situations the decision of whether the lifetime of an object has ended is complicated, but in almost all cases the borrow checker does this for us automatically by inserting lifetime annotations in the intermediate code, so we don't have to. This is known as <strong>lifetime elision</strong>.</p>
+<p>For example, when working with structs, we can safely assume that the struct instance and its fields have the same lifetime. Only when the borrow checker is not completely sure it can happen do we need to indicate the lifetime explicitly, but this happens only on rare occasions, mostly when references are returned.</p>
+<p>One example is when we have a struct with fields that are references. This code won't compile:</p>
+<pre>struct MagicNumbers { 
+    magn1: &amp;u32, 
+    magn2: &amp;u32 
+} </pre>
+<p>And gives us an error again:</p>
+<pre><strong>error[E0106]: missing lifetime specifier</strong> </pre>
+<p>We have to change it to the following:</p>
+<pre>struct MagicNumbers&lt;'a&gt; { 
+    magn1: &amp;'a u32, 
+    magn2: &amp;'a u32 
+} </pre>
+<p>This is to specify that both the struct and the fields have the same lifetime <kbd>'a</kbd>.</p>
+<div class="mce-root packt_infobox"><strong>Exercise</strong>:<br/>
+<br/>
+<span>Explain why the following code won't compile:<br/></span><kbd>// see code in Chapter 7/exercises/dangling_pointer.rs</kbd>:<br/>
+<span><kbd>fn main() {<br/></kbd></span><kbd>let m: &amp;u32 = { let n = &amp;5u32; &amp;*n };</kbd><br/>
+<kbd>let o = *m; }</kbd><br/>
+<span><br/>
+Same question for this code snippet:<br/></span><kbd>let mut x = &amp;3; { let mut y = 4; x = &amp;y; }</kbd><br/>
+<span><span><br/></span></span> <span>And this snippet:<br/></span><kbd>struct IntNumber&lt;'a&gt; {</kbd><br/>
+<span><kbd>x: &amp;'a i32,</kbd><br/></span> <kbd>}</kbd><br/>
+<span><kbd>let x = 1;</kbd><br/></span> <kbd>{ | let y = &amp;5;</kbd><br/>
+<span><kbd>let f = IntNumber { x: y };</kbd><br/></span><kbd>x = &amp;f.x; } println!("{}", x);</kbd><br/>
+<br/>
+Carefully read the error messages and the hints to what is wrong and how it could be solved.</div>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

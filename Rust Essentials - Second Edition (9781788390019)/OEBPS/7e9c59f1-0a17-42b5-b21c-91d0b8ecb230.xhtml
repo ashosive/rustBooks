@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Overview of pointers</h1>
+                </header>
+            
+            <article>
+                
+<p>In the following table we summarize the different pointers used in Rust. <kbd>T</kbd> represents a generic type. We haven't yet encountered the <kbd>Arc</kbd>, <kbd>*const</kbd> and <kbd>*mut</kbd> pointers, but they are included here for completeness.</p>
+<table class="table">
+<tbody>
+<tr>
+<td>
+<p><strong>Notation</strong></p>
+</td>
+<td>
+<p><strong>Pointer type</strong></p>
+</td>
+<td>
+<p><strong>What can this pointer do?</strong></p>
+</td>
+</tr>
+<tr>
+<td>
+<p><kbd>&amp;T</kbd></p>
+</td>
+<td>
+<p>Reference</p>
+</td>
+<td>
+<p>Allows one or more references to read <kbd>T</kbd></p>
+</td>
+</tr>
+<tr>
+<td>
+<p><kbd>&amp;mut T</kbd></p>
+</td>
+<td>
+<p>Mutable Reference</p>
+</td>
+<td>
+<p>Allows a single reference to read and write <kbd>T</kbd></p>
+</td>
+</tr>
+<tr>
+<td>
+<p><kbd>Box&lt;T&gt;</kbd></p>
+</td>
+<td>
+<p>Box</p>
+</td>
+<td>
+<p>Heap allocated <kbd>T</kbd> with a single owner that may read and write <kbd>T</kbd>.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><kbd>Rc&lt;T&gt;</kbd></p>
+</td>
+<td>
+<p><kbd>Rc</kbd> pointer</p>
+</td>
+<td>
+<p>Heap allocated <kbd>T</kbd> with many readers</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><kbd>Cell&lt;T&gt;</kbd></p>
+</td>
+<td/>
+<td>
+<p>Shared mutable memory location with <kbd>Copy</kbd> implemented</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><kbd>RefCell&lt;T&gt;</kbd></p>
+</td>
+<td/>
+<td>
+<p>Mutable memory location</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><kbd>Arc&lt;T&gt;</kbd></p>
+</td>
+<td>
+<p><kbd>Arc</kbd> pointer</p>
+</td>
+<td>
+<p>Same as above, but safe mutable sharing across threads (see <span class="ChapterrefPACKT"><a href="60543aaa-c7d6-43ec-9237-9fe71a0cad4d.xhtml">Chapter 8</a><span>,</span> <em>Concurrency - Coding for Multicore Execution</em></span>)</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><kbd>*const T</kbd></p>
+</td>
+<td>
+<p>Raw pointer</p>
+</td>
+<td>
+<p>Unsafe read access to <kbd>T</kbd> (see <a href="4b959ff8-fbf2-44e8-bb32-6055ef9fe740.xhtml"><span class="ChapterrefPACKT">Chapter 10</span></a>, <em>Programming at the Boundaries</em>)</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><kbd>*mut T</kbd></p>
+</td>
+<td>
+<p>Mutable raw pointer</p>
+</td>
+<td>
+<p>Unsafe read and write access to <kbd>T</kbd> (see also <a href="4b959ff8-fbf2-44e8-bb32-6055ef9fe740.xhtml"><span class="ChapterrefPACKT">Chapter 10</span></a>, <em>Programming at the Boundaries</em>)</p>
+</td>
+</tr>
+</tbody>
+</table>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

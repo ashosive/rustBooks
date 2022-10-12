@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style00.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style01.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Performance testing with Criterion</h1>
+                </header>
+            
+            <article>
+                
+<p>We can now be fairly confident that our naive <kbd>HashMap</kbd> has the same behavior as the standard library for the properties we've checked. But how does the runtime performance of naive <kbd>HashMap</kbd> stack up? To answer this, we'll write a benchmark, but not a benchmark using the unstable Bencher subsystem that's available in the nightly channel. Instead, we'll use Jorge Aparicio's criterion—inspired by the Haskell tool of the same name by Bryan O'Sullivan—which is available on stable and does statistically valid sampling of runs. All Rust benchmark code lives under the top-level <kbd>benches/</kbd> directory and criterion benchmarks are no different. Open <kbd>benches/naive.rs</kbd> and give it this preamble:</p>
+<pre>#[macro_use]
+extern crate criterion;
+extern crate naive_hashmap;
+extern crate rand;
+
+use criterion::{Criterion, Fun};
+use rand::{Rng, SeedableRng, XorShiftRng};</pre>
+<p>This benchmark incorporates pseudorandomness to produce an interesting run. Much like unit tests, handcrafted datasets in benchmarks will trend towards some implicit bias of the author, harming the benchmark. Unless, of course, a handcrafted dataset is exactly what's called for. Benchmarking programs well is a non-trivial amount of labor. The <kbd>Rng</kbd> we use is <kbd>XorShift</kbd>, a pseudo-random generator known for its speed and less cryptographic security. That suits our purposes here:</p>
+<pre style="padding-left: 30px">fn insert_and_lookup_naive(mut n: u64) {
+    let mut rng: XorShiftRng = SeedableRng::from_seed([1981, 1986,<br/>                                                       2003, 2011]);
+    let mut hash_map = naive_hashmap::HashMap::new();
+
+    while n != 0 {
+        let key = rng.gen::&lt;u8&gt;();
+        if rng.gen::&lt;bool&gt;() {
+            let value = rng.gen::&lt;u32&gt;();
+            hash_map.insert(key, value);
+        } else {
+            hash_map.get(&amp;key);
+        }
+        n -= 1;
+    }
+}</pre>
+<p>The first benchmark, named <kbd>insert_and_lookup_native</kbd>, performs pseudo-random insertions and lookups against the naive <kbd>HashMap.</kbd> The careful reader will note that <kbd>XorShiftRng</kbd> is given the same seed every benchmark. This is important. While we want to avoid handcrafting a benchmark dataset, we do want it to be the same every run, else the benchmark comparisons have no basis. That noted, the rest of the benchmark shouldn't be much of a surprise. Generate random actions, apply them, and so forth. As we're interested in the times for standard library <kbd>HashMap</kbd> we have a benchmark for that, too:</p>
+<pre style="padding-left: 30px">fn insert_and_lookup_standard(mut n: u64) {
+    let mut rng: XorShiftRng = SeedableRng::from_seed([1981, 1986, <br/>                                                       2003, 2011]);
+    let mut hash_map = ::std::collections::HashMap::new();
+
+    while n != 0 {
+        let key = rng.gen::&lt;u8&gt;();
+        if rng.gen::&lt;bool&gt;() {
+            let value = rng.gen::&lt;u32&gt;();
+            hash_map.insert(key, value);
+        } else {
+            hash_map.get(&amp;key);
+        }
+        n -= 1;
+    }
+}</pre>
+<p>Criterion offers, as of writing this book, a method for comparing two functions <em>or</em> comparing a function run over parameterized inputs but not both. That's an issue for us here, as we'd like to compare two functions over many inputs. To that end, this benchmark relies on a small macro called <kbd>insert_lookup!</kbd>:</p>
+<pre style="padding-left: 30px">macro_rules! insert_lookup {
+    ($fn:ident, $s:expr) =&gt; {
+        fn $fn(c: &amp;mut Criterion) {
+            let naive = Fun::new("naive", |b, i| b.iter(||                   <br/>                                   insert_and_lookup_naive(*i))<br/>            );
+            let standard = Fun::new("standard", |b, i| b.iter(|| <br/>                                      insert_and_lookup_standard(*i))<br/>            );
+
+            let functions = vec![naive, standard];
+
+            c.bench_functions(&amp;format!("HashMap/{}", $s),<br/>                              functions, &amp;$s);
+        }
+    }
+}
+
+insert_lookup!(insert_lookup_100000, 100_000);
+insert_lookup!(insert_lookup_10000, 10_000);
+insert_lookup!(insert_lookup_1000, 1_000);
+insert_lookup!(insert_lookup_100, 100);
+insert_lookup!(insert_lookup_10, 10);
+insert_lookup!(insert_lookup_1, 1);</pre>
+<p>The meat here is we create two <kbd>Fun</kbd> for comparison called <kbd>naive</kbd> and <kbd>standard,</kbd> then use <kbd>Criterion::bench_functions</kbd> to run a comparison between the two. In the invocation of the macro, we evaluate <kbd>insert_and_lookup_*</kbd> from <kbd>1</kbd> to <kbd>100_000</kbd>, with it being the total number of insertions to be performed against the standard and naive <kbd>HashMap</kbd>s. Finally, we need the criterion group and main function in place:</p>
+<pre style="padding-left: 30px">criterion_group!{
+    name = benches;
+    config = Criterion::default();
+    targets = insert_lookup_100000, insert_lookup_10000, <br/>              insert_lookup_1000, insert_lookup_100, <br/>              insert_lookup_10, insert_lookup_1
+}
+criterion_main!(benches);</pre>
+<p>Running criterion benchmarks is no different to executing Rust built-in benchmarks:</p>
+<pre><strong>&gt; cargo bench
+   Compiling naive_hashmap v0.1.0 (file:///home/blt/projects/us/troutwine/concurrency_in_rust/external_projects/naive_hashmap)
+    Finished release [optimized] target(s) in 5.26 secs
+     Running target/release/deps/naive_hashmap-fe6fcaf7cf309bb8
+
+running 2 tests
+test test::get_what_you_give ... ignored
+test test::sut_vs_genuine_article ... ignored
+
+test result: ok. 0 passed; 0 failed; 2 ignored; 0 measured; 0 filtered out
+
+     Running target/release/deps/naive_interpreter-26c60c76389fd26d
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out
+
+     Running target/release/deps/naive-96230b57fe0068b7
+HashMap/100000/naive    time:   [15.807 ms 15.840 ms 15.879 ms]
+Found 13 outliers among 100 measurements (13.00%)
+  2 (2.00%) low mild
+  1 (1.00%) high mild
+  10 (10.00%) high severe
+HashMap/100000/standard time:   [2.9067 ms 2.9102 ms 2.9135 ms]
+Found 7 outliers among 100 measurements (7.00%)
+  1 (1.00%) low severe
+  5 (5.00%) low mild
+  1 (1.00%) high mild
+
+HashMap/10000/naive     time:   [1.5475 ms 1.5481 ms 1.5486 ms]
+Found 9 outliers among 100 measurements (9.00%)
+  1 (1.00%) low severe
+  2 (2.00%) high mild
+  6 (6.00%) high severe
+HashMap/10000/standard  time:   [310.60 us 310.81 us 311.03 us]
+Found 11 outliers among 100 measurements (11.00%)
+  1 (1.00%) low severe
+  2 (2.00%) low mild
+  3 (3.00%) high mild
+  5 (5.00%) high severe</strong></pre>
+<p>And so forth. Criterion also helpfully produces gnuplot graphs of your runtimes, if gnuplot is installed on your benchmark system. This is highly recommended.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

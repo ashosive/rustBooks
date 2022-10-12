@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Ownership</h1>
+                </header>
+            
+            <article>
+                
+<p>Every resource is given a name when we make a <em>binding</em> to it with <kbd>let</kbd>; in Rust speak we say that the resource gets an <em>owner</em>. For example, in the following code snippet <kbd>klaatu</kbd> owns the piece of memory taken up by the <kbd>Alien</kbd> struct instance:</p>
+<pre>// see code in Chapter 7/code/ownership1.rs   
+struct Alien { 
+    planet: String, 
+    n_tentacles: u32 
+} 
+ 
+fn main() { 
+    let mut klaatu = Alien{ planet: "Venus".to_string(),  
+    n_tentacles: 15 }; 
+} </pre>
+<p>Only the owner can change the object it points to, and there can only be one owner at a time, because the owner is also responsible for freeing the object's resources. This makes sense; if an object could have many owners, its resources could be freed more than once, which would lead to problems. When the owner's lifetime has passed, the compiler frees the memory automatically.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

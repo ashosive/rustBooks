@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style00.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style01.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Drop it!</h1>
+                </header>
+            
+            <article>
+                
+<p>The <kbd>Drop</kbd> trait is a very simple trait:</p>
+<pre>pub trait Drop  
+{ 
+    fn drop(&amp;mut self); 
+} </pre>
+<p>As with all traits, it requires an <kbd>impl</kbd> for it before the trait can be used:</p>
+<pre>struct FreeMemory; 
+impl Drop for FreeMemory 
+{ 
+     fn drop(&amp;mut self); 
+} </pre>
+<p>At this point, we call our <kbd>pub fn</kbd>, which returns a data block from <kbd>ImageMagick</kbd>. Once we have done what we need to do with that memory block, we have to free it. We stored the data in a variable called <kbd>graphics_block</kbd>. To free the block from <kbd>graphics_block</kbd>, we use:</p>
+<pre>graphics_block  = FreeMemory; </pre>
+<p>The memory is freed once <kbd>graphics_block</kbd> goes out of scope.</p>
+<div class="packt_infobox"><span>It is worth pointing out that </span><kbd>panic!</kbd><span> will call </span><kbd>drop</kbd><span> as it unwinds the memory. If you therefore have a </span><kbd>panic!</kbd><span> within a </span><kbd>drop</kbd><span>, chances are that it is going to abort.</span></div>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

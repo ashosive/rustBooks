@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Cell and RefCell</h1>
+                </header>
+            
+            <article>
+                
+<p>So far in this chapter, the mutable references we've been discussing have a property called, by Rust, inherited mutability. That is, values are made mutable when we inherit their ownership or the exclusive right—via a <kbd>&amp;mut</kbd>—to mutate the value. Inherited mutability is preferred in Rust as it is statically enforcable—any defects in our program with regards to memory mutation will be caught at compilation time. Rust does provide facilities for interior mutability,  that being mutability that is available for pieces of an immutable type. The documentation calls interior mutability something of a last resort but, while not common, it is not exactly rare in practice, either. The two options for interior mutability in Rust are <kbd>Cell&lt;T&gt;</kbd> and <kbd>RefCell&lt;T&gt;</kbd>.</p>
+<p>Let's consider <kbd>Cell&lt;T&gt;</kbd>. How is it used? As suggested, <kbd>Cell&lt;T&gt;</kbd> is useful when some field or fields of an otherwise immutable structure need to be mutable and the <kbd>T</kbd> you're concerned with is <kbd>T: Copy</kbd>. Consider a graph structure where a search operation is performed. This is logically immutable—the graph structure does not need to be modified during search. But, also consider the case where we would like to record the total number of traversals along the graph's edges. Our options are to violate the logical immutability of the graph search, require storage outside of the graph, or insert an interior, mutable counter into the graph. Which choice is best will depend on the specific situation. Here is a significantly less complicated example of <kbd>Cell&lt;T&gt;</kbd>, compared to a graph search:</p>
+<pre style="padding-left: 30px">use std::cell::Cell;
+
+enum Project {
+    Apollo,
+    Gemini,
+    Mercury,
+}
+
+struct Mission {
+    project: Project,
+    number: u8,
+    duration_days: Cell&lt;u8&gt;,
+}
+
+fn main() {
+    let mission = Mission {
+        project: Project::Mercury,
+        number: 7,
+        duration_days: Cell::new(255),
+    };
+
+    mission.duration_days.set(0);
+    assert_eq!(0, mission.duration_days.get());
+}</pre>
+<p>Of course, that's a bit contrived. Interior mutability shows up when the situation is non-trivial, generally speaking. Note that <kbd>Cell&lt;u8&gt;</kbd> had to be manipulated with <kbd>get</kbd> and <kbd>set</kbd> methods, contrary to the normal process of setting and reading directly or through a pointer. Let's dig into the implementation of <kbd>Cell&lt;T&gt;</kbd>, defined in <kbd>src/libcore/cell.rs</kbd>:</p>
+<pre style="padding-left: 30px">pub struct Cell&lt;T&gt; {
+    value: UnsafeCell&lt;T&gt;,
+}</pre>
+<p>As is common in Rust internals, a safe interface hides an unsafe inner core, as we saw in <a href="8c61da2f-08c8-40be-89d4-d8afa8510850.xhtml" target="_blank">Chapter 2</a>, <span class="cdp-chapters-widget-post-title"><em>Sequential Rust Performance and Testing</em>,</span> with <kbd>HashMap</kbd>. What is the definition of <kbd>UnsafeCell</kbd>?</p>
+<pre style="padding-left: 30px">pub struct UnsafeCell&lt;T: ?Sized&gt; {
+    value: T,
+}</pre>
+<p>Of particular note is an implementation that follows shortly afterward:</p>
+<pre style="padding-left: 30px">impl&lt;T: ?Sized&gt; !Sync for UnsafeCell&lt;T&gt; {}</pre>
+<p>We will discuss <kbd>Sync</kbd> in the following chapter in greater detail. Suffice it to say, for now, any type that is threadsafe must implement <kbd>Sync</kbd>—and many do automatically—and by disabling the <kbd>Sync</kbd> trait for <kbd>UnsafeCell&lt;T&gt;</kbd>—which is what <kbd>!Sync</kbd> means—the type is specifically being marked as not thread-safe. That is, any thread may be manipulating the data owned by <kbd>UnsafeCell</kbd> at any time. As we've previously discussed, Rust is able to make a good deal of optimizations off the back of the knowledge that <kbd>&amp;T</kbd> is guaranteed to also not be mutable somewhere and that <kbd>&amp;mut T</kbd> is unique. <kbd>UnsafeCell&lt;T&gt;</kbd> is the <em>only</em> method Rust provides to turn these compiler optimizations off; it is possible to dip into an unsafe block and transmute <kbd>&amp;T</kbd> to <kbd>&amp;mut T</kbd>, but this is specifically called out as undefined behavior. They key to <kbd>UnsafeCell&lt;T&gt;</kbd> is that it is possible for a client to retrieve multiple mutable references to the interior data, even if the <kbd>UnsafeCell&lt;T&gt;</kbd> is itself mutable. It is up to the caller to ensure that there is <em>only</em> one mutable reference at any time. The implementation of <kbd>UnsafeCell</kbd> —stripped of its comments for clarity's sake—is brief:</p>
+<pre style="padding-left: 30px">impl&lt;T&gt; UnsafeCell&lt;T&gt; {
+    pub const fn new(value: T) -&gt; UnsafeCell&lt;T&gt; {
+        UnsafeCell { value: value }
+    }
+
+    pub unsafe fn into_inner(self) -&gt; T {
+        self.value
+    }
+}
+
+impl&lt;T: ?Sized&gt; UnsafeCell&lt;T&gt; {
+    pub fn get(&amp;self) -&gt; *mut T {
+        &amp;self.value as *const T as *mut T
+    }
+}</pre>
+<p>This brings us back to <kbd>Cell&lt;T&gt;</kbd>. We know that <kbd>Cell&lt;T&gt;</kbd> is built on top of an unsafe abstraction and we will have to take care not to violate the <kbd>&amp;mut T</kbd> uniqueness constraint. How is this done? First, construction of <kbd>Cell&lt;T&gt;</kbd> is straightforward, as you may expect:</p>
+<pre style="padding-left: 30px">impl&lt;T&gt; Cell&lt;T&gt; {
+    pub const fn new(value: T) -&gt; Cell&lt;T&gt; {
+        Cell {
+            value: UnsafeCell::new(value),
+        }
+    }</pre>
+<p>The <kbd>const fn</kbd> is likely a surprise, on account of it being a nightly-only feature as of writing this book. In Rust, a constant function is evaluated at compile time. The benefit to the programmer of this particular definition is that the result of <kbd>Cell::new</kbd> can be assigned to a constant variable, one which will exist for the lifetime of the program. Both <kbd>as_ptr</kbd> and <kbd>get_mut</kbd> are different views of the underlying <kbd>T</kbd>, one a raw mutable pointer and the other a mutable reference:</p>
+<pre>    pub fn as_ptr(&amp;self) -&gt; *mut T {
+        self.value.get()
+    }
+
+    pub fn get_mut(&amp;mut self) -&gt; &amp;mut T {
+        unsafe {
+            &amp;mut *self.value.get()
+        }
+    }
+
+    pub fn into_inner(self) -&gt; T {
+        unsafe { self.value.into_inner() }
+    }</pre>
+<p>Note that while the internals of <kbd>get_mut</kbd> are unsafe, the borrow checker is brought to bear on the problem of keeping <kbd>&amp;mut T</kbd> unique and so <kbd>Cell::get_mut</kbd> can itself be safe. <kbd>Cell::as_ptr</kbd> is not marked as unsafe—it's safe to receive a raw pointer in Rust—but any caller will have to do deferencing of that raw pointer in an unsafe block: it's possible that there will be more than one raw, mutable pointer floating around. Setting a new value into the cell is done in terms of replacement, discussed ahead, but with careful attention made towards forcefully dropping the <kbd>T</kbd> pulled from the cell:</p>
+<pre>    pub fn set(&amp;self, val: T) {
+        let old = self.replace(val);
+        drop(old);
+    }</pre>
+<p><kbd>Cell::swap</kbd> and <kbd>Cell::replace</kbd> are done in terms of the lower-level memory manipulation tools from <kbd>std::ptr</kbd> and <kbd>std::mem</kbd>. <kbd>swap</kbd> is intended to replace the interior of one cell with another. Its definition is as follows:</p>
+<pre>    pub fn swap(&amp;self, other: &amp;Self) {
+        if ptr::eq(self, other) {
+            return;
+        }
+        unsafe {
+            ptr::swap(self.value.get(), other.value.get());
+        }
+    }</pre>
+<p><kbd>swap</kbd> is done in terms of <kbd>std::ptr::swap</kbd>, a function documented as copying the memory through the raw pointers passed to it as arguments<em>.</em> You'll note that <kbd>Cell::swap</kbd> is careful to avoid the <kbd>swap</kbd> if the passed <kbd>other</kbd> is equivalent to <kbd>self</kbd>. The reason for this becomes clear when we take a peek at the definition of <kbd>std::ptr::swap</kbd>, defined in <kbd>src/libcore/ptr.rs</kbd>:</p>
+<pre style="padding-left: 30px">pub unsafe fn swap&lt;T&gt;(x: *mut T, y: *mut T) {
+    // Give ourselves some scratch space to work with
+    let mut tmp: T = mem::uninitialized();
+
+    // Perform the swap
+    copy_nonoverlapping(x, &amp;mut tmp, 1);
+    copy(y, x, 1); // `x` and `y` may overlap
+    copy_nonoverlapping(&amp;tmp, y, 1);
+
+    // y and t now point to the same thing, but we need to completely <br/>    forget `tmp`
+    // because it's no longer relevant.
+    mem::forget(tmp);
+}</pre>
+<p>The exact details of <kbd>copy_nonoverlapping</kbd> and copy are unimportant here, except in noting that swapping does require allocation of uninitialized space and copying back and forth from that space. It's wise to avoid the work if you don't have to do it. <kbd>Cell::replace</kbd> works along similar lines:</p>
+<pre>    pub fn replace(&amp;self, val: T) -&gt; T {
+        mem::replace(unsafe { &amp;mut *self.value.get() }, val)
+    }
+}</pre>
+<p><kbd>std::mem::replace</kbd> takes a <kbd>&amp;mut T</kbd> and a <kbd>T</kbd> and then replaces the value at <kbd>&amp;mut T</kbd> with the passed in <kbd>val</kbd>, returning the old value and dropping neither. The definition of <kbd>std::mem::replace</kbd> is in <kbd>src/libcore/mem.rs</kbd> and is as follows:</p>
+<pre style="padding-left: 30px">pub fn replace&lt;T&gt;(dest: &amp;mut T, mut src: T) -&gt; T {
+    swap(dest, &amp;mut src);
+    src
+}</pre>
+<p>Chasing the definition of <kbd>swap</kbd> in the same module, we find it is as follows:</p>
+<pre style="padding-left: 30px">pub fn swap&lt;T&gt;(x: &amp;mut T, y: &amp;mut T) {
+    unsafe {
+        ptr::swap_nonoverlapping(x, y, 1);
+    }
+}</pre>
+<p><kbd>std::ptr::swap_nonoverlapping</kbd> is as follows:</p>
+<pre style="padding-left: 30px">pub unsafe fn swap_nonoverlapping&lt;T&gt;(x: *mut T, y: *mut T, count: usize) {
+    let x = x as *mut u8;
+    let y = y as *mut u8;
+    let len = mem::size_of::&lt;T&gt;() * count;
+    swap_nonoverlapping_bytes(x, y, len)
+}</pre>
+<p>Finally, the private <kbd>std::ptr::swap_nonoverlapping_bytes</kbd> is as follows:</p>
+<pre style="padding-left: 30px">unsafe fn swap_nonoverlapping_bytes(x: *mut u8, y: *mut u8, len: usize) {
+    // The approach here is to utilize simd to swap x &amp; y efficiently. <br/>    // Testing reveals that swapping either 32 bytes or 64 bytes at<br/>    // a time is most efficient for intel Haswell E processors. <br/>    // LLVM is more able to optimize if we give a struct a <br/>    // #[repr(simd)], even if we don't actually use this struct<br/>    // directly.
+    //
+    // FIXME repr(simd) broken on emscripten and redox
+    // It's also broken on big-endian powerpc64 and s390x.  #42778
+    #[cfg_attr(not(any(target_os = "emscripten", target_os = "redox",
+                       target_endian = "big")),
+               repr(simd))]
+    struct Block(u64, u64, u64, u64);
+    struct UnalignedBlock(u64, u64, u64, u64);
+
+    let block_size = mem::size_of::&lt;Block&gt;();
+
+    // Loop through x &amp; y, copying them `Block` at a time
+    // The optimizer should unroll the loop fully for most types
+    // N.B. We can't use a for loop as the `range` impl calls <br/>    // `mem::swap` recursively
+    let mut i = 0;
+    while i + block_size &lt;= len {
+        // Create some uninitialized memory as scratch space
+<br/>        // Declaring `t` here avoids aligning the stack when this loop <br/>        // is unused
+        let mut t: Block = mem::uninitialized();
+        let t = &amp;mut t as *mut _ as *mut u8;
+        let x = x.offset(i as isize);
+        let y = y.offset(i as isize);
+
+        // Swap a block of bytes of x &amp; y, using t as a temporary <br/>        // buffer. This should be optimized into efficient SIMD <br/>        // operations where available
+        copy_nonoverlapping(x, t, block_size);
+        copy_nonoverlapping(y, x, block_size);
+        copy_nonoverlapping(t, y, block_size);
+        i += block_size;
+    }
+
+    if i &lt; len {
+        // Swap any remaining bytes
+        let mut t: UnalignedBlock = mem::uninitialized();
+        let rem = len - i;
+
+        let t = &amp;mut t as *mut _ as *mut u8;
+        let x = x.offset(i as isize);
+        let y = y.offset(i as isize);
+
+        copy_nonoverlapping(x, t, rem);
+        copy_nonoverlapping(y, x, rem);
+        copy_nonoverlapping(t, y, rem);
+    }
+}</pre>
+<p>Whew! That's some rabbit hole. Ultimately, what we've discovered here is that <kbd>std::mem::replace</kbd> is defined in terms of block copies from one non-overlapping location in memory to another, a process which the Rust developers have tried to make as efficient as possible by exploiting LLVM's ability to optimize a bitwise operation on common processors in terms of SIMD instructions. Neat.</p>
+<p>What of <kbd>RefCell&lt;T&gt;</kbd>? It too is a safe abstraction over <kbd>UnsafeCell&lt;T&gt;</kbd> except that the copy restriction of <kbd>Cell&lt;T&gt;</kbd> is lifted. This makes the implementation a touch more complicated, as we'll see:</p>
+<pre style="padding-left: 30px">pub struct RefCell&lt;T: ?Sized&gt; {
+    borrow: Cell&lt;BorrowFlag&gt;,
+    value: UnsafeCell&lt;T&gt;,
+}</pre>
+<p>Like <kbd>Cell, RefCell</kbd> has an inner unsafe value, that much is the same. What's fun here is <kbd>borrow: Cell&lt;BorrowFlag&gt;</kbd>. <kbd>RefCell&lt;T&gt;</kbd> is a client of <kbd>Cell&lt;T&gt;</kbd>, which makes good sense considering that the immutable <kbd>RefCell</kbd> is going to need interior mutability to track the total number of borrows of its inner data. <kbd>BorrowFlag</kbd> is defined like so:</p>
+<pre style="padding-left: 30px">// Values [1, MAX-1] represent the number of `Ref` active
+// (will not outgrow its range since `usize` is the size <br/>// of the address space)
+type BorrowFlag = usize;
+const UNUSED: BorrowFlag = 0;
+const WRITING: BorrowFlag = !0;</pre>
+<p>The implementation of <kbd>RefCell&lt;T&gt;</kbd> is like to that of <kbd>Cell&lt;T&gt;</kbd>. <kbd>RefCell::replace</kbd> is also implemented in terms of <kbd>std::mem::replace</kbd>, <kbd>RefCell::swap</kbd> in terms of <kbd>std::mem::swap</kbd>. Where things get interesting are the functions new to <kbd>RefCell</kbd>,  which are those to do with borrowing. We'll look at <kbd>try_borrow</kbd> and <kbd>try_borrow_mut</kbd> first as they're used in the implementations of the other borrowing functions. <kbd>try_borrow</kbd> is defined like so:</p>
+<pre>    pub fn try_borrow(&amp;self) -&gt; Result&lt;Ref&lt;T&gt;, BorrowError&gt; {
+        match BorrowRef::new(&amp;self.borrow) {
+            Some(b) =&gt; Ok(Ref {
+                value: unsafe { &amp;*self.value.get() },
+                borrow: b,
+            }),
+            None =&gt; Err(BorrowError { _private: () }),
+        }
+    }</pre>
+<p>With <kbd>BorrowRef</kbd> being as follows:</p>
+<pre>struct BorrowRef&lt;'b&gt; {
+    borrow: &amp;'b Cell&lt;BorrowFlag&gt;,
+}
+
+impl&lt;'b&gt; BorrowRef&lt;'b&gt; {
+    #[inline]
+    fn new(borrow: &amp;'b Cell&lt;BorrowFlag&gt;) -&gt; Option&lt;BorrowRef&lt;'b&gt;&gt; {
+        match borrow.get() {
+            WRITING =&gt; None,
+            b =&gt; {
+                borrow.set(b + 1);
+                Some(BorrowRef { borrow: borrow })
+            },
+        }
+    }
+}
+
+impl&lt;'b&gt; Drop for BorrowRef&lt;'b&gt; {
+    #[inline]
+    fn drop(&amp;mut self) {
+        let borrow = self.borrow.get();
+        debug_assert!(borrow != WRITING &amp;&amp; borrow != UNUSED);
+        self.borrow.set(borrow - 1);
+    }
+}</pre>
+<p><kbd>BorrowRef</kbd> is a structure that holds a reference to the borrow field of <kbd>RefCell&lt;T&gt;</kbd>. Creating a new <kbd>BorrowRef</kbd> depends on the value of that borrow; if the value is <kbd>WRITING</kbd> then no <kbd>BorrowRef</kbd> is created—<kbd>None</kbd> gets returned—and otherwise the total number of borrows are incremented. This achieves the mutual exclusivity of writing needed while allowing for multiple readers—it's not possible for <kbd>try_borrow</kbd> to hand out a reference when a write reference is out for the same data. Now, let's consider <kbd>try_borrow_mut</kbd>:</p>
+<pre>    pub fn try_borrow_mut(&amp;self) -&gt; Result&lt;RefMut&lt;T&gt;, BorrowMutError&gt; {
+        match BorrowRefMut::new(&amp;self.borrow) {
+            Some(b) =&gt; Ok(RefMut {
+                value: unsafe { &amp;mut *self.value.get() },
+                borrow: b,
+            }),
+            None =&gt; Err(BorrowMutError { _private: () }),
+        }
+    }</pre>
+<p>Again, we find an implementation in terms of another type, <kbd>BorrowRefMut</kbd>:</p>
+<pre style="padding-left: 30px">struct BorrowRefMut&lt;'b&gt; {
+    borrow: &amp;'b Cell&lt;BorrowFlag&gt;,
+}
+
+impl&lt;'b&gt; Drop for BorrowRefMut&lt;'b&gt; {
+    #[inline]
+    fn drop(&amp;mut self) {
+        let borrow = self.borrow.get();
+        debug_assert!(borrow == WRITING);
+        self.borrow.set(UNUSED);
+    }
+}
+
+impl&lt;'b&gt; BorrowRefMut&lt;'b&gt; {
+    #[inline]
+    fn new(borrow: &amp;'b Cell&lt;BorrowFlag&gt;) -&gt; Option&lt;BorrowRefMut&lt;'b&gt;&gt; {
+        match borrow.get() {
+            UNUSED =&gt; {
+                borrow.set(WRITING);
+                Some(BorrowRefMut { borrow: borrow })
+            },
+            _ =&gt; None,
+        }
+    }
+}</pre>
+<p>The key, as with <kbd>BorrowRef</kbd>, is in <kbd>BorrowRefMut::new</kbd>. Here, we can see that if the inner borrow from <kbd>RefCell</kbd> is unused then the borrow is set to write, excluding any potential read references. Likewise, if there is a read reference in existence, the creation of a mutable reference will fail. And so, exclusive mutable references and multiple immutable references are held at runtime by abstracting over an unsafe structure that allows for the breaking of that guarantee.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

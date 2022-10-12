@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Traits</h1>
+                </header>
+            
+            <article>
+                
+<p>What if our game is really diversely populated, and besides Aliens we have also Zombies and Predators, and, needless to say, they all want to attack. Can we abstract their common behavior into something they all share? Of course, in Rust we say that they have a <strong>trait</strong> in common, analogous to an interface or superclass in other languages. Let's call that trait <kbd>Monster</kbd>, and because they all want to attack, a first version could be:</p>
+<pre>// see code in Chapter 6/code/traits.rs 
+trait Monster { 
+    fn attack(&amp;self); 
+} </pre>
+<p>A trait mostly contains a description of methods, that is, their type declarations or signatures, but no real implementation (as we will see later in the example, a trait can contain a default implementation of a method). This is logical, because <kbd>Zombies</kbd>, <kbd>Predators</kbd>, and <kbd>Aliens</kbd> could each have their own method of attack. So there is no code body between <kbd>{}</kbd> after the function signature, but don't forget the <kbd>;</kbd>(semicolon) to close it off.</p>
+<p>When we want to implement the <kbd>Monster</kbd> trait for the struct <kbd>Alien</kbd>, we write the following code:</p>
+<pre>impl Monster for Alien { 
+ 
+} </pre>
+<p>When we compile this, Rust throws the following error:</p>
+<pre>    <strong>not all trait items implemented, missing: `attack`</strong>  </pre>
+<p>That's useful because Rust reminds us which methods from a trait we have forgotten to implement. The following code would make it pass:</p>
+<pre>impl Monster for Alien { 
+   fn attack(&amp;self) { 
+println!("I attack! Your health lowers with {} damage points.", self.damage); 
+   } 
+} </pre>
+<p>So the trait implementation for a type must provide the real code, which is executed when that method is called on an <kbd>Alien</kbd> struct object. If a <kbd>Zombie</kbd> struct attack is twice as bad, its <kbd>Monster</kbd> implementation could be:</p>
+<pre>impl Monster for Zombie { 
+   fn attack(&amp;self) { 
+println!("I bite you! Your health lowers with {} damage points.", 2 * self.damage); 
+   } 
+} </pre>
+<p>We could add other functions and methods to our trait, such as a <kbd>new</kbd>, a <kbd>noise,</kbd> and an <kbd>attack_with_sound</kbd> method:</p>
+<pre>trait Monster { 
+    fn new(hlt: u32, dam: u32) -&gt; Self; 
+    fn attack(&amp;self); 
+    fn noise(&amp;self) -&gt; &amp;'static str; 
+    fn attacks_with_sound(&amp;self) { 
+println!("The Monster attacks by making an awkward sound {}", self.noise()); 
+    } 
+} </pre>
+<p>Notice that in the <kbd>new</kbd> method the resulting object is of <kbd>Self</kbd> <span>type</span>, which becomes the <kbd>Alien</kbd> <span>implementor type</span> or <kbd>Zombie</kbd> in a real implementation of the trait.</p>
+<p>Methods differ from functions because they have an <kbd>&amp;self</kbd> <span>instance</span> as parameter, that means they have the object on which they are invoked as parameter, for example:</p>
+<pre>fn noise(&amp;self) -&gt; &amp;'static str </pre>
+<p>When we call it with the <kbd>zmb1.noise()</kbd> <span>function</span>, the object <kbd>zmb1</kbd> becomes a <kbd>self</kbd> type.</p>
+<p>A trait can provide default code for a method (like here for the <kbd>attack_with_sound</kbd> method). The implementor type can choose to take this default code or override it with its own version. Code in a trait method can also call upon other methods in the trait with the method <kbd>self.method()</kbd>, as in the <kbd>attack_with_sound</kbd> method where the <kbd>self.noise()</kbd> method is called.</p>
+<p>The full implementation of the <kbd>Monster</kbd> trait for type <kbd>Zombie</kbd> could then be:</p>
+<pre>impl Monster for Zombie { 
+   fn new(mut h: u32, d: u32) -&gt; Zombie { 
+      // constraints: 
+      if h &gt; 100 { h = 100; } 
+      Zombie {health: h, damage: d} 
+   } 
+ 
+   fn attack(&amp;self) { 
+println!("The Zombie bites! Your health lowers with {} damage points.", 2 * self.damage); 
+   } 
+ 
+   fn noise(&amp;self) -&gt; &amp;'static str { 
+      "Aaargh!" 
+   } 
+} </pre>
+<p>And here is a short fragment of our game scenario:</p>
+<pre>let zmb1 = Zombie {health: 75, damage: 15}; 
+println!("Oh no, I hear: {}", zmb1.noise()); 
+zmb1.attack(); </pre>
+<p>This prints the following output:</p>
+<pre>    <strong>Oh no, I hear: Aaargh!</strong>
+    <strong>The Zombie bites! Your health lowers with 30 damage points.</strong>  </pre>
+<p>Traits are not limited to structs, they can be implemented on any type. A type can also implement many different traits. All the different implemented methods are compiled to a version specific for their type, so after compilation there exists a different <kbd>new</kbd> method for the <kbd>Alien</kbd>, <kbd>Zombie</kbd>, and <kbd>Predator</kbd> trait.</p>
+<p>Implementing all of the methods in a trait can be tedious work. For example, we probably want to be able to show our creatures in this way:</p>
+<pre>println!("{:?}", zmb1); </pre>
+<p>Unfortunately this gives us the compiler error:</p>
+<pre>    <strong>error[E0277]: the trait bound `Zombie: std::fmt::Debug` is not satisfied.</strong>  </pre>
+<p>So from the message we can infer that this <kbd>{:?}</kbd> format string uses a trait <kbd>Debug</kbd>. If we look this up in the docs we find that we must implement an <kbd>fmt</kbd> method (specifying a way to format the data from the struct instance). But the compiler once again helps us out here: if we prefix our <kbd>Zombie</kbd> struct definition with <kbd>#[derive</kbd><kbd>(Debug</kbd>)], then a default code version is generated automatically!</p>
+<pre>#[derive(Debug)] 
+struct Zombie { health: u32, damage: u32 } </pre>
+<p>So that <kbd>println!("{:?}", zmb1);</kbd> now shows:</p>
+<pre>    <strong>Zombie { health: 75, damage: 15 }</strong>  </pre>
+<p>This mechanism also works for a whole list of other traits (see section <em>Built-in traits</em> and <a href="http://rustbyexample.com/trait/derive.html"><span class="URLPACKT">http://rustbyexample.com/trait/derive.html</span></a>).</p>
+<p>The actual implementation of a trait for a type is separated from the definition of the type itself: the data and the operations on them are independent. They can reside in different files, or even different modules, providing for more flexibility.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

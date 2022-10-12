@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Memory model</h1>
+                </header>
+            
+            <article>
+                
+<p>The details of a processor's handling of memory is both complicated and very specific to that processor. Programming languages—and Rust is no exception here—invent a <em>memory model</em> to paper over the details of all supported processors while, ideally, leaving the programmer enough freedom to exploit the specifics of each processor. Systems languages <span>also</span><span> </span><span>tend to allow absolute freedom in the form of escape hatches from the language memory model, which is exactly what Rust has in terms of <em>unsafe</em>.</span></p>
+<p>With regard to its memory model, Rust is very much inspired by C++. The atomic orderings exposed in Rust are those of LLVM's, which are those of C++11. This is a fine thing—any literature to do with either C++ or LLVM will be immediately applicable to Rust. Memory order is a complex topic, and it's often quite helpful to lean on material written for C++ when learning. This is <em>especially</em> important when studying up on lock-free/wait-free structures—which we'll see later in this book—as literature on those topics often deals with it in terms of C++. Literature written with C11 in mind is also suitable, if maybe a little less straightforward to translate.</p>
+<p>Now, this is not to say that the C++ programmer will be immediately comfortable in concurrent Rust. The digs will be familiar, but not quite right. This is because Rust's memory model also includes a notion of reference consumption. In Rust, a thing in memory must be used zero or one times, but no more. This, incidentally, is an application of a version of linear-type theory called <em>affine typing</em>, if you'd like to read up more on the subject. Now, the consequence of restricting memory access in this way is that Rust is able to guarantee at compile-time safe memory access—threads cannot reference the same location in memory at the same time without coordination; out-of-order access in the same thread are not allowed, and so forth. Rust code is <em>memory safe</em> without relying on a garbage collector. In this book's estimation, memory safety is a good win, even though <span>the restrictions that are introduced do complicate implementing certain kinds of structures that are more straightforward to build in C++ or similar languages.</span></p>
+<p>This is a topic we'll cover in much greater detail in <a href="605ce307-29ed-4b5a-961e-8d327467b84f.xhtml" target="_blank">Chapter 3</a>, <em>The Rust Memory Model<span> </span>– Ownership, References and Manipulation</em>.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

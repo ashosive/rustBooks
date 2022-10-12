@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Introduction to the standard library</h1>
+                </header>
+            
+            <article>
+                
+<p>To be able to understand where <kbd>println!</kbd> comes from, we need to take a brief look at the Rust Standard Library. If you're familiar with C, C++, or C# (or any of the other languages commonly used), you'll have used something like this:</p>
+<pre>#include &lt;stdio.h&gt; 
+#include &lt;stdlib&gt; 
+using System.Collections.Generic; </pre>
+<p>These are standard libraries that the compiler comes with, and which the developer can optionally include. They contain many useful procedures, functions, and methods, all designed to make development simpler so that you don't need to keep reinventing the wheel when you need to do a common task.</p>
+<p>A similar system exists in Rust in the form of crates. The std crate contains the Rust Standard Library, and it is by default included in every other crate. This means that you can use functionality from there without extra steps.</p>
+<p>The crates are further separated into module hierarchies, with a double colon <kbd>::</kbd> being a separator for the paths. So, for example, <kbd>std::fmt</kbd> is the <kbd>fmt</kbd> module inside the <kbd>std</kbd> module. It contains string formatting and printing functionality. For instance, the <kbd>println!</kbd> macro that we have used already is there.</p>
+<p>So why don't we have to write <kbd>std::fmt::println!</kbd> every time we use the <kbd>println!</kbd> macro? Because <kbd>println!</kbd> is one of the many standard macros which are imported to every namespace automatically.</p>
+<p>You can also import things to the current namespace yourself, to save yourself some keystrokes. This is done by the use keyword. Here's an example that uses the <kbd>HashMap</kbd> collection type from the standard library, without using the use keyword:</p>
+<pre>let mut my_hashmap: std::collections::HashMap&lt;String, u8&gt; =  
+    std::collections::HashMap::new(); 
+my_hashmap.insert("one".to_owned(), 1); </pre>
+<p>Spelling out the full namespace explicitly every time is possible, but as you can see, the noise-to-signal ratio is a bit poorer. Importing the <kbd>HashMap</kbd> into the current namespace can help. This piece of code is equivalent to the previous:</p>
+<pre>use std::collections::HashMap; 
+let mut my_hashmap: HashMap&lt;String, u8&gt; = HashMap::new(); 
+my_hashmap.insert("one".to_owned(), 1); </pre>
+<p>Rust's library system is a bit different from other languages, and may therefore be a bit of a stumbling block for newcomers. I found it a useful tidbit to realize that use clauses are not required to make code visible and callable: they just import a namespace into the current namespace.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

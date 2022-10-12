@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style00.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style01.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">How Rust uses memory</h1>
+                </header>
+            
+            <article>
+                
+<p>The memory occupied by any Rust program is split into two distinct areas: the heap and the stack. Simply put, the stack contains primitive variables, while the heap stores complex types. As with the mess on my daughter's bedroom floor, a heap can grow and grow until the available memory is exhausted. The stack is faster and simpler but may not grow without limits. Every binding in Rust is in a stack, but those bindings may refer to things in the heap, and elsewhere.</p>
+<p>This all relates directly to the string example. The binding <kbd>myName</kbd> is in the stack, and refers to a literal static string, <em>my name</em>. That string being static means that it is somewhere in memory when the program starts. Its being static also means that it cannot be changed.</p>
+<p><kbd>String::new</kbd>, on the other hand, creates a String in the heap. It is initially empty, but may grow to fill the whole virtual memory space.</p>
+<p>Here is an example of a growing String:</p>
+<pre>let mut myStringOne = "This is my first string ".to_owned(); 
+let myStringTwo = "This is my second string. "; 
+let myStringThree = "This is my final string"; 
+myStringOne = myStringOne + myStringTwo + myStringTwo + myStringThree + myStringTwo; </pre>
+<p>One of the ways of creating Strings is to call the <kbd>to_owned</kbd> method on a string slice, like we have just done. There are other ways, but this is the most recommended one because it underlines the ownership issue. We'll get back to that later.</p>
+<p>Here, the binding <kbd>myStringOne</kbd> starts out at 24 characters long, and would be allocated at least that size on the heap. The binding <kbd>myStringOne</kbd> is actually a reference to the position on the heap where <kbd>myStringOne</kbd> lives.</p>
+<p>As we add to <kbd>myStringOne</kbd>, the size it occupies on the heap increases; however, the reference to the base position remains the same.</p>
+<div class="packt_infobox">The lifetime and scope of a variable have to be taken into account. For example, if we define a string within part of a function, and then try and access the string outside the function, we get a compiler error.</div>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

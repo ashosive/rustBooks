@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style00.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style01.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Borrow immutability</h1>
+                </header>
+            
+            <article>
+                
+<p>If we look back to the start of this chapter, I described borrowing as borrowing a DVD from my son. When I take possession of the DVD, I cannot change it, as my son would expect the same DVD back.</p>
+<p>The same applies for Rust: the references cannot be changed as they are immutable values. If you think about it, this makes sense. Let me explain.</p>
+<p>I have created a <kbd>Vec&lt;T&gt;</kbd> array type, which is, let's say, eight values long (it doesn't matter what the values are or the type they are). When the binding between the heap and stack is made, it will be of a particular type. If we allow the reference to alter the vector, we will have the same problem as the C# example and so the guarantees can't be assured and the Rust compiler will fail the build. To ensure that the guarantee is kept, Rust simply says that you are unable to change the values borrowed.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

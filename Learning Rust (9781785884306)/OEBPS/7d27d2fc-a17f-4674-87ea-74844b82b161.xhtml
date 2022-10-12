@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Tuple structs – the hybrid of two</h1>
+                </header>
+            
+            <article>
+                
+<p>Consider a <kbd>struct</kbd> with three fields. It will have a name for the <kbd>struct</kbd> type and the three fields with their types:</p>
+<pre>struct Test 
+{ 
+     drink: bool, 
+     number: i32, 
+     price: f32 
+} </pre>
+<p>Let's consider what this actually is and if we can we not rewrite this as follows:</p>
+<pre>let Test: (bool, i32, f32) = (false, 4, 1.55); </pre>
+<p>Well, we can, but we will now run into how to access the members of the tuple. We will also run into assigning one tuple to another. You can't really define two structs, which are identical in everything other than the <kbd>struct</kbd> type name, and then assign the second <kbd>struct</kbd> type to the first.</p>
+<p>To get around this, Rust has the tuple <kbd>struct</kbd> hybrid. It contains the <kbd>struct</kbd> type but then assigns the fields as a tuple:</p>
+<pre>struct TestOne (f32, i8, &amp;str); 
+struct TestTwo (f32, i8, &amp;str); </pre>
+<p>We now have the flexibility of a tuple, but with the protection of the <kbd>struct</kbd>. Despite the arity being the same and the types inside the struct being the same, they are different types.</p>
+<p>As with a regular tuple, we can access the members of the tuple <kbd>struct</kbd> in the same way:</p>
+<pre>let i = TestOne.1; </pre>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

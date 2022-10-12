@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style00.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style01.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Parsing input and storing as building description and floor requests</h1>
+                </header>
+            
+            <article>
+                
+<p>To parse input, we first need to decide whether to expect input from <kbd>stdin</kbd> or from a file. We will adopt the convention that if a filename is provided to the program, then we will read from the file; if the file name is <kbd>-</kbd> then read from <kbd>stdin</kbd>, and otherwise read from <kbd>test1.txt</kbd>.</p>
+<p>Using the Rust <kbd>std::env</kbd> package and a pattern <kbd>match</kbd> statement, we can accomplish this quite easily. This is shown as follows:</p>
+<pre class="p1"><span class="s1">let buffer = match env::args().nth(1) {<br/></span><span class="s1">   Some(ref fp) if *fp == "-".to_string()<span class="Apple-converted-space">  </span>=&gt; {<br/></span><span class="s1">      let mut buffer = String::new();<br/></span><span class="s1">      io::stdin().read_to_string(&amp;mut buffer)<br/></span><span class="s1">                 .expect("read_to_string failed");<br/></span><span class="s1">      buffer<br/></span><span class="s1">   },<br/></span><span class="s1">   None =&gt; {<br/></span><span class="s1">      let fp = "test1.txt";<br/></span><span class="s1">      let mut buffer = String::new();<br/></span><span class="s1">      File::open(fp)<br/></span><span class="s1">         .expect("File::open failed")<br/></span><span class="s1">         .read_to_string(&amp;mut buffer)<br/></span><span class="s1">         .expect("read_to_string failed");<br/></span><span class="s1">         buffer<br/></span><span class="s1">   },<br/></span><span class="s1">   Some(fp) =&gt; {<br/></span><span class="s1">      let mut buffer = String::new();<br/></span><span class="s1">      File::open(fp)<br/></span><span class="s1">         .expect("File::open failed")<br/></span><span class="s1">         .read_to_string(&amp;mut buffer)<br/></span><span class="s1">         .expect("read_to_string failed");<br/></span><span class="s1">      buffer<br/></span><span class="s1">   }<br/></span><span class="s1">};<br/></span></pre>
+<p>Now, we need to parse the string's input. For each line in the input, we store the parsed value as either a floor count, floor height, or floor request, in that order. Here is the code to implement this:</p>
+<pre class="p1"><span class="s1">for (li,l) in buffer.lines().enumerate() {<br/></span><span class="s1">   if li==0 {<br/></span><span class="s1">      floor_count = l.parse::&lt;u64&gt;().unwrap();<br/></span><span class="s1">   } else if li==1 {<br/></span><span class="s1">      floor_height = l.parse::&lt;f64&gt;().unwrap();<br/></span><span class="s1">   } else {<br/></span><span class="s1">      floor_requests.push(l.parse::&lt;u64&gt;().unwrap());<br/></span><span class="s1">   }<br/></span><span class="s1">}</span></pre>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Standard library HashMap</h1>
+                </header>
+            
+            <article>
+                
+<p>Let's poke around in <kbd>HashMap</kbd>'s internals. A good starting place, I find, for inspecting unfamiliar Rust data structures is jumping into the source to the struct definition itself. Especially in the Rust codebase, there will be public <kbd>rustdoc</kbd> comments and private comments explaining implementation ambitions. The reader is warmly encouraged to inspect the <kbd>HashMap</kbd> comments for themselves. In this book, we're inspecting Rust at SHA <kbd>da569fa9ddf8369a9809184d43c600dc06bd4b4d</kbd>. The comments of <kbd>src/libstd/collections/hash/map.rs</kbd> explain that the <kbd>HashMap</kbd> is implemented with linear probing Robin Hood bucket stealing. Linear probing implies that we'll find <kbd>HashMap</kbd> implemented in terms of a cell storage—probably a contiguous memory structure for reasons we'll discuss shortly—and should be able to understand the implementation pretty directly, linear probing being a common method of implementing associative arrays. Robin Hood bucket stealing is maybe less common, but the private comments describe it as <em>the main performance trick in this hashmap</em> and then goes on to quote Pedro Celis' 1986 <em>Robin Hood Hashing:</em></p>
+<div class="packt_quote">
+<p>"If an insertion collides with an existing element, and that element's "probe distance" (how far away the element is from its ideal location) is higher than how far we've already probed, swap the elements."</p>
+</div>
+<p>If you pull the thesis yourself, you'll further find:</p>
+<div class="packt_quote">
+<p>"(Robin Hood Hashing) leads to a new search algorithm which requires less than 2.6 probes on average to perform a successful search even when the table is nearly full. Unsuccessful searches require only O(ln n) probes."</p>
+</div>
+<p>Not bad. Here's <kbd>HashMap</kbd>:</p>
+<pre>pub struct HashMap&lt;K, V, S = RandomState&gt; {
+    // All hashes are keyed on these values, to prevent <br/>    // hash collision attacks.
+    hash_builder: S,
+
+    table: RawTable&lt;K, V&gt;,
+
+    resize_policy: DefaultResizePolicy,
+}</pre>
+<p>Okay, so, it interacts with <kbd>RawTable&lt;K, V&gt;</kbd> and we can jump to that definition:</p>
+<pre>pub struct RawTable&lt;K, V&gt; {
+    capacity_mask: usize,
+    size: usize,
+    hashes: TaggedHashUintPtr,
+
+    // Because K/V do not appear directly in any of the<br/>    // types in the struct, inform rustc that in fact <br/>    // instances of K and V are reachable from here.
+    marker: marker::PhantomData&lt;(K, V)&gt;,
+}</pre>
+<p>But it's maybe not the most illuminating struct definition either. Common operations on a collection are often a good place to dig in, so let's look at <kbd>HashMap::insert</kbd>:</p>
+<pre>    pub fn insert(&amp;mut self, k: K, v: V) -&gt; Option&lt;V&gt; {
+        let hash = self.make_hash(&amp;k);
+        self.reserve(1);
+        self.insert_hashed_nocheck(hash, k, v)
+    }</pre>
+<p>And then on into <kbd>HashMap::reserve</kbd>:</p>
+<pre>    pub fn reserve(&amp;mut self, additional: usize) {
+        let remaining = self.capacity() - self.len(); // this can't <br/>        overflow
+        if remaining &lt; additional {
+            let min_cap = <br/>            self.len().checked_add(additional)<br/>                      .expect("reserve overflow");
+            let raw_cap = self.resize_policy.raw_capacity(min_cap);
+            self.resize(raw_cap);
+        } else if self.table.tag() &amp;&amp; remaining &lt;= self.len() {
+            // Probe sequence is too long and table is half full,
+            // resize early to reduce probing length.
+            let new_capacity = self.table.capacity() * 2;
+            self.resize(new_capacity);
+        }
+    }</pre>
+<p>Whether <kbd>reserve</kbd> expands the underlying storage capacity because we've got near the current total capacity of that storage or to reduce probe lengths, <kbd>HashMap::resize</kbd> is called. That's:</p>
+<pre>    #[inline(never)]
+    #[cold]
+    fn resize(&amp;mut self, new_raw_cap: usize) {
+        assert!(self.table.size() &lt;= new_raw_cap);
+        assert!(new_raw_cap.is_power_of_two() || new_raw_cap == 0);
+
+        let mut old_table = replace(&amp;mut self.table, <br/>        RawTable::new(new_raw_cap));
+        let old_size = old_table.size();
+
+        if old_table.size() == 0 {
+            return;
+        }
+
+        let mut bucket = Bucket::head_bucket(&amp;mut old_table);
+
+        // This is how the buckets might be laid out in memory:
+        // ($ marks an initialized bucket)
+        //  ________________
+        // |$$$_$$$$$$_$$$$$|
+        //
+        // But we've skipped the entire initial cluster of buckets
+        // and will continue iteration in this order:
+        //  ________________
+        //     |$$$$$$_$$$$$
+        //                  ^ wrap around once end is reached
+        //  ________________
+        //  $$$_____________|
+        //    ^ exit once table.size == 0
+        loop {
+            bucket = match bucket.peek() {
+                Full(bucket) =&gt; {
+                    let h = bucket.hash();
+                    let (b, k, v) = bucket.take();
+                    self.insert_hashed_ordered(h, k, v);
+                    if b.table().size() == 0 {
+                        break;
+                    }
+                    b.into_bucket()
+                }
+                Empty(b) =&gt; b.into_bucket(),
+            };
+            bucket.next();
+        }
+
+        assert_eq!(self.table.size(), old_size);
+    }</pre>
+<p>We're back at <kbd>RawTable</kbd> and have a lead on a structure called <kbd>Bucket</kbd>:</p>
+<pre>pub struct Bucket&lt;K, V, M&gt; {
+    raw: RawBucket&lt;K, V&gt;,
+    table: M,
+}</pre>
+<p>Okay, we're going in some circles here. The bucket parameterizes the table on <kbd>M</kbd> rather than the table holding some collection of buckets. The <kbd>RawBucket</kbd> is described as an unsafe view of a <kbd>RawTable</kbd> bucket of which there are two variants—<kbd>EmptyBucket</kbd> and <kbd>FullBucket</kbd>. These variants are used to populate a <kbd>BucketState</kbd> enumeration:</p>
+<pre style="padding-left: 30px">pub enum BucketState&lt;K, V, M&gt; {
+    Empty(EmptyBucket&lt;K, V, M&gt;),
+    Full(FullBucket&lt;K, V, M&gt;),
+}</pre>
+<p>Here, we can see it being used back in <kbd>HashMap::insert_hashed_ordered</kbd>:</p>
+<pre>    fn insert_hashed_ordered(&amp;mut self, hash: SafeHash, k: K, v: V) {
+        let mut buckets = Bucket::new(&amp;mut self.table, hash);
+        let start_index = buckets.index();
+
+        loop {
+            // We don't need to compare hashes for value swap.
+            // Not even DIBs for Robin Hood.
+            buckets = match buckets.peek() {
+                Empty(empty) =&gt; {
+                    empty.put(hash, k, v);
+                    return;
+                }
+                Full(b) =&gt; b.into_bucket(),
+            };
+            buckets.next();
+            debug_assert!(buckets.index() != start_index);
+        }
+    }</pre>
+<p>If we explore down into <kbd>empty.push(hash, k, v)</kbd>, we find ourselves at the following:</p>
+<pre>    pub fn put(mut self, hash: SafeHash, key: K, value: V) <br/>        -&gt; FullBucket&lt;K, V, M&gt; <br/>    {
+        unsafe {
+            *self.raw.hash() = hash.inspect();
+            ptr::write(self.raw.pair(), (key, value));
+
+            self.table.borrow_table_mut().size += 1;
+        }
+
+        FullBucket {
+            raw: self.raw,
+            table: self.table,
+        }
+    }</pre>
+<p>Tidy. <kbd>ptr::write(self.raw.pair(), (key, value))</kbd> demonstrates that we're working with a structure built out of raw memory pointer manipulation, befitting a structure that will see a lot of use in critical <kbd>paths</kbd>. <kbd>self.raw.pair()</kbd>, which returns the appropriate offset to move <kbd>(key, value)</kbd> into, matching the <kbd>HashMap::insert</kbd> move semantics we're already familiar with. Take a look at the definition of <kbd>RawBucket</kbd>:</p>
+<pre style="padding-left: 30px">pub struct RawBucket&lt;K, V&gt; {
+    hash_start: *mut HashUint,
+    // We use *const to ensure covariance with respect to K and V
+    pair_start: *const (K, V),
+    idx: usize,
+    _marker: marker::PhantomData&lt;(K, V)&gt;,
+}</pre>
+<p>Here, we've got two raw pointers:  <kbd>hash_start</kbd> and <kbd>pair_start</kbd>. The former is the first location in memory of our stored pairs' hashes, the latter is the first location in the memory of the pairs. What this ends up being is contiguous storage in memory of two sets of data, which is about what you'd expect. The table module documentation refers to this approach as <em>unzipped</em> arrays. <kbd>RawTable</kbd> holds the capacity and the data, kind of. In reality, the data held by <kbd>RawTable</kbd> is carefully placed in memory, as we've seen, but there's no <em>owner</em> as the Rust type system understands it. That's where <kbd>marker: marker::PhantomData&lt;(K, V)&gt;</kbd> comes in. <kbd>PhantomData</kbd> instructs the compiler to behave as if <kbd>RawTable&lt;K, V&gt;</kbd> owns pairs of <kbd>(K, V)</kbd>, even though with all the unsafe pointer manipulation we're doing that can't actually be proven by Rust. We human observers can determine by inspection that <kbd>RawTable</kbd> owns its data via <kbd>RawTable::raw_bucket_at</kbd> as it computes where in memory the data exists:</p>
+<pre>    fn raw_bucket_at(&amp;self, index: usize) -&gt; RawBucket&lt;K, V&gt; {
+        let hashes_size = self.capacity() * size_of::&lt;HashUint&gt;();
+        let pairs_size = self.capacity() * size_of::&lt;(K, V)&gt;();
+
+        let (pairs_offset, _, oflo) =
+            calculate_offsets(hashes_size, pairs_size, <br/>                              align_of::&lt;(K, V)&gt;());
+        debug_assert!(!oflo, "capacity overflow");
+
+        let buffer = self.hashes.ptr() as *mut u8;
+        unsafe {
+            RawBucket {
+                hash_start: buffer as *mut HashUint,
+                pair_start: buffer.offset(pairs_offset as isize) <br/>                              as *const (K, V),
+                idx: index,
+                _marker: marker::PhantomData,
+            }
+        }
+    }</pre>
+<p>Well, by inspection and testing, as you can see at the bottom of the module.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

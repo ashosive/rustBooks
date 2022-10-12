@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">The rope bridge problem</h1>
+                </header>
+            
+            <article>
+                
+<p>This puzzle appears in <em>The Little Book of Semaphores</em> as the <em>Baboon crossing problem</em>, section 6.3. Downey notes that it is adapted from Tanenbaum's <em>Operating Systems: Design and Implementation</em>, so you're getting it third-hand here. The problem description is thus:</p>
+<div class="packt_quote">"There is a deep canyon somewhere in Kruger National Park, South Africa, and a single rope that spans the canyon. Baboons can cross the canyon by swinging hand-over-hand on the rope, but if two baboons going in opposite directions meet in the middle, they will fight and drop to their deaths. Furthermore, the rope is only strong enough to hold 5 baboons. If there are more baboons on the rope at the same time, it will break.Assuming that we can teach the baboons to use semaphores, we would like to design a synchronization scheme with the following properties:</div>
+<div class="packt_quote">
+<ul>
+<li><em>Once a baboon has begun to cross, it is guaranteed to get to the other side without running into a baboon going the other way.</em></li>
+<li><em>There are never more than 5 baboons on the rope.</em>"</li>
+</ul>
+</div>
+<p>Our solution does not use semaphores. Instead, we lean on the type system to provide guarantees, leaning on it to ensure that no left-traveler will ever meet a right-traveler. Let's dig in:</p>
+<pre style="padding-left: 30px">use std::thread;
+use std::sync::{Arc, Mutex};
+
+#[derive(Debug)]
+enum Bridge {
+    Empty,
+    Left(u8),
+    Right(u8),
+}</pre>
+<p>We see here the usual preamble, and then a type, <kbd>Bridge</kbd>. <kbd>Bridge</kbd> is the model of the <kbd>rope</kbd> bridge of the problem statement and is either empty, has left-traveling baboons on it, or has right-traveling baboons on it; there's no reason to fiddle with flags and infer state when we can just encode it into a type. In fact, leaning on the type system, our synchronization is very simple:</p>
+<pre style="padding-left: 30px">fn main() {
+    let rope = Arc::new(Mutex::new(Bridge::Empty));</pre>
+<p>Just a single mutex. We represent either side of the bridge as a thread, each side trying to get its own baboons across but co-operatively allowing baboons to reach its side. Here's the left side of the bridge:</p>
+<pre style="padding-left: 30px">    let lhs_rope = Arc::clone(&amp;rope);
+    let lhs = thread::spawn(move || {
+        let rope = lhs_rope;
+        loop {
+            let mut guard = rope.lock().unwrap();
+            match *guard {
+                Bridge::Empty =&gt; {
+                    *guard = Bridge::Right(1);
+                }
+                Bridge::Right(i) =&gt; {
+                    if i &lt; 5 {
+                        *guard = Bridge::Right(i + 1);
+                    }
+                }
+                Bridge::Left(0) =&gt; {
+                    *guard = Bridge::Empty;
+                }
+                Bridge::Left(i) =&gt; {
+                    *guard = Bridge::Left(i - 1);
+                }
+            }
+        }
+    });</pre>
+<p>When the left side of the bridge finds the bridge itself empty, one right-traveling baboon is sent on its way. Further, when the left side finds that there are already right-traveling baboons on the bridge and the rope's capacity of five has not been reached, another baboon is sent on its way. Left-traveling baboons are received from the rope, decrementing the total baboons on the rope. The special case here is the clause for <kbd>Bridge::Left(0)</kbd>. While there are no baboons on the bridge still, technically, if the right side of the bridge were to be scheduled before the left side, it would send a baboon on its way, as we'll see shortly. We could make the removal of a baboon more aggressive and set the bridge to <kbd>Bridge::Empty</kbd> as soon as there are no travelers, of course. Here's the right side of the bridge, which is similar to the left:</p>
+<pre>    let rhs = thread::spawn(move || loop {
+        let mut guard = rope.lock().unwrap();
+        match *guard {
+            Bridge::Empty =&gt; {
+                *guard = Bridge::Left(1);
+            }
+            Bridge::Left(i) =&gt; {
+                if i &lt; 5 {
+                    *guard = Bridge::Left(i + 1);
+                }
+            }
+            Bridge::Right(0) =&gt; {
+                *guard = Bridge::Empty;
+            }
+            Bridge::Right(i) =&gt; {
+                *guard = Bridge::Right(i - 1);
+            }
+        }
+    });
+
+    rhs.join().unwrap();
+    lhs.join().unwrap();
+}</pre>
+<p>Now, is this fair? It depends on your system mutex. Some systems provide mutexes that are fair in that, if one thread has acquired the lock repeatedly and starved other threads attempting to lock the same primitive, the greedy thread will be de-prioritized under the others. Such fairness may or may not incur additional overheads when locking, depending on the implementation. Whether you want fairness, in fact, depends strongly on the problem you're trying to solve. If we were only interested in shuffling baboons across the rope bridge as quickly as possible—maximizing throughput—then it doesn't truly matter which direction they're coming from. The original problem statement makes no mention of fairness, which it kind of shuffles around by allowing the stream of baboons to be infinite. Consider what would happen if the baboons were finite on either side of the bridge and we wanted to reduce the time it takes for any individual baboon to cross to the other side, to minimize latency. Our present solution, adapted to cope with finite streams, is pretty poor, then, in that regard. The situation could be improved by occasional yielding, layering in more aggressive rope packing, intentional back off, or a host of other strategies. Some platforms allow you to dynamically shift the priority of threads with regard to locks, but Rust does not offer that in the standard library.</p>
+<p>Or, you know, we could use two bounded MPSC channels. That's an option. It all depends on what you're trying to get done.</p>
+<p>Ultimately, the tools in safe Rust are very useful for performing computations on existing data structures without having to dip into any funny business. If that's your game, you're very unlikely to need to head much past <kbd>Mutex</kbd> and <kbd>Condvar</kbd>, and possibly into <kbd>RwLock</kbd> and <kbd>Barrier</kbd>. But, if you're building structures that are made of pointers, you'll have to dip into some of the funny business we saw in Ring, with all the dangers that brings.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

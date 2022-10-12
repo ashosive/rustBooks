@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style00.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style01.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Targeting a Rust object</h1>
+                </header>
+            
+            <article>
+                
+<p>In the last example, we had a callback that listened for a single <kbd>int</kbd>. What happens though if we want to listen out for a complex object from the external library (for example, a structure)? We can't return a structure, but we can have a Rust object that can be mapped to the callback.</p>
+<p>It is a slightly more complex affair than for a synchronous callback:</p>
+<ol>
+<li>Create the structure that will map to the external structure we're interested in:</li>
+</ol>
+<pre style="padding-left: 60px">#[repr(C)] // this is a name used within the extern in (2) 
+struct MyObject 
+ { 
+    a: i32, 
+    // and anything else you want to get back from the library 
+    // just make sure you add them into the call back 
+} </pre>
+<ol start="2">
+<li>Create the callback; <kbd>result</kbd> is a pointer to the mutable <kbd>myobject</kbd>:</li>
+</ol>
+<pre style="padding-left: 60px">extern "C" fn callback(result: *mut MyObject, a: i32)  
+{ 
+     unsafe 
+     { 
+          (*result).a = a; 
+     } 
+} </pre>
+<ol start="3">
+<li>Create the <kbd>extern</kbd> functions to the library:</li>
+</ol>
+<pre style="padding-left: 60px">#[link(name="external_lib")] 
+extern 
+ { 
+    fn register_callback(result: mut MyObject, cback: extern fn(mut MyObject, i32)); 
+    fn start_callback(); 
+} </pre>
+<ol start="4">
+<li>Create the calling code:</li>
+</ol>
+<pre style="padding-left: 60px">fn main() 
+ { 
+    // we need to create an object for the callback 
+    let mystruct = Box::new (MyObject{a: 5i32}); 
+    unsafe { 
+        register_callback(&amp;mut *mystruct, callback); 
+        start_callback(); 
+    } 
+} </pre>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

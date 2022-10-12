@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Using the visitor pattern</h1>
+                </header>
+            
+            <article>
+                
+<p>The visitor design pattern is a common pattern used in object-oriented languages. A visitor stores an algorithm that operates over a collection of objects of different types. It allows multiple different algorithms to be written over the same data without having to modify the code of the data's classes (For a more detailed description, see <a href="https://en.wikipedia.org/wiki/Visitor_pattern"><span class="URLPACKT">https://en.wikipedia.org/wiki/Visitor_pattern</span></a>).</p>
+<p>Let's implement a visitor to calculate the area of different geometric objects, such as squares and circles.</p>
+<pre>// see code in Chapter 6/code/visitor_pattern.rs 
+// structs: 
+struct Point { 
+    x: f64, 
+    y: f64 
+} 
+ 
+struct Circle { 
+    center: Point, 
+    radius: f64, 
+} 
+ 
+struct Square { 
+    lowerLeftCorner: Point, 
+    side: f64, 
+} 
+ 
+// traits: 
+trait ShapeVisitor { 
+    fn visit_circle(&amp;mut self, c: &amp;Circle); 
+    fn visit_square(&amp;mut self, r: &amp;Square); 
+} 
+ 
+trait Shape { 
+    fn accept&lt;V: ShapeVisitor&gt;(&amp;self, sv: &amp;mut V); 
+} 
+ 
+impl Shape for Circle { 
+    fn accept&lt;V: ShapeVisitor&gt;(&amp;self, sv: &amp;mut V) { 
+        sv.visit_circle(self); 
+    } 
+} 
+ 
+impl Shape for Square { 
+    fn accept&lt;V: ShapeVisitor&gt;(&amp;self, sv: &amp;mut V) { 
+        sv.visit_square(self); 
+    } 
+} 
+ 
+fn compute_area&lt;S: Shape&gt;(s: &amp;S) -&gt; f64 { 
+    struct AreaCalculator { 
+        area: f64, 
+    } 
+ 
+    impl ShapeVisitor for AreaCalculator { 
+        fn visit_circle(&amp;mut self, c: &amp;Circle) { 
+self.area = std::f64::consts::PI * c.radius * c.radius; 
+        } 
+        fn visit_square(&amp;mut self, r: &amp;Square) { 
+            self.area = r.side * r.side; 
+        } 
+    } 
+     
+    let mut ac = AreaCalculator { area: 0.0 }; 
+    s.accept(&amp;mut ac); 
+    ac.area 
+} 
+ 
+fn main() { 
+    let cn = Point{ x: 0.0, y: 0.0 }; 
+    let ci = Circle{ center: cn, radius: 1.0 }; 
+    let area = compute_area(&amp;ci); 
+    println!("The area of the circle is {}", area); 
+    let cn = Point{ x: 0.0, y: 0.0 }; 
+    let sq = Square{ lowerLeftCorner: cn, side: 1.0 }; 
+    let area = compute_area(&amp;sq); 
+    println!("The area of the square is {}", area); 
+ 
+} </pre>
+<p>Which prints out the following output:</p>
+<pre>    <strong>The area of the circle is 3.141592653589793</strong>
+    <strong>The area of the square is 1</strong>  </pre>
+<p>From the signature of the accept function:</p>
+<pre>fn accept&lt;V: ShapeVisitor&gt;(&amp;self, sv: &amp;mut V); </pre>
+<p>We can see that static dispatch is used here. If we were to prefer dynamic dispatch, its signature would be:</p>
+<pre>fn accept(&amp;self, sv: &amp;mut ShapeVisitor) </pre>
+<p>As an exercise, rewrite the previous code in dynamic dispatch form (see <kbd>Chapter 6/exercises/visitor_pattern_dd.rs</kbd>).</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style00.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style01.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Always consider the scope</h1>
+                </header>
+            
+            <article>
+                
+<p>As with borrowing, we have to consider the scope to ensure that things work correctly.</p>
+<p>The following piece of code, for example, won't work:</p>
+<pre>struct MyStruct&lt;'a&gt; { 
+    lifea: &amp;'a i32, 
+} 
+ 
+fn main()  
+{ 
+    let x;  
+    {   
+        let y = &amp;5; // means let y = 5; let y = &amp;y; 
+        let f = MyStruct { lifea: y };  
+        x = &amp;f.lifea  
+    }  
+    println!("{}", x);  
+} </pre>
+<div class="packt_infobox">The code for this section is in the <kbd>08/lifetimescope</kbd> folder of the supporting code bundle provided along with this book.</div>
+<p>It may not seem obvious at first why this should not work. In terms of scope, <kbd>f</kbd> is created after <kbd>y</kbd>, so is in the scope of <kbd>y</kbd> and <kbd>y</kbd> is created within the scope of <kbd>x</kbd>. Or is it?</p>
+<p>When the code is built, we will get the following output:</p>
+<div class="packt_figure CDPAlignCenter CDPAlign"><img height="555" width="514" class=" image-border" src="Images/b54d4162-7c22-43b2-8b0a-4a4821b3666d.png"/></div>
+<p>The error will be the <kbd>x = &amp;f.lifea</kbd>, as we attempted to assign a value of something about to go out of scope.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

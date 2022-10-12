@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Writing a file</h1>
+                </header>
+            
+            <article>
+                
+<p>Writing an XML file is far more complex than reading. Here, we have to explicitly use <kbd>XmlEvent</kbd> and <kbd>EventWriter</kbd>. We also use <kbd>EmitterConfig,</kbd> which does as the name suggests, that is, creates a configuration and then uses it. <kbd>EventWriter</kbd>, <kbd>EmitterConfig,</kbd> and <kbd>XmlEvent</kbd> are all part of <kbd>xml::writer</kbd>.</p>
+<p>Let us first consider the main function. First, create the file and two references, one to <kbd>stdin</kbd> and one to <kbd>stdout</kbd>, as follows:</p>
+<pre>let mut file = File::create("myxml_file.xml).unwrap(); 
+let mut output = io::stdout(); 
+let mut input = io::stdin(); </pre>
+<p>Next, we create the writer via <kbd>EmitterConfig:</kbd></p>
+<pre>let mut writer = EmitterConfig::new().preform_indent(true).create_writer(&amp;mut file); </pre>
+<p>We now have the writer set up. <kbd>perform_indent</kbd> tells the writer to indent each node when true.</p>
+<p>Finally, we create a loop and write the XML. You will notice a call to <kbd>handle_event</kbd>; we will deal with this shortly:</p>
+<pre>loop { 
+    print!("&gt; "); 
+    output.flush().unwrap(); 
+    let mut line = String::new(); 
+    match input.readline(&amp;mut line) { 
+         Ok(0) =&gt; break, 
+         Ok(_) =&gt; match handle_event(&amp;mut writer, line) { 
+              Ok(_) =&gt; {} 
+              Err(e) =&gt; panic!("XML write error: {}", e) 
+         } 
+         Err(e) =&gt; panic!("Input error: {}", e); 
+    } 
+} </pre>
+<p>The definition of the function <kbd>handle_event</kbd> is a bit more advanced than we have seen until now:</p>
+<pre>fn handle_event&lt;W: Write&gt;(w: &amp;mut EventWriter&lt;W&gt;, line: String) -&gt; Result&lt;()&gt; { </pre>
+<p>In C#, the preceding definition would be something similar, and would be written as follows:</p>
+<pre>Result handle_result&lt;T&gt;(EventWriter&lt;T&gt; w, string line) where T:Write </pre>
+<p>We pass a type (be it a <kbd>class</kbd>, <kbd>string</kbd>, <kbd>i32,</kbd> or anything else for that matter) to the function to use as a parameter. In this case, we are using <kbd>std::io::Write</kbd> for the <kbd>EventWriter</kbd> to use.</p>
+<p>The function itself has nothing special. We start by trimming the string to remove any whitespace or returns:</p>
+<pre>let line = line.trim(); </pre>
+<p>We now use <kbd>XmlEvent</kbd> to generate the code:</p>
+<pre>let event: XmlEvent = if line.starts_with("+") &amp;&amp; line.len() &gt; 1 { 
+    XmlEvent::start_element(&amp;line[1..]).into() 
+} else if line.starts_with("-") { 
+    XmlEvent::end_element().into() 
+} else { 
+    XmlEvent::characters(&amp;line).into() 
+   }; 
+    w.write(&amp;line).into(); 
+} </pre>
+<p><kbd>into()</kbd> converts the pointer to the structure (known as <kbd>self</kbd>). In this case, it takes (say) <kbd>XmlEvent::characters(&amp;line),</kbd> and sends it back into the line.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

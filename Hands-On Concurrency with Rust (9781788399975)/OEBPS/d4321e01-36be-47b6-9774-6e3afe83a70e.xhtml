@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Getting set up</h1>
+                </header>
+            
+            <article>
+                
+<p>Now that we have a handle on the machines, this book will deal with what we need to get synchronized on our Rust compiler. There are three channels of Rust to choose from—stable, beta, and nightly. Rust operates on a six-week release cycle. Every day the nightly channel is rolled over, containing all the new patches that have landed on the master branch since the day before. The nightly channel is special, compared to beta and stable, in that it is the only version of the compiler where nightly features are able to be compiled. Rust is very serious about backward compatibility. Proposed changes to the language are baked in nightly, debated by the community, and lived with for some time before they're promoted out of nightly only status and into the language proper. The beta channel is rolled over from the current nightly channel every six weeks. The stable channel is rolled over from beta at the same time, every six weeks.</p>
+<p>This means that a new stable version of the compiler is at most only ever six weeks old. Which channel you choose to work with is up to you and your organization. Most teams I'm aware of work with nightly and ship stable, as many important tools in the ecosystem—such as clippy and rustfmt—are only available with nightly features, but the stable channel offers, well, a stable development target. You'll find that many libraries in the crate ecosystem work to stay on stable for this reason.</p>
+<p>Unless otherwise noted,  we'll focus on the stable channel in this book. We'll need two targets installed—one for our x86 machine and the other for our ARMv7. Your operating system may package Rust for you—kudos!—but <span>the community tends to recommend the use of</span><span> </span><kbd>rustup</kbd><span>, especially when managing multiple, version-pinned targets</span><span>. If you're unfamiliar with</span> <kbd>rustup</kbd><span>, you can find a persuasive explanation of and instructions for its use at</span> <a href="https://www.rustup.rs/">rustup.rs</a><span>. If you're installing a Rust target for use on a machine on which </span><kbd>rustup</kbd> <span>is run, it will do the necessary triplet detections. Assuming that your machine has an x86 chip in it and is ru</span>nning Linux, then the following two commands <span>will have equivalent results:</span></p>
+<pre><strong>&gt; rustup install stable</strong>
+
+<strong>&gt; rustup target add x86_64-unknown-linux-gnu</strong></pre>
+<p>Both will instruct <kbd>rustup</kbd> to track the target <kbd>x86_64-unknown-linux-gnu</kbd> and install the stable channel version of Rust. If you're running OS X or Windows, a slightly different triplet will be installed by the first variant, but it's the chip that really matters. The second target, we'll need to be more precise with:</p>
+<pre><strong>&gt; rustup target add stable-armv7-unknown-linux-gnueabihf</strong></pre>
+<p>Now you have the ability to generate x86 binaries for your development machine, for x86 (which is probably the same thing), and for an ARMv7 running Linux, the readily available RaspberryPi 3. If you intend to generate executables for the ARMv7—which is recommended, if you have or can obtain the chip—then you'll also need to install an appropriate cross-compiler to link. On a Debian-based development system, you can run the following:</p>
+<pre><strong>&gt; apt-get install gcc-arm-linux-gnueabihf</strong></pre>
+<p>Instructions will vary by operating system, and, honestly, this can be the trickiest part of getting a cross-compiling project set up. Don't despair. If push comes to shove, you could always compile on host. Compilation will just be pokey. The final setup step before we get into the interesting part is to tell cargo how to link our ARMv7 target. Now, please be aware that cross-compilation is an active area of work in the Rust community at the time of writing<span>. The following configuration file fiddling may have changed a little between this book being published and your reading of it. Apologies. The Rust community documentation will surely help patch up some of the differences. Anyway, add the following—or similar, depending on your operating system—to</span> <kbd>~/.cargo/config</kbd><span>:</span></p>
+<pre style="padding-left: 30px">[target.armv7-unknown-linux-gnueabihf]
+linker = "arm-linux-gnueabihf-gcc"</pre>
+<p>If <kbd>~/.cargo/config</kbd> doesn't exist, go ahead and create it with the preceding contents.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">References</h1>
+                </header>
+            
+            <article>
+                
+<p>In our previous example, <kbd>m</kbd> which had the value <kbd>&amp;n</kbd> is the simplest form of pointer, called a <strong>reference</strong> (or <strong>borrowed pointer</strong>)--the variable <kbd>m</kbd> is a reference to the stack-allocated variable <kbd>n</kbd> and has type <kbd>&amp;i32</kbd> because it points to a value of type <kbd>i32</kbd>.</p>
+<div class="packt_infobox">In general, when <kbd>n</kbd> is a value of type <kbd>T</kbd>, then the reference <kbd>&amp;n</kbd> is of type <kbd>&amp;T</kbd>.</div>
+<p>Here <kbd>n</kbd> is immutable, so <kbd>m</kbd> is also immutable; trying to change the value of <kbd>n</kbd> through <kbd>m</kbd> with <kbd>*m = 7;</kbd> for example, results in an error:</p>
+<pre>    <strong>cannot assign to immutable borrowed content `*m`</strong>  </pre>
+<p>Rust does not let you change an immutable variable via its pointer, contrary to C.</p>
+<p>Because there is no danger of changing the value of <kbd>n</kbd> through a reference, multiple references to an immutable value are allowed, they can only be used to read the value, for example:</p>
+<pre>let o = &amp;n; 
+println!("The address of n is {:p}", o); 
+println!("The value of n is {}", *o);  </pre>
+<p>Printing out as before:</p>
+<pre>    <strong>The address of n is 0x7078eff8bc </strong>
+    <strong>The value of n is 42</strong>  </pre>
+<p>We could represent this situation in memory like this:</p>
+<div class="packt_figure CDPAlignCenter CDPAlign"><img height="73" width="143" src="Images/323174a5-49f8-474b-ba61-f97f00d64480.png"/></div>
+<p>It will be clear that working with pointers like this or in much more complex situations necessitates much stricter rules than the <kbd>Copy</kbd> behavior. For example, the memory can only be freed when there are no variables or pointers associated with it anymore. And when the value is mutable, can it be changed through any of its pointers? These stricter rules, described by the ownership and borrowing system from the next section, are enforced by the compiler.</p>
+<p>Mutable references do exist, and they are declared as:</p>
+<pre>let m = &amp;mut n </pre>
+<p>However the variable <kbd>n</kbd> also has to be a mutable value. When <kbd>n</kbd> is immutable, the compiler rejects the <kbd>m</kbd> mutable reference binding with the error:</p>
+<pre>    <strong>error: cannot borrow immutable local variable `n` as mutable</strong>  </pre>
+<p>This makes sense, as immutable variables cannot be changed, even when you know their memory location.</p>
+<p>To reiterate, in order to change a value through a reference<span class="MsoCommentReference">,</span> both the variable and its reference have to be mutable, like in the following code snippet:</p>
+<pre>   let mut u = 3.14f64; 
+   let v = &amp;mut u; 
+   *v = 3.15; 
+println!("The value of u is now {}", *v); </pre>
+<p>This will print the following output:</p>
+<pre><strong>The value of u is now 3.15</strong> 
+<strong>Now the value at the memory location of u is changed to 3.15 </strong></pre>
+<p>But note that we now cannot change (or even print) that value anymore by using the variable <kbd>u</kbd>:</p>
+<p>A statement like <kbd>u = u * 2.0;</kbd> or even a simple <kbd>println!("The value of u is {}", u);</kbd> give us respectively the compiler error:</p>
+<pre><strong>errors: cannot assign to `u` because it is borrowed</strong>  </pre>
+<p>(We explain why this is so in the following section on <em>Ownership and Borrowing</em>)</p>
+<pre><strong>cannot borrow `u` as immutable because it is also borrowed as mutable</strong>  </pre>
+<p>We say that borrowing a variable (by taking a reference to it, here <kbd>v</kbd>) freezes that variable, the original variable <kbd>u</kbd> is frozen (no longer usable), until the <kbd>v</kbd> reference goes out of scope.</p>
+<p>Also we can only have one mutable reference: <kbd>let w = &amp;mut u;</kbd> which results in the following error:</p>
+<pre><strong>error: cannot borrow `u` as mutable more than once at a time</strong>  </pre>
+<p>The compiler even adds the following note to the previous code line with: <kbd>let v = &amp;mut u;</kbd> which results in the following error:</p>
+<pre><strong>note: previous borrow of `u` occurs here; the mutable borrow prevents subsequent moves, borrows, or modification of `u` until the borrow ends.</strong>  </pre>
+<p>This is logical--the compiler is (rightfully) concerned that a change to the value of <kbd>u</kbd> through one reference might change its memory location, because the variable <kbd>u</kbd> might change in size (in case of a more complex variable than an integer) and so not fit anymore in its previous location, and would have to be relocated to another address. This would render all other references to <kbd>u</kbd> invalid, and even dangerous, because through them we might inadvertently change another variable that has taken up the <kbd>u</kbd> variable's previous location!</p>
+<p>A mutable value can also be changed by passing its address as a mutable reference to a function, like in this example:</p>
+<pre>let mut m = 7; 
+add_three_to_magic(&amp;mut m); 
+println!("m is now {}", m);  // prints out m is now 10 </pre>
+<p>With the function <kbd>add_three_to_magic</kbd> declared as:</p>
+<pre>fn add_three_to_magic(num: &amp;mut i32) { 
+    *num += 3;  // value is changed in place through += 
+} </pre>
+<div class="packt_infobox">To summarize, when <kbd>n</kbd> is a mutable value of type <kbd>T</kbd>, then only one mutable reference to it (of type <kbd>&amp;mut T)</kbd> can exist at any time. Through this reference, the value can be changed.</div>
+<p>References are frequently used as function parameters: they avoid moving (which means in most cases copying) the value to the function, which could decrease performance when the value is large. Instead passing a reference only copies the address of the value to the function, not the value, thereby saving unnecessary memory usage. Consider a string buffer that contains a large amount of data. Copying that around will cause the program to be much slower.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

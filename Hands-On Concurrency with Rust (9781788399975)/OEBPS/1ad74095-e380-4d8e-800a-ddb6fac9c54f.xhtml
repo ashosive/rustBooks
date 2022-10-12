@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Ordering::Acquire</h1>
+                </header>
+            
+            <article>
+                
+<p><kbd>Acquire</kbd> is an ordering that deals with loads. Recall that we previously said that if a thread, <kbd>B</kbd>, loads var with <kbd>Acquire</kbd> ordering and thread <kbd>A</kbd> then stores with <kbd>Release</kbd> ordering, then <kbd>A</kbd> synchronizes-with <kbd>B</kbd>, which means that <kbd>A</kbd> happens-before <kbd>B</kbd>. Recall that back in the previous chapter we ran into <kbd>Acquire</kbd> in the context of hopper:</p>
+<pre>    pub unsafe fn push_back(
+        &amp;self,
+        elem: T,
+        guard: &amp;mut MutexGuard&lt;BackGuardInner&lt;S&gt;&gt;,
+    ) -&gt; Result&lt;bool, Error&lt;T&gt;&gt; {
+        let mut must_wake_dequeuers = false;
+        if self.size.load(Ordering::Acquire) == self.capacity {
+            return Err(Error::Full(elem));
+        } else {
+            assert!((*self.data.offset((*guard).offset)).is_none());
+            *self.data.offset((*guard).offset) = Some(elem);
+            (*guard).offset += 1;
+            (*guard).offset %= self.capacity as isize;
+            if self.size.fetch_add(1, Ordering::Release) == 0 {
+                must_wake_dequeuers = true;
+            }
+        }
+        Ok(must_wake_dequeuers)
+    }</pre>
+<p>The size seen there is an <kbd>AtomicUsize</kbd>, which the current thread is using to determine if there's space left for it to emplace a new element. Later, once the element has been emplaced, the thread increases the size with <kbd>Release</kbd> ordering. That… seems preposterous. It's clearly counter-intuitive to program order for the increase of size to happen-before the capacity check. And, that's true. It's worth keeping in mind that there's another thread in the game:</p>
+<pre>    pub unsafe fn pop_front(&amp;self) -&gt; T {
+        let mut guard = self.front_lock.lock()<br/>                          .expect("front lock poisoned");
+        while self.size.load(Ordering::Acquire) == 0 {
+            guard = self.not_empty
+                .wait(guard)
+                .expect("oops could not wait pop_front");
+        }
+        let elem: Option&lt;T&gt; = mem::replace(&amp;mut <br/>        *self.data.offset((*guard).offset), None);
+        assert!(elem.is_some());
+        *self.data.offset((*guard).offset) = None;
+        (*guard).offset += 1;
+        (*guard).offset %= self.capacity as isize;
+        self.size.fetch_sub(1, Ordering::Release);
+        elem.unwrap()
+    }</pre>
+<p>Consider what would happen if there were only two threads, <kbd>A</kbd> and <kbd>B</kbd>, and <kbd>A</kbd> only performed <kbd>push_back</kbd> and <kbd>B</kbd> only performed <kbd>pop_front</kbd>. The <kbd>mutexes</kbd> function to provide isolation for threads of the same kind—those that push or pop—and so are meaningless in this hypothesis and can be ignored. All that matters are the atomics. If the size is zero and <kbd>B</kbd> is scheduled first, it will empty the condvar loop on an Acquire-load of size. When <kbd>A</kbd> is scheduled and finds that there is spare capacity for its element, the element will be enqueued and, once done, the size will be <kbd>Release</kbd>-stored, meaning that some lucky loop of <kbd>B</kbd> will happen-after a successful push-back from <kbd>A</kbd>.</p>
+<p>The Rust documentation for <kbd>Acquire</kbd> says:</p>
+<div class="packt_quote">
+<p>"When coupled with a load, all subsequent loads will see data written before a store with Release ordering on the same value in other threads."</p>
+</div>
+<p>The LLVM documentation says:</p>
+<div class="packt_quote">
+<p>"Acquire provides a barrier of the sort necessary to acquire a lock to access other memory with normal loads and stores."</p>
+</div>
+<p>How should we take this? An <kbd>Acquire</kbd> load keeps loads and stores those that come after it from migrating up, with regard to program order. Loads and stores prior to the <kbd>Acquire</kbd> might migrate down, with regard to program order, though. Think of an <kbd>Acquire</kbd> as akin to the starting line of a lock, but one that is porous on the top side.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

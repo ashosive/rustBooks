@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Inheritance with traits</h1>
+                </header>
+            
+            <article>
+                
+<p>Traits can also <em>inherit</em> from other traits, indicated with the <kbd>:</kbd> operator:</p>
+<pre>      trait Trait1 : SuperTrait </pre>
+<p>Look at the following code, where <kbd>trait Monster</kbd> inherits from <kbd><span>trait</span> SuperMonster</kbd>. In such a case any type that implements <kbd>Monster</kbd> must also implement <kbd>SuperMonster</kbd>, in this specific case its <kbd>super1()</kbd> method:</p>
+<pre>// see code in Chapter 6/code/super_traits.rs 
+struct Zombie { health: u32, damage: u32 } 
+ 
+trait SuperMonster { 
+    fn super1(&amp;self); 
+} 
+ 
+trait Monster : SuperMonster { 
+    fn new(hlt: u32, dam: u32) -&gt; Self; 
+    fn attack(&amp;self); 
+    fn noise(&amp;self) -&gt; &amp;'static str; 
+} 
+ 
+impl SuperMonster for Zombie { 
+    fn super1(&amp;self) { 
+        println!("I am a SuperMonster"); 
+    } 
+} 
+ 
+impl Monster for Zombie { 
+   fn new(mut h: u32, d: u32) -&gt; Zombie { 
+      if h &gt; 100 { h = 100; } 
+      Zombie { health: h, damage: d } 
+   } 
+ 
+   fn attack(&amp;self) { 
+      println!("The Zombie bites! Your health lowers with {} damage points.", 2 * self.damage); 
+   } 
+ 
+   fn noise(&amp;self) -&gt; &amp;'static str { 
+      "Aaargh!" 
+   } 
+} 
+ 
+fn main() { 
+   let zmb1 = Zombie { health: 75, damage: 15 }; 
+   println!("Oh no, I hear: {}", zmb1.noise()); 
+    zmb1.super1(); 
+} 
+// Oh no, I hear: Aaargh! 
+// I am a SuperMonster </pre>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

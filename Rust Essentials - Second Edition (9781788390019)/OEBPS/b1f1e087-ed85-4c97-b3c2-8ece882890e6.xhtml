@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">When is code unsafe</h1>
+                </header>
+            
+            <article>
+                
+<p>There are situations in which even the Rust compiler cannot guarantee that our code will behave in a safe manner. This could occur when:</p>
+<ul>
+<li>We need to program against the metal, close to the operating system, processors, and hardware</li>
+<li>We want to work with the same amount of control as is possible in C</li>
+<li>We delegate a part of the program execution to an unsafe language, such as C</li>
+<li>We want to use inline assembly language</li>
+</ul>
+<p>Rust allows us to do all of these, but we have to envelop this possibly dangerous code in an <kbd>unsafe</kbd> block:</p>
+<pre>    <strong>   unsafe {</strong>
+    <strong>     // possibly dangerous code</strong>
+    <strong>   }</strong>  </pre>
+<p>This means that the programmer takes full responsibility for the code in the block. The unsafe block is a promise to the compiler that the danger does not leak out of the block. The compiler will check the code areas marked as <kbd>unsafe</kbd> more loosely and allow otherwise forbidden manipulations, but a number of rules in the ownership system (see <span class="ChapterrefPACKT"><a href="181718d1-5b78-4952-8082-796f69471c96.xhtml">Chapter 7</a>, <em>Ensuring Memory Safety and Pointers</em></span>) still remain in place.</p>
+<p>The clear advantage here is that problem areas now appear very well isolated; if a problem occurs, we know that it can only occur in the code areas that are marked as unsafe. Having a code base where 99 percent of the code is safe and 1 percent is unsafe is much easier to maintain than a code base with 100 percent unsafe code, as in C!</p>
+<p>So, what can we do in an <kbd>unsafe</kbd> block?</p>
+<ul>
+<li>Work with <em>raw pointers</em>, especially dereferencing (see the <em>Raw pointers</em> section).</li>
+<li>Call a function in another language through an <strong>Foreign Function Interface</strong> (<span><strong>FFI</strong>)</span>, see the <em>Interfacing with C</em> section.</li>
+<li>Use assembly code in our Rust code.</li>
+<li>Use <kbd>std::mem::transmute</kbd> to convert simple types, bitwise. Here is an example of its use, transforming a string to a slice of bytes:</li>
+</ul>
+<pre>// code from Chapter 10/code/unsafe.rs: 
+use std::mem; 
+ 
+fn main() { 
+   let v: &amp;[u8] = unsafe {  
+      mem::transmute("Gandalf")  
+   }; 
+   println!("{:?}", v); 
+} </pre>
+<ul>
+<li class="packt_nosymbol">This prints out <kbd>[71, 97, 110, 100, 97, 108, 102]</kbd>.</li>
+<li class="packt_nosymbol">Use (read or change) mutable static variables. This can only be done in an unsafe block; it is a very bad idea anyway. Here is an example:</li>
+</ul>
+<pre>   // code from Chapter 10/code/unsafe.rs: 
+
+static mut N: i32 =  42; 
+fn main() { 
+// N = 108; // use of mutable static requires unsafe         // function or block 
+    unsafe { 
+       println!("{:?}", N );  // 42 
+       N = 108; 
+       println!("{:?}", N );  // 108 
+    } 
+} </pre>
+<p>An <kbd>unsafe</kbd> block can also call <kbd>unsafe</kbd> functions that perform these dangerous operations, marked like this: <kbd>unsafe fn dangerous() { }</kbd>.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

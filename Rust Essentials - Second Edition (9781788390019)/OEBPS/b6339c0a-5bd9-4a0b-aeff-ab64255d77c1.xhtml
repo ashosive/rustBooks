@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Importing modules and file hierarchy</h1>
+                </header>
+            
+            <article>
+                
+<p>The <kbd>use</kbd> keyword like in <kbd>use game1::func2;</kbd> imports a <kbd>func2</kbd> function from the <kbd>game1</kbd> module, so that it can simply be called with its name, <kbd>func2()</kbd>. You can even give it a shorter name with <kbd>use game1::func2 as gf2;</kbd> so that it can be called as <kbd>gf2()</kbd>.</p>
+<p>When the module <kbd>game1</kbd> contains two (or more) functions, <kbd>func2</kbd> and <kbd>func3</kbd>, that we want to import, this can be done with <kbd>use game1::{func2, func3};</kbd>.</p>
+<p>If you want to import all (<kbd>public</kbd>) items of the module <kbd>game1</kbd> you can do it with <kbd>*</kbd>:</p>
+<pre>use game1::*; </pre>
+<p>However, using such a global import is not best practice, except in modules for testing. The main reason is that a global import makes it harder to see where names are bound. Furthermore, they are forward-incompatible, since new upstream exports can clash with existing names.</p>
+<p>Inside a module, <kbd>self::</kbd> and <kbd>super::</kbd> can be prepended to a path, like <kbd>game1::func2</kbd>, to distinguish, respectively, between a function in the current module itself and a function in the parent scope outside of the module:</p>
+<pre>self::game1::func2(); 
+::game1::func2(); // same thing as self:: 
+super::game1::func2(); </pre>
+<p>The <kbd>use</kbd> statements are preferably written at the top of the code file, so that they work for the whole of the code. If you prepend the <kbd>use</kbd> statement with a <kbd>pub</kbd>, then you export these definitions (in other words, you make them visible) to the <kbd>super</kbd> level, like this:</p>
+<pre>pub use game1::{func2, func3}; </pre>
+<p>If the code is inside the current module, write this as:</p>
+<pre>use self::game1::{func2, func3}; </pre>
+<p>In the previous example, the module was defined in the main source file itself; in most cases a module will be defined in another source file. How do we import such modules? In Rust, we can insert the entire contents of a module source file into the current file by declaring the module at the top of the code (but after any <kbd>use</kbd> statements) like this--<kbd>mod modul1;</kbd> optionally preceded by <kbd>pub</kbd>.</p>
+<p>This statement will look for a file, <kbd>modul1.rs</kbd>, in the same folder as the current source file, and import its code in the current code inside a module, <kbd>modul1</kbd>. If a <kbd>modul1.rs</kbd> file is not found, it will look for a <kbd>mod.rs</kbd> file in a subfolder <kbd>modul1</kbd>, and insert its code.</p>
+<p>If we write it as <kbd>pub mod modul1</kbd>, then everything from <kbd>modul1</kbd> is accessible.</p>
+<p>This is Rust's mechanism for constructing a main source file that imports the code of many other source files and can refer to them. The mechanism works in a hierarchical fashion, allowing the creation of complete trees containing source code.</p>
+<p>Here is a simple example; <kbd>import_modules.rs</kbd> contains the following code:</p>
+<pre>// from Chapter 8/code/import_modules.rs 
+mod modul1; 
+mod modul2; 
+ 
+fn main() { 
+    modul1::func1(); 
+    modul2::func1(); 
+} </pre>
+<p>In a subfolder, <kbd>modul1</kbd>, we have the <kbd>mod.rs</kbd> file, containing this:</p>
+<pre>pub fn func1() { 
+    println!("called func1 from modul1"); 
+} </pre>
+<p>The <kbd>modul2.rs</kbd> file in the same folder as <kbd>import_modules.rs</kbd> contains this:</p>
+<pre>pub fn func1() { 
+    println!("called func1 from modul2"); 
+} </pre>
+<div class="packt_infobox">Note that these module source files don't contain the <kbd>mod</kbd> declaration anymore, because they were already declared in <kbd>import_modules.rs</kbd>.</div>
+<p>Executing <kbd>import_modules</kbd> prints out the following:</p>
+<pre><strong>    called func1 from modul1</strong>
+    <strong>called func1 from modul2</strong>  </pre>
+<div class="mce-root packt_infobox"><span class="packt_screen">Remark</span>: ;<br/>
+<br/>
+Compile <kbd>import_modules.rs</kbd> on the command-line with rustc, using the Sublime Text plugin, for example, it is not able to find the module code.</div>
+<p>What happens if you simply call <kbd>func1()</kbd> in <kbd>main(</kbd>)? Now the compiler doesn't know which <kbd>func1</kbd> to call, either from <kbd>modul1</kbd> or from <kbd>modul2</kbd>, resulting in <kbd>error: unresolved name `func1`</kbd>. But if we add <kbd>use</kbd><kbd>modul1::func1</kbd>, then calling <kbd>func1()</kbd> works and the ambiguity is resolved.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

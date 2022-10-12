@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Back to the where version</h1>
+                </header>
+            
+            <article>
+                
+<p>The <kbd>where</kbd> version of the code is more complex than the non-where version.</p>
+<div class="packt_infobox">The source for this version can be found in <kbd>09/generic_trait_where</kbd>.</div>
+<p>Let's examine the code:</p>
+<pre class="mce-root">extern crate num; <br/>use std::ops::{Add, Mul}; <br/>use num::FromPrimitive;</pre>
+<p>We have seen <kbd>std::ops::Mul</kbd> before in the generic multiplication example. If we need to include multiple items from <kbd>std::ops</kbd> (or indeed any library), they are held in curly braces; <kbd>{}</kbd>. Here, we include <kbd>Add</kbd> and <kbd>Mul</kbd>.</p>
+<p>Up until this point, we have not seen the <kbd>extern crate</kbd> directive. For now, it is enough to know that this will include an external library. Crates are covered in <span class="ChapterrefPACKT">Chapter 9, <em>Generics and Traits</em></span>.</p>
+<p>Finally, we use <kbd>FromPrimitive</kbd> from the <kbd>num</kbd> library.</p>
+<p>Our <kbd>struct</kbd> and <kbd>trait</kbd> are the same as before. The implementation, though, is different:</p>
+<pre class="mce-root">impl&lt;T&gt; Calculate&lt;T&gt; for Shape&lt;T&gt; <br/>  where T: Copy + FromPrimitive + Add&lt;Output = T&gt; + <br/>  Mul&lt;Output = T&gt; <br/>{<br/>  fn calc(&amp;self) -&gt; T {<br/>    let two = T::from_u8(2).expect("Unable to create a value of 2");<br/>    self.line_one * two + self.line_two * two<br/>  } <br/>}</pre>
+<p>There are two important lines in this code: <kbd>where T:Copy + FromPrimitive + Add&lt;Output = T&gt; + Mul&lt;Output = T&gt;</kbd> and <kbd>let two = T::from_u8(2).expect("Unable to create a value of 2");</kbd>.</p>
+<p>Here, we are saying that we want to copy the type, we'll be using <kbd>FromPrimitive</kbd> to cast a primitive to <kbd>T</kbd>, and both the <kbd>Add</kbd> and <kbd>Mul</kbd> outputs will be of type <kbd>T</kbd>. Rust concatenates the parameters that a <kbd>where</kbd> uses using <kbd>+</kbd>.</p>
+<p>The <kbd>let two</kbd> line creates a variable that takes an unsigned 8-bit value and casts that to <kbd>T</kbd>. If it fails, the error is thrown.</p>
+<p>We have to use <kbd>Add&lt;Output = T&gt;</kbd> to ensure we can add the types together.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style00.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style01.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Creating documentation using Cargo</h1>
+                </header>
+            
+            <article>
+                
+<p>As with other languages, Rust is able to create documentation based on meta tags with the source files. Take the following example:</p>
+<pre>fn main() 
+{ 
+   print_multiply(4, 5); 
+} 
+ 
+/// A simple function example 
+/// 
+/// # Examples 
+/// 
+/// ``` 
+/// print_multiply(3, 5); 
+///  
+/// ``` 
+ 
+fn print_multiply(x: i32, y: i32) 
+{ 
+   println!("x * y = {}", x * y); 
+} </pre>
+<p>The comments preceded by <kbd>///</kbd> will be converted into documentation.</p>
+<p>The documentation can be created in one of two ways: via Cargo or by using the <strong>rustdoc</strong> program.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

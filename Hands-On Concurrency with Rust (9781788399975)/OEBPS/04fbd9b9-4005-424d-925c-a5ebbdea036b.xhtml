@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Managing cross-language ownership</h1>
+                </header>
+            
+            <article>
+                
+<p>Rust is now aware of the C functions, and we have our internal structs reworked to use C layout: it is time to link up the C functions that manipulate <kbd>mars_t</kbd> with our <kbd>Mars</kbd>. Because we're sharing ownership of <kbd>Mars</kbd> between the Rust allocator and the C allocator, we've got to be careful to initialize the <kbd>Mars</kbd> struct with null pointers in the fields that C will own, like so:</p>
+<pre>impl MarsBuilder {
+    pub fn freeze(self) -&gt; Mars {
+        let mut mars = Mars {
+            n_warriors: 2,
+            cycles: u32::from(self.cycles.unwrap_or(10_000)),
+            core_size: self.core_size.unwrap_or(8_000),
+            processes: self.processes.unwrap_or(10_000),
+            max_warrior_length: self.max_warrior_length.unwrap_or(100),
+            war_tab: ptr::null_mut(),
+            core_mem: ptr::null_mut(),
+            queue_mem: ptr::null_mut(),
+        };
+        unsafe {
+            sim_alloc_bufs(&amp;mut mars);
+        }
+        mars
+    }</pre>
+<p>This <kbd>MarsBuilder</kbd> is a builder-pattern for producing a <kbd>Mars</kbd>. The remainder of the implementation works how you might expect:</p>
+<pre>    pub fn core_size(mut self, core_size: u16) -&gt; Self {
+        self.core_size = Some(core_size);
+        self
+    }
+
+    pub fn cycles(mut self, cycles: u16) -&gt; Self {
+        self.cycles = Some(cycles);
+        self
+    }
+
+    pub fn processes(mut self, processes: u32) -&gt; Self {
+        self.processes = Some(processes);
+        self
+    }
+
+    pub fn max_warrior_length(mut self, max_warrior_length: u16) -&gt; Self {
+        self.max_warrior_length = Some(max_warrior_length);
+        self
+    }
+}</pre>
+<p>Back to <kbd>MarsBuilder::freeze(self) -&gt; Mars</kbd>. This function creates a new <kbd>Mars</kbd> and then passes it immediately into <kbd>sim_alloc_bufs</kbd>:</p>
+<pre>unsafe {
+    sim_alloc_bufs(&amp;mut mars);
+}</pre>
+<p><kbd>&amp;mut mars</kbd> automatically coerces into <kbd>*mut mars</kbd> and, as we know from previous chapters, dereferencing a raw pointer is unsafe. The fact that it's <em>C</em> dereferencing the raw pointer is icing on the cake. Now, let's take a look at <kbd>sim_alloc_bufs</kbd> and get a sense of what's going on. In <kbd>c_src/sim.c</kbd>:</p>
+<pre>int sim_alloc_bufs(mars_t* mars) {
+    mars-&gt;coreMem = (insn_t*)malloc(sizeof(insn_t) * mars-&gt;coresize);
+    mars-&gt;queueMem = (insn_t**)malloc(sizeof(insn_t*) * <br/>                       (mars-&gt;nWarriors * mars-&gt;processes + 1));
+    mars-&gt;warTab = (w_t*)malloc(sizeof(w_t)*mars-&gt;nWarriors);
+
+    return (mars-&gt;coreMem
+            &amp;&amp; mars-&gt;queueMem
+            &amp;&amp; mars-&gt;warTab);
+}</pre>
+<p>The three fields owned by C—<kbd>coreMem</kbd>, <kbd>queueMem</kbd>, and <kbd>warTab</kbd>—are allocated according to the size of the structs being stored and the return is a boolean-and of the <kbd>malloc</kbd> returns, a short way of determining whether <kbd>malloc</kbd> ever returned <kbd>NULL</kbd>, signaling that no more memory was available on-system. Had we decided to add a new field into the Rust struct and not updated the C struct to reflect this change, these stores would be too small. Eventually, some code somewhere would reach past the bounds of an array and crash. No good, that.</p>
+<p>But! We've just called C code from Rust.</p>
+<p>Let's talk about ownership for a second. <kbd>Mars</kbd> is a structure not wholly owned by Rust, and not wholly owned by C. That's fine and is also not uncommon, especially if you're partially (or completely) porting a C codebase into Rust. It does mean we've got to be careful about <kbd>Drop</kbd>:</p>
+<pre>impl Drop for Mars {
+    fn drop(&amp;mut self) {
+        unsafe { sim_free_bufs(self) }
+    }
+}</pre>
+<p>As we've seen in previous chapters, we have to arrange for explicit <kbd>Drop</kbd> when there's raw memory in use. <kbd>Mars</kbd> is no exception. The call here to <kbd>sim_free_bufs</kbd> clears up the C-owned memory and Rust takes care of the rest. If cleanup were more difficult—as sometimes happens—you'd have to take care to avoid deferencing the C-owned pointers post-free. <kbd>sim_free_bufs</kbd> is a brief implementation:</p>
+<pre>void sim_free_bufs(mars_t* mars)
+{
+    free(mars-&gt;coreMem);
+    free(mars-&gt;queueMem);
+    free(mars-&gt;warTab);
+}</pre>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

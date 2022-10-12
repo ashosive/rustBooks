@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Exporting a public interface</h1>
+                </header>
+            
+            <article>
+                
+<p>The next error the compiler throws at us is <kbd>error: Zombie does not name a structure</kbd>; clearly the code for the <kbd>Zombie</kbd> struct is not found. Because this struct also resides in the <kbd>monsters</kbd> module, the solution is easy: prefix <kbd>Zombie</kbd> with <kbd>monsters::</kbd>, like this:</p>
+<pre>let zmb1 = monsters::Zombie {health: 75, damage: 15}; </pre>
+<p>Another <kbd>error: struct `Zombie` is private</kbd> makes it clear that we must mark the <kbd>Zombie</kbd> struct with <kbd>pub</kbd> like the following:</p>
+<pre>pub struct Zombie { ... } </pre>
+<p>Now we get an error on the line containing <kbd>zmb1.noise():</kbd><kbd>error: type `monsters::Zombie` does not implement any method in scope named `noise`</kbd>. The accompanying help note explains what to do and why:</p>
+<pre><strong>help: methods from traits can only be called if the trait is in scope; the following trait is implemented but not in scope, perhaps add a `use` for it:</strong>
+<strong>help: candidate #1: use `monsters::Monster`</strong>  </pre>
+<p>So, let's add this to the code:</p>
+<pre>extern crate monsters; 
+use monsters::Monster; </pre>
+<p>The last error we have to solve occurs at the <kbd>use</kbd> line: <kbd>error: trait `Monster` is private - source trait is private</kbd>. Again, it is very logical; if we want to use a trait, it must be publicly visible:</p>
+<pre>pub trait Monster { ... } </pre>
+<p>Now <kbd>cargo build</kbd> is successful, and if we execute <kbd>monsters</kbd> the output is this:</p>
+<pre><strong>Printing from crate monsters!</strong>
+<strong>Oh no, I hear: Aaargh!</strong>
+<strong>The Zombie bites! Your health lowers with 30 damage points.</strong>
+<strong>Zombie { health: 75, damage: 15 }</strong>  </pre>
+<p>This makes it clear that the things we want to make <em>visible</em> in our module (or put it another way, that we want to export) must be annotated with <kbd>pub</kbd>; they form the <em>interface</em> our module exposes to the outside world.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style00.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style01.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Let's really make the function simple</h1>
+                </header>
+            
+            <article>
+                
+<p>While the preceding example is fairly compact, we can further reduce the footprint of the code by using <kbd>match</kbd> as an expression.</p>
+<p>If you're used to <kbd>?</kbd> in C#, you will be familiar with a construct such as the following:</p>
+<pre>var t = SomeCondition == 3 ? "three" : (SomeCondition == 4 ? <br/> "four" : "not three or four");</pre>
+<p>This means that we can assign <kbd>t</kbd> to be <kbd>three</kbd> if <kbd>SomeCondition == 3</kbd> else <kbd>if</kbd><kbd>SomeCondition == 4</kbd>, <kbd>t = four</kbd>. If this falls through, we can set <kbd>t</kbd> as <kbd>not three or four</kbd>.</p>
+<p>It can get messy. Rust can do the same, only far more cleanly.</p>
+<p>In the origin code, we had the following:</p>
+<pre>let mut t = "".to_string(); 
+match x 
+{ </pre>
+<p>We can use <kbd>match</kbd> as an expression to set the value to be returned:</p>
+<pre>let t = match x 
+{ 
+    ... 
+}; 
+return t; </pre>
+<p>Or, more simply, by just returning the result of the match:</p>
+<pre>return match x 
+{ 
+    ... 
+}; 
+ </pre>
+<p>Or even more simply, when we remember that, in Rust, a block returns the result of its last expression when we omit the <kbd>;</kbd>:</p>
+<pre>fn my_test(x: i32) -&gt; String { 
+    match x { 
+        1 =&gt; "one".to_owned(), 
+        2 =&gt; "two".to_owned(), 
+        3 =&gt; "three".to_owned(), 
+        _ =&gt; "not found".to_owned() 
+    } <br/>}</pre>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

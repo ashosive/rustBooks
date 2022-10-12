@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style00.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style01.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Stack and heap variables</h1>
+                </header>
+            
+            <article>
+                
+<p>To understand why we get this problem, we will need to understand in depth how Rust works, and by this I mean at memory level.</p>
+<p>Let's start with our variable:</p>
+<pre>let myvar = 32i32; </pre>
+<p>As I've said, in our minds, we will create a <kbd>myvar</kbd> variable of type <kbd>i32</kbd> and bind it to the value <kbd>32</kbd>. Rust, on the other hand, does it differently.</p>
+<p>Firstly, it identifies that we will need space on the stack for a value that is the size of <kbd>i32</kbd>.</p>
+<p>Next, it copies the value for <kbd>32</kbd> into that space allocated on the stack.</p>
+<p>Lastly, it binds the binding to the position of the stack allocated block to the variable name.</p>
+<p>In other words, the complete opposite to how we do it in our minds.</p>
+<p>Let's see what happens when we create another binding, like this:</p>
+<pre>let myvartwo = myvar; </pre>
+<p>The compiler moves the binding to where the data sits on the stack for <kbd>myvar</kbd> and then says that that position (and data) belongs to <kbd>myvartwo</kbd>. The binding will be transferred. What happens to <kbd>myvar</kbd> though? Rust won't allow things to <em>dangle</em> or allow information to be bound to two different objects. Once the binding is transferred, <kbd>myvar</kbd> is removed.</p>
+<p>The same thing happens if the binding points to something in the heap. Therefore, when we consider <kbd>let myvec = vec![1i32, 2i32, 3i32];</kbd>, <kbd>let myvec = vec![1i32, 2i32, 3i32];</kbd> we know how this will work. The compiler knows that it requires space on the heap, enough to hold three elements of type <kbd>i32</kbd>. These values are copied into the locations and the base address of the contiguous chunk of memory is bound to <kbd>myvec</kbd>.</p>
+<p>Now, let's transfer ownership:</p>
+<pre>let vectwo = myvec; </pre>
+<p>Now, <kbd>vectwo</kbd> is the only usable binding to the vector on the heap, and <kbd>myvec</kbd> gets invalidated.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

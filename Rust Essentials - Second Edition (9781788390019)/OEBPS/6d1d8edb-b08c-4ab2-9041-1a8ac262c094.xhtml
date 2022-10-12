@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style00.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style01.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Printing with string interpolation</h1>
+                </header>
+            
+            <article>
+                
+<p>An obvious way to use variables is to print out their value, as is done here:</p>
+<pre>// see Chapter 2/code/constants2.rs 
+static MAX_HEALTH: i32 = 100; 
+static GAME_NAME: &amp;str = "Monster Attack"; 
+const MYPI: f32 = 3.14; 
+ 
+fn main() { 
+  println!("The Game you are playing is called {}.", GAME_NAME); 
+  println!("You start with {} health points.", MAX_HEALTH); 
+} </pre>
+<p>This gives an output which looks like this:</p>
+<pre><strong>The Game you are playing is called Monster Attack.</strong>
+<strong>You start with 100 health points<span class="NormalPACKTChar">.</span></strong></pre>
+<p>The first argument of the <kbd>println!</kbd> macro is a literal format string containing a placeholder <kbd>{}</kbd>. The value of the constant or variable after the comma is converted to a string and comes in its place. There can be more than one placeholder and they can be numbered in order, so that they can be used repeatedly, as in the following code:</p>
+<pre>println!("In the Game {0} you start with {1} % health, yes you read it correctly: {1} points!", GAME_NAME, MAX_HEALTH); </pre>
+<p>This produces the following output:</p>
+<pre><strong>In the Game Monster Attack you start with 100 % health, yes you read it correctly: 100 points!</strong>
+  </pre>
+<p>The placeholder can also contain one or more named arguments, like this:</p>
+<pre>println!("You have {points} % health", points = 70); </pre>
+<p>This produces the following output:</p>
+<pre><strong>You have 70 % health</strong>  </pre>
+<p>Special ways of formatting can be indicated inside the <kbd>{}</kbd> after a colon (<kbd>:</kbd>), optionally prefixed by a position, like this:</p>
+<pre>println!("MAX_HEALTH is {:x} in hexadecimal", MAX_HEALTH); // </pre>
+<p>This gives an output like this: <kbd>64</kbd></p>
+<pre>println!("MAX_HEALTH is {:b} in binary", MAX_HEALTH);   // </pre>
+<p>This gives an output like this: <kbd>1100100</kbd></p>
+<pre>println!( "Two written in binary is {0:b}", 2);   // </pre>
+<p>This gives an output like this: <kbd>10</kbd></p>
+<pre>println!("pi is {:e} in floating point notation", PI);  // </pre>
+<p>This gives an output like this: <kbd>3.14e0</kbd>.</p>
+<p>The following formatting possibilities exist:</p>
+<ul>
+<li><strong>o</strong>: For octal</li>
+<li><strong>x</strong>: For lower hexadecimal</li>
+<li><strong>X</strong>: For upper hexadecimal</li>
+<li><strong>p</strong>: For a pointer</li>
+<li><strong>b</strong>: For binary</li>
+<li><strong>e</strong>: For lower exponential notation</li>
+<li><strong>E</strong>: For upper exponential notation</li>
+<li><strong>?</strong>: For debugging purposes</li>
+</ul>
+<p>The <kbd>format!</kbd> macro has the same parameters and works the same way as the <kbd>println!</kbd> macro, but it returns a string instead of printing out.</p>
+<div class="packt_infobox">Consult <a href="http://doc.rust-lang.org/std/fmt/"><span class="URLPACKT">http://doc.rust-lang.org/std/fmt/</span></a> for an overview of all possibilities.</div>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

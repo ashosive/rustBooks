@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">std::ascii</h1>
+                </header>
+            
+            <article>
+                
+<p>This module performs operations on ASCII strings.</p>
+<div class="packt_infobox"><span>The </span><kbd>AsciiExt</kbd><span> trait contains a number of useful string slice utilities for testing, as well as conversion to upper and lowercase.</span></div>
+<p style="font-weight: 400"><strong>Structs</strong></p>
+<ul>
+<li><kbd>pub struct EscapeDefault</kbd>: Iterates over the escaped version of a byte</li>
+<li><kbd>impl</kbd> iterator for <kbd>EscapeDefault</kbd>
+<ul>
+<li><kbd>type Item = u8</kbd>: Type of the elements iterated over</li>
+</ul>
+</li>
+<li><kbd>impl</kbd> iterator for <kbd>EscapeDefault</kbd> functions
+<ul>
+<li><kbd>next(&amp;mut self) -&gt; Option&lt;u8&gt;</kbd>: Advances the iterator and return the next value</li>
+<li><kbd>size_hint(&amp;self) -&gt; (usize, Option&lt;usize&gt;)</kbd>: Returns the bounds on the remaining length of the iterator</li>
+<li><kbd>count(self) -&gt; usize</kbd>: Returns the number of iterations</li>
+<li><kbd>last(self) -&gt; Option&lt;Self::Item&gt;</kbd>: Returns the last element</li>
+<li><kbd>nth(&amp;mut self, n:usize) -&gt; Option&lt;Self::Item&gt;</kbd>: Returns the next element after the n<sup>th</sup> position</li>
+<li><kbd>chain&lt;U&gt;(self, other:U) -&gt; Chain&lt;Self, U::IntoIterator&gt; where U: IntoIterator&lt;Item=Self::Item&gt;</kbd>: Takes two iterators and creates a new one over both in sequence</li>
+<li><kbd>zip&lt;U&gt;(self, other: U) -&gt; Zip&lt;Self, U:IntoIterator&gt; where U:IntoIterator</kbd>: Takes two iterators and makes them into a single pair iterator</li>
+<li><kbd>map&lt;T,U&gt;(self, u: U) -&gt; Map&lt;Self, U&gt; where U:FnMut(Self::Item) -&gt; T</kbd>: Creates an iterator from a closure that calls that closure on each element</li>
+<li><kbd>filter&lt;F&gt;(self, predicate: F) -&gt; Filter&lt;Self, F&gt; where F: FnMut(&amp;Self::Item) -&gt; bool</kbd>: Creates an iterator that uses a closure to determine whether an element should be returned</li>
+<li><kbd>enumerate(self) -&gt; Enumerate&lt;Self&gt;</kbd>: Gives the current iteration count and the next value</li>
+<li><kbd>peekable(self) -&gt; Peekable&lt;Self&gt;</kbd>: Peeks at the next value without the iterator consuming it</li>
+<li><kbd>skip_while&lt;P&gt;(self, predicate:P) -&gt; SkipWhile&lt;Self, P&gt; where P:FnMut(&amp;Self::Item) -&gt; bool</kbd>: Creates an iterator that skips <em>n</em> elements based on the predicate.</li>
+<li><kbd>take_while&lt;P&gt;(self, predicate:P) -&gt; TakeWhile&lt;Self, P&gt; where P:FnMut(&amp;Self::Item) -&gt; bool</kbd>: Creates an iterator that yields elements based on the predicate.</li>
+<li><kbd>skip(self, n: usize) -&gt; Skip&lt;Self&gt;</kbd>: Skips the first <em>n</em> elements</li>
+<li><kbd>take(self, n: usize) -&gt; Take&lt;Self&gt;</kbd>: The iterator that yields the first <em>n</em> elements</li>
+<li><kbd>scan&lt;S, T, U&gt;(self, interal_state: S, u: U) -&gt; Scan&lt;Self, S, U&gt; where U:FnMut(&amp;mut S, Self::Item)-&gt; Option&lt;T&gt;</kbd>: The iterator adapter that holds an internal state and produces a new iterator</li>
+<li><kbd>flat_map&lt;T, U&gt;(self, u:U) -&gt; Flat_Map&lt;Self, T, U&gt; where U:FnMut(Self::Item) -&gt; T, T:IntoIterator</kbd>: Creates an iterator that works like a map, but produces a flattened, nested structure</li>
+<li><kbd>fuse(self)-&gt;Fuse(Self)</kbd>: Iterator that terminates after the first instance of <kbd>None</kbd></li>
+<li><kbd>inspect&lt;T&gt;(self, t: T)-&gt;Insepect&lt;Self, T&gt; where T: FnMut(&amp;self::Item)-&gt;()</kbd>: Does something with each iterated element and passes the value on.</li>
+<li><kbd>by_ref(&amp;mut self) -&gt; &amp;mut Self</kbd>: Borrows rather than consumes the iterator</li>
+<li><kbd>collect&lt;T&gt;(self) -&gt; T where T:FromIterator(Self::Item)</kbd>: Makes a collection from an iterator</li>
+<li><kbd>partition&lt;T, U&gt;(self, u:U) -&gt; (T,T) where T:Default + Extend&lt;Self::Item&gt;, U:FnMut(&amp;Self::Item&gt; -&gt; bool</kbd>: Takes the iterator and creates two collections from it</li>
+<li><kbd>fold&lt;T, U&gt;(self, init:T, u:U)-&gt;T where U:FnMut(T, Self::Item) -&gt; T</kbd>: The iterator adapter that applies a function to produce a single final result</li>
+<li><kbd>all&lt;T&gt;(&amp;mut self, t:T) -&gt; bool where T:FnMut(Self::Item) -&gt; bool</kbd>: Tests whether all elements of the iterator match the predicate <kbd>T</kbd></li>
+<li><kbd>any&lt;T&gt;(&amp;mut self, t:T) -&gt; bool where T:FnMut(Self::Item) -&gt; bool</kbd>: Tests whether any elements of the iterator match the predicate <kbd>T</kbd></li>
+<li><kbd>find&lt;T&gt;(&amp;mut self, predicate:T) -&gt; Option&lt;Self::Item&gt; where T: FnMut(&amp;Self::Item) -&gt; bool</kbd>: Searches the iterator for a match to the predicate</li>
+<li><kbd>position&lt;T&gt;(&amp;mut self, predicate:T) -&gt; Option&lt;usize&gt; where T:FnMut(Self::Item) -&gt; bool</kbd>: Searches the iterator for a match to the predicate and return the index</li>
+<li><kbd>rposition&lt;T&gt;(&amp;mut self, predicate:T) -&gt; Option&lt;usize&gt; where T:FnMut(Self::Item) -&gt; bool, Self:ExtractSizeIterator + doubleEndedIterator</kbd>: As for position, except it searches from the right</li>
+<li><kbd>max(self_ =&gt; Option&lt;Self::Item&gt;</kbd>: Returns the max element of the iterator</li>
+<li><kbd>min(self_ =&gt; Option&lt;Self::Item&gt;</kbd>: Returns the min element of the iterator</li>
+<li><kbd>rev(self) -&gt; Rev&lt;Self&gt; where Self:DoubleEndedIterator</kbd>: Reverses the direction of the iterator</li>
+<li><kbd>unzip&lt;T, U, FromT, FromU&gt;(self) -&gt; (FromT, FromU) -&gt; Where FromT: Default + Extend&lt;T&gt;, FromU: Default + Extend&lt;U&gt;, Self::Iterator&lt;Item=(T,U)&gt;</kbd>: Performs the reverse of ZIP (two collections from a single iterator)</li>
+<li><kbd>cloned&lt;'a, Y&gt;(self) -&gt; Cloned&lt;Self&gt; where Self:Iterator&lt;Item = &amp;'a T&gt;, T: 'a + Clone</kbd>: Creates an iterator that clones all of its elements</li>
+<li><kbd>cycle(self) -&gt; Cycle&lt;Self&gt; where Self:Clone</kbd>: Repeats the iterator endlessly</li>
+<li><kbd>sum&lt;T&gt;(self) -&gt; T where Y:Add&lt;Self::Item, Output=T&gt; + Zero</kbd>: Returns the sum of the iterator elements</li>
+<li><kbd>Product&lt;T&gt;(self) -&gt; T where T: Mul&lt;Self::Item, Output = T&gt; + One</kbd>: Multiplies the elements of the iterator and returns the value</li>
+</ul>
+</li>
+<li><kbd>impl DoubleEndedIterator for EscapeDefault</kbd>
+<ul>
+<li><kbd>next_back(&amp;mut self) -&gt; Option&lt;u8&gt;</kbd>: Iterator able to yield a result from both ends</li>
+</ul>
+</li>
+<li><kbd>impl ExactSizeIterator for EscapeDefault</kbd>
+<ul>
+<li><kbd>Len(&amp;self) -&gt; usize</kbd>: Returns the number of times the iterator will iterate.</li>
+</ul>
+</li>
+</ul>
+<p><strong>Traits</strong></p>
+<pre>pub trait AsciiExt {<br/>  type Owned;<br/>  fn is_ascii(&amp;self) -&gt; bool ;<br/>  fn to_ascii_uppercase(&amp;self) -&gt; Self:: Owned ;<br/>  fn to_ascii_lowercase(&amp;self) -&gt; Self:: Owned ;<br/>  fn eq_ignore_ascii_case(&amp;self, other: &amp;Self) -&gt; bool ;<br/>  fn make_ascii_uppercase(&amp;mut self);<br/>  fn make_ascii_lowercase(&amp;mut self);<br/>}</pre>
+<p>The following are extension methods for ASCII subset operations on string slices:</p>
+<ul>
+<li>Associated type
+<ul>
+<li><kbd>Owned:</kbd> Container for copied ASCII characters.</li>
+</ul>
+</li>
+<li>Required methods
+<ul>
+<li><kbd>is_ascii(&amp;self) -&gt; bool</kbd>: Whether value is an ASCII value</li>
+<li><kbd>to_ascii_uppercase(&amp;self) -&gt; Self::Owned</kbd>: Makes a copy of the string in ASCII uppercase</li>
+<li><kbd>to_ascii_lowercase(&amp;self) -&gt; Self::Owned</kbd>: As for uppercase, but in lowercase</li>
+<li><kbd>eq_ignore_ascii_case(&amp;self, other: &amp;Self) -&gt; bool</kbd>: Are two strings the same ignoring the case</li>
+</ul>
+</li>
+</ul>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

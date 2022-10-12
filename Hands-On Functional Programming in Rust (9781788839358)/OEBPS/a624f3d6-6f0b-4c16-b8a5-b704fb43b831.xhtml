@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Multiples of small numbers are also small numbers</h1>
+                </header>
+            
+            <article>
+                
+<p><span>The reverse may also be true. Sometimes the low frequency of </span><kbd>work</kbd><span> is overwhelmed by frequent and expensive </span><kbd>initialization</kbd><span>. Knowing which problem you have will let you know where to start looking to improve:</span></p>
+<pre style="padding-left: 30px" class="p1"><span class="s1">use std::{thread,time};<br/><br/></span><span class="s1">fn initialization() -&gt; Vec&lt;i32&gt; {<br/></span><span class="s1">   let t = time::Duration::from_millis(15000);<br/></span><span class="s1">   thread::sleep(t);<br/></span><span class="s1">   println!("Initialize data.");<br/></span><span class="s1">   vec![1, 2, 3];<br/></span><span class="s1">}<br/><br/></span><span class="s1">fn work(x: i32) -&gt; i32 {<br/></span><span class="s1">   let t = time::Duration::from_millis(150);<br/></span><span class="s1">   thread::sleep(t);<br/></span><span class="s1">   println!("Work.");<br/></span><span class="s1">   x * x<br/></span><span class="s1">}<br/><br/></span><span class="s1">fn main() {<br/></span><span class="s1">   for _ in 0..10 {<br/></span><span class="s1">      let data = initialization();<br/></span><span class="s1">      data.iter().map(|x| work(*x)).for_each(drop);<br/></span><span class="s1">   }<br/></span><span class="s1">}</span></pre>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

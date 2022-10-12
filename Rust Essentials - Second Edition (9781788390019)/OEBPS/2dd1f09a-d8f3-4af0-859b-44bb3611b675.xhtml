@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Sending and receiving data</h1>
+                </header>
+            
+            <article>
+                
+<p>Which datatypes can be sent over a channel? Rust requires that data to be sent over a channel must implement the <kbd>Send</kbd> trait, which guarantees that ownership is transferred safely between threads. Data that does not implement <kbd>Send</kbd> cannot leave the current thread. An <kbd>i32</kbd> is <kbd>Send</kbd> because we can make a copy, so let's do that in the following code snippet:</p>
+<pre>fn main() { 
+   let (tx, rx) = channel(); 
+   thread::spawn(move|| { 
+<strong>     tx.send(10).unwrap();</strong> 
+   }); 
+<strong>   let res = rx.recv().unwrap(); </strong> 
+   println!("{:?}", res);  
+} </pre>
+<p>This of course prints <kbd>10</kbd>.</p>
+<p>Here, <kbd>tx</kbd> is moved inside the closure. A better way to write <kbd>tx.send(10).unwrap()</kbd> is the following:</p>
+<pre><strong>tx.send(10).ok().expect("Unable to send message");</strong>  </pre>
+<p>This will ensure that, in the case of a problem, a message is reported.</p>
+<p><kbd>send()</kbd> is executed by the child thread; it queues a message (a data value, here 10) in the channel and does not block it. The <kbd>recv()</kbd> is done by the parent thread; it picks a message from the channel and blocks the current thread if there are no messages available (if you need to do this in a non-blocking fashion, use <kbd>try_recv()</kbd>).</p>
+<p>If you do not need to process the received value, the block can be written as follows:</p>
+<pre>let _ = rx.recv(); </pre>
+<p>The <kbd>send()</kbd> and <kbd>recv()</kbd> operations return a <kbd>Result</kbd>, which can be of type <kbd>Ok(value)</kbd> or an error, <kbd>Err</kbd>. Full error handling is omitted here, because in the case of an <kbd>Err</kbd> the channel does not work anymore, and it is better for that thread to fail (panic) and stop.</p>
+<p>In a general scenario, we could make a child thread execute a long computation, and then receive the result in the parent thread, like this:</p>
+<pre>// code from Chapter 9/code/channels2.rs: 
+use std::thread; 
+use std::sync::mpsc::channel; 
+ 
+fn main() { 
+   let (tx, rx) = channel(); 
+     
+   thread::spawn(move|| { 
+        let result = some_expensive_computation(); 
+        tx.send(result).ok().expect("Unable to send message"); 
+    }); 
+ 
+    some_other_expensive_computation(); 
+    let result = rx.recv(); 
+    println!("{:?}", result);   
+} 
+ 
+fn some_expensive_computation() -&gt; i32 { 1 } 
+fn some_other_expensive_computation() { } </pre>
+<p><kbd>result</kbd> here has the value <kbd>Ok(1)</kbd>.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

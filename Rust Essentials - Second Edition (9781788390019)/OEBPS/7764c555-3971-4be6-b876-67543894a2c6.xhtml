@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Why macros?</h1>
+                </header>
+            
+            <article>
+                
+<p>Macros make powerful language or syntax extensions, and thus <em>metaprogramming</em>, possible; for example, Rust has a <kbd>regex!</kbd> macro which allows for defining regular expressions in your program, which are compiled while your code is compiled. That way the regular expressions are verified and can be optimized at compile time, and so avoid runtime overhead.</p>
+<p>Macros can capture repetitive or similar code patterns and replace them with other source code; the macro expands the original code into new code. This expansion happens early in compilation, before any static checking is done, so the resulting code is compiled together with the original code. In this sense, they much more resemble Lisp macros than C macros. Rust macros allow writing <strong>Don't Repeat Yourself</strong> ;(<strong>DRY</strong>) code, by factoring out the common parts of functions. But a macro is higher-level than a function, because a macro allows for generating the code for many functions at compile time.</p>
+<p>So, as a Rust developer, you can also write your own macros, replacing repetitive code with much simpler code and thereby automating tasks. On the other side of the spectrum, this could even make it possible to write domain-specific languages. Macro coding follows a specific set of declarative pattern-based rules. Rust's macro system is also <em>hygienic</em>, which means no conflict is possible between variables used in the macro and variables outside the macro. Each macro expansion happens in a distinct syntax context, and each variable is tagged with the syntax context where it was introduced.</p>
+<p>Macro code itself is harder to understand than normal Rust code, so it is not that easy to make. But on the other hand, you won't code macros every day; if a macro is tested, just use it. The full story of macro writing extends into advanced regions of Rust, but in the following sections we discuss the basic techniques for developing macros.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

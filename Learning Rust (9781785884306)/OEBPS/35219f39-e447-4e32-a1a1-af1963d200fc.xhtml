@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style00.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style01.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Building a string</h1>
+                </header>
+            
+            <article>
+                
+<p>We've seen that we can create a String from a string slice (using <kbd>to_owned()</kbd> or the <kbd>format!</kbd> macro), or we can create it using <kbd>String::new()</kbd>.</p>
+<p>There are two further ways to help build the string: <kbd>push</kbd> adds a single character to the string, and <kbd>push_str</kbd> adds an <kbd>str</kbd> to the string.</p>
+<p>The following shows this in action:</p>
+<pre>fn main() { 
+    let home_team = "Liverpool"; 
+    let result = " beat "; 
+    let away_team = "Manchester United"; 
+    let home_score = '3'; // single character 
+    let away_score = "-0"; 
+     
+ 
+    let mut full_line = format!("{}{}{} ", home_team, result, away_team); 
+         
+    // add the character to the end of the String     
+    full_line.push(home_score); 
+      
+    // add the away score to the end of the String 
+    full_line.push_str(away_score); 
+         
+    println!("{}", full_line); 
+} </pre>
+<p>When this last code snippet is compiled and executed, you will see this:</p>
+<div class="packt_figure CDPAlignCenter CDPAlign"><img class=" image-border" src="Images/005ad0f7-e80f-4a94-ab5c-d33057e14661.png"/></div>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

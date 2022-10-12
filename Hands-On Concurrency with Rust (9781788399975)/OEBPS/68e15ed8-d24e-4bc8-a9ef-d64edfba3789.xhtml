@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style00.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style01.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Main</h1>
+                </header>
+            
+            <article>
+                
+<p>The preamble to <kbd>src/main.rs</kbd> is typical for the programs we've seen so far in this book:</p>
+<pre>extern crate feruscore;
+extern crate rand;
+extern crate rayon;
+
+use feruscore::individual::*;
+use rand::{thread_rng, Rng};
+use rayon::prelude::*;
+use std::collections::VecDeque;
+use std::fs::File;
+use std::fs::{self, DirBuilder};
+use std::io::{self, BufWriter};
+use std::path::{Path, PathBuf};
+use std::sync::atomic::{AtomicUsize, Ordering};
+use std::{thread, time};</pre>
+<p>The program does start, however, with an abnormally large block of constants and statics:</p>
+<pre>// configuration
+const POPULATION_SIZE: u16 = 256; // NOTE must be powers of two
+const CHROMOSOME_SIZE: u16 = 25; // Must be &lt;= 100
+const PARENTS: u16 = POPULATION_SIZE / 8;
+const CHILDREN: u16 = PARENTS * 2;
+const RANDOS: u16 = POPULATION_SIZE - (PARENTS + CHILDREN);
+const CORE_SIZE: u16 = 8000;
+const GENE_MUTATION_CHANCE: u32 = 100;
+
+// reporting
+static GENERATIONS: AtomicUsize = AtomicUsize::new(0);
+static REGIONAL_BATTLES: AtomicUsize = AtomicUsize::new(0);
+static FINALS_BATTLES: AtomicUsize = AtomicUsize::new(0);
+static STATE: AtomicUsize = AtomicUsize::new(0);
+static NEW_PARENTS: AtomicUsize = AtomicUsize::new(0);</pre>
+<p>Realistically, the configuration constants could be adjusted into actual configuration, via clap or some configuration-parsing library. The toml (<a href="https://crates.io/crates/toml">https://crates.io/crates/toml</a>) crate paired with serde is very useful for parsing straightforward configuration, where the validation steps are a few checks we now encode as comments. The reporting statics are the same static <kbd>AtomicUsize</kbd>s we've seen through the book. In fact, starting the reporting thread is the first thing that the <kbd>main</kbd> function does:</p>
+<pre>fn main() {
+    let _ = thread::spawn(report);</pre>
+<p>The <kbd>report</kbd> thread works in a similar fashion to the threads that fill a comparable role elsewhere in the book: the global statics—including <kbd>FITNESS_*</kbd> from <kbd>feruscore::individuals</kbd>—are swapped for zero, a little bit of computation happens, then there's a block that prints to stdout, and finally the thread sleeps for a bit before looping around again, forever. It's a well-worn technique by this point.</p>
+<p>With the reporting thread online, feruscore creates its initial population:</p>
+<pre>    let mut population: Vec&lt;Individual&gt; = <br/>        Vec::with_capacity(POPULATION_SIZE as usize);
+    let mut children: Vec&lt;Individual&gt; = <br/>        Vec::with_capacity(CHILDREN as usize);
+    let mut parents: VecDeque&lt;Individual&gt; = <br/>        VecDeque::with_capacity(PARENTS as usize);
+    population.par_extend(
+        (0..POPULATION_SIZE)
+            .into_par_iter()
+            .map(|_| Individual::new(CHROMOSOME_SIZE, CORE_SIZE)),
+    );
+    population.pop();
+    population.pop();
+    population.push(ringers::imp(CHROMOSOME_SIZE));
+    population.push(ringers::dwarf(CHROMOSOME_SIZE));</pre>
+<p>rayon's <kbd>par_extend</kbd> makes an appearance again, useful when <kbd>POPULATION_SIZE</kbd> is a large number but not harmful with its current value. As we saw, rayon will decline to split a parallel collection too small to be effectively parallelized, the distribution to threads overwhelming the time to compute. <kbd>Individual::new</kbd> is called with the actual chromosome and core sizes, and two unlucky, random members of the population are ejected and deallocated in favor of ringers from <kbd>individual::ringers</kbd>.</p>
+<p>There are many ways to decide the fitness of individuals in a population. The method that feruscore takes is to run individuals in a tournament. The winner of the first tournament becomes the first parent, the winner of the second becomes the second parent, and so forth until each parent is filled up. That implementation is brief but contains multitudes:</p>
+<pre>    loop {
+        // tournament, fitness and selection of parents
+        STATE.store(0, Ordering::Release);
+        while parents.len() &lt; PARENTS as usize {
+            thread_rng().shuffle(&amp;mut population);
+            let res = population
+                .into_par_iter()
+                .fold(|| (None, Vec::new()), regional_tournament)
+                .reduce(|| (None, Vec::new()), finals_tournament);
+            population = res.1;
+            parents.push_back(res.0.unwrap());
+            NEW_PARENTS.fetch_add(1, Ordering::Relaxed);
+        }</pre>
+<p>What's going on here? The population is shuffled at the start to avoid pairing up the same individuals in each tournament. Indeterminacy in thread makes this somewhat unnecessary and the speed-obsessed evolver might do well to remove this. The main show is the fold and reduce of the population. Readers familiar with functional programming will be surprised to learn that rayon's <kbd>fold</kbd> and <kbd>reduce</kbd> are not synonymous. The type of <kbd>ParallelIterator::fold</kbd> is:</p>
+<pre>fold&lt;T, ID, F&gt;(self, identity: ID, fold_op: F) <br/>    -&gt; Fold&lt;Self, ID, F&gt; <br/>where
+    F: Fn(T, Self::Item) -&gt; T + Sync + Send,
+    ID: Fn() -&gt; T + Sync + Send,
+    T: Send,</pre>
+<p>Readers familiar with functional programming will not be surprised to learn that <kbd>fold</kbd>'s type is somewhat involved. Jokes aside, note that the function does not return an instance of <kbd>T</kbd> but <kbd>Fold&lt;Self, ID, F&gt;</kbd> where <kbd>Fold: ParallelIterator</kbd>. rayon's <kbd>fold</kbd> does not produce a single <kbd>T</kbd> but, instead, a parallel iterator over chunks that will have <kbd>Fn(T, Self::Item) -&gt; T</kbd> applied: an iterator over folded chunks. <kbd>ParallelIterator::reduce</kbd> has the following type:</p>
+<pre>reduce&lt;OP, ID&gt;(self, identity: ID, op: OP) <br/>    -&gt; Self::Item <br/>where
+    OP: Fn(Self::Item, Self::Item) -&gt; Self::Item + Sync + Send,
+    ID: Fn() -&gt; Self::Item + Sync + Send,</pre>
+<p>The <kbd>OP</kbd> takes two <kbd>Item</kbd>s and combines them into one <kbd>Item</kbd>. <kbd>Reduce</kbd>, then, takes a <kbd>ParallelIterator</kbd> of <kbd>Item</kbd>s and reduces them down into a single instance of <kbd>Item</kbd> type. Our tournament implementation folds <kbd>regional_tournament</kbd> over the population, producing a <kbd>Fold</kbd> over <kbd>(Option&lt;Individual&gt;, Vec&lt;Individual&gt;)</kbd>, the first element of the tuple being the fittest individual in that subchunk of the population, the second element being the remainder of the population. The <kbd>reduce</kbd> step, then, takes the winners of the regional tournaments and reduces them into one final winner. The implementation of these two functions is similar. First, <kbd>regional_tournament</kbd>:</p>
+<pre>fn regional_tournament(
+    (chmp, mut population): (Option&lt;Individual&gt;, Vec&lt;Individual&gt;),
+    indv: Individual,
+) -&gt; (Option&lt;Individual&gt;, Vec&lt;Individual&gt;) {
+    if let Some(chmp) = chmp {
+        REGIONAL_BATTLES.fetch_add(1, Ordering::Relaxed);
+        match chmp.compete(&amp;indv) {
+            Winner::Left(_) | Winner::Tie =&gt; {
+                population.push(indv);
+                (Some(chmp), population)
+            }
+            Winner::Right(_) =&gt; {
+                population.push(chmp);
+                (Some(indv), population)
+            }
+        }
+    } else {
+        (Some(indv), population)
+    }
+}</pre>
+<p>Note the call to compete and the choice to promote the existing <kbd>chmp</kbd>—champion—to the next tournament round in the event of a tie. <kbd>REGIONAL_BATTLES</kbd> sees an update, feeding the report thread information. The less fit individual is pushed back into the population. <kbd>finals_tournament</kbd> is a little more complicated but built along the same lines:</p>
+<pre>fn finals_tournament(
+    (left, mut lpop): (Option&lt;Individual&gt;, Vec&lt;Individual&gt;),
+    (right, rpop): (Option&lt;Individual&gt;, Vec&lt;Individual&gt;),
+) -&gt; (Option&lt;Individual&gt;, Vec&lt;Individual&gt;) {
+    if let Some(left) = left {
+        lpop.extend(rpop);
+        if let Some(right) = right {
+            FINALS_BATTLES.fetch_add(1, Ordering::Relaxed);
+            match left.compete(&amp;right) {
+                Winner::Left(_) | Winner::Tie =&gt; {
+                    lpop.push(right);
+                    (Some(left), lpop)
+                }
+                Winner::Right(_) =&gt; {
+                    lpop.push(left);
+                    (Some(right), lpop)
+                }
+            }
+        } else {
+            (Some(left), lpop)
+        }
+    } else {
+        assert!(lpop.is_empty());
+        (right, rpop)
+    }
+}</pre>
+<p>This function is responsible for rerunning competitions and for joining up the previously split parts of the population. Note the call to <kbd>lpop.extend</kbd>. The right population—<kbd>rpop</kbd>—is always merged into the left population, as are less fit individuals. There's no special reason for this, we could equally have merged right and returned right.</p>
+<p>Now, take a minute to look at these two functions. They are sequential. We are able to reason about them as sequential functions, we are able to program them like sequential functions. We can test them like sequential functions. rayon's internal model doesn't leak into this code. We have to understand only the types and, once that's done, rayon's able to do its thing. This sequential inside, parallel outside model is unique, compared to all the techniques we've discussed in the book so far. rayon's implementation is undoubtedly complicated, but the programming model it admits is quite straightforward, once you get the hang of iterator style.</p>
+<p>Once the tournament selection is completed, the parents vector is filled with <kbd>PARENTS</kbd>, number of <kbd>Individual</kbd>s and the population has members who are all suitable for being turned into children. Why draw from the population? Well, the upside is we avoid having to reallocate a new <kbd>Individual</kbd> for each reproduction. Many small allocations can get expensive fast. The downside is, by drawing from the population, we're not able to easily turn a direct loop into a parallel iterator. Given that the total number of reproductions is small, the implementation does not attempt anything but a serial loop:</p>
+<pre>        STATE.store(1, Ordering::Release);
+        while children.len() &lt; CHILDREN as usize {
+            let parent0 = parents.pop_front().expect("no parent0");
+            let parent1 = parents.pop_front().expect("no parent1");
+            let mut child = population.pop().expect("no child");
+            parent0.reproduce(&amp;parent1, &amp;mut child);
+            children.push(child);
+            parents.push_back(parent0);
+            parents.push_back(parent1);
+        }</pre>
+<p>Two parents are popped off, a child is popped off, reproduction happens, and everyone is pushed into their respective collection. Children exist to avoid reproducing into the same <kbd>Individual</kbd> multiple times. Once reproduction is completed, <kbd>children</kbd> is merged back into the population, but not before some sanity-checks take place:</p>
+<pre>        assert_eq!(children.len(), CHILDREN as usize);
+        assert_eq!(parents.len(), PARENTS as usize);
+        assert_eq!(population.len(), RANDOS as usize);
+
+        population.append(&amp;mut children);</pre>
+<p>Once <kbd>children</kbd> is integrated into the population, mutation:</p>
+<pre>        STATE.store(2, Ordering::Release);
+        population.par_iter_mut().for_each(|indv| {
+            let _ = indv.mutate(GENE_MUTATION_CHANCE, CORE_SIZE);
+        });</pre>
+<p>The careful reader will note that the parents are not included in the mutation step. This is intentional. Some implementations do mutate the parents in a given generation, and whether or not this is a good thing to do depends very much on domain. Here, the difference between a fit <kbd>Individual</kbd> and an unfit one is so small that I deemed it best to leave parents alone. A matter for experimentation.</p>
+<p>Finally, we bump the <kbd>generation</kbd>, potentially <kbd>checkpoint</kbd>, and re-integrate the parents into the population:</p>
+<pre>        let generation = GENERATIONS.fetch_add(1, Ordering::Relaxed);
+        if generation % 100 == 0 {
+            checkpoint(generation, &amp;parents)<br/>                .expect("could not checkpoint");
+        }
+
+        for parent in parents.drain(..) {
+            population.push(parent);
+        }
+    }
+}</pre>
+<p>There is no stop condition in feruscore. Instead, every 100 generations, the program will write out its best warriors—the parents—to disk. The user can use this information as they want. It would be reasonable to stop simulation after a fixed number of generations or compare the parents against a host of known best-of-breed warriors, exiting when a warrior had been evolved that could beat them all. That last would be especially nifty but would require either a parser or a fair deal of hand-assembly. Checkpointing looks the way you may imagine it:</p>
+<pre>fn checkpoint(generation: usize, best: &amp;VecDeque&lt;Individual&gt;) -&gt; io::Result&lt;()&gt; {
+    let root: PathBuf = Path::new("/tmp/feruscore/checkpoints")<br/>                            .join(generation.to_string());
+    DirBuilder::new().recursive(true).create(&amp;root)?;
+    assert!(fs::metadata(&amp;root).unwrap().is_dir());
+
+    for (idx, indv) in best.iter().enumerate() {
+        let path = root.join(format!("{:04}.red", idx));
+        let mut fp = BufWriter::new(File::create(&amp;path)<br/>                         .expect("could not write lfp"));
+        indv.serialize(&amp;mut fp)?;
+    }
+
+    Ok(())
+}</pre>
+<p>Okay! Let's evolve some warriors.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

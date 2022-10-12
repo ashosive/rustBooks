@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">std::thread</h1>
+                </header>
+            
+            <article>
+                
+<p>This is the main threading module, providing native threads to your Rust application.</p>
+<div class="packt_infobox"><span>Threading is covered in </span><span class="ChapterrefPACKT"><a href="636b329f-0544-4c2d-9924-fcd12f105567.xhtml">Chapter 11</a>, <em>Concurrency in Rust</em></span><span>.</span></div>
+<p><span><strong>Structs, Traits, and Enums</strong><br/></span></p>
+<ul>
+<li><strong>Structs</strong>: <kbd>Builder</kbd> (provides detailed control over new threads), <kbd>JoinHandle</kbd> (owned permission to join on a thread), <kbd>LocalKey</kbd> (key to local storage that owns the contents), and <kbd>Thread</kbd> (handle to thread).</li>
+<li><span><strong>Functions</strong>: </span><kbd>current</kbd><span> (get handle to the thread invocation), </span><kbd>panicking</kbd><span> (if the thread is unwinding due to a panic), </span><kbd>park</kbd><span> (blocks unless or until the token is available), </span><kbd>park_timeout</kbd><span> (blocks for a duration), and </span><kbd>sleep</kbd><span> (puts the current thread to sleep for a duration), </span><kbd>spawn</kbd><span> (spawns a new thread, returns a </span><kbd>JoinHandle</kbd><span>), and </span><kbd>yield_now</kbd><span> (gives up a timeslice to the OS scheduler).</span></li>
+</ul>
+<div class="packt_infobox"><span>See the code examples in </span><span class="ChapterrefPACKT"><a href="636b329f-0544-4c2d-9924-fcd12f105567.xhtml">Chapter 11</a>, <em>Concurrency in Rust</em></span><span>.</span></div>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

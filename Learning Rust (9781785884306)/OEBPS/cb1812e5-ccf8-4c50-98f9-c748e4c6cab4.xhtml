@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">std::slice</h1>
+                </header>
+            
+            <article>
+                
+<p>This module provides a dynamically-sized placement into a contiguous <kbd>[T]</kbd>.</p>
+<div class="packt_infobox"><span>Slices are mutable (</span><kbd>&amp;mut [T]</kbd><span>) or shared slices (</span><kbd>&amp;[T]</kbd><span>) of memory represented as a pointer. They implement </span><kbd>IntoIter</kbd><span>, which duplicates the type </span><kbd>IntoIter</kbd><span> is being performed on.</span></div>
+<p><strong>Structs, Traits, and Enums</strong></p>
+<ul>
+<li><strong>Structs</strong>: <kbd>Chunks</kbd> (iterates over a non-overlapping slice in chunks of <kbd>size_of&lt;T&gt;</kbd> elements at a time), <kbd>ChunksMut</kbd> (as for <kbd>Chunks</kbd> except are mutable), <kbd>Iter</kbd> (immutable iterator), <kbd>IterMut</kbd> (mutable iterator), <kbd>RSplitN</kbd> and <kbd>RSplitNMut</kbd> (iterate over sub-slices that match a predicate, limited to a given number of splits, and start from the end of the slice). <kbd>Split</kbd> and <kbd>SplitMut</kbd> (iterator over sub-slice separated by elements that match a predicate function or predicate respectively), and <kbd>SplitN</kbd> and <kbd>SplitNMut</kbd> (iterate over sub-slices that match predicate function), and <kbd>Windows</kbd> (iterates over overlapping sub-slice of length <kbd>size_of&lt;T&gt;</kbd>).</li>
+<li><span><strong>Functions</strong>: </span><kbd>from_raw_parts</kbd><span> (forms a slice from a pointer and length) and </span><kbd>from_raw_parts_mut</kbd><span> (as </span><kbd>from_raw_parts</kbd><span> except the slice returned is mutable).</span></li>
+</ul>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

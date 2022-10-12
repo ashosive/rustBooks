@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Joining threads</h1>
+                </header>
+            
+            <article>
+                
+<p>To retrieve the spawned thread, Rust uses the <kbd>join()</kbd> trait and then unwraps the result.</p>
+<div class="CDPAlignCenter CDPAlign"><img height="96" width="401" class=" image-border" src="Images/baf1db36-52dd-462c-a0a0-ee8eec131f84.png"/></div>
+<div class="CDPAlignCenter CDPAlign packt_figref">Figure 5</div>
+<p>To make our small example application output, we therefore need to join the spawned thread back to the main thread:</p>
+<pre>use std::thread;  
+fn main()  
+{ 
+    let threadhandle = thread::spawn(||  
+    { 
+        "Hello from a thread in your Rust program" 
+    }); 
+     
+    println!("{}", threadhandle.join().unwrap()); 
+} </pre>
+<div class="packt_infobox">Code for the alterations can be found in <kbd>Chapter11/joined_thread</kbd>.</div>
+<p>When we run the code, this time we see the following:</p>
+<div class="CDPAlignCenter CDPAlign"><img class=" image-border" src="Images/f05b0444-64d3-445a-b225-9ee2d19aa497.png" width="1170" height="256"/></div>
+<div class="CDPAlignCenter CDPAlign packt_figref">Figure 6</div>
+<p>Hold on. That code isn't the same! This is true, and it is due to the spawn accepting a closure (<kbd>||</kbd>).</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

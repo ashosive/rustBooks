@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Writing the trip_planning.rs module</h1>
+                </header>
+            
+            <article>
+                
+<p>The trip planner should work in static and dynamic modes. The basic structure is a FIFO queue, pushing requests into the queue, and popping the oldest element. We may be able to unify both static and dynamic modes into a single implementation, which would look like the following.</p>
+<p>Trip planning will be organized by purpose. The planner should work in two modes—static and dynamic. For static mode, the planner should accept a list of floor requests to process. For dynamic mode, the planner should accept floor requests as they come dynamically and add them to the queue. The planner module should contain the following:</p>
+<pre style="padding-left: 30px"><span class="s1">use std::collections::VecDeque;<br/><br/></span>pub struct FloorRequests<br/><span class="s1">{<br/></span><span class="s1">   pub requests: VecDeque&lt;u64&gt;<br/></span><span class="s1">}<br/><br/></span><span class="s1">pub trait RequestQueue<br/></span><span class="s1">{<br/></span><span class="s1">   fn add_request(&amp;mut self, req: u64);<br/></span><span class="s1">   fn add_requests(&amp;mut self, reqs: &amp;Vec&lt;u64&gt;);<br/></span><span class="s1">   fn pop_request(&amp;mut self) -&gt; Option&lt;u64&gt;;<br/></span><span class="s1">}<br/><br/></span><span class="s1">impl RequestQueue for FloorRequests<br/></span><span class="s1">{<br/></span><span class="s1">   fn add_request(&amp;mut self, req: u64)<br/></span><span class="s1">   {<br/></span><span class="s1">      self.requests.push_back(req);<br/></span><span class="s1">   }<br/></span><span class="s1">   fn add_requests(&amp;mut self, reqs: &amp;Vec&lt;u64&gt;)<br/></span><span class="s1">   {<br/></span><span class="s1">      for req in reqs<br/></span><span class="s1">      {<br/></span><span class="s1">         self.requests.push_back(*req);<br/></span><span class="s1">      }<br/></span><span class="s1">   }<br/></span><span class="s1">   fn pop_request(&amp;mut self) -&gt; Option&lt;u64&gt;<br/></span><span class="s1">   {<br/></span><span class="s1">      self.requests.pop_front()<br/></span><span class="s1">   }<br/></span><span class="s1">}</span></pre>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style00.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style01.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Mutation and reproduction</h1>
+                </header>
+            
+            <article>
+                
+<p>Before we discuss competition between two <kbd>Individual</kbd>s, let's talk about mutation and reproduction. Mutation is the easier of the two to understand, in my opinion, because it operates on one <kbd>Individual</kbd> at a time. Our implementation:</p>
+<pre>    pub fn mutate(&amp;mut self, mutation_chance: u32, core_size: u16) -&gt; () {
+        self.chromosome.par_iter_mut().for_each(|gene| {
+            if thread_rng().gen_weighted_bool(mutation_chance) {
+                *gene = if thread_rng().gen::&lt;bool&gt;() {
+                    Some(Instruction::random(core_size))
+                } else {
+                    None
+                };
+            }
+        });
+    }</pre>
+<p>The call to <kbd>par_iter_mut</kbd> creates a <kbd>ParallelIterator</kbd> in which the elements of the iterator are mutable, much like <kbd>iter_mut</kbd> from the standard library. The <kbd>for_each</kbd> operator applies the closure to each. The <kbd>for_each</kbd> operator  is similar in purpose to <kbd>map</kbd>, except it's going to necessarily consume the input but will be able to avoid allocating a new underlying collection. Modifying a thing in-place? Use <kbd>for_each</kbd>. Creating a new thing from an existing bit of storage? Use <kbd>map</kbd>. Anyway, the mutation strategy that feruscore uses is simple enough. Every <kbd>Instruction</kbd> in the chromosome is going to be changed with probability <kbd>1/mutation_chance</kbd> and may be disabled with 1/2 probability, that is, be set to None. The careful reader will have noticed that the serializer stops serializing instructions when a <kbd>None</kbd> is found in the chromosome, making everything after that point junk DNA. The junk still comes into play during reproduction:</p>
+<pre>    pub fn reproduce(&amp;self, partner: &amp;Individual, <br/>                     child: &amp;mut Individual) -&gt; () <br/>    {
+        for (idx, (lgene, rgene)) in self.chromosome
+            .iter()
+            .zip(partner.chromosome.iter())
+            .enumerate()
+        {
+            child.chromosome[idx] = if thread_rng().gen::&lt;bool&gt;() {
+                *lgene
+            } else {
+                *rgene
+            };
+        }
+    }</pre>
+<p>Feruscore uses a reproduction strategy called half-uniform crossover. Each gene from a parent has even odds of finding its way into the child. The child is passed as a mutable reference, which is creepy if you think about it too hard. I'm not sure of any real species that takes over the body of a less fit individual and hot-swaps DNA into it to form a child in order to save on energy (or computation, in our case) but here we are. Note that, unlike mutation, reproduction is done serially. Remember that rayon is chunking work and distributing it through a threadpool. If we were to make this parallel, there'd have to be a mechanism in place to rectify the choices made from the zipper of the parents' chromosomes into the child. If the chromosomes were many multiple megabytes, this would be a good thing to tinker with. As is, the chromosomes are very small. Most Corewars games limit a warrior to 100 instructions. rayon is impressive but it is not <em>free</em>, either in runtime cost or programming effort.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

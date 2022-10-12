@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style00.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style01.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Memory layout</h1>
+                </header>
+            
+            <article>
+                
+<p>Rust has a handful of mechanisms to lay out compound types in memory. They are as follows:</p>
+<ul>
+<li>Arrays</li>
+<li>Enums</li>
+<li>Structs</li>
+<li>Tuples</li>
+</ul>
+<p>Exactly how these are laid out in memory depends on the representation chosen. By default, everything in Rust is <kbd>repr(Rust)</kbd>. All <kbd>repr(Rust)</kbd> types are aligned on byte boundaries to the power of two. Every type is at least one byte in memory, then two, then four, and so forth. Primitives—<kbd>u8</kbd>, <kbd>usize</kbd>, <kbd>bool</kbd>, and <kbd>&amp;T</kbd>—are aligned to their size. In Rust, representation structures have alignment according to the largest field. Consider the following struct:</p>
+<pre style="padding-left: 30px">struct AGC {
+  elapsed_time2: u16,
+  elapsed_time1: u16,
+  wait_list_upper: u32,
+  wait_list_lower: u16,
+  digital_autopilot: u16,
+  fine_scale: u16
+}</pre>
+<p><kbd>AGC</kbd> is aligned to <kbd>u32</kbd> with padding inserted as appropriate to match that 32-bit alignment. Rust will re-order fields to achieve maximal packing. Enums are different, being subject to a host of optimizations, most notably null pointer optimization. See the following enumeration:</p>
+<pre style="padding-left: 30px">enum AGCInstruction {
+  TC,
+  TCF,
+  CCS(u8),
+  B(u16),
+  BZF,
+}</pre>
+<p>This will be laid out as follows:</p>
+<pre style="padding-left: 30px">struct AGCInstructionRepr {
+  data: u16,
+  tag: u8,
+}</pre>
+<p>The <kbd>data</kbd> field is wide enough to accommodate the largest inner value and the <kbd>tag</kbd> allows discrimination between variants. Where this gets complicated is in the case of an enum that holds a non-nullable pointer, and other variants cannot refer to the same. <kbd>Option&lt;&amp;T&gt;</kbd> means if a null pointer is discovered when dereferencing the option Rust can assume that the <kbd>None</kbd> variant was discovered. Rust will optimize away the tag for <kbd>Option&lt;&amp;T&gt;</kbd>.</p>
+<p>Rust supports other representations. <kbd>repr(C) </kbd> lays out types in memory in a manner that C would do and is often used in FFI projects, as we'll see later in this book. <kbd>repr(packed)</kbd> lays types out in memory like <kbd>repr(Rust)</kbd> except that no padding is added, and alignment occurs only to the byte. This representation is likely to cause unaligned loads and a severe effect on performance of common CPUs, certainly the two CPU architectures we concern ourselves with in this book. The remaining representations have to do with forcing the size of fieldless enumerations—that is, enumerations that have no data in their variants—and these are useful for forcing the size of such an enum with an eye towards ABI compatability.</p>
+<p>Rust allocations happen by default on the hardware stack, as is common for other low-level languages. Heap allocations must be performed explicitly by the programmer or be done implicitly when creating a new type that holds some sort of internal storage. There are complications here. By default, Rust types obey move semantics: the bits of the type are moved as appropriate between contexts. For example:</p>
+<pre style="padding-left: 30px">fn project_flights() -&gt; Vec&lt;(u16, u8)&gt; {
+    let mut t = Vec::new();
+    t.push((1968, 2));
+    t.push((1969, 4));
+    t.push((1970, 1));
+    t.push((1971, 2));
+    t.push((1972, 2));
+    t
+}
+
+fn main() {
+    let mut total: u8 = 0;
+    let flights = project_flights();
+    for &amp;(_, flights) in flights.iter() {
+        total += flights;
+    }
+    println!("{}", total);
+}</pre>
+<p>The <kbd>project_flights</kbd> function allocates a new <kbd>Vec&lt;(u16, u8)&gt;</kbd> on the heap, populates it, and then returns ownership of the heap-allocated vector to the caller. This does not mean that the bits of <kbd>t</kbd> are copied from the stack frame of <kbd>project_flights</kbd> but, instead, that the pointer  <kbd>t</kbd> is returned from the <kbd>project_flights</kbd> stack to <kbd>main</kbd>. It is possible to achieve copy semantics in Rust through the use of the <kbd>Copy</kbd> trait. <kbd>Copy</kbd> types will have their bits copied in memory from one place to the other. Rust primitive types are <kbd>Copy</kbd>—copying them is as fast as moving them, especially when the type is smaller than the native pointer. It's possible to implement <kbd>Copy</kbd> for your own type unless your type implements <kbd>Drop</kbd>, the trait that defines how a type deallocates itself. This restriction eliminates—in Rust code not using <kbd>unsafe</kbd> —the possibility of double frees. The following code block derives <kbd>Copy</kbd> for two user-defined types and is an example of a poor random generator:</p>
+<pre style="padding-left: 30px">#[derive(Clone, Copy, PartialEq, Eq)]
+enum Project {
+    Apollo,
+    Gemini,
+    Mercury,
+}
+
+#[derive(Clone, Copy)]
+struct Mission {
+    project: Project,
+    number: u8,
+    duration_days: u8,
+}
+
+fn flight() -&gt; Mission {
+    Mission {
+        project: Project::Apollo,
+        number: 8,
+        duration_days: 6,
+    }
+}
+
+fn main() {
+    assert_eq!(::std::mem::size_of::&lt;Mission&gt;(), 3);
+    let mission = flight();
+    if mission.project == Project::Apollo &amp;&amp; mission.number == 8 {
+        assert_eq!(mission.duration_days, 6);
+    }
+}</pre>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

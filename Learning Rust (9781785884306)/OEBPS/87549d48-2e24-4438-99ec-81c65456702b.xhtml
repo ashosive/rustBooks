@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Defining the child structures</h1>
+                </header>
+            
+            <article>
+                
+<p>We have two types of <kbd>struct</kbd>—parent and child. Here, the <kbd>struct</kbd> of <kbd>Room</kbd> is the parent and it has two children: the window definition and room size. They are very different beasts as the window definition is a <kbd>Vec</kbd> type, while the other is just a <kbd>struct</kbd> type.</p>
+<p>For the room area, we can use the following when creating an instance of the room type:</p>
+<pre>room_area: Area {width: 2.3f32, length: 4.3f32} </pre>
+<p>We are defining <kbd>room_area</kbd>, for which we will then define an inline variable which will act as the pointer to the area structure and, finally, create the size of the room. This is accessed using the following code snippet:</p>
+<pre>println!("The room width is {}m by {}m", room.room_area.width, room.room_area.length); </pre>
+<p>Finally, we have to define the vector of Windows.</p>
+<p>This is done in a very similar way to how we define any other vector, which is as follows:</p>
+<pre>window: vec![  
+        Window { 
+            window_area: Area {width: 1.3f32, length: 1.4f32}, 
+            window_type: "Main".to_owned(), 
+            has_blinds: true, 
+            curtain_color: "Blue".to_owned(), 
+            has_lock: false, 
+            top_open: true, 
+            single_window: true, 
+        }, 
+        Window { 
+            window_area: Area {width: 0.9f32, length: 1.1f32}, 
+            window_type: "Small".to_owned(), 
+            has_blinds: true, 
+            curtain_color: "Blue".to_owned(), 
+            has_lock: false, 
+            top_open: true, 
+            single_window: true, 
+        } </pre>
+<p>We will then add a few more <kbd>println!</kbd> lines to show we have some data:</p>
+<pre>println!("The room width is {}m by {}m", room.room_area.width, room.room_area.length);  
+let ref window_two = room.window[1]; 
+println!("Window 2 is {}m by {}m and has {} curtains", window_two.window_area.width, window_two.window_area.length,  window_two.curtain_color); </pre>
+<p>When compiled, the code produces the following result:</p>
+<div class="packt_figure CDPAlignCenter CDPAlign"><img class=" image-border" src="Images/007279b1-a7e3-49f3-ad8e-6a074b4e1f8f.png" width="1170" height="200"/></div>
+<p>We have very quickly, and simply, created a multi-level structure.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

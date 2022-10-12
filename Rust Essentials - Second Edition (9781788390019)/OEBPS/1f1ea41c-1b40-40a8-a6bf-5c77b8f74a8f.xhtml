@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style00.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style01.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Comments</h1>
+                </header>
+            
+            <article>
+                
+<p>Ideally, a program should be self-documenting by using descriptive variable names and easy-to-read code, but there are always cases where additional comments about a program's structure or algorithms are needed. Rust follows the C convention and has:</p>
+<ul>
+<li><kbd>//</kbd> line comments<em>;</em> everything on the line after <kbd>//</kbd> is commentary and not compiled</li>
+<li><kbd>/* */</kbd>block or multi-line comments; everything between the start <kbd>/*</kbd>and the end <kbd>*/</kbd> is not compiled</li>
+</ul>
+<p>However, the preferred Rust style is to use only the <kbd>//</kbd> comment, also for multiple lines, as shown in the following code:</p>
+<pre>// see Chapter 2/code/comments.rs 
+fn main() { 
+  // Here starts the execution of the Game. 
+  // We begin with printing a welcome message: 
+  println!("Welcome to the Game!"); 
+} </pre>
+<p>Use the <kbd>/* */</kbd> comments only to comment out code.</p>
+<p>Rust also has a doc comment with <kbd>///</kbd>, useful in larger projects that require an official documentation for customers and developers. Such comments have to appear before an item (like a function) on a separate line to document that item. In these comments, you can use Markdown formatting syntax (see <a href="https://en.wikipedia.org/wiki/Markdown"><span class="URLPACKT">https://en.wikipedia.org/wiki/Markdown</span></a>).</p>
+<p>Here is a doc comment:</p>
+<pre>/// Start of the Game 
+fn main() { 
+} </pre>
+<p>We'll see more relevant uses of <kbd>///</kbd> in later code snippets. The rustdoc tool can compile these comments into project documentation.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

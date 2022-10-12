@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">The feruscore executable</h1>
+                </header>
+            
+            <article>
+                
+<p>The final thing left to cover is <kbd>src/bin/feruscore.rs</kbd>. The careful reader will have noted that there's been a suspicious lack of rayon in the implementation so far. In fact, rayon is not in use in this version. Here's the full <kbd>Cargo.toml</kbd> for the project:</p>
+<pre>[package]
+name = "feruscore"
+version = "0.2.0"
+authors = ["Brian L. Troutwine &lt;brian@troutwine.us&gt;"]
+
+[dependencies]
+rand = "0.4"
+rand_derive = "0.3"
+libc = "0.2.0"
+byteorder = "1.0"
+num_cpus = "1.0"
+
+[build-dependencies]
+cc = "1.0"
+
+[dev-dependencies]
+quickcheck = "0.6"
+criterion = "0.2"
+
+[[bench]]
+name = "mars_bench"
+harness = false
+
+[[bin]]
+name = "feruscore"
+
+[[bin]]
+name = "fuzz_target"</pre>
+<p>As mentioned at the start of the chapter, there were two issues with feruscore aside from calling out to an OS process: repeat allocation of similar structures and poor control over tournaments. Viewed a certain way, comparing <kbd>Individual</kbd> fitness is a sorting function. Rayon does have a parallel sorting capability, <kbd>ParallelSliceMut&lt;T: Send&gt;::par_sort(&amp;mut self)</kbd>, where <kbd>T: Ord</kbd>. We could make use of that, defining an <kbd>Ord</kbd> for <kbd>Individual</kbd> that allocated a new <kbd>Mars</kbd> for every comparison. Many tiny allocations is a killer for speed, though. A thread-local <kbd>Mars</kbd> could reduce that to a single allocation per thread, but then we're still giving up some control here. For instance, without inspecting rayon's source, can we be sure that population chunks are going to be of roughly equal size? Usually, this is not a concern, but it is for us here. Rayon's requiring that we perform a fold and then a reduce step is also extra work we don't necessarily have to do if we adjust our ambitions some.</p>
+<p>One common method to deal with parallelizing genetic algorithms, and the one we'll take now, is to make islands that undergo evolution in parallel. The user sets a global population, where  this population is split among islands, and threads are assigned an island to simulate for some number of generations. After that limit of generations is up, the island populations are merged, shuffled, and redistributed to islands. This has the benefit of reducing cross-thread communication, which potentially comes with cache locality issues.</p>
+<p>The preamble of <kbd>src/bin/feruscore.rs</kbd> is straightforward:</p>
+<pre>extern crate feruscore;
+extern crate num_cpus;
+extern crate rand;
+
+use feruscore::individual::*;
+use feruscore::mars::*;
+use rand::{thread_rng, Rng};
+use std::fs::{self, DirBuilder, File};
+use std::io::{self, BufWriter};
+use std::path::{Path, PathBuf};
+use std::sync::atomic::{AtomicUsize, Ordering};
+use std::sync::mpsc;
+use std::{thread, time};</pre>
+<p>The configuration and reporting globals are somewhat reduced, compared to the last chapter:</p>
+<pre>// configuration
+const POPULATION_SIZE: usize = 1_048_576 / 8; 
+const CHROMOSOME_SIZE: u16 = 100;
+const CORE_SIZE: u16 = 8000;
+const GENE_MUTATION_CHANCE: u32 = 100;
+const ROUNDS: u16 = 100;
+
+// reporting
+static GENERATIONS: AtomicUsize = AtomicUsize::new(0);</pre>
+<p>The <kbd>report</kbd> function is almost entirely the same as in last chapter, except there are a few less atomic variables to read from. checkpoint is also almost entirely the same. We'll skip reprinting both functions in the interest of space. What is new is <kbd>sort_by_tournament</kbd>:</p>
+<pre>fn sort_by_tournament(mars: &amp;mut Mars, <br/>                      mut population: Vec&lt;Individual&gt;) <br/>    -&gt; Vec&lt;Individual&gt; <br/>{
+    let mut i = population.len() - 1;
+    while i &gt;= (population.len() / 2) {
+        let left_idx = thread_rng().gen_range(0, i);
+        let mut right_idx = left_idx;
+        while left_idx == right_idx {
+            right_idx = thread_rng().gen_range(0, i);
+        }
+        match mars.compete(ROUNDS, <br/>                           &amp;population[left_idx], <br/>                           &amp;population[right_idx]) <br/>        {
+            Winner::Right(_) =&gt; {
+                population.swap(i, right_idx);
+            }
+            Winner::Left(_) =&gt; {
+                population.swap(i, left_idx);
+            }
+            Winner::Tie =&gt; {}
+        }
+        i -= 1;
+    }
+    population
+}</pre>
+<p>This function sorts a population by fitness, based on the result of competition inside the passed <kbd>Mars</kbd>. The reader will note that it's not a true sort in that the last element is the most fit, but that the last element is the winner of the first tournament, the second to last the winner of the second tournament, and so forth. Only <kbd>population.len() / 2</kbd> competitions are held and the resulting champions compare favorably to a population precisely sorted by fitness. The reader is encouraged to experiment with their own implementation of <kbd>sort_by_tournament</kbd>. Now, let's look at the <kbd>main</kbd> function:</p>
+<pre>fn main() {
+    let mut out_recvs = Vec::with_capacity(num_cpus::get());
+    let mut in_sends = Vec::with_capacity(num_cpus::get());
+
+    let total_children = 128;
+
+    let thr_portion = POPULATION_SIZE / num_cpus::get();
+    for _ in 0..num_cpus::get() {
+        let (in_snd, in_rcv) = mpsc::sync_channel(1);
+        let (out_snd, out_rcv) = mpsc::sync_channel(1);
+        let mut population: Vec&lt;Individual&gt; = (0..thr_portion)
+            .into_iter()
+            .map(|_| Individual::new(CHROMOSOME_SIZE))
+            .collect();
+        population.pop();
+        population.pop();
+        population.push(ringers::imp(CORE_SIZE));
+        population.push(ringers::dwarf(CORE_SIZE));
+        let _ = thread::spawn(move || island(in_rcv, <br/>                                             out_snd, <br/>                                             total_children));
+        in_snd.send(population).unwrap();
+        in_sends.push(in_snd);
+        out_recvs.push(out_rcv);
+    }</pre>
+<p>The total number of islands in a feruscore run will vary by the number of CPUs available on-system. Each island causes two synchronous MPSC channels to be created, one for the main thread to push populations into the worker thread and one for the worker thread to push populations back to the main. The implementation refers to these as <kbd>in_*</kbd> and <kbd>out_*</kbd> senders and receivers. You can see again that we're building up a population of random <kbd>Individual</kbd> warriors and pushing the ringers in, though the island population is not <kbd>POPULATION_SIZE</kbd>, but an even split of <kbd>POPULATION_SIZE</kbd> by the number of available CPUs. The reporting thread is started after the island threads have their populations, mostly just to avoid UI spam:</p>
+<pre>    let _ = thread::spawn(report);</pre>
+<p>The report function is much the same as it was in the previous chapter's discussion of feruscore and I'll avoid listing it here for brievity's sake.</p>
+<p>The final chunk of the <kbd>main</kbd> function is the recombining loop. When the island threads finish their competitions, they write into their out sender, which gets picked up by the recombination loop:</p>
+<pre>    let mut mars = MarsBuilder::default().core_size(CORE_SIZE).freeze();
+    let mut global_population: Vec&lt;Individual&gt; = <br/>        Vec::with_capacity(POPULATION_SIZE);
+    loop {
+        for out_rcv in &amp;mut out_recvs {
+            let mut pop = out_rcv.recv().unwrap();
+            global_population.append(&amp;mut pop);
+        }</pre>
+<p>Once all the islands have been merged together, the whole lot is shuffled:</p>
+<pre>        assert_eq!(global_population.len(), POPULATION_SIZE);
+        thread_rng().shuffle(&amp;mut global_population);</pre>
+<p>That's one generation done. We <kbd>checkpoint</kbd>, this time doing an additional tournament to pull the save winners from the global population:</p>
+<pre>        let generation = GENERATIONS.fetch_add(1, Ordering::Relaxed);
+        if generation % 100 == 0 {
+            global_population = sort_by_tournament(&amp;mut mars, <br/>                                                   global_population);
+            checkpoint(generation, &amp;global_population)<br/>                .expect("could not checkpoint");
+        }</pre>
+<p>Finally, the population is split back up and sent to the island threads:</p>
+<pre>        let split_idx = global_population.len() / num_cpus::get();
+
+        for in_snd in &amp;mut in_sends {
+            let idx = global_population.len() - split_idx;
+            let pop = global_population.split_off(idx);
+            in_snd.send(pop).unwrap();
+        }
+    }
+}</pre>
+<p>Now, what is island doing? Well, it's an infinite loop pulling from the population assignment receiver:</p>
+<pre>fn island(
+    recv: mpsc::Receiver&lt;Vec&lt;Individual&gt;&gt;,
+    snd: mpsc::SyncSender&lt;Vec&lt;Individual&gt;&gt;,
+    total_children: usize,
+) -&gt; () {
+    let mut mars = MarsBuilder::default().core_size(CORE_SIZE).freeze();
+
+    while let Ok(mut population) = recv.recv() {</pre>
+<p>Now a <kbd>Mars</kbd> is allocated above the loop, meaning we'll only ever do <kbd>num_cpu::get()</kbd> allocations of this structure per feruscore run. Also recall that <kbd>Receiver::recv</kbd> blocks when there is no data in the channel, so island threads don't burn up CPU when there's no work for them. The interior of the loop should be familiar. First, the <kbd>Individual</kbd> warriors are put into competition:</p>
+<pre>        // tournament, fitness and selection of parents
+        population = sort_by_tournament(&amp;mut mars, population);</pre>
+<p>Reproduction is done by taking high-ranking members of the population and producing two children into the low reaches of the population until the total number of children needed per generation is reached:</p>
+<pre>        // reproduce
+        let mut child_idx = 0;
+        let mut parent_idx = population.len() - 1;
+        while child_idx &lt; total_children {
+            let left_idx = parent_idx;
+            let right_idx = parent_idx - 1;
+            parent_idx -= 2;
+
+            population[child_idx] = population[left_idx]<br/>                                    .reproduce(&amp;population[right_idx]);
+            child_idx += 1;
+            population[child_idx] = population[left_idx]<br/>                                    .reproduce(&amp;population[right_idx]);
+            child_idx += 1;
+        }</pre>
+<p>New to this implementation, we also introduce random new population members just before the newly introduced children:</p>
+<pre>        for i in 0..32 {
+            population[child_idx + i] = Individual::new(CHROMOSOME_SIZE)
+        }</pre>
+<p>Random infusion can help tamp down premature convergence in a population. Remember, simulated evolution is a kind of state-space search. Something else that has changed is that all members of the population have a chance of mutation:</p>
+<pre>        // mutation
+        for indv in population.iter_mut() {
+            indv.mutate(GENE_MUTATION_CHANCE);
+        }</pre>
+<p>Finally, we push the population back up to the recombination thread, having worked the population over thoroughly:</p>
+<pre>        snd.send(population).expect("could not send");
+    }
+}</pre>
+<p>With all the changes made here—cutting back on small allocations, reducing total number of competitions per generation, removing pmars parsing plus spawn overhead—the implementation is substantially faster. Recall that the implementation in the last chapter struggled to peak 500 competitions—or <kbd>BATTLES</kbd> as the UI has it—per second. Here's a report diagnostic from a recent eight-hour run I did:</p>
+<pre><strong>GENERATION(5459):
+    RUNTIME (sec):  31248
+    BATTLES:        41181
+       BATTLES/s:   14340
+    FITNESS:
+        00...10:    151
+        11...20:    2
+        21...30:    0
+        31...40:    1
+        41...50:    0
+        51...60:    0
+        61...60:    2
+        71...70:    1
+        81...80:    0
+        91...100:   41024</strong></pre>
+<p>That's 14,000 battles per second on an 8,000-sized core memory, or around 650 generations per hour. Still not blazingly fast, but enough that with some time you can start to get pretty mediocre players being produced. Reducing core memory size will improve the runtime, as will limiting the maximum length of the warriors. Those who are interested in building a better evolver would do well to investigate different ways of assessing fitness, of introducing more ringers, and seeing whether porting <kbd>sim_mw</kbd> into Rust wouldn't improve runtime some. This simulator doesn't support the full scope of instructions that pMARS does, so that's also an area for improvement.</p>
+<p>I'd love to hear about what you come up with.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style00.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style01.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Mixing object-oriented programming and functional programming</h1>
+                </header>
+            
+            <article>
+                
+<p class="p1"><span class="s1">As mentioned before, Rust supports much of both object-oriented and functional programming styles. Datatypes and functions are neutral to either paradigm. Traits specifically support a hybrid blend of both styles.</span></p>
+<p class="p1"><span class="s1">First, in an object-oriented style, defining a simple class with a constructor and some methods can be accomplished with a <kbd>struct</kbd>, <kbd>trait</kbd>, and <kbd>impl</kbd>. This is explained using the following code snippet, in <kbd>intro_mixoopfp.rs</kbd>:</span></p>
+<pre style="padding-left: 30px">struct MyObject<br/>{<br/>    a: u32,<br/>    b: f32,<br/>    c: String<br/>}<br/><br/>trait MyObjectTrait<br/>{<br/>    fn new(a: u32, b: f32, c: String) -&gt; Self;<br/>    fn get_a(&amp;self) -&gt; u32;<br/>    fn get_b(&amp;self) -&gt; f32;<br/>    fn get_c(&amp;self) -&gt; String;<br/>}<br/><br/>impl MyObjectTrait for MyObject<br/>{<br/>    fn new(a: u32, b: f32, c: String) -&gt; Self<br/>    {<br/>        MyObject { a:a, b:b, c:c }<br/>    }<br/><br/>    fn get_a(&amp;self) -&gt; u32<br/>    {<br/>        self.a<br/>    }<br/><br/>    fn get_b(&amp;self) -&gt; f32<br/>    {<br/>        self.b<br/>    }<br/><br/>    fn get_c(&amp;self) -&gt; String<br/>    {<br/>        self.c.clone()<br/>    }<br/>}</pre>
+<p class="p1"><span class="s1">Adding support for functional programming onto an object is as simple as defining traits and methods that use functional language features. For example, accepting a closure can become a great abstraction when used appropriately. Consider the following example, in <kbd>intro_mixoopfp.rs</kbd>:</span></p>
+<pre style="padding-left: 30px">trait MyObjectApply<br/>{<br/>    fn apply&lt;F,R&gt;(&amp;self, f:F) -&gt; R<br/>    where F: Fn(u32,f32,String) -&gt; R;<br/>}<br/><br/>impl MyObjectApply for MyObject<br/>{<br/>    fn apply&lt;F,R&gt;(&amp;self, f:F) -&gt; R<br/>    where F: Fn(u32,f32,String) -&gt; R<br/>    {<br/>        f(self.a, self.b, self.c.clone())<br/>    }<br/>}</pre>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

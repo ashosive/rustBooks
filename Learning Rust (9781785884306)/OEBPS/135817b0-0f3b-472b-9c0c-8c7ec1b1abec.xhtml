@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">A practical example</h1>
+                </header>
+            
+            <article>
+                
+<p>In the example code, <kbd>matrix</kbd>, we can see how to use a 2D array and how to pass by a reference, with the receiving function calculating the result of a matrix multiplication. Let's examine the code:</p>
+<pre>fn main()  
+{ 
+    // first create a couple of arrays - these will be used 
+    // for the vectors 
+    let line1: [i32; 4] = [4, 2, 3, 3]; 
+    let line2: [i32; 4] = [3, 4, 5, 7]; 
+    let line3: [i32; 4] = [2, 9, 6, 2]; 
+    let line4: [i32; 4] = [5, 7, 2, 4]; 
+ 
+    // create two holding arrays and assign 
+    // we are creating an array of references 
+    let array_one = [&amp;line1, &amp;line3, &amp;line4, &amp;line2]; 
+    let array_two = [&amp;line2, &amp;line1, &amp;line3, &amp;line4]; 
+ 
+    // let's do the multiply 
+    // we are passing in a ref array containing ref arrays 
+    let result = matrix_multiply(&amp;array_one, &amp;array_two); 
+    println!("{:?}", result); 
+} 
+ 
+fn matrix_multiply(vec1: &amp;[&amp;[i32;4];4], vec2: &amp;[&amp;[i32;4];4]) -&gt; [[i32; 4];4] 
+{ 
+    // we need to create the arrays to put the results into 
+    let mut result = [[0i32; 4]; 4]; 
+ 
+    // loop through the two vectors 
+    for vone in 0..4 
+    { 
+       for vtwo in 0..4 
+       { 
+          let mut sum = 0; 
+          for k in 0..4 
+          { 
+               sum += vec1[vone][k] * vec2[k][vtwo]; 
+          } 
+          result[vone][vtwo] = sum; 
+       } 
+    } 
+    result 
+} </pre>
+<p>When compiled, you will get the following output:</p>
+<div class="packt_figure CDPAlignCenter CDPAlign"><img class=" image-border" src="Images/136be610-d175-4095-bb05-11e096466e66.png" width="1142" height="146"/></div>
+<p>What we need to really consider here is the definition line for the <kbd>matrix_multiply</kbd> function:</p>
+<pre>fn matrix_multiply(vec1: &amp;[&amp;[i32;4];4], vec2: &amp;[&amp;[i32;4];4]) -&gt; [[i32; 4];4] </pre>
+<p>If you recall how we told a function the name of the variable and the type earlier, we said it was <kbd>variable_name: variable_type</kbd>. The preceding line may look very much different, but it really isn't:</p>
+<div class="CDPAlignCenter CDPAlign"><img src="Images/ec207008-e0cc-48f5-8489-227e5bb1faa9.png" width="632" height="90"/></div>
+<p>We are passing in a reference to a holding array, which holds references to other arrays. The array is defined using <kbd>[i32;4]</kbd>; therefore, the reference is <kbd>&amp;[i32;4]</kbd>. This is the inner array. The outer array <kbd>[i32;4]</kbd> is also a reference (<kbd>&amp;[i32;4]</kbd>), which has a size of 4. Therefore, when we put these together, we have the following:</p>
+<div class="packt_figure CDPAlignCenter CDPAlign"><img height="108" width="301" src="Images/6ef524c5-0d05-471a-907a-3ca1f75be52c.png"/></div>
+<p>The preceding example shows how to pass by a reference quite nicely, though in reality, it is most likely that the compiler will optimize this out to something faster for such a small data sample. It does show, however, how it's done.</p>
+<p>The golden rule is that what you send over to the function has to marry up with what the function is expecting.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

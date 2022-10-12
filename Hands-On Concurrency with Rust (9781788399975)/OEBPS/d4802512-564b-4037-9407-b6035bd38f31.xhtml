@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style00.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style01.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">High-Level Parallelism – Threadpools, Parallel Iterators and Processes</h1>
+                </header>
+            
+            <article>
+                
+<p>In previous chapters, we introduced the basic mechanisms of concurrency in the Rust—programming language. In <a href="5a332d94-37e4-4748-8920-1679b07e2880.xhtml" target="_blank">Chapter 4</a>, <em>Sync and Send – the Foundation of Rust Concurrency</em>, we discussed the interplay of the type system of Rust with concurrent programs, how Rust ensures memory safety in this most difficult of circumstances. In <a href="e2de1ba7-c291-494e-82da-37fee7323c1d.xhtml" target="_blank">Chapter 5</a>, <em>Locks<span> </span>–<span> </span>Mutex, Condvar, Barriers and RWLock</em>, we discussed the higher, so-called coarse, synchronization mechanisms available to us, common among many languages. In <a href="d42acb0b-a05e-4068-894f-81365d147bf4.xhtml" target="_blank">Chapter 6</a>, <em>Atomics<span> </span><span>– </span>the Primitives of Synchronization</em>, and <a href="2099e79d-45cd-46cb-bf58-fc27b27b84ec.xhtml" target="_blank">Chapter 7</a>, <em>Atomics<span> </span>–<span> </span>Safely Reclaiming Memory</em>, we discussed the finer synchronization primitives available on modern machines, exposed through Rust's concurrent memory model. This has all been well and good but, though we've done deep-dives into select libraries or data structures, we have yet to see the <em>consequences</em> of all of these tools on the structure of programs, or how you might choose to split up your workloads across CPUs depending on need.</p>
+<p>In this chapter, we will explore higher-level techniques for exploiting concurrent machines without dipping into manual locking or atomic synchronization. We'll examine thread pooling, a technique common in other programming languages, data parallelism with the rayon library, and demonstrate multiprocessing in the context of a genetic programming project that will carry us into the next chapter, as well.</p>
+<p>By the end of this chapter, we will have:</p>
+<ul>
+<li><span>Explored the implementation of thread pool</span></li>
+<li><span>Understood how thread pooling relates to the operation of rayon</span></li>
+<li><span>Explored rayon's internal mechanism in-depth</span></li>
+<li><span>Demonstrated the use of rayon in a non-trivial exercise</span></li>
+</ul>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

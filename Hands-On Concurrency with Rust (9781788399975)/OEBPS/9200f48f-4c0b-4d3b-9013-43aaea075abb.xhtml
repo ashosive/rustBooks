@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Testing with American Fuzzy Lop</h1>
+                </header>
+            
+            <article>
+                
+<p>In this book, we'll make use of American Fuzzy Lop, a best-of-breed fuzzer commonly used in other systems languages. AFL is an external tool that takes a corpus of inputs, an executable that reads inputs from <kbd>STDIN</kbd>, and mutates the corpus with a variety of heuristics to find crashing inputs. Our aim is to seek out crash bugs in naive <kbd>HashMap</kbd>, this implies that we're going to need some kind of program to run our <kbd>HashMap</kbd> in. In fact, if you'll recall back to the project's <kbd>Cargo.toml</kbd>, we already had the infrastructure for such in place:</p>
+<pre style="padding-left: 30px">[[bin]]
+name = "naive_interpreter"
+doc = false</pre>
+<p>The source for <kbd>naive_interpreter</kbd> is a little goofy looking but otherwise uneventful:</p>
+<pre style="padding-left: 30px">extern crate naive_hashmap;
+
+use std::io;
+use std::io::prelude::*;
+
+fn main() {
+    let mut hash_map = naive_hashmap::HashMap::new();
+
+    let n = io::stdin();
+    for line in n.lock().lines() {
+        if let Ok(line) = line {
+            let mut cmd = line.split(" ");
+            match cmd.next() {
+                Some("LOOKUP") =&gt; {
+                    if let Some(key) = cmd.next() {
+                        let _ = hash_map.get(key);
+                    } else {
+                        continue;
+                    }
+                }
+                Some("INSERT") =&gt; {
+                    if let Some(key) = cmd.next() {
+                        if let Some(val) = cmd.next() {
+                            let _ = hash_map.insert(key.to_string(), <br/>                            val.to_string());
+                        }
+                    } else {
+                        continue;
+                    }
+                }
+                _ =&gt; continue,
+            }
+        } else {
+            break;
+        }
+    }
+}</pre>
+<p>Lines are read from <kbd>stdin</kbd>, and these lines are split along spaces and interpreted as commands, either <kbd>LOOKUP</kbd> or <kbd>INSERT</kbd> and these are interpreted into actions on the naive <kbd>HashMap</kbd>. The corpus for an AFL run can live pretty much anywhere. By convention, in this book we'll store the corpus in-project in a top-level resources/directory. Here's <kbd>resources/in/mixed_gets_puts</kbd>:</p>
+<pre>LOOKUP 10
+INSERT abs 10
+LOOKUP abs</pre>
+<p>The larger your input corpus, the more material AFL has to mutate and the faster—maybe—you'll find crashing bugs. Even in a case such as naive <kbd>HashMap</kbd> where we can be reasonably certain that there will be no crashing bugs—owing to the lack of pointer manipulation and potentially fatal integer operations—it's worthwhile building up a good corpus to support future efforts. After building a release of the project, getting an AFL run going is a cargo command away:</p>
+<pre><strong>&gt; cargo afl build --release
+&gt; cargo afl fuzz -i resources/in/ -o resources/out/ target/release/naive_interpreter</strong></pre>
+<p>This says to execute <kbd>target/release/naive_interpreter</kbd> under AFL with input corpus at <kbd>resources/in</kbd> and to output any failing cases under <kbd>resources/out</kbd>. Such crashes often make excellent unit tests. Now, the trick with fuzzing tools in general is they're not part of any kind of quick-cycle test-driven development loop. These tool runs are long and often get run on dedicated hardware overnight or over many days. Here, for example, is the AFL run I had going while writing this chapter:</p>
+<div class="CDPAlignCenter CDPAlign"><img src="Images/8b4a6366-3c4e-4fa5-80fc-182300d5a773.png" style="width:37.08em;height:29.67em;" width="572" height="457"/></div>
+<p>There's a fair bit of information here but consider that the AFL runtime indicator is measured in days. One key advantage to the use of AFL compared to other fuzzers is the prominence of AFL in the security community. There are a good many papers describing its implementation and the interpretation of its, uh, <em>comprehensive</em> interface. You are warmly encouraged to scan the <em>Further reading</em> section of this chapter for more information.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

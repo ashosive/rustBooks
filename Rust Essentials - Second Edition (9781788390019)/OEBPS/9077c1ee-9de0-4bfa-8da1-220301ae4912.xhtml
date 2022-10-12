@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Synchronous and asynchronous</h1>
+                </header>
+            
+            <article>
+                
+<p>The kind of sending channel we have used up until now has been asynchronous, which means it does not block the executing code. Rust also has a synchronous channel type, <kbd>sync_channel</kbd>, where the <kbd>send()</kbd> ;method blocks the code execution if its internal buffer becomes full; it waits until the parent thread starts receiving the data. In the following code, this type of channel is used to send a value of struct <kbd>Msg</kbd> over the channel:</p>
+<pre>// code from Chapter 9/code/sync_channel.rs: 
+use std::sync::mpsc::sync_channel; 
+use std::thread; 
+ 
+type TokenType = i32; 
+ 
+struct Msg { 
+    typ: TokenType, 
+    val: String, 
+} 
+ 
+fn main() { 
+<strong>    let (tx, rx) = sync_channel(1); // buffer size 1</strong> 
+ tx.send(Msg {typ: 42, val: "Rust is cool".to_string()}).unwrap(); 
+    println!("message 1 is sent"); 
+    thread::spawn(move|| { 
+ tx.send(Msg {typ: 43, val: "Rust is still cool".to_string()}).unwrap(); 
+        println!("message 2 is sent"); 
+    }); 
+ 
+    println!("Waiting for 3 seconds ..."); 
+     thread::sleep(time::Duration::from_secs(3)); 
+ 
+    if let Some(msg) = rx.recv().ok() { 
+println!("received message of type {} and val {}", msg.typ, msg.val); 
+    }; 
+    if let Some(msg) = rx.recv().ok() { 
+println!("received second message of type {} and val {}", msg.typ, msg.val); 
+    }; 
+} </pre>
+<p>This prints the following:</p>
+<pre><strong>message 1 is sent</strong><br/><strong>Waiting for 3 seconds</strong></pre>
+<p>Then, after 3 seconds, it prints the following:</p>
+<pre><strong>message 2 is sent</strong><br/><strong>received message of type 42 and val Rust is cool</strong><br/><strong>received second message of type 43 and val Rust is still cool</strong></pre>
+<p>This clearly shows that the second message can only be sent when the buffer is emptied by receiving the first message.</p>
+<div class="mce-root packt_infobox"><span class="packt_screen">Question</span>:<span class="packt_screen"><br/>
+<br/></span> Explain what happens when the second message is also sent from within the main thread, not a separate thread.</div>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

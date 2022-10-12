@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style00.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style01.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Type checking and conversions</h1>
+                </header>
+            
+            <article>
+                
+<p>Rust has to know the type of variables, because that way it can check (at compile time) that they are only used in ways their type permits. That way programs are type safe and a whole range of bugs are avoided.</p>
+<p>This also means that we cannot change the type of a variable during its lifetime, because of static typing, for example, the variable <kbd>score</kbd> in the following snippet cannot change from an integer to a string:</p>
+<pre>// see Chapter 2/code/type_errors.rs 
+// warning: this code does not work! 
+fn main() { 
+let score: i32 = 100; 
+score = "YOU WON!" 
+} </pre>
+<p>With this, we get the compiler error, as follows:</p>
+<pre><strong>error: mismatched types: expected i32, found reference</strong></pre>
+<p>However, I am allowed to write this as:</p>
+<pre>let score = "YOU WON!"; </pre>
+<p>Rust lets me redefine variables; each <kbd>let</kbd> binding creates a new variable score that hides the previous one, which is freed from memory. This is actually quite useful because variables are immutable by default.</p>
+<p>Adding strings with <kbd>+</kbd> (like the players in the following code) is not defined in Rust:</p>
+<pre>let player1 = "Rob"; 
+let player2 = "Jane"; 
+let player3 = player1 + player2; </pre>
+<p>With this we get an error stating:</p>
+<pre><strong>error: binary operation `+` cannot be applied to type `&amp;str`</strong></pre>
+<p>In Rust you can use the <kbd>to_string()</kbd> method to convert the value to a String type like this:</p>
+<pre>let player3 = player1.to_string() + player2; </pre>
+<p>Alternatively, you could use the <kbd>format!</kbd> macro:</p>
+<pre>let player3 = format!("{}{}", player1, player2); </pre>
+<p>In both cases, the variable <kbd>player3</kbd> has the value <kbd>RobJane</kbd>.</p>
+<p>Let's find out what happens when you assign a value from a variable of a certain type to another variable of a different type:</p>
+<pre>// see Chapter 2/code/type_conversions.rs 
+fn main() { 
+  let points = 10i32; 
+  let mut saved_points: u32 = 0; 
+   saved_points = points; // error ! 
+} </pre>
+<p>This is again not allowed, therefore, we get the same error, as follows:</p>
+<pre><strong>error: mismatched types: expected u32, found i32</strong></pre>
+<p>To enable maximal type checking Rust does not permit automatic (or implicit) conversions of one type to another like C++ does, thus avoiding a lot of hard-to-find bugs. For example, the numbers after the decimal point are lost when converting an <kbd>f32</kbd> value to an <kbd>i32</kbd> value; this could lead to errors when done automatically.</p>
+<p>We can however do an explicit conversion (also called a casting) with the keyword as follows:</p>
+<pre>saved_points = points as u32; </pre>
+<p>When the variable <kbd>points</kbd> contains a negative value, the sign would be lost after conversion. Similarly, when casting from a wider value like a float to an integer, the decimal part is truncated. See the following example:</p>
+<pre>  let f2 = 3.14; 
+  saved_points = f2 as u32; // truncation to value 3 occurs here </pre>
+<p>Also, the value must be convertible to the new type, a string cannot be converted to an integer, for example:</p>
+<pre>  let mag = "Gandalf"; 
+   saved_points = mag as u32; // </pre>
+<p>This gives an error, as follows:</p>
+<pre><strong>error: non-scalar cast:`&amp;str`as`u32`</strong></pre>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

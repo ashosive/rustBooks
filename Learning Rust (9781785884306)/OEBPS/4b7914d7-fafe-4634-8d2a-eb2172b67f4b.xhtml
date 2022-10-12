@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">The task</h1>
+                </header>
+            
+            <article>
+                
+<p>Each function takes a single parameter of either the <kbd>f32</kbd> or <kbd>i32</kbd> type and thankfully, we can separate out the modules to be those that return an <kbd>f32</kbd> or <kbd>i32</kbd> (the bases all return <kbd>i32</kbd>: all of the others have their answers in <kbd>f32</kbd>).</p>
+<p>If we look at the temperatures module, everything will return the answer as <kbd>f32</kbd> (after task 1, how it does this is up to you). We can therefore create a single function that takes as the first parameter the conversion to be performed and as the second the value.</p>
+<p>When the single function recognizes the first parameter, it calls the now private functions and returns the value.</p>
+<p>As with the first task, you will need to implement this and create documentation for the new library. You should create a new unit test for the crate and test it in your test rig application.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

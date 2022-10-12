@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style00.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style01.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Getting information in</h1>
+                </header>
+            
+            <article>
+                
+<p>Up to this point, we have concentrated on getting information out from a Rust program rather than entering information.</p>
+<p>Input is done via the <kbd>std::io</kbd> module, getting a reader using the <kbd>io::stdin()</kbd> function, and then calling <kbd>read_line</kbd> on that reader. We put the inputted data into a dynamically growing <kbd>String</kbd>, which needs to be mutable.</p>
+<p>A simple example for inputting would look like this:</p>
+<pre>// 03/readline/src/main.rs<br/>use std::io; 
+fn main() {     
+    let reader: io::Stdin = io::stdin(); 
+    let mut input_text: String = String::new(); 
+ 
+    reader.read_line(&amp;mut input_text).expect("Reading failed"); 
+    println!("Read {}", input_text); 
+} </pre>
+<p>We can see Rust's error handling in action in the previous code. The <kbd>read_line</kbd> method returns a result type, which means that the operation could have failed. The result type encapsulates two generic types inside itself, which in the case of <kbd>read_line</kbd> are <kbd>usize</kbd> (for reporting how many bytes were read in) and <kbd>io::Error</kbd> (for reporting any errors during input). The actual read String is placed in the first argument of the function, in this case <kbd>input_text</kbd>.</p>
+<p>On that result type, our example calls the <kbd>expect</kbd> method. It expects that everything went fine, and returns the first value (the <kbd>usize</kbd> in this case). If there were errors, the <kbd>expect</kbd> method prints reading failed to the standard output and exits the program.</p>
+<p>This is not the only way to handle result types, but it's a common one in cases where we expect things to usually work out fine.</p>
+<p>Another way to handle the error is to explicitly call the <kbd>is_err</kbd> method on the result. It returns a boolean, like this:</p>
+<pre>    let result: Result&lt;usize, io::Error&gt; = reader.read_line(&amp;mut input_text); 
+    if result.is_err() { 
+        println!("failed to read from stdin"); 
+        return; 
+    } </pre>
+<p>If we wish to further parse the entry into another type, we can use the <kbd>parse</kbd> method.</p>
+<p>For instance, say we'd like to get an <kbd>i32</kbd> from the input. The <kbd>read_line</kbd> method includes a carriage return in the input data, so we need to get rid of that using the <kbd>trim</kbd> method before parsing:</p>
+<pre>    let trimmed = input_text.trim(); 
+    let option: Option&lt;i32&gt; = trimmed.parse::&lt;i32&gt;().ok(); </pre>
+<p>For the sake of this example, this final line converts the result type into an <kbd>Option</kbd> using the <kbd>ok</kbd> method. Option is a simplified version of result. This is a useful library and it can have one of two results: <kbd>Some</kbd> or <kbd>None</kbd>.</p>
+<p>Here, if the entry result is <kbd>None</kbd>, the value is not an integer, whereas <kbd>Some</kbd> would be an integer:</p>
+<pre>match option { 
+        Some(i) =&gt; println!("your integer input: {}", i), 
+        None =&gt; println!("this was not an integer: {}", trimmed) 
+    }; 
+ </pre>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

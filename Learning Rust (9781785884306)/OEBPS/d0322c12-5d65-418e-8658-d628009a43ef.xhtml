@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Why do we put the thread to sleep?</h1>
+                </header>
+            
+            <article>
+                
+<p>Usually, the use of <kbd>thread::sleep</kbd> allows the execution to pause for a finite amount of time as an extra protection against racing. This is not always a good plan as there isn't any real way to tell how long a thread is going to take, so it's at best a guess. As with all guesses, they can be wildly inaccurate (it is used here as we're not doing anything with the data value).</p>
+<p>In real systems, the preferred method, to ensure that the correct amount of time is given to ensure that everything has worked is to synchronize the threads using channels.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

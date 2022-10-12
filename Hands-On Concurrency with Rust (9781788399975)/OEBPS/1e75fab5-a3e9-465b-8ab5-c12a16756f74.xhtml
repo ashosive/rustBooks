@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Ordering::Relaxed</h1>
+                </header>
+            
+            <article>
+                
+<p>This ordering didn't show up in the definition of happens-before/synchronizes-with. There's a very good reason for that. <kbd>Relaxed</kbd> ordering implies no guarantees. Loads and stores are free to be re-ordered around a load or store with relaxed ordering. That is, loads and stores can migrate <em>up</em> or <em>down</em> in program order from the point of view of a <kbd>Relaxed</kbd> operation.</p>
+<p>The compiler and the hardware are free to do whatever they please in the presence of <kbd>Relaxed</kbd> ordering. There's quite a lot of utility in this, as we'll see in the upcoming detailed examples. For now, consider counters in a concurrent program used for self-telemetry, or data structures that have been designed to be eventually consistent. No need for strict ordering there.</p>
+<p>Before we move on, it's worth being very clear about what we mean by the ordering of loads and stores. Loads and stores on <em>what</em>? Well, atomics. In Rust, these are exposed in <kbd>std::sync::atomic</kbd> and there are, as of writing this book, four stable atomic types available:</p>
+<ul>
+<li><kbd>AtomicUsize</kbd></li>
+<li><kbd>AtomicIsize</kbd></li>
+<li><kbd>AtomicPtr</kbd></li>
+<li><kbd>AtomicBool</kbd></li>
+</ul>
+<p>There's an ongoing discussion centered around using Rust issue <kbd>#32976</kbd> to support smaller atomic types—you'll note, of the stable four, three are machine word sized and <kbd>AtomicBool</kbd> is currently also one of them—but progress there looks to have stalled out, for want of a champion. So, for now, these are the types. Of course, there's more loads and stores than just atomics—manipulation of raw pointers, to name a familiar example. These are data accesses and have no ordering guarantees beyond those that are built into Rust to begin with. Two threads may load and store to the same raw pointer at the exact same moment and there's nothing that can be done about it without prior coordination.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

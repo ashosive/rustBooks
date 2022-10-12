@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style00.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style01.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Deriving</h1>
+                </header>
+            
+            <article>
+                
+<p>Rust provides a handy attribute that allows you to access a number of commonly used traits without having to implement them yourself time and again. They are called using <kbd>#[derive(Trait_Name)]</kbd>.</p>
+<p>The traits available are as follows:</p>
+<ul>
+<li><kbd>Clone</kbd>: This creates a clone of the object</li>
+<li><kbd>Copy</kbd>: This creates a copy of the object</li>
+<li><kbd>Debug</kbd>: This provides debugging code</li>
+<li><kbd>Default</kbd>: This gives a useful default value for a type</li>
+<li><kbd>Eq</kbd>: <kbd>Equality</kbd>, this is similar to <kbd>PartialEq</kbd> except for all parameters within a struct</li>
+<li><kbd>Hash</kbd>: This is a hashable type</li>
+<li><kbd>Ord</kbd>: <kbd>Order</kbd>, these are the types that form a total order on all types</li>
+<li><kbd>PartialEq</kbd>: <kbd>Partial Equality</kbd>, this only tests on a subset of the struct</li>
+<li><kbd>PartialOrd</kbd>: <kbd>Partial Order</kbd>, values that can compared to create a sort order</li>
+</ul>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

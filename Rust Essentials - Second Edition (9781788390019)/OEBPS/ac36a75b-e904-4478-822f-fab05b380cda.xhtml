@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Using a C library</h1>
+                </header>
+            
+            <article>
+                
+<p>Suppose we want to calculate the tangents of a complex number. The <kbd>num</kbd> crate offers this functionality; however, for the purposes of this exercise, we will call the <kbd>ctanf</kbd> function from the C library <kbd>libm</kbd> instead. This is a collection of mathematical functions implemented in C. The following code defines a complex number as a simple struct.</p>
+<div class="packt_tip"><span class="packt_screen">Warning</span>: This code only works on OS X and Linux, not on Windows.</div>
+<pre>// code from Chapter 10/code/calling_clibrary.rs: 
+<strong>#[repr(C)]</strong> 
+#[derive(Copy, Clone)] 
+#[derive(Debug)] 
+struct Complex { 
+    re: f32, 
+    im: f32, 
+} 
+ 
+<strong>#[link(name = "m")]</strong><strong>extern {</strong><strong>   fn ctanf(z: Complex) -&gt; Complex;</strong><strong>}</strong> 
+ 
+fn tan(z: Complex) -&gt; Complex { 
+<strong>    unsafe { ctanf(z) }</strong> 
+} 
+ 
+fn main() { 
+    let z = Complex { re: -1., im: 1. }; // z is -1 + i 
+    let z_tan = tan(z); 
+    println!("the tangents of {:?} is {:?}", z, z_tan); 
+} </pre>
+<p>This program prints out the following:</p>
+<pre><strong>the tangents of Complex { re: -1, im: 1 } is Complex { re: -0.271753, im: 1.083923 }</strong></pre>
+<p>The <kbd>#[derive(Debug)]</kbd> attribute is necessary because we want to show the number in a <kbd>{:?}</kbd> format string. <kbd>#[derive(Copy, Clone)]</kbd> is needed because we want to use <kbd>z</kbd> in the <kbd>println!</kbd> statement, after we have moved it by calling <kbd>tan(z)</kbd>.The function of <kbd>#[repr(C)]</kbd> is to reassure the compiler that the type we are passing to C is foreign-function safe, and it tells <kbd>rustc</kbd> to create a struct with the same layout as C.</p>
+<p>The signatures of the C functions we want to use must be listed in an <kbd>extern<span>{}</span></kbd> block. The compiler cannot check these signatures, so it is important to specify them accurately to make the correct bindings at runtime. This block can also declare global variables exported by C to be used in Rust. These must be marked with <kbd>static</kbd> or <kbd>static mut</kbd>, for example, <kbd>static mut version: libc::c_int</kbd>.</p>
+<p>The <kbd>extern</kbd> block must be preceded by a <kbd>#[link(name = "m")]</kbd> attribute to link in the <kbd>libm</kbd> library. This instructs <kbd>rustc</kbd> to link to that native library so that symbols from that library are resolved.</p>
+<p>The C call itself must evidently be done inside an <kbd>unsafe {}</kbd> block. This block is enveloped inside the <kbd>tan(z)</kbd> wrapper function, which only uses Rust types. The wrapper can be exposed as a safe interface, hiding the unsafe calls and type conversions between Rust and C types, especially C pointers. When the C code returns a resource, the Rust code must contain destructors for these values to ensure their memory is released.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style00.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style01.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Prematurely terminating a loop</h1>
+                </header>
+            
+            <article>
+                
+<p>Depending on the size of the data being iterated over within a loop, the loop can be costly on processor time. For example, say the server is receiving data from a data-logging application, such as measuring values from a gas chromatograph; over the entire scan, it may record roughly half a million data points with an associated time position.</p>
+<p>For our purposes, we want to add all of the recorded values until the value is over 1.5 and once that is reached, we can stop the loop.</p>
+<p>Sound easy? There is one thing not mentioned: there is no guarantee that the recorded value will ever reach over 1.5, so how can we terminate the loop if the value is reached?</p>
+<p>We can do this in one of two ways. The first is to use a <kbd>while</kbd> loop and introduce a Boolean to act as the test condition. In the following example, <kbd>my_array</kbd> represents a very small subsection of the data sent to the server:</p>
+<pre>// 04/terminate-loop-1/src/main.rs<br/>fn main()  
+{ 
+    let my_array = vec![0.6f32, 0.4, 0.2, 0.8, 1.3, 1.1, 1.7, 1.9]; 
+    let mut counter: usize = 0; 
+    let mut result = 0f32; 
+    let mut quit = false; 
+ 
+    while quit != true 
+    { 
+        if my_array[counter] &gt; 1.5 
+        { 
+            quit = true; 
+        } 
+        else 
+        { 
+            result += my_array[counter]; 
+            counter += 1; 
+        } 
+    } 
+     println!("{}", result); 
+} </pre>
+<p>The result here is <kbd>4.4</kbd>. This code is perfectly acceptable, if slightly long-winded. Rust also allows the use of the <kbd>break</kbd> and <kbd>continue</kbd> keywords (if you're familiar with C, they work in the same way).</p>
+<p>Our code using <kbd>break</kbd> will be as follows:</p>
+<pre>// 04/terminate-loop-2/src/main.rs<br/>fn main()  
+{ 
+    let my_array = vec![0.6f32, 0.4, 0.2, 0.8, 1.3, 1.1, 1.7, 1.9]; 
+    let mut result = 0f32; 
+ 
+    for(_, value) in my_array.iter().enumerate() 
+    { 
+       if *value &gt; 1.5 
+       { 
+           break; 
+       } 
+       else 
+       { 
+           result += *value; 
+       } 
+    } 
+    println!("{}", result); 
+} </pre>
+<p>Again, this will give an answer of <kbd>4.4</kbd>, indicating that the two methods used are equivalent.</p>
+<p>If we replace <kbd>break</kbd> with <kbd>continue</kbd> in the preceding code example, we will get the same result (<kbd>4.4</kbd>). The difference between <kbd>break</kbd> and <kbd>continue</kbd> is that <kbd>continue</kbd> jumps to the next value in the iteration rather than jumping out, so if we had the final value of <kbd>my_array</kbd> as <kbd>1.3</kbd>, the output at the end should be <kbd>5.7</kbd>.</p>
+<div class="packt_tip">When using <kbd>break</kbd> and <kbd>continue</kbd>, always keep in mind this difference. While it may not crash the code, mistaking <kbd>break</kbd> and <kbd>continue</kbd> may lead to results that you may not expect or want.</div>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

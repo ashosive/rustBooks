@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style00.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style01.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Looking into thread pool</h1>
+                </header>
+            
+            <article>
+                
+<p>Let's look into threadpool and understand its implementation. Hopefully by this point in the book, you have a sense of how you'd go about building your own thread-pooling library. Consider that for a moment, before we continue, and see how well your idea stacks up against this particular approach. We'll inspect the library (<a href="https://crates.io/crates/threadpool">https://crates.io/crates/threadpool</a>) at SHA <kbd>a982e060ea2e3e85113982656014b212c5b88ba2</kbd>.</p>
+<div class="packt_infobox"><span>The thread pool crate is not listed in its entirety. You can find the full listing in the book's source repository. </span></div>
+<p>Let's look first at the project's <kbd>Cargo.toml</kbd>:</p>
+<pre>[package]
+
+name = "threadpool"
+version = "1.7.1"
+authors = ["The Rust Project Developers", "Corey Farwell &lt;coreyf@rwell.org&gt;", "Stefan Schindler &lt;dns2utf8@estada.ch&gt;"]
+license = "MIT/Apache-2.0"
+readme = "README.md"
+repository = "https://github.com/rust-threadpool/rust-threadpool"
+homepage = "https://github.com/rust-threadpool/rust-threadpool"
+documentation = "https://docs.rs/threadpool"
+description = """
+A thread pool for running a number of jobs on a fixed set of worker threads.
+"""</pre>
+<pre>keywords = ["threadpool", "thread", "pool", "threading", "parallelism"]
+categories = ["concurrency", "os"]
+
+[dependencies]
+num_cpus = "1.6"</pre>
+<p>Fairly minimal. The only dependency is <kbd>num_cpus</kbd>, a little library to determine the number of logical and physical cores available on the machine. On linux, this reads <kbd>/proc/cpuinfo</kbd>. On other operating systems, such as the BSDs or Windows, the library makes system calls. It's a clever little library and well worth reading if you need to learn how to target distinct function implementations across OSes. The key thing to take away from the threadpool's <kbd>Cargo.toml</kbd> is that it is almost entirely built from the tools available in the standard library. In fact, there's only a single implementation file in the library, <kbd>src/lib.rs</kbd>. All the code we'll discuss from this point can be found in that file.</p>
+<p>Now, let's understand the builder pattern we saw in the previous section. The <kbd>Builder</kbd> type is defined like so:</p>
+<pre>#[derive(Clone, Default)]
+pub struct Builder {
+    num_threads: Option&lt;usize&gt;,
+    thread_name: Option&lt;String&gt;,
+    thread_stack_size: Option&lt;usize&gt;,
+}</pre>
+<p>We only populated <kbd>num_threads</kbd> in the previous section. <kbd>thread_stack_size</kbd> is used to control the stack size of pool threads. As of writing, thread stack sizes are by default two megabytes. Standard library's <kbd>std::thread::Builder::stack_size</kbd> allows us to manually set this value. We could have, for instance, in our thread-per-connection example, set the stack size significantly lower, netting us more threads on the same hardware. After all, each thread allocated very little storage, especially if we had taken steps to read only into a fixed buffer. The <kbd>thread_name</kbd> field, like the stack size, is a toggle for <kbd>std::thread::Builder::name</kbd>. That is, it allows the user to set the thread name for all threads in the pool, a name they will all share. In my experience, naming threads is a relatively rare thing to do, especially in a pool, but it can sometimes be useful for logging purposes.</p>
+<p>The pool builder works mostly as you'd expect, with the public functions setting the fields in the <kbd>Builder</kbd> struct. Where the implementation gets interesting is <kbd>Builder::build</kbd>:</p>
+<pre>    pub fn build(self) -&gt; ThreadPool {
+        let (tx, rx) = channel::&lt;Thunk&lt;'static&gt;&gt;();
+
+        let num_threads = self.num_threads.unwrap_or_else(num_cpus::get);
+
+        let shared_data = Arc::new(ThreadPoolSharedData {
+            name: self.thread_name,
+            job_receiver: Mutex::new(rx),
+            empty_condvar: Condvar::new(),
+            empty_trigger: Mutex::new(()),
+            join_generation: AtomicUsize::new(0),
+            queued_count: AtomicUsize::new(0),
+            active_count: AtomicUsize::new(0),
+            max_thread_count: AtomicUsize::new(num_threads),
+            panic_count: AtomicUsize::new(0),
+            stack_size: self.thread_stack_size,
+        });
+
+        // Threadpool threads
+        for _ in 0..num_threads {
+            spawn_in_pool(shared_data.clone());
+        }
+
+        ThreadPool {
+            jobs: tx,
+            shared_data: shared_data,
+        }
+    }</pre>
+<p>There's a lot going on here. Let's take it a bit at a time. First, that channel is the <kbd>std::sync::mpsc::channel</kbd> we discussed at length in <a href="5a332d94-37e4-4748-8920-1679b07e2880.xhtml" target="_blank">Chapter 4</a>, <em>Sync and Send – the Foundation of Rust Concurrency</em>. What is unfamiliar there is <kbd>Thunk</kbd>. Turns out, it's a type synonym:</p>
+<pre>type Thunk&lt;'a&gt; = Box&lt;FnBox + Send + 'a&gt;;</pre>
+<p>Now, what is <kbd>FnBox</kbd>? It's a small trait:</p>
+<pre>trait FnBox {
+    fn call_box(self: Box&lt;Self&gt;);
+}
+
+impl&lt;F: FnOnce()&gt; FnBox for F {
+    fn call_box(self: Box&lt;F&gt;) {
+        (*self)()
+    }
+}</pre>
+<p>It is the <kbd>FnOnce</kbd> trait we encountered in <a href="605ce307-29ed-4b5a-961e-8d327467b84f.xhtml" target="_blank">Chapter 3</a>, <em>The Rust Memory Model<span> </span>–<span> </span>Ownership, References and Manipulation</em>, so if you read that chapter, you know that <kbd>F</kbd> will only be called once. The boxing of the function closure means its captured variables are available on the heap and don't get deallocated when the pool caller moves the closure out of scope. Great. Now, let's jump back to build and look at <kbd>shared_data</kbd>:</p>
+<pre>        let shared_data = Arc::new(ThreadPoolSharedData {
+            name: self.thread_name,
+            job_receiver: Mutex::new(rx),
+            empty_condvar: Condvar::new(),
+            empty_trigger: Mutex::new(()),
+            join_generation: AtomicUsize::new(0),
+            queued_count: AtomicUsize::new(0),
+            active_count: AtomicUsize::new(0),
+            max_thread_count: AtomicUsize::new(num_threads),
+            panic_count: AtomicUsize::new(0),
+            stack_size: self.thread_stack_size,
+        });</pre>
+<p>Alright, several atomic usizes, a condvar, a mutex to protect the receiver side of the thunk channel, and a mutex that'll be paired with the condvar. There's a fair bit you can tell from reading the population of a struct, with a little bit of background information. The implementation of <kbd>ThreadPoolSharedData</kbd> is brief:</p>
+<pre>impl ThreadPoolSharedData {
+    fn has_work(&amp;self) -&gt; bool {
+        self.queued_count.load(Ordering::SeqCst) &gt; 0 || <br/>        self.active_count.load(Ordering::SeqCst) &gt; 0
+    }
+
+    /// Notify all observers joining this pool if there<br/>    /// is no more work to do.
+    fn no_work_notify_all(&amp;self) {
+        if !self.has_work() {
+            *self.empty_trigger
+                .lock()
+                .expect("Unable to notify all joining threads");
+            self.empty_condvar.notify_all();
+        }
+    }
+}</pre>
+<p>The <kbd>has_work</kbd> function does a sequentially consistent read of the two indicators of work, an operation that is not exactly cheap considering the two sequentially consistent reads, but implies a need for accuracy in the response. The <kbd>no_work_notify_all</kbd> function is more complicated and mysterious. Happily, the function is used in the implementation of the next chunk of <kbd>Build::build</kbd> and will help clear up that mystery. The next chunk of <kbd>build</kbd> is:</p>
+<pre>        for _ in 0..num_threads {
+            spawn_in_pool(shared_data.clone());
+        }
+
+        ThreadPool {
+            jobs: tx,
+            shared_data: shared_data,
+        }
+    }
+}</pre>
+<p>For each of the <kbd>num_threads</kbd>, the <kbd>spawn_in_pool</kbd> function is called over a clone of the <kbd>Arc</kbd>ed <kbd>ThreadPoolSharedData</kbd>. Let's inspect <kbd>spawn_in_pool</kbd>:</p>
+<pre>fn spawn_in_pool(shared_data: Arc&lt;ThreadPoolSharedData&gt;) {
+    let mut builder = thread::Builder::new();
+    if let Some(ref name) = shared_data.name {
+        builder = builder.name(name.clone());
+    }
+    if let Some(ref stack_size) = shared_data.stack_size {
+        builder = builder.stack_size(stack_size.to_owned());
+    }</pre>
+<p>As you might have expected, the function creates <kbd>std::thread::Builder</kbd> and pulls references to the name and stack size embedded in the <kbd>ThreadPoolSharedData</kbd> shared data. With these variables handy, the <kbd>builder.spawn</kbd> is called, passing in a closure in the usual fashion:</p>
+<pre>    builder
+        .spawn(move || {
+            // Will spawn a new thread on panic unless it is cancelled.
+            let sentinel = Sentinel::new(&amp;shared_data);</pre>
+<p>Well, let's take a look at <kbd>Sentinel:</kbd></p>
+<pre>struct Sentinel&lt;'a&gt; {
+    shared_data: &amp;'a Arc&lt;ThreadPoolSharedData&gt;,
+    active: bool,
+}</pre>
+<p>It holds a reference to <kbd>Arc&lt;ThreadPoolSharedData&gt;</kbd>—avoiding increasing the reference counter—and an <kbd>active</kbd> boolean. The implementation is likewise brief:</p>
+<pre>impl&lt;'a&gt; Sentinel&lt;'a&gt; {
+    fn new(shared_data: &amp;'a Arc&lt;ThreadPoolSharedData&gt;) -&gt; Sentinel&lt;'a&gt; {
+        Sentinel {
+            shared_data: shared_data,
+            active: true,
+        }
+    }
+
+    /// Cancel and destroy this sentinel.
+    fn cancel(mut self) {
+        self.active = false;
+    }
+}</pre>
+<p>The real key here is the <kbd>Drop</kbd> implementation:</p>
+<pre>impl&lt;'a&gt; Drop for Sentinel&lt;'a&gt; {
+    fn drop(&amp;mut self) {
+        if self.active {
+            self.shared_data.active_count.fetch_sub(1, Ordering::SeqCst);
+            if thread::panicking() {
+                self.shared_data.panic_count<br/>                    .fetch_add(1, Ordering::SeqCst);
+            }
+            self.shared_data.no_work_notify_all();
+            spawn_in_pool(self.shared_data.clone())
+        }
+    }
+}</pre>
+<p>Recall how in the previous section, our join vector grew without bound, even though threads in that vector had panicked and were no longer working. There is an interface available to determine whether the current thread is in a panicked state, <kbd>std::thread::panicking()</kbd>, in use here.</p>
+<p>When a thread panics, it drops its storage, which, in this pool, includes the allocated <kbd>Sentinel</kbd>.  <kbd>drop</kbd> then checks the <kbd>active</kbd> flag on the <kbd>Sentinel,</kbd> decrements the <kbd>active_count</kbd> of the <kbd>ThreadPoolSharedData,</kbd> increases its <kbd>panic_count,</kbd> calls the as-yet mysterious <kbd>no_work_notify_all</kbd> and then adds an additional thread to the pool. In this way, the pool maintains its appropriate size and there is no need for any additional monitoring of threads to determine when they need to be recycled: the type system does all the work.</p>
+<p>Let's hop back into <kbd>spawn_in_pool:</kbd></p>
+<pre>            loop {
+                // Shutdown this thread if the pool has become smaller
+                let thread_counter_val = shared_data<br/>                                             .active_count<br/>                                             .load(Ordering::Acquire);
+                let max_thread_count_val = shared_data<br/>                                             .max_thread_count<br/>                                             .load(Ordering::Relaxed);
+                if thread_counter_val &gt;= max_thread_count_val {
+                    break;
+                }</pre>
+<p>Here, we see the start of the infinite loop of the <kbd>builder.spawn</kbd> function, plus a check to shut down threads if the pool size has decreased since the last iteration of the loop. <kbd>ThreadPool</kbd> exposes the <kbd>set_num_threads</kbd> function to allow changes to the pool's size at runtime. Now, why an infinite loop? Spawning a new thread is not an entirely fast operation on some systems and, besides, it's not a free operation. If you can avoid the cost, you may as well. Some pool implementations in other languages spawn a new thread for every bit of work that comes in, fearing memory pollution. This is less a problem in Rust, where unsafe memory access has to be done intentionally and <kbd>FnBox</kbd> is effectively a trap for such behavior anyway, owing to the fact that the closure will have no pointers to the pool's private memory. The loop exists to pull <kbd>Thunks</kbd> from the receiver channel side in <kbd>ThreadPoolSharedData</kbd>:</p>
+<pre>                let message = {
+                    // Only lock jobs for the time it takes
+                    // to get a job, not run it.
+                    let lock = shared_data
+                        .job_receiver
+                        .lock()
+                        .expect("Worker thread unable to \<br/>                                lock job_receiver");
+                    lock.recv()
+                };</pre>
+<p>The message may be an error, implying that the <kbd>ThreadPool</kbd> was dropped, closing the sender channel side. But, should the message be <kbd>Ok</kbd>, we'll have our <kbd>FnBox</kbd> to call:</p>
+<pre>                let job = match message {
+                    Ok(job) =&gt; job,
+                    // The ThreadPool was dropped.
+                    Err(..) =&gt; break,
+                };</pre>
+<p>The final bit of <kbd>spawn_in_pool</kbd> is uneventful:</p>
+<pre>                shared_data.active_count.fetch_add(1, Ordering::SeqCst);
+                shared_data.queued_count.fetch_sub(1, Ordering::SeqCst);
+
+                job.call_box();
+
+                shared_data.active_count.fetch_sub(1, Ordering::SeqCst);
+                shared_data.no_work_notify_all();
+            }
+
+            sentinel.cancel();
+        })
+        .unwrap();
+}</pre>
+<p>The <kbd>FnBox</kbd> called job is called via <kbd>call_box</kbd> and if this panics, killing the thread, the <kbd>Sentinel</kbd> cleans up the atomic references as appropriate and starts a new thread in the pool. By leaning on Rust's type system and memory model, we get a cheap thread-pool implementation that spawns threads only when needed, with no fears of accidentally polluting memory between jobs.</p>
+<p><kbd>ThreadPool::execute</kbd> is a quick boxing of <kbd>FnOnce</kbd>, pushed into the sender side of the <kbd>Thunk</kbd> channel:</p>
+<pre>    pub fn execute&lt;F&gt;(&amp;self, job: F)
+    where
+        F: FnOnce() + Send + 'static,
+    {
+        self.shared_data.queued_count.fetch_add(1, Ordering::SeqCst);
+        self.jobs
+            .send(Box::new(job))
+            .expect("ThreadPool::execute unable to send job into queue.");
+    }</pre>
+<p>The last piece here is <kbd>ThreadPool::join</kbd>. This is where <kbd>ThreadPoolSharedData::no_work_notify_all</kbd> comes into focus. Let's look at <kbd>join</kbd>:</p>
+<pre>    pub fn join(&amp;self) {
+        // fast path requires no mutex
+        if self.shared_data.has_work() == false {
+            return ();
+        }
+
+        let generation = self.shared_data<br/>                             .join_generation<br/>                             .load(Ordering::SeqCst);
+        let mut lock = self.shared_data.empty_trigger.lock().unwrap();
+
+        while generation == self.shared_data<br/>                                .join_generation <br/>                                .load(Ordering::Relaxed)
+            &amp;&amp; self.shared_data.has_work()
+        {
+            lock = self.shared_data.empty_condvar.wait(lock).unwrap();
+        }
+
+        // increase generation if we are the first thread to<br/>        // come out of the loop
+        self.shared_data.join_generation.compare_and_swap(
+            generation,
+            generation.wrapping_add(1),
+            Ordering::SeqCst,
+        );
+    }</pre>
+<p>The function calls first to <kbd>has_work</kbd>, bailing out early if there are no active or queued threads in the pool. No reason to block the caller there. Then, <kbd>generation</kbd> is set up to act as a condition variable in the loop surrounding <kbd>empty_condvar</kbd>. Every thread that joins to the pool checks that the pool <kbd>generation</kbd> has not shifted, implying some other thread has unjoined, and that there's work yet to do. Recall that it's <kbd>no_work_notify_all</kbd> that calls <kbd>notify_all</kbd> on condvar, this function in turn being called when either a <kbd>Sentinel</kbd> drops or the inner-loop of <kbd>spawn_in_pool</kbd> returns from a job. Any joined thread waking on those two conditions—a job being completed or crashing—checks their condition, incrementing the <kbd>generation</kbd> on their the way to becoming unjoined.</p>
+<p>That's it! That's a thread pool, a thing built out of the pieces we've discussed so far in this book. If you wanted to make a thread pool without queuing, you'd push an additional check into <kbd>execute</kbd>. Some of the sequentially consistent atomic operations could likely be relaxed, as well, as potentially the consequence of making a simple implementation more challenging to reason with. It's potentially worth it for the performance gain if your executed jobs are very brief. In fact, we'll discuss a library later in this chapter that ships an alternative thread pool implementation for just such a use case, though it is quite a bit more complex than the one we've just discussed.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

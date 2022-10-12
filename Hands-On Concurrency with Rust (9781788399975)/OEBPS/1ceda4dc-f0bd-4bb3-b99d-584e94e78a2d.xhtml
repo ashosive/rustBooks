@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Compare and set mutex</h1>
+                </header>
+            
+            <article>
+                
+<p>First, let's look at a very simple mutex implementation, an atomic swap mutex that spins around in a loop until the correct conditions arrive. That is, let's build a <em>spin-lock</em>. This mutex is so named because every thread that blocks on <kbd>lock</kbd> is burning up CPU, spinning on the condition that holds it from acquiring the lock. Anyhow, you'll see. We'll lay down our <kbd>Cargo.toml</kbd> first:</p>
+<pre>[package]
+name = "synchro"
+version = "0.1.0"
+authors = ["Brian L. Troutwine &lt;brian@troutwine.us&gt;"]
+
+[[bin]]
+name = "swap_mutex"
+doc = false
+
+[[bin]]
+name = "status_demo"
+doc = false
+
+[[bin]]
+name = "mutex_status_demo"
+doc = false
+
+[[bin]]
+name = "spin_mutex_status_demo"
+doc = false
+
+[[bin]]
+name = "queue_spin"
+doc = false
+
+[[bin]]
+name = "crossbeam_queue_spin"
+doc = false
+
+[dependencies]
+crossbeam = { git = "https://github.com/crossbeam-rs/crossbeam.git", rev = "89bd6857cd701bff54f7a8bf47ccaa38d5022bfb" }
+
+[dev-dependencies]
+quickcheck = "0.6"</pre>
+<p>Now, we need <kbd>src/lib.rs</kbd>:</p>
+<pre style="padding-left: 30px">extern crate crossbeam;
+
+mod queue;
+mod swap_mutex;
+mod semaphore;
+
+pub use semaphore::*;
+pub use swap_mutex::*;
+pub use queue::*;</pre>
+<p>There's a fair bit here we're not going to use straight away, but we'll come to it shortly. Now, let's dive into <kbd>src/swap_mutex.rs</kbd>. First, our preamble:</p>
+<pre>extern crate crossbeam;
+
+mod queue;
+mod swap_mutex;
+mod semaphore;</pre>
+<p>Very little surprise here by this point. We see the usual imports, plus a few new ones—<kbd>AtomicBool</kbd> and <kbd>Ordering</kbd>, as discussed previously. We implement <kbd>Send</kbd> and <kbd>Sync</kbd> ourselves—discussed in the previous chapter—because while <em>we</em> can prove that our <kbd>SwapMutex&lt;T&gt;</kbd> is <kbd>threadsafe</kbd>, Rust cannot. The <kbd>SwapMutex&lt;T&gt;</kbd> is small:</p>
+<pre>pub struct SwapMutex&lt;T&gt; {
+    locked: AtomicBool,
+    data: *mut T,
+}</pre>
+<p>The field <kbd>locked</kbd> is an <kbd>AtomicBool</kbd>, which we'll be using to provide isolation between threads. The idea is simple enough—if a thread shows up and finds that <kbd>locked</kbd> is false then the thread may acquire the lock, else it has to spin. It's also worth noting that our implementation lives a little on the wild side by keeping a raw pointer to <kbd>T</kbd>. The Rust standard library <kbd>std::sync::Mutex</kbd> keeps its interior data, as of writing this book, in an <kbd>UnsafeCell</kbd>, which we don't have access to in stable. In this implementation we're just going to be storing the pointer and not doing any manipulation through it. Still, we've got to be careful about dropping the <kbd>SwapMutex</kbd>. Creating a <kbd>SwapMutex</kbd> happens like you might expect:</p>
+<pre style="padding-left: 30px">impl&lt;T&gt; SwapMutex&lt;T&gt; {
+    pub fn new(t: T) -&gt; Self {
+        let boxed_data = Box::new(t);
+        SwapMutex {
+            locked: AtomicBool::new(false),
+            data: Box::into_raw(boxed_data),
+        }
+    }</pre>
+<p>The <kbd>T</kbd> is moved into <kbd>SwapMutex</kbd> and we box it to then get its raw pointer. That's necessary to avoid a stack value being pushed into <kbd>SwapMutex</kbd> and promptly disappearing when the stack frame changes, all of which was discussed in great detail in <a href="8c61da2f-08c8-40be-89d4-d8afa8510850.xhtml" target="_blank">Chapter 2</a>, <em>Sequential Rust Performance and Testing</em>. A mutex always starts unlocked, else there'd be no way to ever acquire it. Now, let's look at locking the mutex:</p>
+<pre>    pub fn lock(&amp;self) -&gt; SwapMutexGuard&lt;T&gt; {
+        while self.locked.swap(true, Ordering::AcqRel) {
+            thread::yield_now();
+        }
+        SwapMutexGuard::new(self)
+    }</pre>
+<p>The API is a little different compared to the <span>standard library </span><kbd>Mutex</kbd>. For one, <kbd>SwapMutex</kbd> does not track poisoning, and, as a result, if lock is invoked it's guaranteed to return with a guard, called <kbd>SwapMutexGuard</kbd>. <kbd>SwapMutex</kbd> <em>is</em> scope-based, however; just like <span>standard library </span><kbd>MutexGuard</kbd> there's no need—nor ability—to ever call an explicit unlock. There is an unlock though, used by the drop of <kbd>SwapMutexGuard</kbd>:</p>
+<pre>    fn unlock(&amp;self) -&gt; () {
+        assert!(self.locked.load(Ordering::Relaxed) == true);
+        self.locked.store(false, Ordering::Release);
+    }</pre>
+<p>In this simple mutex, all that needs to be done to unlock is set the <kbd>locked</kbd> field <span>to false, but not before confirming that, in fact, the calling thread has a right to unlock the mutex.</span></p>
+<p>Now, can we convince ourselves that this mutex is correct? Let's go through our criteria:</p>
+<div class="packt_quote">"Mutex supports two operations, <em>lock</em> and <em>unlock</em>."</div>
+<p>Check. Next:</p>
+<div class="packt_quote">"A mutex is either <em>locked</em> or <em>unlocked."</em></div>
+<p>Check, by reason that this is flagged by a Boolean. Finally:</p>
+<div class="packt_quote">"The operation <em>lock</em> will move a mutex into a <em>locked</em> state if and only if the mutex is <em>unlocked</em>. The thread that completes the <em>lock</em> is said to hold the <em>lock</em>."</div>
+<p>Let's talk through what <kbd>AtomicBool::swap</kbd> does. The full type is <kbd>swap(&amp;self, val: bool, order: Ordering) -&gt; bool</kbd> and the function does what you might expect by the name; it atomically swaps the bool at self with the bool <kbd>val</kbd> atomically, according to the passed ordering, and returns the previous value. Here, then, each thread is competing to write true into the locked flag and only one thread at a time will see false returned as the previous value, owing to the atomicity of swapping. The thread that has written false is now the holder of the lock, returning <kbd>SwapMutexGuard</kbd>. Locking a <kbd>SwapMutex</kbd> can only be done to an unlocked <kbd>SwapMutex</kbd> and it is done exclusive of other threads.</p>
+<div class="packt_quote">"The operation unlock will move a mutex into an unlocked state if and only if the mutex is previously locked and the caller of unlock is the holder of the lock."</div>
+<p>Let's consider unlock. Recall first that it's only possible to call from <kbd>SwapMutexGuard</kbd>, so the assertion that the caller has the right to unlock the <kbd>SwapMutex</kbd> is a check against a malfunctioning lock: only one thread at a time can hold <kbd>SwapMutex</kbd>, and as a result there will only ever be one <kbd>SwapMutexGuard</kbd> in memory. Because of the nature of <kbd>Release</kbd> ordering, we're guaranteed that the <kbd>Relaxed</kbd> load of <kbd>locked</kbd> will occur before the store, so it's guaranteed that when the store does happen the value of <kbd>locked</kbd> will be true. Only the holder of the lock can unlock it, and this property is satisfied as well.</p>
+<div class="packt_quote">"All loads and stores that occur after and before a lock in program order must not be moved prior to or after the lock."</div>
+<p>This follows directly from the behavior of <kbd>AcqRel</kbd> ordering.</p>
+<div class="packt_quote">"All loads and stores that occur before an unlock in program order must not be moved to after the unlock."</div>
+<p>This follows from the behavior of <kbd>Release</kbd> ordering.</p>
+<p>Bang, we have ourselves a mutex. It's not an especially power-friendly mutex, but it does have the essential properties. Here's the rest of the thing, for completeness's sake:</p>
+<pre style="padding-left: 30px">impl&lt;T&gt; Drop for SwapMutex&lt;T&gt; {
+    fn drop(&amp;mut self) {
+        let data = unsafe { Box::from_raw(self.data) };
+        drop(data);
+    }
+}
+
+pub struct SwapMutexGuard&lt;'a, T: 'a&gt; {
+    __lock: &amp;'a SwapMutex&lt;T&gt;,
+}
+
+impl&lt;'a, T&gt; SwapMutexGuard&lt;'a, T&gt; {
+    fn new(lock: &amp;'a SwapMutex&lt;T&gt;) -&gt; SwapMutexGuard&lt;'a, T&gt; {
+        SwapMutexGuard { __lock: lock }
+    }
+}
+
+impl&lt;'a, T&gt; Deref for SwapMutexGuard&lt;'a, T&gt; {
+    type Target = T;
+
+    fn deref(&amp;self) -&gt; &amp;T {
+        unsafe { &amp;*self.__lock.data }
+    }
+}
+
+impl&lt;'a, T&gt; DerefMut for SwapMutexGuard&lt;'a, T&gt; {
+    fn deref_mut(&amp;mut self) -&gt; &amp;mut T {
+        unsafe { &amp;mut *self.__lock.data }
+    }
+}
+
+impl&lt;'a, T&gt; Drop for SwapMutexGuard&lt;'a, T&gt; {
+    #[inline]
+    fn drop(&amp;mut self) {
+        self.__lock.unlock();
+    }
+}</pre>
+<p>Now, let's build something with <kbd>SwapMutex</kbd>. In <kbd>src/bin/swap_mutex.rs</kbd>, we'll replicate the bridge problem from the last chapter, but on top of <kbd>SwapMutex</kbd>, plus some fancy add-ons now that we know some clever things to do with atomics. Here's the preamble:</p>
+<pre style="padding-left: 30px">extern crate synchro;
+
+use std::sync::atomic::{AtomicUsize, Ordering};
+use std::sync::Arc;
+use synchro::SwapMutex;
+use std::{thread, time};
+
+#[derive(Debug)]
+enum Bridge {
+    Empty,
+    Left(u8),
+    Right(u8),
+}</pre>
+<p>Familiar enough. We pull in our <kbd>SwapMutex</kbd>, and define <kbd>Bridge</kbd>. Fairly unsurprising material. To continue:</p>
+<pre style="padding-left: 30px">static LHS_TRANSFERS: AtomicUsize = AtomicUsize::new(0);
+static RHS_TRANSFERS: AtomicUsize = AtomicUsize::new(0);</pre>
+<p>This is new, though. Statics in Rust are compile-time globals. We've seen their lifetime static floating around from time to time but have never remarked on it. A static will be part of the binary itself and any initialization code needed for the static will have to be evaluated at compile-time as well as being threadsafe. We're creating two static <kbd>AtomicUsizes</kbd> here at the top of our program. Why? One of the major issues with the previous rope bridge implementation was its silence. You could watch it in a debugger, sure, but that's slow and won't impress your friends. Now that we have atomics at hand, what we're going to do is get each side of the bridge to tally up how many baboons cross. <kbd>LHS_TRANSFERS</kbd> are the number of baboons that go from right to left, <kbd>RHS_TRANSFERS</kbd> is the other direction. Our left and right sides of the bridge are broken out into functions this time around, too:</p>
+<pre style="padding-left: 30px">fn lhs(rope: Arc&lt;SwapMutex&lt;Bridge&gt;&gt;) -&gt; () {
+    loop {
+        let mut guard = rope.lock();
+        match *guard {
+            Bridge::Empty =&gt; {
+                *guard = Bridge::Right(1);
+            }
+            Bridge::Right(i) =&gt; {
+                if i &lt; 5 {
+                    *guard = Bridge::Right(i + 1);
+                }
+            }
+            Bridge::Left(0) =&gt; {
+                *guard = Bridge::Empty;
+            }
+            Bridge::Left(i) =&gt; {
+                LHS_TRANSFERS.fetch_add(1, Ordering::Relaxed);
+                *guard = Bridge::Left(i - 1);
+            }
+        }
+    }
+}
+
+fn rhs(rope: Arc&lt;SwapMutex&lt;Bridge&gt;&gt;) -&gt; () {
+    loop {
+        let mut guard = rope.lock();
+        match *guard {
+            Bridge::Empty =&gt; {
+                *guard = Bridge::Left(1);
+            }
+            Bridge::Left(i) =&gt; {
+                if i &lt; 5 {
+                    *guard = Bridge::Left(i + 1);
+                }
+            }
+            Bridge::Right(0) =&gt; {
+                *guard = Bridge::Empty;
+            }
+            Bridge::Right(i) =&gt; {
+                RHS_TRANSFERS.fetch_add(1, Ordering::Relaxed);
+                *guard = Bridge::Right(i - 1);
+            }
+        }
+    }
+}</pre>
+<p>This ought to be familiar enough from the previous chapter, but do note that the transfer counters are now being updated. We've used <kbd>Relaxed</kbd> ordering—the increments are guaranteed to land but it's not especially necessary for them to occur strictly before or after the modification to the guard. Finally, the <kbd>main</kbd> function:</p>
+<pre style="padding-left: 30px">fn main() {
+    let mtx: Arc&lt;SwapMutex&lt;Bridge&gt;&gt; = Arc::new(SwapMutex::new(Bridge::Empty));
+
+    let lhs_mtx = Arc::clone(&amp;mtx);
+    let _lhs = thread::spawn(move || lhs(lhs_mtx));
+    let _rhs = thread::spawn(move || rhs(mtx));
+
+    let one_second = time::Duration::from_millis(1_000);
+    loop {
+        thread::sleep(one_second);
+        println!(
+            "Transfers per second:\n    LHS: {}\n    RHS: {}",
+            LHS_TRANSFERS.swap(0, Ordering::Relaxed),
+            RHS_TRANSFERS.swap(0, Ordering::Relaxed)
+        );
+    }
+}</pre>
+<p>We can see here that the mutex is set up, the threads have been spawned, and that the main thread spends its time in an infinite loop printing out information on transfer rates. This is done by sleeping the thread in one-second intervals, swapping the transfer counters with zero and printing the previous value. The output looks something like this:</p>
+<pre><strong>&gt; cargo build
+&gt; ./target/debug/swap_mutex
+Transfers per second:
+    LHS: 787790
+    RHS: 719371
+Transfers per second:
+    LHS: 833537
+    RHS: 770782
+Transfers per second:
+    LHS: 848662
+    RHS: 776678
+Transfers per second:
+    LHS: 783769
+    RHS: 726334
+Transfers per second:
+    LHS: 828969
+    RHS: 761439</strong></pre>
+<p>The exact numbers will vary depending on your system. Also note that the numbers are not very close in some instances, either. The <kbd>SwapMutex</kbd> is not <em>fair</em>.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

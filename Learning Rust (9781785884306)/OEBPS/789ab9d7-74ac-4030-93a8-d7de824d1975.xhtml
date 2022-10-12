@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">A simple crate example</h1>
+                </header>
+            
+            <article>
+                
+<p>In this example, we will create a trait that will contain the signature for two functions: <kbd>calc_perimeter</kbd> and <kbd>calc_area</kbd>. To start with, we construct a <kbd>struct</kbd>. In this case, we will have two <kbd>struct</kbd>s:</p>
+<pre class="mce-root">struct Perimeter <br/>{<br/>  side_one: i32,<br/>  side_two: i32, <br/>}<br/><br/>struct Oval <br/>{<br/>  radius: f32,<br/>  height: f32,<br/>}</pre>
+<p>We need to create a trait for each. The general format for a trait looks like this:</p>
+<pre class="mce-root">trait TraitName <br/>{ <br/>  fn function_name(&amp;self) -&gt; return_type; <br/>}</pre>
+<p>In our case, we would have the following:</p>
+<pre class="mce-root">trait CalcPerimeter<br/>{<br/>  fn calc_perimeter(&amp;self) -&gt; i32; <br/>}<br/><br/>trait CalcArea <br/>{<br/>  fn calc_area(&amp;self) -&gt; f32; <br/>}</pre>
+<p>We now need to create an implementation for both of these traits. The <kbd>impl</kbd>, though, will not look quite the same.</p>
+<p>Before, we had the following:</p>
+<pre class="mce-root">impl SomeImplement<br/>{ <br/>  ...<br/>}</pre>
+<p>This time, we have to give the name of the struct it relates to:</p>
+<pre class="mce-root">impl SomeImplement for MyStruct <br/>{<br/>  ...<br/>}</pre>
+<p>If the <kbd>impl</kbd> defines the trait and the trait is just a stub, why do we need to say which struct it is for?</p>
+<p>This is a fair question.</p>
+<p>Without the trait, an <kbd>impl</kbd> operates in a similar way to a function. We supply the parameters to the <kbd>impl</kbd> via <kbd>&amp;self</kbd>. When we have a trait, the <kbd>impl</kbd> has to say what <kbd>&amp;self</kbd> refers to.</p>
+<div class="packt_infobox"><span>The code for this can be found in <kbd>09/non_generic_trait</kbd></span><span>.</span></div>
+<p>Our <kbd>impl</kbd> for the first trait will be as follows:</p>
+<pre class="mce-root">impl CalcPerimeter for Perimeter <br/>{ <br/>  fn calc_perimeter(&amp;self) -&gt; i32 <br/>  {<br/>    self.side_one * 2 + self.side_two * 2 <br/>  }<br/>}</pre>
+<p>Note that the function can access <kbd>side_one</kbd> and <kbd>side_two</kbd> from the <kbd>Perimeter struct</kbd>.</p>
+<p>The second <kbd>impl</kbd> will look like this:</p>
+<pre class="mce-root">impl CalcArea for Oval<br/>{ <br/>  fn calc_area(&amp;self) -&gt; f32 <br/>  { <br/>    3.1415927f32 * self.radius * self.height <br/>  }<br/>}</pre>
+<p>Finally, the calls to the implementations. Unlike previous examples, both of the structures have to be initialized and then the implementation call given:</p>
+<pre class="mce-root">fn main() <br/>{ <br/>  let peri = Perimeter <br/>  {<br/>    side_one: 5, side_two: 12 };<br/>    println!("Side 1 = 5, Side 2 = 12, Perimeter = {}", <br/>              peri.calc_perimeter());<br/>    let area = Oval <br/>    {<br/>      radius: 5.1f32,<br/>      height: 12.3f32<br/>    };<br/>    println!("Radius = 5.1, Height = 12.3, Area = {}", <br/>              area.calc_area()); }</pre>
+<p>Once the code has been compiled, the expected answer is as shown in the following screenshot:</p>
+<div class="CDPAlignCenter CDPAlign"><img src="Images/19980abc-ceeb-4f68-ae99-70cb68255ebc.png" width="1169" height="217"/></div>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

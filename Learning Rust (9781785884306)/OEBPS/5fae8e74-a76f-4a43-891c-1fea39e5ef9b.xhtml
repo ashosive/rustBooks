@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">std::iter</h1>
+                </header>
+            
+            <article>
+                
+<p>This module is used for iteration.</p>
+<p><strong>Structs, Traits, and Enums</strong></p>
+<ul>
+<li><strong>Structs</strong>: <kbd>Chain</kbd> (strings two iterators together), <kbd>Cloned</kbd> (clones the underlying iterator), <kbd>Cycle</kbd> (never-ending iterator), <kbd>Empty</kbd> (yields nothing), <kbd>Enumerate</kbd> (yields the current count and element while iterating), <kbd>Filter</kbd> (filters the elements of <kbd>iter</kbd> with predicate), <kbd>FilterMap</kbd> (iterator that uses a type for both filter and map from <kbd>iter</kbd>), <kbd>FlatMap</kbd> (maps each element to the iterator, yields the elements produced), <kbd>Fuse</kbd> (yields <kbd>None</kbd> continually once the underlying iterator first iterates <kbd>None</kbd>), <kbd>Inspect</kbd> (calls a function with a reference to each element before yielding it), <kbd>Map</kbd> (maps the values of <kbd>iter</kbd> with a type), <kbd>Once</kbd> (yields an element once), <kbd>Peekable</kbd> (allows <kbd>peek()</kbd> to be used), <kbd>Repeat</kbd> (repeats an element forever), <kbd>Rev</kbd> (double ended iterator with the read direction reversed), <kbd>Scan</kbd> (maintains state while iterating another iterator), <kbd>Skip</kbd> (skips <em>n</em> elements of <kbd>iter</kbd>), <kbd>SkipWhile</kbd> (rejects elements while predicate is true), <kbd>Take</kbd> (only iterates over the first <em>n</em> of <kbd>iter</kbd>), <kbd>TakeWhile</kbd> (only accepts elements to iterate over while the predicate is true), and <kbd>Zip</kbd> (iterates two iterators simultaneously).</li>
+<li><span><strong>Traits</strong>: </span><kbd>DoubleEndedIterator</kbd><span> (yields the elements at both ends), </span><kbd>ExactSizeIterator</kbd><span> (exact length known), </span><kbd>Extend</kbd><span> (extends a collection with the contents of an iterator), </span><kbd>FromIterator</kbd><span> (converts from </span><kbd>Iterator</kbd><span>), </span><kbd>ToIterator</kbd><span> (converts into </span><kbd>Iterator</kbd><span>), and </span><kbd>Iterator</kbd><span> (interface for dealing with iterators).</span></li>
+<li><strong>Functions</strong>: <kbd>empty</kbd> (new iterator that yields nothing), <kbd>once</kbd> (new iterator that yields an element once), and <kbd>repeat</kbd> (new iterator that continually repeats a single element).</li>
+</ul>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">The machine</h1>
+                </header>
+            
+            <article>
+                
+<p>In this book, independent of the specific Rust techniques, we'll attempt to teach a kind of <em>mechanical sympathy</em> with the modern parallel computer. There are two model kinds of parallelism we'll touch on—concurrent memory operations and data parallelism. We'll spend most of our time in this book on concurrent memory operations, the kind of parallelism in which multiple CPUs contend to manipulate a shared, addressable memory. Data parallelism, where the CPU is able to operate with a single or multiple instructions on multiple words at a time concurrently, will be touched on, but the details are CPU specific, and the necessary intrinsics are only now becoming available in the base language as this book goes to press. Fortunately, Rust, as a systems language with modern library management, will easily allow us to pull in an appropriate library and emit the correct instructions, or we could inline the assembly ourselves.</p>
+<p>Literature on the abstract construction of algorithms for parallel machines must choose a machine model to operate under. The parallel random access machine (PRAM) is common in the literature. In this book, we will focus on <span>two</span><span> concrete machine architectures:</span></p>
+<ul>
+<li>x86</li>
+<li>ARM</li>
+</ul>
+<p>These machines were chosen because they are common and because they each have specific properties that will be important when we get to <a href="d42acb0b-a05e-4068-894f-81365d147bf4.xhtml">Chapter 6</a>, <em>Atomics – the Primitives of Synchronization</em>. Actual machines deviate from the the PRAM model in important ways. Most obviously, actual machines have a limited number of CPUs and a bounded amount of RAM. Memory locations are not uniformly accessible from each CPU; in fact, cache hierarchies have a significant impact on the performance of computer programs. None of this is to say that PRAM is an absurd simplification, nor is this true of any other model you'll find in literature. What should be understood is that as we work, we'll need to draw lines of abstraction <span>out of necessity</span><span>, where further detail does not improve our ability to solve problems well. We also have to understand how our abstractions, suited to our own work, relate to the abstractions of others so that we can learn and share. In this book, we will concern ourselves with empirical methods for understanding our machines, involving careful measurement, examination of assembly code, and experimentation with alternative implementations. This will be combined with an abstract model of our machines, more specific to today's machines than PRAM, but still, in the details, focusing on total cache layers, cache sizes, bus speeds, microcode versions, and so forth. The reader is encouraged to add more specificity should the need arise and should they feel so emboldened.</span></p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

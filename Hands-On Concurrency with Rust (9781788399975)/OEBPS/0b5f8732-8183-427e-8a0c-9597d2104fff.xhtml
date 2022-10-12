@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">A hazard-pointer Treiber stack</h1>
+                </header>
+            
+            <article>
+                
+<p>The introduction of the Treiber stack in the previous section on reference counting was not an idle introduction. We'll examine hazard pointers and epoch-based reclamation here, through the lens of an effectively reclaimed Treiber stack. It so happens that <kbd>conc</kbd> ships with a Treiber stack, in <kbd>tfs/conc/src/sync/treiber.rs</kbd>. The preamble is mostly familiar:</p>
+<pre style="padding-left: 30px">use std::sync::atomic::{self, AtomicPtr};
+use std::marker::PhantomData;
+use std::ptr;
+use {Guard, add_garbage_box};</pre>
+<p>Both <kbd>Guard</kbd> and <kbd>add_garbage_box</kbd> are new, but we'll get to them directly. The <kbd>Treiber</kbd> struct is as you might have imaged it:</p>
+<pre style="padding-left: 30px">pub struct Treiber&lt;T&gt; {
+    /// The head node.
+    head: AtomicPtr&lt;Node&lt;T&gt;&gt;,
+    /// Make the `Sync` and `Send` (and other OIBITs) transitive.
+    _marker: PhantomData&lt;T&gt;,
+}</pre>
+<p>As is the node:</p>
+<pre style="padding-left: 30px">struct Node&lt;T&gt; {
+    /// The data this node holds.
+    item: T,
+    /// The next node.
+    next: *mut Node&lt;T&gt;,
+}</pre>
+<p>This is where we need to understand <kbd>conc::Guard</kbd>. Much like <kbd>MutexGuard</kbd> in the standard library, <kbd>Guard</kbd> exists here to protect the contained data from being multiply mutated. <kbd>Guard</kbd> is the hazard pointer interface for <kbd>conc</kbd>. Let's examine <kbd>Guard</kbd> in detail and get to the hazard pointer algorithm. <kbd>Guard</kbd> is defined in <kbd>tfs/conc/src/guard.rs</kbd>:</p>
+<pre style="padding-left: 30px">pub struct Guard&lt;T: 'static + ?Sized&gt; {
+    /// The inner hazard.
+    hazard: hazard::Writer,
+    /// The pointer to the protected object.
+    pointer: &amp;'static T,
+}</pre>
+<p>As of writing this book, all <kbd>T</kbd> protected by <kbd>Guard</kbd> have to be static, but we'll ignore that as the codebase has references to a desire to relax that restriction. Just be aware of it should you wish to make immediate use of <kbd>conc</kbd> in your project. Like <kbd>MutexGuard</kbd>, <kbd>Guard</kbd> does not own the underlying data but merely protects a reference to it, and we can see that our <kbd>Guard</kbd> is the writer-end of the hazard. What is <kbd>hazard::Writer</kbd>? It's defined in <kbd>tfs/conc/src/hazard.rs</kbd>:</p>
+<pre style="padding-left: 30px">pub struct Writer {
+    /// The pointer to the heap-allocated hazard.
+    ptr: &amp;'static AtomicPtr&lt;u8&gt;,
+}</pre>
+<p>Pointer to the heap-allocated hazard? Okay, let's back out a bit. We know from the algorithm description that there has to be thread-local storage happening in coordination with, apparently, heap storage. We also know that <kbd>Guard</kbd> is our primary interface to the hazard pointers. There are three functions to create new instances of <kbd>Guard</kbd>:</p>
+<ul>
+<li><kbd>Guard&lt;T&gt;::new&lt;F: FnOnce() -&gt; &amp;'static T&gt;(ptr: F) -&gt; Guard&lt;T&gt;</kbd></li>
+<li><kbd>Guard&lt;T&gt;::maybe_new&lt;F: FnOnce() -&gt; Option&lt;&amp;'static T&gt;&gt;(ptr: F) -&gt; Option&lt;Guard&lt;T&gt;&gt;</kbd></li>
+<li><kbd>Guard&lt;T&gt;::try_new&lt;F: FnOnce() -&gt; Result&lt;&amp;'static T, E&gt;&gt;(ptr: F) -&gt; Result&lt;Guard&lt;T&gt;, E&gt;</kbd></li>
+</ul>
+<p>The first two are defined in terms of <kbd>try_new</kbd>. Let's dissect <kbd>try_new</kbd>:</p>
+<pre>    pub fn try_new&lt;F, E&gt;(ptr: F) -&gt; Result&lt;Guard&lt;T&gt;, E&gt;
+    where F: FnOnce() -&gt; Result&lt;&amp;'static T, E&gt; {
+        // Increment the number of guards currently being created.
+        #[cfg(debug_assertions)]
+        CURRENT_CREATING.with(|x| x.set(x.get() + 1));</pre>
+<p>The function takes <kbd>FnOnce</kbd> whose responsibility is to kick out a reference to <kbd>T</kbd> or fail. The first call in <kbd>try_new</kbd> is an increment of <kbd>CURRENT_CREATING</kbd>, which is <kbd>thread-local Cell&lt;usize&gt;</kbd>:</p>
+<pre style="padding-left: 30px">thread_local! {
+    /// Number of guards the current thread is creating.
+    static CURRENT_CREATING: Cell&lt;usize&gt; = Cell::new(0);
+}</pre>
+<p>We've seen <kbd>Cell</kbd> in <a href="605ce307-29ed-4b5a-961e-8d327467b84f.xhtml" target="_blank">Chapter 3</a><span>, </span> <span><em>The Rust Memory Model – Ownership, References and Manipulation</em></span>, but <kbd>thread_local!</kbd> is new. This macro wraps one or more static values into <kbd>std::thread::LocalKey</kbd>, Rust's take on thread-local stores. The exact implementation varies from platform to platform but the basic idea holds: the value will act as a static global but will be confined to a single thread. In this way, we can program as if the value were global but without having to manage coordination between threads. Once <kbd>CURRENT_CREATING</kbd> is incremented:</p>
+<pre>        // Get a hazard in blocked state.
+        let hazard = local::get_hazard();</pre>
+<p>The <kbd>local::get_hazard</kbd> function is defined in <kbd>tfs/conc/src/local.rs</kbd>:</p>
+<pre style="padding-left: 30px">pub fn get_hazard() -&gt; hazard::Writer {
+    if STATE.state() == thread::LocalKeyState::Destroyed {
+        // The state was deinitialized, so we must rely on the<br/>        // global state for creating new hazards.
+        global::create_hazard()
+    } else {
+        STATE.with(|s| s.borrow_mut().get_hazard())
+    }
+}</pre>
+<p>The <kbd>STATE</kbd> referenced in this function is:</p>
+<pre style="padding-left: 30px">thread_local! {
+    /// The state of this thread.
+    static STATE: RefCell&lt;State&gt; = RefCell::new(State::default());
+}</pre>
+<p>The <kbd>State</kbd> is type defined like so:</p>
+<pre style="padding-left: 30px">#[derive(Default)]
+struct State {
+    garbage: Vec&lt;Garbage&gt;,
+    available_hazards: Vec&lt;hazard::Writer&gt;,
+    available_hazards_free_before: usize,
+}</pre>
+<p>The field garbage maintains a list of <kbd>Garbage</kbd> that has yet to be moved to the global state—more on that in a minute—for reclamation. <kbd>Garbage</kbd> is a pointer to bytes and a function pointer to bytes called <kbd>dtor</kbd>, for destructor. Memory reclamation schemes must be able to deallocate, regardless of the underlying type. The common approach, and the approach taken by <kbd>Garbage</kbd>, is to build a monomorphized destructor function when the type information is available, but otherwise work on byte buffers. You are encouraged to thumb through the implementation of <kbd>Garbage</kbd> yourself, but the primary trick is <kbd>Box::from_raw(ptr as *mut u8 as *mut T)</kbd>, which we've seen repeatedly throughout this book.</p>
+<p>The <kbd>available_hazards</kbd> field stores the previously allocated hazard writers that aren't currently being used. The implementation keeps this as a cache to avoid allocator thrash. We can see this in action in <kbd>local::State::get_hazard</kbd>:</p>
+<pre>    fn get_hazard(&amp;mut self) -&gt; hazard::Writer {
+        // Check if there is hazards in the cache.
+        if let Some(hazard) = self.available_hazards.pop() {
+            // There is; we don't need to create a new hazard.
+            //
+            // Since the hazard popped from the cache is not <br/>            // blocked, we must block the hazard to satisfy <br/>            // the requirements of this function.
+            hazard.block();
+            hazard
+        } else {
+            // There is not; we must create a new hazard.
+            global::create_hazard()
+        }
+    }</pre>
+<p>The final field, <kbd>available_hazards_free_before</kbd>, stores hazards in the freed state, prior to the actual deallocation of the underlying type. We'll discuss this more later. Hazards are in one of four states: free, dead, blocked, or protecting. A dead hazard can be deallocated safely, along with the protected memory. A dead hazard should not be read. A free hazard is protecting nothing and may be reused. A blocked hazard is in use by some other thread can and will cause reads of the hazard to stall. A protecting hazard is, well, protecting some bit of memory. Now, jump back to this branch in <kbd>local::get_hazard</kbd>:</p>
+<pre>    if STATE.state() == thread::LocalKeyState::Destroyed {
+        // The state was deinitialized, so we must rely on the <br/>        // global state for creating new hazards.
+        global::create_hazard()
+    } else {</pre>
+<p>What is <kbd>global::create_hazard</kbd>? This module is <kbd>tfs/conc/src/global.rs</kbd> and the function is:</p>
+<pre style="padding-left: 30px">pub fn create_hazard() -&gt; hazard::Writer {
+    STATE.create_hazard()
+}</pre>
+<p>The variable names are confusing. This <kbd>STATE</kbd> is not the thread-local <kbd>STATE</kbd> but a globally scoped <kbd>STATE</kbd>:</p>
+<pre style="padding-left: 30px">lazy_static! {
+    /// The global state.
+    ///
+    /// This state is shared between all the threads.
+    static ref STATE: State = State::new();
+}</pre>
+<p>Let's dig in there:</p>
+<pre style="padding-left: 30px">struct State {
+    /// The message-passing channel.
+    chan: mpsc::Sender&lt;Message&gt;,
+    /// The garbo part of the state.
+    garbo: Mutex&lt;Garbo&gt;,
+}</pre>
+<p>The global <kbd>STATE</kbd> is a mpsc <kbd>Sender</kbd> of <kbd>Message</kbd> and a mutex-guarded <kbd>Garbo</kbd>. <kbd>Message</kbd> is a simple enumeration:</p>
+<pre style="padding-left: 30px">enum Message {
+    /// Add new garbage.
+    Garbage(Vec&lt;Garbage&gt;),
+    /// Add a new hazard.
+    NewHazard(hazard::Reader),
+}</pre>
+<p><kbd>Garbo</kbd> is something we'll get into directly. Suffice it to say for now that <kbd>Garbo</kbd> acts as the global garbage collector for this implementation. The global state sets up a channel, maintaining the sender side in the global state and feeding the receiver into <kbd>Garbo</kbd>:</p>
+<pre style="padding-left: 30px">impl State {
+    /// Initialize a new state.
+    fn new() -&gt; State {
+        // Create the message-passing channel.
+        let (send, recv) = mpsc::channel();
+
+        // Construct the state from the two halfs of the channel.
+        State {
+            chan: send,
+            garbo: Mutex::new(Garbo {
+                chan: recv,
+                garbage: Vec::new(),
+                hazards: Vec::new(),
+            })
+        }
+    }</pre>
+<p>The creation of a new global hazard doesn't take much:</p>
+<pre>    fn create_hazard(&amp;self) -&gt; hazard::Writer {
+        // Create the hazard.
+        let (writer, reader) = hazard::create();
+        // Communicate the new hazard to the global state <br/>        // through the channel.
+        self.chan.send(Message::NewHazard(reader));
+        // Return the other half of the hazard.
+        writer
+    }</pre>
+<p>This establishes a new hazard via <kbd>hazard::create()</kbd> and feeds the reader side down through to <kbd>Garbo</kbd>, returning the writer side back out to <kbd>local::get_hazard()</kbd>. While the names writer and reader suggest that hazard is itself an MPSC, this is not true. The hazard module is <kbd>tfs/conc/src/hazard.rs</kbd> and creation is:</p>
+<pre style="padding-left: 30px">pub fn create() -&gt; (Writer, Reader) {
+    // Allocate the hazard on the heap.
+    let ptr = unsafe {
+        &amp;*Box::into_raw(Box::new(AtomicPtr::new(<br/>                        &amp;BLOCKED as *const u8 as *mut u8)))
+    };
+
+    // Construct the values.
+    (Writer {<br/>        ptr: ptr,<br/>    }, Reader {<br/>        ptr: ptr,<br/>    })<br/>}</pre>
+<p>Well, look at that. What we have here are two structs, <kbd>Writer</kbd> and <kbd>Reader</kbd>, which each store the same raw pointer to a heap-allocated atomic pointer to a mutable byte pointer. Phew! We've seen this trick previously but what's special here is the leverage of the type system to provide for different reading and writing interfaces over the same bit of raw memory.</p>
+<p>What about <kbd>Garbo</kbd>? It's defined in the global module and is defined as:</p>
+<pre style="padding-left: 30px">struct Garbo {
+    /// The channel of messages.
+    chan: mpsc::Receiver&lt;Message&gt;,
+    /// The to-be-destroyed garbage.
+    garbage: Vec&lt;Garbage&gt;,
+    /// The current hazards.
+    hazards: Vec&lt;hazard::Reader&gt;,
+}</pre>
+<p><kbd>Garbo</kbd> defines a <kbd>gc</kbd> function that reads all <kbd>Messages</kbd> from its channel, storing the garbage into the garbage field and free hazards into hazards. Dead hazards are destroyed, freeing its storage as the other holder is guaranteed to have hung up already. Protected hazards also make their way into hazards, which are to be scanned during the next call of gc. Garbage collections are sometimes performed when a thread calls <kbd>global::tick()</kbd> or when <kbd>global::try_gc()</kbd> is called. A tick is performed whenever <kbd>local::add_garbage</kbd> is called, which is what <kbd>whatconc::add_garbage_box</kbd> calls.</p>
+<p>We first encountered <kbd>add_barbage_box</kbd> at the start of this section. Every time a thread signals a node as garbage, it rolls the dice and potentially becomes responsible for performing a global garbage collection over all of the threads' hazard-pointed memory.</p>
+<p>Now that we understand how memory reclamation works, all that remains is to understand how hazard pointers protect memory from reads and writes. Let's finish <kbd>guard::try_new</kbd> in one large jump:</p>
+<pre>        // This fence is necessary for ensuring that `hazard` does not<br/>        // get reordered to after `ptr` has run.
+        // TODO: Is this fence even necessary?
+        atomic::fence(atomic::Ordering::SeqCst);
+
+        // Right here, any garbage collection is blocked, due to the<br/>        // hazard above. This ensures that between the potential <br/>        // read in `ptr` and it being protected by the hazard, there
+        // will be no premature free.
+
+        // Evaluate the pointer through the closure.
+        let res = ptr();
+
+        // Decrement the number of guards currently being created.
+        #[cfg(debug_assertions)]
+        CURRENT_CREATING.with(|x| x.set(x.get() - 1));
+
+        match res {
+            Ok(ptr) =&gt; {
+                // Now that we have the pointer, we can protect it by <br/>                // the hazard, unblocking a pending garbage collection<br/>                // if it exists.
+                hazard.protect(ptr as *const T as *const u8);
+
+                Ok(Guard {
+                    hazard: hazard,
+                    pointer: ptr,
+                })
+            },
+            Err(err) =&gt; {
+                // Set the hazard to free to ensure that the hazard <br/>                // doesn't remain blocking.
+                hazard.free();
+
+                Err(err)
+            }
+        }
+    }</pre>
+<p>We can see that the conc authors have inserted a sequentially consistent fence that they question. The model laid out by Michael does not require sequential consistency and I believe that this fence is not needed, being a significant drag on performance. The key things here to note are the call to <kbd>hazard::protect</kbd> and <kbd>'hazard::free</kbd>. Both calls are part of <kbd>hazard::Writer</kbd>, the former setting the internal pointer to the byte pointer fed to it, the latter marking the hazard as free. Both states interact with the garbage collector, as we've seen. The remaining bit has to do with <kbd>hardard::Reader::get</kbd>, the function used to retrieve the state of the hazard. Here it is:</p>
+<pre>impl Reader {
+    /// Get the state of the hazard.
+    ///
+    /// It will spin until the hazard is no longer in a blocked state, <br/>    /// unless it is in debug mode, where it will panic given enough<br/>    /// spins.
+    pub fn get(&amp;self) -&gt; State {
+        // In debug mode, we count the number of spins. In release <br/>        // mode, this should be trivially optimized out.
+        let mut spins = 0;
+
+        // Spin until not blocked.
+        loop {
+            let ptr = self.ptr.load(atomic::Ordering::Acquire) <br/>                          as *const u8;
+
+            // Blocked means that the hazard is blocked by another <br/>            // thread, and we must loop until it assumes another <br/>            // state.
+            if ptr == &amp;BLOCKED {
+                // Increment the number of spins.
+                spins += 1;
+                debug_assert!(spins &lt; 100_000_000, "\
+                    Hazard blocked for 100 millions rounds. Panicking <br/>                    as chances are that it will \
+                    never get unblocked.\
+                ");
+
+                continue;
+            } else if ptr == &amp;FREE {
+                return State::Free;
+            } else if ptr == &amp;DEAD {
+                return State::Dead;
+            } else {
+                return State::Protect(ptr);
+            }</pre>
+<p>Only if the hazard is blocked does the get of the state spin until it's dead, free, or merely protected. What blocks the hazard? Recall that they're created blocked. By creating the hazards in a blocked state, it is not possible to perform garbage collection over a pointer that has not been fully initialized—a problem we saw with the reference-counting implementation—nor is it possible to read from a partially-initialized hazarded pointer. Only once the pointer is moved into the protected state can reads move forward.</p>
+<p>And there you go—garbage collection and atomic isolation.</p>
+<p>Let's go all the way back up to the stack and look at its push implementation:</p>
+<pre>    pub fn push(&amp;self, item: T)
+    where T: 'static {
+        let mut snapshot = Guard::maybe_new(|| unsafe {
+            self.head.load(atomic::Ordering::Relaxed).as_ref()
+        });
+
+        let mut node = Box::into_raw(Box::new(Node {
+            item: item,
+            next: ptr::null_mut(),
+        }));
+
+        loop {
+            let next = snapshot.map_or(ptr::null_mut(), <br/>                                       |x| x.as_ptr() as *mut _);
+            unsafe { (*node).next = next; }
+
+            match Guard::maybe_new(|| unsafe {
+                self.head.compare_and_swap(next, node, <br/>                    atomic::Ordering::Release).as_ref()
+            }) {
+                Some(ref new) if new.as_ptr() == next =&gt; break,
+                None if next.is_null() =&gt; break,
+                // If it fails, we will retry the CAS with updated <br/>                // values.
+                new =&gt; snapshot = new,
+            }
+        }
+    }</pre>
+<p>At the top of the function, the implementation loads the hazard pointer for the head node into the snapshot. <kbd>Guard::as_ptr(&amp;self) -&gt; *const T</kbd> retrieves the current pointer for the hazard on each invocation, adapting as the underlying data shifts forward. The node is the allocated and raw-pointered <kbd>Node</kbd> containing <kbd>item: T</kbd>. The remainder of the loop is the same compare-and-swap we've seen for other data structures of this kind, merely in terms of a hazard <kbd>Guard</kbd> instead of raw <kbd>AtomicPtrs</kbd> or the like. The programming model is very direct, as it is for <kbd>pop</kbd> as well:</p>
+<pre>    pub fn pop(&amp;self) -&gt; Option&lt;Guard&lt;T&gt;&gt; {
+        let mut snapshot = Guard::maybe_new(|| unsafe {
+            self.head.load(atomic::Ordering::Acquire).as_ref()
+        });
+
+        while let Some(old) = snapshot {
+            snapshot = Guard::maybe_new(|| unsafe {
+                self.head.compare_and_swap(
+                    old.as_ptr() as *mut _,
+                    old.next as *mut Node&lt;T&gt;,
+                    atomic::Ordering::Release,
+                ).as_ref()
+            });
+
+            if let Some(ref new) = snapshot {
+                if new.as_ptr() == old.as_ptr() {
+                    unsafe { add_garbage_box(old.as_ptr()); }
+                    return Some(old.map(|x| &amp;x.item));
+                }
+            } else {
+                break;
+            }
+        }
+
+        None
+    }</pre>
+<p>Note that when the old node is removed from the stack, <kbd>add_garbage_box</kbd> is called on it, adding the node to be garbage-collected at a later date. We know, further, from inspection, that this later date might well be exactly the moment of invocation, depending on luck.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

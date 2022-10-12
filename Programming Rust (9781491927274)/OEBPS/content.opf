@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://www.idpf.org/2007/opf" unique-identifier="bookid" version="2.0" >
+<metadata xmlns:dc="http://purl.org/dc/elements/1.1/"  xmlns:opf="http://www.idpf.org/2007/opf">
+<dc:title>Programming Rust</dc:title>
+<dc:creator opf:file-as="Jim Blandy" opf:role="aut">Jim Blandy</dc:creator>
+<dc:creator opf:file-as="Jason Orendorff" opf:role="aut">Jason Orendorff</dc:creator>
+<dc:description>&lt;span&gt;&lt;div&gt;&lt;p&gt;Rust is a new systems programming language that combines the performance and low-level control of C and C++ with memory safety and thread safety. Rust’s modern, flexible types ensure your program is free of null pointer dereferences, double frees, dangling pointers, and similar bugs, all at compile time, without runtime overhead. In multi-threaded code, Rust catches data races at compile time, making concurrency much easier to use.&lt;/p&gt;&lt;p&gt;Written by two experienced systems programmers, this book explains how Rust manages to bridge the gap between performance and safety, and how you can take advantage of it. Topics include:&lt;/p&gt;&lt;ul&gt;&lt;li&gt;How Rust represents values in memory (with diagrams)&lt;/li&gt;&lt;li&gt;Complete explanations of ownership, moves, borrows, and lifetimes&lt;/li&gt;&lt;li&gt;Cargo, rustdoc, unit tests, and how to publish your code on crates.io, Rust’s public package repository&lt;/li&gt;&lt;li&gt;High-level features like generic code, closures, collections, and iterators that make Rust productive and flexible&lt;/li&gt;&lt;li&gt;Concurrency in Rust: threads, mutexes, channels, and atomics, all much safer to use than in C or C++&lt;/li&gt;&lt;li&gt;Unsafe code, and how to preserve the integrity of ordinary code that uses it&lt;/li&gt;&lt;li&gt;Extended examples illustrating how pieces of the language fit together&lt;/li&gt;&lt;/ul&gt;&lt;/div&gt;&lt;/span&gt;</dc:description>
+<dc:publisher>O&#x27;Reilly Media, Inc.</dc:publisher>
+<dc:rights>Copyright © 2017 Jim Blandy &amp; Jason Orendorff</dc:rights>
+<dc:language>en-US</dc:language>
+<dc:date>2017-12-11</dc:date>
+<dc:identifier id="bookid">9781491927281</dc:identifier>
+<meta name="cover" content="Images/cover.png"/>
+</metadata>
+<manifest>
+<item id="ncx" href="toc.ncx" media-type="application/x-dtbncx+xml" />
+<item id="cover" href="cover.xhtml" media-type="application/xhtml+xml" />
+<item id="toc01" href="toc01.xhtml" media-type="application/xhtml+xml" />
+<item id="titlepage01" href="titlepage01.xhtml" media-type="application/xhtml+xml" />
+<item id="copyright-page01" href="copyright-page01.xhtml" media-type="application/xhtml+xml" />
+<item id="preface01" href="preface01.xhtml" media-type="application/xhtml+xml" />
+<item id="ch01" href="ch01.xhtml" media-type="application/xhtml+xml" />
+<item id="ch02" href="ch02.xhtml" media-type="application/xhtml+xml" />
+<item id="ch03" href="ch03.xhtml" media-type="application/xhtml+xml" />
+<item id="ch04" href="ch04.xhtml" media-type="application/xhtml+xml" />
+<item id="ch05" href="ch05.xhtml" media-type="application/xhtml+xml" />
+<item id="ch07" href="ch07.xhtml" media-type="application/xhtml+xml" />
+<item id="ch08" href="ch08.xhtml" media-type="application/xhtml+xml" />
+<item id="ch09" href="ch09.xhtml" media-type="application/xhtml+xml" />
+<item id="ch10" href="ch10.xhtml" media-type="application/xhtml+xml" />
+<item id="ch11" href="ch11.xhtml" media-type="application/xhtml+xml" />
+<item id="ch12" href="ch12.xhtml" media-type="application/xhtml+xml" />
+<item id="ch13" href="ch13.xhtml" media-type="application/xhtml+xml" />
+<item id="ch14" href="ch14.xhtml" media-type="application/xhtml+xml" />
+<item id="ch15" href="ch15.xhtml" media-type="application/xhtml+xml" />
+<item id="ch16" href="ch16.xhtml" media-type="application/xhtml+xml" />
+<item id="ch16" href="ch16.xhtml" media-type="application/xhtml+xml" />
+<item id="ch17" href="ch17.xhtml" media-type="application/xhtml+xml" />
+<item id="ch18" href="ch18.xhtml" media-type="application/xhtml+xml" />
+<item id="ch19" href="ch19.xhtml" media-type="application/xhtml+xml" />
+<item id="ch20" href="ch20.xhtml" media-type="application/xhtml+xml" />
+<item id="ch21" href="ch21.xhtml" media-type="application/xhtml+xml" />
+<item id="ix01" href="ix01.xhtml" media-type="application/xhtml+xml" />
+<item id="colophon01" href="colophon01.xhtml" media-type="application/xhtml+xml" />
+<item id="colophon02" href="colophon02.xhtml" media-type="application/xhtml+xml" />
+<item id="img_rust_10in04" href="Images/rust_10in04.png" media-type="image/png" />
+<item id="img_rust_2103" href="Images/rust_2103.png" media-type="image/png" />
+<item id="img_rust_05in03" href="Images/rust_05in03.png" media-type="image/png" />
+<item id="img_rust_1002" href="Images/rust_1002.png" media-type="image/png" />
+<item id="img_rust_1001" href="Images/rust_1001.png" media-type="image/png" />
+<item id="img_rust_2002" href="Images/rust_2002.png" media-type="image/png" />
+<item id="img_rust_2004" href="Images/rust_2004.png" media-type="image/png" />
+<item id="img_rust_0206" href="Images/rust_0206.png" media-type="image/png" />
+<item id="img_rust_1903" href="Images/rust_1903.png" media-type="image/png" />
+<item id="img_rust_19in01" href="Images/rust_19in01.png" media-type="image/png" />
+<item id="img_rust_1905" href="Images/rust_1905.png" media-type="image/png" />
+<item id="img_rust_04in04" href="Images/rust_04in04.png" media-type="image/png" />
+<item id="img_rust_0302" href="Images/rust_0302.png" media-type="image/png" />
+<item id="img_rust_0202" href="Images/rust_0202.png" media-type="image/png" />
+<item id="img_rust_1301" href="Images/rust_1301.png" media-type="image/png" />
+<item id="img_rust_05in07" href="Images/rust_05in07.png" media-type="image/png" />
+<item id="img_rust_1606" href="Images/rust_1606.png" media-type="image/png" />
+<item id="img_rust_2001" href="Images/rust_2001.png" media-type="image/png" />
+<item id="img_rust_2107" href="Images/rust_2107.png" media-type="image/png" />
+<item id="img_rust_1402" href="Images/rust_1402.png" media-type="image/png" />
+<item id="img_rust_0803" href="Images/rust_0803.png" media-type="image/png" />
+<item id="img_rust_0802" href="Images/rust_0802.png" media-type="image/png" />
+<item id="img_rust_10in01" href="Images/rust_10in01.png" media-type="image/png" />
+<item id="img_rust_2101" href="Images/rust_2101.png" media-type="image/png" />
+<item id="img_rust_1404" href="Images/rust_1404.png" media-type="image/png" />
+<item id="img_rust_1904" href="Images/rust_1904.png" media-type="image/png" />
+<item id="img_rust_1703" href="Images/rust_1703.png" media-type="image/png" />
+<item id="img_rust_0204" href="Images/rust_0204.png" media-type="image/png" />
+<item id="img_rust_1102" href="Images/rust_1102.png" media-type="image/png" />
+<item id="img_rust_05in05" href="Images/rust_05in05.png" media-type="image/png" />
+<item id="img_rust_04in01" href="Images/rust_04in01.png" media-type="image/png" />
+<item id="img_rust_1901" href="Images/rust_1901.png" media-type="image/png" />
+<item id="img_rust_0301" href="Images/rust_0301.png" media-type="image/png" />
+<item id="img_rust_04in03" href="Images/rust_04in03.png" media-type="image/png" />
+<item id="img_rust_1902" href="Images/rust_1902.png" media-type="image/png" />
+<item id="img_rust_1403" href="Images/rust_1403.png" media-type="image/png" />
+<item id="img_cover" href="Images/cover.png" media-type="image/png" />
+<item id="img_rust_1802" href="Images/rust_1802.png" media-type="image/png" />
+<item id="img_rust_04in06" href="Images/rust_04in06.png" media-type="image/png" />
+<item id="img_rust_10in02" href="Images/rust_10in02.png" media-type="image/png" />
+<item id="img_rust_05in02" href="Images/rust_05in02.png" media-type="image/png" />
+<item id="img_rust_1101" href="Images/rust_1101.png" media-type="image/png" />
+<item id="img_rust_04in13" href="Images/rust_04in13.png" media-type="image/png" />
+<item id="img_rust_1401" href="Images/rust_1401.png" media-type="image/png" />
+<item id="img_rust_0501" href="Images/rust_0501.png" media-type="image/png" />
+<item id="img_rust_1908" href="Images/rust_1908.png" media-type="image/png" />
+<item id="img_rust_1602" href="Images/rust_1602.png" media-type="image/png" />
+<item id="img_rust_04in11" href="Images/rust_04in11.png" media-type="image/png" />
+<item id="img_rust_10in03" href="Images/rust_10in03.png" media-type="image/png" />
+<item id="img_rust_05in06" href="Images/rust_05in06.png" media-type="image/png" />
+<item id="img_rust_2102" href="Images/rust_2102.png" media-type="image/png" />
+<item id="img_rust_04in05" href="Images/rust_04in05.png" media-type="image/png" />
+<item id="img_rust_1604" href="Images/rust_1604.png" media-type="image/png" />
+<item id="img_rust_04in10" href="Images/rust_04in10.png" media-type="image/png" />
+<item id="img_rust_05in09" href="Images/rust_05in09.png" media-type="image/png" />
+<item id="img_rust_2003" href="Images/rust_2003.png" media-type="image/png" />
+<item id="img_rust_1601" href="Images/rust_1601.png" media-type="image/png" />
+<item id="img_rust_05in08" href="Images/rust_05in08.png" media-type="image/png" />
+<item id="img_rust_0801" href="Images/rust_0801.png" media-type="image/png" />
+<item id="img_rust_1501" href="Images/rust_1501.png" media-type="image/png" />
+<item id="img_rust_1701" href="Images/rust_1701.png" media-type="image/png" />
+<item id="img_rust_1910" href="Images/rust_1910.png" media-type="image/png" />
+<item id="img_rust_1909" href="Images/rust_1909.png" media-type="image/png" />
+<item id="img_rust_1801" href="Images/rust_1801.png" media-type="image/png" />
+<item id="img_rust_09in01" href="Images/rust_09in01.png" media-type="image/png" />
+<item id="img_rust_2104" href="Images/rust_2104.png" media-type="image/png" />
+<item id="img_rust_2105" href="Images/rust_2105.png" media-type="image/png" />
+<item id="img_rust_05in01" href="Images/rust_05in01.png" media-type="image/png" />
+<item id="img_rust_04in07" href="Images/rust_04in07.png" media-type="image/png" />
+<item id="img_rust_1907" href="Images/rust_1907.png" media-type="image/png" />
+<item id="img_rust_1702" href="Images/rust_1702.png" media-type="image/png" />
+<item id="img_rust_0205" href="Images/rust_0205.png" media-type="image/png" />
+<item id="img_rust_1603" href="Images/rust_1603.png" media-type="image/png" />
+<item id="img_rust_04in12" href="Images/rust_04in12.png" media-type="image/png" />
+<item id="img_rust_1605" href="Images/rust_1605.png" media-type="image/png" />
+<item id="img_rust_04in09" href="Images/rust_04in09.png" media-type="image/png" />
+<item id="img_rust_0201" href="Images/rust_0201.png" media-type="image/png" />
+<item id="img_rust_1003" href="Images/rust_1003.png" media-type="image/png" />
+<item id="img_rust_2106" href="Images/rust_2106.png" media-type="image/png" />
+<item id="img_rust_02in01" href="Images/rust_02in01.png" media-type="image/png" />
+<item id="img_rust_0502" href="Images/rust_0502.png" media-type="image/png" />
+<item id="img_rust_05in04" href="Images/rust_05in04.png" media-type="image/png" />
+<item id="img_rust_03in01" href="Images/rust_03in01.png" media-type="image/png" />
+<item id="img_rust_1103" href="Images/rust_1103.png" media-type="image/png" />
+<item id="img_rust_04in02" href="Images/rust_04in02.png" media-type="image/png" />
+<item id="img_rust_0203" href="Images/rust_0203.png" media-type="image/png" />
+<item id="img_rust_1906" href="Images/rust_1906.png" media-type="image/png" />
+<item id="img_rust_04in08" href="Images/rust_04in08.png" media-type="image/png" />
+<item id="style_00" href="Styles/Style00.css" media-type="text/css" />
+<item id="style_01" href="Styles/Style01.css" media-type="text/css" />
+<item id="style_02" href="Styles/Style02.css" media-type="text/css" />
+<item id="style_03" href="Styles/Style03.css" media-type="text/css" />
+</manifest>
+<spine toc="ncx">
+<itemref idref="cover"/>
+<itemref idref="toc01"/>
+<itemref idref="titlepage01"/>
+<itemref idref="copyright-page01"/>
+<itemref idref="preface01"/>
+<itemref idref="ch01"/>
+<itemref idref="ch02"/>
+<itemref idref="ch03"/>
+<itemref idref="ch04"/>
+<itemref idref="ch05"/>
+<itemref idref="ch07"/>
+<itemref idref="ch08"/>
+<itemref idref="ch09"/>
+<itemref idref="ch10"/>
+<itemref idref="ch11"/>
+<itemref idref="ch12"/>
+<itemref idref="ch13"/>
+<itemref idref="ch14"/>
+<itemref idref="ch15"/>
+<itemref idref="ch16"/>
+<itemref idref="ch16"/>
+<itemref idref="ch17"/>
+<itemref idref="ch18"/>
+<itemref idref="ch19"/>
+<itemref idref="ch20"/>
+<itemref idref="ch21"/>
+<itemref idref="ix01"/>
+<itemref idref="colophon01"/>
+<itemref idref="colophon02"/></spine>
+<guide><reference href="cover.xhtml" title="Cover" type="cover" /></guide>
+</package>

@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">The reference counter</h1>
+                </header>
+            
+            <article>
+                
+<p>Consider the following piece of code. It won't work because there are multiple owners of the <kbd>vec</kbd>:</p>
+<pre>use std::thread; 
+use std::time::Duration;  
+fn main()  
+{ 
+    let mut my_data = vec![5, 8, 13];  
+    for i in 0..10  
+   { 
+        thread::spawn(move || { my_data[0] += i; }); // fails here 
+   } 
+ 
+    thread::sleep(Duration::from_millis(50)); 
+} </pre>
+<p>There has to be a way to get this compile, and there is. Rust provides us with a reference counter called <kbd>Rc</kbd>. The reference count has to have a type associated with it, and so it is commonly quoted as <kbd>Rc&lt;T&gt;</kbd>. This can be used to keep track of each reference. Every time we execute a clone on the execution, the reference count is incremented (and a new owned reference created), so the compiler always knows when something is returned.</p>
+<p>The only problem with using <kbd>Rc&lt;T&gt;</kbd> is that it doesn't implement send. Therefore, we use <kbd>Arc&lt;T&gt;</kbd> (the <kbd>A</kbd> stands for atomic—it is Rust's own reference count and can be accessed across threads).</p>
+<p><kbd>Arc&lt;T&gt;</kbd>, though, has its own problem: by default, the contents are immutable. You can share data with <kbd>Arc&lt;T&gt;</kbd>, but <em>shared</em> mutable values—that's a different matter. Mutable shared values give rise to race conditions and that is what we are most certainly not after.</p>
+<p>There are alternatives to <kbd>Arc&lt;T&gt;</kbd> (namely <kbd>RefCell&lt;T&gt;</kbd> and <kbd>Cell&lt;T&gt;</kbd>, but neither of these implement sync, and so they can't be used with threading).</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

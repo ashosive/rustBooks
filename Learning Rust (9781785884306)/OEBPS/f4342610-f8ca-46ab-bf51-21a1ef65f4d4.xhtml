@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style00.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style01.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Inheritance</h1>
+                </header>
+            
+            <article>
+                
+<div>
+<p>This is very similar to inheritance within C++ and C#:</p>
+<pre class="mce-root">trait One <br/>{<br/>  fn one(&amp;self); <br/>}<br/>trait OneTwo : One <br/>{<br/>  fn onetwo(&amp;self); <br/>}</pre></div>
+<div class="packt_infobox">Code for this part is in <kbd>09/inheritance</kbd><span class="packt_screen">.</span></div>
+<p>The code that implements <kbd>OneTwo</kbd> must also implement <kbd>One</kbd> (the same as when we overrode the default method, we still had to define <kbd>is_done</kbd>), therefore:</p>
+<pre class="mce-root">struct Three; <br/>impl One for Three <br/>{ <br/>  fn one(&amp;self) <br/>  {<br/>    println!("one");<br/>  }<br/>}<br/>impl OneTwo for Three <br/>{<br/>  fn onetwo(&amp;self) <br/>  {<br/>    println!("onetwo");<br/>  } <br/>}</pre>
+<p>And the result is as follows:</p>
+<div class="CDPAlignCenter CDPAlign"><img src="Images/a81c10d7-64f7-4534-a74b-426d97f5e948.png"/></div>
+<p>If we omitted the <kbd>impl One</kbd> block, we would get a compilation error complaining that <kbd>impl OneTwo</kbd> requires <kbd>impl One</kbd> to exist.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

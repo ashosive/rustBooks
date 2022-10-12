@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">The Rust side</h1>
+                </header>
+            
+            <article>
+                
+<p>There are new things in the <kbd>Cargo.toml</kbd> file that we need to discuss:</p>
+<pre>[package]
+name = "embed_quantiles"
+version = "0.1.0"
+authors = ["Brian L. Troutwine &lt;brian@troutwine.us&gt;"]
+
+[dependencies]
+quantiles = "0.7"
+
+[lib]
+name = "embed_quantiles"
+crate-type = ["staticlib"]</pre>
+<p>Note specifically that we're building the embed_quantiles library with <kbd>crate-type = ["staticlib"]</kbd>. What does that mean? The Rust compiler is capable of making many kinds of linkages, and usually they're just implicit. For instance, a binary is <kbd>crate-type = ["bin"]</kbd>. There's a longish list of different link types, which I've included in the <em>Further reading</em> section. The interested reader is encouraged to look through them. What we'd like to produce here is a statically linked library, otherwise every C programmer that tries to make use of embed_quantiles is going to need Rust's shared libraries installed on their system. Not… not great. A staticlib crate will archive all the bits of the Rust standard library needed by the Rust code. The archive can then be linked to C as normal.</p>
+<p>Okay, now, if we're going to produce a static archive that C can call, we've got to export Rust functions with a C ABI. Put another way, we've got to put a C skin on top of Rust. C++ programmers will be familiar with this tactic. The sole Rust file in this project is <kbd>src/lib.rs</kbd> and its preamble is what you might expect:</p>
+<pre style="padding-left: 30px">extern crate quantiles;
+
+use quantiles::ckms::CKMS;</pre>
+<p>We've pulled in the quantiles library and have imported <kbd>CKMS</kbd>. No big deal. Check this out, though:</p>
+<pre style="padding-left: 30px">#[no_mangle]
+pub extern "C" fn alloc_ckms(error: f64) -&gt; *mut CKMS&lt;f32&gt; {
+    let ckms = Box::new(CKMS::new(error));
+    Box::into_raw(ckms)
+}</pre>
+<p>Hey! There's a bunch of new things. First, <kbd>#[no_mangle]</kbd>? A static library has to export a symbol for the linker to, well, link. These symbols are functions, static variables, and so forth. Now, usually Rust is free to fiddle with the names that go into a symbol to include information, such as module location or, really, whatever else the compiler wants to do. The exact semantics of mangling are undefined, as of this writing. If we're going to be calling a function from C, we have to have the exact symbol name to refer to. <kbd>no_mangle</kbd> turns off mangling, leaving us with our name as written. It does mean we have to be careful not to cause symbol collisions. Similar to importing functions, the <kbd>extern C</kbd> here means that this function should be written out to obey the C ABI. Technically, we could also have written this as <kbd>extern fn</kbd>, leaving the C off as the C ABI is the implicit default.</p>
+<p><kbd>alloc_ckms</kbd> allocates a new <kbd>CKMS</kbd>, returning a mutable pointer to it. Interop with C requires raw pointers, which, you know, makes sense. We do have to be very conscious of memory ownership when embedding Rust—does Rust own the memory, implying we need to provide a free function? Or, does the other language own the memory? More often than not, it's easier to keep ownership with Rust, because to free memory, the compiler will need to know the type's size in memory. By passing a pointer out, as we're doing here, we've kept C in the dark about the size of <kbd>CKMS</kbd>. All the C side of this project knows is that it has an <em>opaque struct</em> to deal with. This is a common tactic in C libraries, for good reason. Here's freeing a <kbd>CKMS</kbd>:</p>
+<pre style="padding-left: 30px">#[no_mangle]
+pub extern "C" fn free_ckms(ckms: *mut CKMS&lt;f32&gt;) -&gt; () {
+    unsafe {
+        let ckms = Box::from_raw(ckms);
+        drop(ckms);
+    }
+}</pre>
+<p>Notice that in <kbd>alloc_ckms</kbd>, we're boxing the <kbd>CKMS</kbd>—forcing it to the heap—and in <kbd>free_ckms</kbd> we're building a boxed <kbd>CKMS</kbd> from its pointer. We discussed boxing and freeing memory in the context of raw pointers extensively in <a href="605ce307-29ed-4b5a-961e-8d327467b84f.xhtml" target="_blank">Chapter 3</a>, <em>The Rust Memory Model – Ownership, References and Manipulation</em>. Inserting a value into the <kbd>CKMS</kbd> is straightforward enough:</p>
+<pre style="padding-left: 30px">#[no_mangle]
+pub extern "C" fn ckms_insert(ckms: &amp;mut CKMS&lt;f32&gt;, value: f32) -&gt; () {
+    ckms.insert(value)
+}</pre>
+<p>Querying requires a little explanation:</p>
+<pre style="padding-left: 30px">#[no_mangle]
+pub extern "C" fn query(ckms: &amp;mut CKMS&lt;f32&gt;, q: f64, <br/>                        quant: *mut f32) <br/>    -&gt; i8 <br/>{
+    unsafe {
+        if let Some((_, res)) = ckms.query(q) {
+            *quant = res;
+            0
+        } else {
+            -1
+        }
+    }
+}</pre>
+<p>Signaling error conditions in a C API is tricky. In Rust, we return some kind of compound type, such as an <kbd>Option</kbd>. There's no such thing in C without building an error signaling struct for your API. In addition to the error-struct approach it's common to either write well-known nonsense into the pointer where the answer will be written or return a negative value. C expects to have its answer written into a 32-bit float being pointed to by quant, and there's no easy way to write nonsense into a numeric value. So, query returns an <kbd>i8</kbd>; zero on success, negative on a failure. A more elaborate API would differentiate failures by returning different negative values.</p>
+<p>That's it! When you run <kbd>cargo build --release</kbd>, a static library obeying the C ABI will get kicked out into <kbd>target/release</kbd>. We're ready to link it into a C program.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

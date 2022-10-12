@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style00.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style01.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Monitoring an external process within an FFI</h1>
+                </header>
+            
+            <article>
+                
+<p>During your time using a computer, you will have no doubt seen an image like the following:</p>
+<div class="CDPAlignCenter CDPAlign"><img height="49" width="230" class=" image-border" src="Images/c5dcc7fd-960b-42f2-9c7c-3316b7e3a6a3.png"/></div>
+<p>These progress bars work in a similar way to each other. Say you have a process that has five equal sized portions or you're downloading a file from the internet. As the portion completes or an amount of code is downloaded, the bar and percentage are updated using a programming technique known as a <strong>callback</strong>.</p>
+<p>How a callback is implemented depends on the language being used. For example, in an event-driven language, the process will either emit a signal or generate an event that the receiver listens for. When the signal/event is received, the user interface is updated.</p>
+<p>Rust is no different; it is able to use a callback when using an FFI. Rust is capable of working with both synchronous and asynchronous callbacks. It is also possible to target a callback to a Rust object.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

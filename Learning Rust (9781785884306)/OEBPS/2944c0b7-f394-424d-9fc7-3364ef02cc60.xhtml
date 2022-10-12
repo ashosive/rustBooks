@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style00.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style01.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Stop the race...</h1>
+                </header>
+            
+            <article>
+                
+<p>How can this error be avoided?</p>
+<p>There's another reference counted type with an incredibly cool name: Atomic RC. Atomicity, in this case, refers to non-divisible actions and/or containers, which means that they are thread-safe. Also, we'll need to pair the <kbd>Arc</kbd> type with a <kbd>Mutex</kbd> to allow us to lock the data for access. Here's the full code for a threaded implementation:</p>
+<pre>    // 05/threads-2/src/main.rs<br/>    use std::thread; 
+    use std::sync::{Arc, Mutex}; 
+ 
+    struct MyCounter 
+    { 
+        count: i32 
+    } 
+ 
+    fn wont_work() 
+    { 
+        let counter = Arc::new(Mutex::new(MyCounter {count: 0})); 
+        let another_counter = counter.clone(); 
+        thread::spawn(move || // new thread  
+        { 
+            let mut counter = another_counter.lock().expect("Locking of cloned counter failed"); 
+            counter.count += 1; 
+        }); 
+        println!("{}", counter.lock().unwrap().count); 
+    } </pre>
+<p>Usually, this code will print <kbd>0</kbd> because the print method tends to be reached before the mutation in the thread takes place.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

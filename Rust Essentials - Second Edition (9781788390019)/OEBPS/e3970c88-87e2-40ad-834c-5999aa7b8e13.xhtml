@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style00.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style01.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Filesystem operations</h1>
+                </header>
+            
+            <article>
+                
+<p>Here is an example that shows some info for all files in the current directory:</p>
+<pre>// code from Chapter 11/code/read_files_in_dir.rs: 
+<strong>use std::env;</strong> 
+use std::fs; 
+use std::error::Error; 
+ 
+fn main() { 
+    show_dir().unwrap(); 
+} 
+ 
+fn show_dir() -&gt; Result&lt;(), Box&lt;Error&gt;&gt; { 
+<strong>    let here = try!(env::current_dir());</strong> 
+    println!("Contents in: {}", here.display()); 
+<strong>    for entry in try!(fs::read_dir(&amp;here)) {</strong> 
+        let path = try!(entry).path(); 
+<strong>        let md = try!(fs::metadata(&amp;path));</strong><strong>        println!("  {} ({} bytes)", path.display(), md.len());</strong> 
+    } 
+    Ok(()) 
+} </pre>
+<p>This prints out:</p>
+<pre><strong>Contents in: F:\Rust\Rust book\The Rust Programming Language\Chapter 11 - Working with files\code F:\Rust\Rust book\The Rust Programming Language\Chapter 11 - Working with files\code\read_file.rs (710 bytes) F:\Rust\Rust book\The Rust Programming Language\Chapter 11 - Working with files\code\read_files_in_dir.exe (2382143 bytes)</strong></pre>
+<p>Here are some remarks to clarify the code:</p>
+<ul>
+<li>This code uses the <kbd>current_dir</kbd> method from <kbd>std::env</kbd>, reads that folder with <kbd>read_dir</kbd>, and iterates over all files it contains with <kbd>for entry in</kbd></li>
+<li>To manipulate the filesystem, see <kbd>filesystem.rs</kbd> in the code download for examples, which demonstrates the use of the methods <kbd>create_dir, create_dir_all, remove_file, remove_dir</kbd>, and <kbd>read_dir</kbd></li>
+<li>The <kbd>kind()</kbd> method is used here in the error case, to display the specific I/O error category (from the <kbd>std::io::ErrorKind</kbd> enum)</li>
+<li>The <kbd>fs::read_dir</kbd> method is used to read the contents of a directory, returning an <kbd>io::Result&lt;Vec&lt;Path&gt;&gt; paths</kbd>, which can be looped through with this code:</li>
+</ul>
+<pre>for path in paths { 
+    println!("&gt; {:?}", path.unwrap().path()); 
+} </pre>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

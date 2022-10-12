@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style00.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style01.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Further reading</h1>
+                </header>
+            
+            <article>
+                
+<ul>
+<li><em>Shipping specialization: a story of soundness</em>, available at <a href="https://aturon.github.io/blog/2017/07/08/lifetime-dispatch/">https://aturon.github.io/blog/2017/07/08/lifetime-dispatch/</a>. There's long been an ambition to see specialization available in stable Rust, and it's not for want of trying that it hasn't happened yet. In this blog post, Aaron Turon discusses the difficulties of specialization in 2017, introducing the Chalk logic interpreter in the discussion. Chalk is interesting in its own right, especially if you are interested in compiler internals or logic programming.</li>
+<li><em>Maximally minimal specialization: always applicable impls</em>, available at <a href="http://smallcultfollowing.com/babysteps/blog/2018/02/09/maximally-minimal-specialization-always-applicable-impls/">http://smallcultfollowing.com/babysteps/blog/2018/02/09/maximally-minimal-specialization-always-applicable-impls/</a>. This blog post by Niko Matsakis extends the topics covered in Turon's <em>Shipping specialization</em> article, discussing a <em>min-max</em> solution to the specialization soundness issue. The approach seemed to be the most likely candidate for eventual implementation, but flaws were discovered. Happily, not unresolvable flaws. This post is an excellent example of the preRFC conversation in the Rust community.</li>
+<li><em>Sound and ergonomic specialization for Rust</em>, available at <a href="http://aturon.github.io/2018/04/05/sound-specialization/">http://aturon.github.io/2018/04/05/sound-specialization/</a>. This blog post addresses the issues in the min-max article and proposes the implementation discussed in this chapter. It is, as of writing this book, the most likely to be implemented, unless some bright spark finds a flaw in it.</li>
+<li><em>Chalk</em>, available at <a href="https://github.com/rust-lang-nursery/chalk">https://github.com/rust-lang-nursery/chalk</a>. Chalk is really a very interesting Rust project. It is, according to the project description, a <em>PROLOG-ish interpreter written in Rust</em>. To date, Chalk is being used to reason about specialization in the Rust language, but there are plans to merge Chalk into <kbd>rustc</kbd> itself someday. The project README, as of <kbd>SHA 94a1941a021842a5fcb35cd043145c8faae59f08</kbd>, has a list of excellent articles on the applications of chalk.</li>
+<li><em>The Unstable Book</em>, available at <a href="https://doc.rust-lang.org/nightly/unstable-book/">https://doc.rust-lang.org/nightly/unstable-book/</a>. <kbd>rustc</kbd> has a large number of in-flight features. <em>The Unstable Book</em> is intended to be a best-effort collection of these features, the justifications behind them, and any relevant tracking issues. It is well worth a read, especially if you're looking to contribute to the compiler project.</li>
+<li><em>Zero-cost futures in Rust</em>, available at <a href="http://aturon.github.io/blog/2016/08/11/futures/">http://aturon.github.io/blog/2016/08/11/futures/</a>. This post introduced the Rust community to the futures project and explains the motivation behind the introduction well. The actual implementation details of futures have changed with time, but this article is still well worth a read.</li>
+<li><em>Async / Await</em>, available at  <a href="https://github.com/rust-lang/rfcs/blob/master/text/2394-async_await.md">https://github.com/rust-lang/rfcs/blob/master/text/2394-async_await.md</a>. RFC  2394 introduces the motivation for simplifying the ergonomics of futures in Rust, as well as laying out the implementation approach for it. The RFC is, itself, a fine example of how Rust evolves—community desire turns into experimentation which then turns into support from the compiler.</li>
+</ul>
+<p> </p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

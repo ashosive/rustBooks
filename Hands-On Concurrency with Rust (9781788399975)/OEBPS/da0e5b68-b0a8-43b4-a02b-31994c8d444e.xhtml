@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Instructions</h1>
+                </header>
+            
+            <article>
+                
+<p>No surprises here. We import the project dependencies and expose two public modules: instruction and individual. The instruction module at <kbd>src/instruction.rs</kbd> is feruscore's version of <kbd>[u8]</kbd>, or, rather, the <kbd>u8</kbd> in the array. Let's take a look. The structure at the root is <kbd>Instruction</kbd>:</p>
+<pre>#[derive(PartialEq, Eq, Copy, Clone, Debug)]
+pub struct Instruction {
+    pub opcode: OpCode,
+    pub modifier: Modifier,
+    pub a_mode: Mode,
+    pub a_offset: Offset,
+    pub b_mode: Mode,
+    pub b_offset: Offset,
+}</pre>
+<p>An instruction in Redcode is an opcode, a modifier for that opcode, an a-offset plus modifier and a b-offset plus modifier. (The a-field and b-field are the combination of offset and mode.) That's exactly what we have here. No need to deserialize from a byte array; we'll work on a direct representation. The implementation of <kbd>Instruction</kbd> is small. To start, we need some way of creating random <kbd>Instruction</kbd>s:</p>
+<pre>impl Instruction {
+    pub fn random(core_size: u16) -&gt; Instruction {
+        Instruction {
+            opcode: OpCode::random(),
+            modifier: Modifier::random(),
+            a_mode: Mode::random(),
+            a_offset: Offset::random(core_size / 32),
+            b_mode: Mode::random(),
+            b_offset: Offset::random(core_size / 32),
+        }
+    }</pre>
+<p>This sets up a pattern we'll use through the rest of this module. Every type exposes <kbd>random() -&gt; Self</kbd> or some variant thereof. Note that the offset is restricted to 1/32 the passed <kbd>core_size</kbd>. Why? Well, we're trying to cut down the cardinality of the domain being explored. Say the core size is 8,000. If all possible  instances of core size values were tried in an offset, there'd be 64,000,000 possible <kbd>Instruction</kbd>, not including any of the other valid combinations with the other structure fields. Based on what I know about high-scoring warriors, the explicit offsets are usually small numbers.</p>
+<p>By cutting down the offset domain, we've eliminated 62,000,000 potential instructions, saving CPU time. This could well be a pessimistic restriction—forcing the population right into a bottleneck—but I doubt it. Every struct in this module also has a <kbd>serialize(&amp;self, w: &amp;mut Write) -&gt; io::Result&lt;usize&gt;</kbd> function. Here's the one for <kbd>Instruction</kbd>:</p>
+<pre>    pub fn serialize(&amp;self, w: &amp;mut Write) -&gt; io::Result&lt;usize&gt; {
+        let mut total_written = 0;
+        self.opcode.serialize(w)?;
+        total_written += w.write(b".")?;
+        self.modifier.serialize(w)?;
+        total_written += w.write(b" ")?;
+        total_written += match self.a_mode {
+            Mode::Immediate =&gt; w.write(b"#")?,
+            Mode::Direct =&gt; w.write(b"$")?,
+            Mode::Indirect =&gt; w.write(b"*")?,
+            Mode::Decrement =&gt; w.write(b"{")?,
+            Mode::Increment =&gt; w.write(b"}")?,
+        };
+        self.a_offset.serialize(w)?;
+        total_written += w.write(b", ")?;
+        total_written += match self.b_mode {
+            Mode::Immediate =&gt; w.write(b"#")?,
+            Mode::Direct =&gt; w.write(b"$")?,
+            Mode::Indirect =&gt; w.write(b"@")?,
+            Mode::Decrement =&gt; w.write(b"&lt;")?,
+            Mode::Increment =&gt; w.write(b"&gt;")?,
+        };
+        total_written += self.b_offset.serialize(w)?;
+        total_written += w.write(b"\n")?;
+        Ok(total_written)
+    }
+}</pre>
+<p>We're going to be calling out to the local system's pmars executable when we run feruscore and that program needs to find files on-disk. Every <kbd>Instruction</kbd> in every individual will be serialized to disk each time we check fitness. That load file will be deserialized by pmars, run in simulation and the results issued back to feruscore from pmars' stdout. That's not a fast process.</p>
+<p>The remainder of the instruction module follows this general outline. Here, for instance, is the <kbd>Modifier</kbd> struct:</p>
+<pre>#[derive(PartialEq, Eq, Copy, Clone, Debug)]
+pub enum Modifier {
+    A,
+    B,
+    AB,
+    BA,
+    F,
+    X,
+    I,
+}</pre>
+<p>Here's the implementation:</p>
+<pre>impl Modifier {
+    pub fn random() -&gt; Modifier {
+        match thread_rng().gen_range(0, 7) {
+            0 =&gt; Modifier::A,
+            1 =&gt; Modifier::B,
+            2 =&gt; Modifier::AB,
+            3 =&gt; Modifier::BA,
+            4 =&gt; Modifier::F,
+            5 =&gt; Modifier::X,
+            6 =&gt; Modifier::I,
+            _ =&gt; unreachable!(),
+        }
+    }
+
+    pub fn serialize(&amp;self, w: &amp;mut Write) -&gt; io::Result&lt;usize&gt; {
+        match *self {
+            Modifier::A =&gt; w.write(b"A"),
+            Modifier::B =&gt; w.write(b"B"),
+            Modifier::AB =&gt; w.write(b"AB"),
+            Modifier::BA =&gt; w.write(b"BA"),
+            Modifier::F =&gt; w.write(b"F"),
+            Modifier::X =&gt; w.write(b"X"),
+            Modifier::I =&gt; w.write(b"I"),
+        }
+    }
+}</pre>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

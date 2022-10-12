@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Iterators</h1>
+                </header>
+            
+            <article>
+                
+<p>So far, we've assumed that the reader has been at least passingly familiar with Rust iterators. It's possible that you've used them extensively but have never written your own iterator implementation. That knowledge is important for what follows and we'll discuss Rust's iteration facility now.</p>
+<p>A Rust iterator is any type that implements <kbd>std::iter::Iterator</kbd>. The <kbd>Iterator</kbd> trait has an interior <kbd>Item</kbd> type that allows the familiar iterator functions, such as <kbd>next(&amp;mut self) -&gt; Option&lt;Self::Item&gt;</kbd>, to be defined in terms of that generic <kbd>Item</kbd>. Many of the iterator functions are, well, functional in nature: <kbd>map</kbd>, <kbd>filter</kbd>, and <kbd>fold</kbd> are all higher-order functions on a stream of <kbd>Item</kbd>. Many of the iterator functions are searches on that stream of <kbd>Item</kbd>: <kbd>max</kbd>, <kbd>min</kbd>, <kbd>position</kbd>, and <kbd>find</kbd>. It is a versatile trait. If you find it limited in some manner, the community has put together a crate with more capability: itertools (<a href="https://crates.io/crates/itertools">https://crates.io/crates/itertools</a>). Here, we're less concerned with the interface of <kbd>Iterator</kbd> than how to implement it for our own types.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

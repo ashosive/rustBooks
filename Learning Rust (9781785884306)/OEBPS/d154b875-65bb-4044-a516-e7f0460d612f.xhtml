@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style00.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style01.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Using Cargo to build and run an application</h1>
+                </header>
+            
+            <article>
+                
+<p>As we are all able to create directory structures, Cargo is then able to build and execute our source code.</p>
+<p>If you look at the source code that comes with this chapter, you will find a directory called <kbd>app_name</kbd>. To build this package using Cargo, type the following from a Terminal (or command on Windows) window:</p>
+<pre><strong>cd app_name </strong>
+<strong>cargo build app_name</strong>  </pre>
+<p>This will build the source code; finally you will be informed that the compilation has been successful:</p>
+<div class="packt_figure CDPAlignCenter CDPAlign"><img class=" image-border" src="Images/db2d7413-616c-4df4-881b-ef4e6540f050.png"/></div>
+<p>Next, we can use Cargo to execute the binary as follows:</p>
+<pre><strong>cargo run</strong></pre>
+<p>If everything has worked, you will see something like the following:</p>
+<div class="packt_figure CDPAlignCenter CDPAlign"><img height="47" width="319" class=" image-border" src="Images/2af512c0-87ed-4062-8e99-a7c0187eab5a.png"/></div>
+<p>As with any sort of utility, it's possible to "daisy-chain" the build and execution into one line, as follows:</p>
+<pre><strong>cargo build; cargo run</strong>  </pre>
+<div class="packt_infobox">You may be wondering why the first operation performed was to move into the application structure rather than just type <kbd>cargo build</kbd>. This is because Cargo is looking for the <kbd>Cargo.toml</kbd> file (remember, this acts as a build script).</div>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style00.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style01.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Let's consider the heap</h1>
+                </header>
+            
+            <article>
+                
+<p>As already discussed, the heap is typically used for complex types. The stack frame model can still be used, but it will need modifying, as the stack will need to point to the base address of the complex type on the heap.</p>
+<p>Let's construct a stack frame for the following piece of code:</p>
+<pre>    fn main() 
+    { 
+        let f = 42; 
+        let my_ids: Vec&lt;i64&gt; = Vec::with_capacity(5); 
+    } </pre>
+<table class="MsoTableGrid">
+<tbody>
+<tr>
+<td>
+<p><strong>Function name</strong></p>
+</td>
+<td>
+<p><strong>Address</strong></p>
+</td>
+<td>
+<p><strong>Variable name</strong></p>
+</td>
+<td>
+<p><strong>Value</strong></p>
+</td>
+</tr>
+<tr>
+<td>
+<p><kbd>main</kbd></p>
+</td>
+<td>
+<p><kbd>1</kbd></p>
+</td>
+<td>
+<p><kbd>f</kbd></p>
+</td>
+<td>
+<p><kbd>42</kbd></p>
+</td>
+</tr>
+<tr>
+<td/>
+<td>
+<p><kbd>0</kbd></p>
+</td>
+<td>
+<p><kbd>my_ids</kbd></p>
+</td>
+<td>
+<p><kbd>(an instance of Vector)</kbd></p>
+</td>
+</tr>
+</tbody>
+</table>
+<p> </p>
+<p>Space is allocated correctly for <kbd>f</kbd>, but <kbd>my_ids</kbd> is different; it is a <kbd>Vector&lt;i64&gt;</kbd> with pre-allocated space for five <kbd>i64s</kbd> values. While the vector itself is stored in the stack, its contents are allocated in the heap.</p>
+<p>Values in the heap are considered to be more persistent than those in the stack. That means, unlike values in the stack, their lifetime does not have to be as short as the block's they were defined in.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

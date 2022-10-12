@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Developing macros</h1>
+                </header>
+            
+            <article>
+                
+<p>The basic structure of a macro definition for a macro with the name <kbd>mac1</kbd> is of this form:</p>
+<pre>macro_rules! mac1 { 
+(pattern) =&gt; (expansion); 
+(pattern) =&gt; (expansion); 
+... 
+} </pre>
+<p>So, we can see that the definition of a macro is also done through a macro, namely the macro <kbd>macro_rules!</kbd> ;As you can see, a macro is similar to a <kbd>match</kbd> block, defining one or more <em>rules</em> for pattern matching, each rule ending on a semicolon. Every rule consists of a pattern before the <kbd>=&gt;</kbd> sign (also called a <strong>matcher)</strong> that is replaced with the expansion part during compilation, not while executing the code.</p>
+<p>The macro can be called as either <kbd>mac1!()</kbd> or <kbd>mac1![]</kbd>; the braces contain the arguments.</p>
+<p>The following macro, <kbd>welcome!</kbd> , expects no pattern and expands into a print statement by using the <kbd>println!</kbd> macro. It is trivial, but it demonstrates how macros work:</p>
+<pre>// from Chapter 8/code/macros.rs 
+macro_rules! welcome { 
+    () =&gt; ( 
+        println!("Welcome to the Game!"); 
+    ) 
+} </pre>
+<p>You can invoke it by adding a bang sign, <kbd>!</kbd> , to its name:</p>
+<pre>fn main() { 
+   welcome!()   
+} </pre>
+<p>This prints out the following:</p>
+<pre><strong>Welcome to the Game!</strong>  </pre>
+<p>The pattern before =&gt; can contain an expression of the form <kbd>$arg:frag</kbd>:</p>
+<ul>
+<li><kbd>$arg</kbd> binds a meta-variable, <kbd>arg</kbd>, to a value when the macro is called.</li>
+<li>Variables used inside a macro, such as <kbd>$arg</kbd>, are prefixed with a <kbd>$</kbd> sign, to distinguish them from normal variables in code.</li>
+<li><kbd>frag</kbd> is a <strong>fragment specifier</strong>, and can be one of the following, with some examples added between <kbd>""</kbd>:
+<ul>
+<li><kbd>expr</kbd>: <kbd>"42"</kbd> or <kbd>"2 + 2"</kbd> or <kbd>"if true then { 1 } else { 2 }"</kbd> or <kbd>"f(42)"</kbd></li>
+<li><kbd>item</kbd>: <kbd>"fn average() { }"</kbd> or <kbd>"struct Person;"</kbd></li>
+<li><kbd>block</kbd>: Is a sequence of instructions delimited by curly braces, such as <kbd>"{ log(error, "hi"); return 12; }"</kbd></li>
+<li><kbd>stmt</kbd>: <kbd>"let x = 3"</kbd></li>
+<li><kbd>pat</kbd>: <kbd>"Some(t)"</kbd> or <kbd>"(17, 'a')"</kbd> or <kbd>"_"</kbd></li>
+<li><kbd>ty (type)</kbd>: <kbd>"i32"</kbd> or <kbd>"Vec&lt;(char, String)&gt;"</kbd> or <kbd>"&amp;T"</kbd></li>
+<li><kbd>ident</kbd>: <kbd>"x"</kbd> or <kbd>"42"</kbd></li>
+<li><kbd>path</kbd><span class="NormalPACKTChar">:</span> <kbd>"T::SpecialA"</kbd></li>
+<li><kbd>tt</kbd>: For more global elements</li>
+</ul>
+</li>
+</ul>
+<div class="packt_infobox">You can find more information on the meaning of these fragments in the official documentation ;<a href="https://doc.rust-lang.org/stable/book/first-edition/macros.html"><span class="URLPACKT">https://doc.rust-lang.org/stable/book/first-edition/macros.html</span></a>.</div>
+<p>Any other Rust literals (tokens) that appear in a matcher must match exactly.</p>
+<p>For example, consider the following macro, <kbd>mac1</kbd>:</p>
+<pre>macro_rules! mac1 { 
+    ($arg:expr) =&gt; (println!("arg is {}", $arg)); 
+} </pre>
+<p>When you call <kbd>mac1!(42);</kbd> it will print out <kbd>arg is 42</kbd>.</p>
+<p><kbd>mac1</kbd> looks at its argument, <kbd>42</kbd>, as an expression (<kbd>expr</kbd>), and binds <kbd>arg</kbd> to that value.</p>
+<div class="packt_infobox"><span class="packt_screen">Exercises</span>:
+<ul>
+<li>Write a macro, <kbd>mac2</kbd>, that triples its argument. Test it out for the following arguments: 5 and 2 + 3.</li>
+<li>Write a macro, <kbd>mac3</kbd>, that takes an identifier name and replaces it with a binding of that name to 42. (Hint: use <kbd>$arg:ident</kbd> instead of <kbd>$arg:expr</kbd>, <kbd>ident</kbd> is used for variable and function names.)</li>
+<li>Write a macro, <kbd>mac4</kbd>, that when invoked like <kbd>mac4!("Where am I?");</kbd> prints out <kbd>start - Where am I? - end</kbd>.</li>
+<li>Write a macro <kbd>says</kbd> that when invoked like ;<kbd><span>says!(</span>"Hi", "Jim");</kbd> prints out <kbd>He/She says: 'Hi' to Jim</kbd>.</li>
+</ul>
+(See the example code in <kbd>Chapter 8/exercises/macro_ex.rs</kbd>.)</div>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

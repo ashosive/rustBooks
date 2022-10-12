@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">What's the [link(name="")] for?</h1>
+                </header>
+            
+            <article>
+                
+<p>This is a directive that tells the compiler that the code is going to link to a library called whatever is inside the quotes. You don't need the likes of <kbd>mathlib.dll</kbd>,  <kbd>mathlib.so</kbd>, or  <kbd>mathlib.a</kbd> inside the quotes, just the name without the extension.</p>
+<p>There are three different types of link (called models and defined in the <kbd>kind</kbd> parameter following the <span class="packt_screen">name</span>) available: <em>dynamic</em>, <em>static,</em> and <em>framework</em> (though the latter is for macOS only). The following table gives a summary of what they are for. For the majority of the time, the <kbd>dynamic</kbd> type is used.</p>
+<table class="MsoTableGrid">
+<tbody>
+<tr>
+<td>
+<p><strong>Type</strong></p>
+</td>
+<td>
+<p><strong>Example</strong></p>
+</td>
+<td>
+<p><strong>Notes</strong></p>
+</td>
+</tr>
+<tr>
+<td>
+<p>Dynamic</p>
+</td>
+<td>
+<p><kbd>[link(name="foo")]</kbd></p>
+</td>
+<td>
+<p>This is the default. The compiled binary creates <em>hooks</em> that will link into the platform installed form of the library.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p>Static</p>
+</td>
+<td>
+<p><kbd>[link(name="foo", kind="static")]</kbd></p>
+</td>
+<td>
+<p>These are <kbd>.a</kbd> files. When the application is built, the binary is created, but the platform library file is not required to be distributed.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p>Framework</p>
+</td>
+<td>
+<p><kbd>[link(name="foo", kind="framework")]</kbd></p>
+</td>
+<td>
+<p>macOS only. This will be the <kbd>.dylib</kbd> file and is treated the same as a dynamic library.</p>
+</td>
+</tr>
+</tbody>
+</table>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Further reading</h1>
+                </header>
+            
+            <article>
+                
+<p class="mce-root">The memory model of a programming language is a broad topic. Rust's, as of writing this book, must be understood from the inspection of the Rust documentation, the rustc source code, and research into LLVM. That is, Rust's memory model is not formally documented, though there are rumblings in the community of providing it. Independent of that, it is also important for the working programmer to understand the underlying machine. There's a staggering amount of material to be covered.</p>
+<p class="mce-root">These notes are a small start, focusing especially on the Rust documentation that relates most to this chapter:</p>
+<ul>
+<li><em>High Performance Code 201: Hybrid Data Structures</em>, Chandler Carruth, available at <a href="https://www.youtube.com/watch?v=vElZc6zSIXM&amp;index=5&amp;list=PLKW_WLANyJtqQ6IWm3BjzHZvrFxFSooey">https://www.youtube.com/watch?v=vElZc6zSIXM&amp;index=5&amp;list=PLKW_WLANyJtqQ6IWm3BjzHZvrFxFSooey</a>. This, in point of fact, is a talk from CppCon 2016. Carruth is an engaging speaker and is a member of the LLVM team focused on compiler performance. This talk is especially interesting from the point of view of building information-dense data structures that interact well with CPU caches. While the talk is in C++, the techniques apply directly to Rust.</li>
+<li><em>Cache-oblivious Algorithms</em>, Matteo Frigo, Charles Leiserson, Harald Prokop, and Sridhar Ramachandran. This paper introduces the concept of building data structures that are cache oblivious, or, native to machines with memory hierarchies and interact with them well, in addition to a machine model to analyze such data structures.</li>
+<li><em>Cache-Oblivious Algorithms and Data Structures</em>, Erik Demaine. This paper is a classic in the cache-oblivious space, building on the work presented in the last by Frigo et al and summarizing existing work. This is a highly recommended read, especially in conjunction with the previous paper. It is well worth scanning the bibliography as well.</li>
+<li><em>The Stack and the Heap</em>, available at <a href="https://doc.rust-lang.org/book/first-edition/the-stack-and-the-heap.html">https://doc.rust-lang.org/book/first-edition/the-stack-and-the-heap.html</a>. This chapter from the first edition of the Rust book explains the difference between the hardware stack and heap, allocations to each, and the implications for Rust. This chapter has gone into further detail in some areas, but the Rust book's chapter is warmly recommended for anyone needing a refresher or a more gentle climb.</li>
+<li><em>Splitting Borrows</em>, available at <a href="https://doc.rust-lang.org/beta/nomicon/borrow-splitting.html">https://doc.rust-lang.org/beta/nomicon/borrow-splitting.html</a>. The Nomicon is a Rust book intended to teach low-level Rust programming, not unlike this book. While it is a work-in-progress, the information in it is invaluable. <em>Splitting Borrows</em> explains the reasoning behind a common issue with new Rust developers: performing multiple mutable borrows out of a vector or array. The fact that this works with <em>structs</em> is often a source of great confusion and anguish.</li>
+<li><em>Rust Reference</em>, available at <a href="https://doc.rust-lang.org/reference/">https://doc.rust-lang.org/reference/</a>. Like any established programming language, the Rust Reference is invaluable for understanding the subtle details of the language itself, which have been hashed out in mailing lists and over chat for years. The reference in its current form can be a touch hard to search—it used to be one long page—but it's hoped the situation will be improved upon by the time our book here has gone to press.</li>
+<li><em>Closures: Anonymous Functions that can Capture their Environment</em>, available at <a href="http://doc.rust-lang.org/1.23.0/book/second-edition/ch13-01-closures.html">http://doc.rust-lang.org/1.23.0/book/second-edition/ch13-01-closures.html</a>. Rust closures have some subtle implications to them that can be hard to internalize for new Rust developers. This chapter in the second edition of the Rust Book is excellent in this regard.</li>
+<li><em>External blocks</em>, available at <a href="https://doc.rust-lang.org/reference/items/external-blocks.html">https://doc.rust-lang.org/reference/items/external-blocks.html</a>. External blocks are relatively rare in this book—and, perhaps, in most of the Rust code you're likely to see—but there's a fair few of them available. It is well worth having a passing knowledge of this document's existence.</li>
+<li><em>Hacker's Delight</em>, Henry Warren Jr.This book is a classic. Many of the tricks present in the book are now available as simple instructions on some chips, such as x86, but you'll see the occasional delight here or there in the <kbd>rustc</kbd> source code, the <kbd>swap_nonoverlapping_bytes</kbd> trick especially.</li>
+</ul>
+<p class="mce-root"/>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

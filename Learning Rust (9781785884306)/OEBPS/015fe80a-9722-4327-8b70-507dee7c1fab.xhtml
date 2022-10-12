@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style00.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style01.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Creating a binary package using Cargo</h1>
+                </header>
+            
+            <article>
+                
+<p>As with any other script, Cargo works (by default) on the current working directory. (For example, while writing this chapter, my working directory for the example code is <kbd>~/Developer/Rust/chapter0</kbd> on the Mac and Linux boxes, and <kbd>J:\Developer\Rust\Chapter0</kbd> on the Windows 10 machine.)</p>
+<p>In its simplest form, Cargo can generate the correct file structure like this:</p>
+<pre><strong>cargo new demo_app_name -bin</strong> </pre>
+<p>The preceding command tells Cargo to create a new structure called <kbd>demo_app_name</kbd>, and that it is to be a binary. If you remove <kbd>-bin</kbd>, it creates a structure called, which is going to be a library (or more accurately, something other than a binary).</p>
+<p>If you don't wish to use the root (say you want to create a library within your binary framework), then instead of <kbd>demo_app_name</kbd>, you append the structure before the name relating to your working directory.</p>
+<p>In the small example I gave earlier, if I wanted to create a library within my binary structure, I would use the following:</p>
+<pre><strong>cargo new app_name/mylib</strong>  </pre>
+<p>That will create a structure like this:</p>
+<div class="packt_figure CDPAlignCenter CDPAlign"><img height="131" width="363" class=" image-border" src="Images/50683c60-8d99-4ba1-97ac-058dd3ba649e.png"/></div>
+<p>The <kbd>Cargo.toml</kbd> file requires no editing (at this stage), as it contains the information we had to enter manually when we created the project by hand.</p>
+<div class="packt_infobox">Cargo has a number of directory separator <em>translators</em>. This means that the preceding example can be used on OS X, Linux, and Windows without an issue; Cargo has converted the <kbd>/</kbd> to <kbd>\</kbd> for Windows.</div>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

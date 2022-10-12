@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style00.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style01.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Specialization</h1>
+                </header>
+            
+            <article>
+                
+<p>In <a href="8c61da2f-08c8-40be-89d4-d8afa8510850.xhtml" target="_blank">Chapter 2</a>, <em>Sequential Rust Performance and Testing</em>, we noted that the technique of <em>specialization</em> would be cut off from data structure implementors if they intended to target stable Rust. Specialization is a means by which a generic structure—say, a <kbd>HashMap</kbd>—can be implemented specifically for one type. Usually, this is done to improve performance—say, by turning a <kbd>HashMap</kbd> with <kbd>u8</kbd> keys into an array—or provide a simpler implementation when possible. Specialization has been in Rust for a good while, but limited to nightly projects, such as the compiler, because of soundness issues when interacting with lifetimes. The canonical example has always been the following:</p>
+<pre>trait Bad1 {
+    fn bad1(&amp;self);
+}
+
+impl&lt;T&gt; Bad1 for T {
+    default fn bad1(&amp;self) {
+        println!("generic");
+    }
+}
+
+// Specialization cannot work: trans doesn't know if T: 'static
+impl&lt;T: 'static&gt; Bad1 for T {
+    fn bad1(&amp;self) {
+        println!("specialized");
+    }
+}
+
+fn main() {
+    "test".bad1()
+}</pre>
+<p>Lifetimes are erased at a certain point in the compilation process. String literals are static, but by the time dispatch to specialized type would occur there's not enough information in the compiler to decide. Lifetime equality in specialization also poses difficulties.</p>
+<p>It seemed for a good while that specialization would miss the boat for inclusion into the language in 2018. Now, <em>maybe</em>, a more limited form of specialization will be included. A specialization will only apply if the implementation is generic with regard to lifetimes, does not introduce duplication into trait lifetimes, does not repeat generic type parameters, and all trait bounds are themselves applicable for specialization. The exact details are in flux as I write this, but do keep an eye out.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

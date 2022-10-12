@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Testing</h1>
+                </header>
+            
+            <article>
+                
+<p>We can prefix a function with the <kbd>#[test]</kbd> attribute to indicate that it is part of the unit tests for our application or library. We then compile with the following command and run the generated executable:</p>
+<pre>    <strong>rustc --test program.rs</strong></pre>
+<p>This will replace the <kbd>main()</kbd> function with a test runner, and show the result from the functions marked with <kbd>#[test]</kbd>, for example:</p>
+<pre>// from Chapter 3/code/attributes_testing.rs 
+fn main() { 
+  println!("No tests are compiled,compile with rustc --test! "); 
+} 
+ 
+#[test] 
+fn arithmetic() { 
+  if 2 + 3 == 5 { 
+    println!("You can calculate!"); 
+  } 
+} </pre>
+<p>Test functions, like <kbd>arithmetic()</kbd> in the example, are black boxes, they have no arguments or returns. When this program is run on the command line it produces the following output:</p>
+<div class="packt_figure CDPAlignCenter CDPAlign"><img height="51" width="368" src="Images/a1acf747-28a2-4a0d-9713-dab051911ed4.png"/></div>
+<p>But, if we change the test to <kbd>if 2 + 3 == 6</kbd> the test passes as well! Try it out. It turns out that test functions always pass when their execution does not cause a crash (called a panic in Rust terminology), and only fails when it panics. That's why testing (or debugging) must use the <kbd>assert_eq!</kbd> macro (or other similar macros), as shown in the following code:</p>
+<pre>assert_eq!(2, power); </pre>
+<p>This statement tests whether the variable <kbd>power</kbd> has the value <kbd>2</kbd>. If it does, nothing happens, but if <kbd>power</kbd> is different from <kbd>2</kbd>, an exception occurs and the program panics, giving the following command:</p>
+<pre>    <strong>thread '&lt;main&gt;' panicked at 'assertion failed.</strong></pre>
+<p>In our first function, we would write the test <kbd>assert_eq!(5, 2 + 3);</kbd>, which would pass.</p>
+<p>We could also write this as <kbd>assert!(2 + 3 == 5);</kbd> using the <kbd>assert!</kbd> macro. This macro does nothing if the expression between the parentheses is true, but it panics if the expression is false.</p>
+<p>These macros are also useful in normal code, to make certain specific conditions are met. Just be aware that when they fail, they do it while the program is running!</p>
+<p>A test fails when the function panics, as is the case for the following example:</p>
+<pre>#[test] 
+fn badtest() { 
+  assert_eq!(6, 2 + 3); 
+} </pre>
+<p class="packt_figure CDPAlignLeft CDPAlign"><span>This produces the following output:</span></p>
+<div class="mce-root CDPAlignCenter CDPAlign"><img style="color: black;font-size: 1em" height="192" width="542" src="Images/03dc3d4e-42fa-44c7-a021-0509d8961db7.png"/></div>
+<div class="packt_figure CDPAlignCenter CDPAlign">
+<p>If you want to make sure that a test fails, use the <kbd>#[should_panic]</kbd> attribute, like so:</p>
+</div>
+<pre>#[test] 
+#[should_panic(expected = "assertion failed")] 
+fn failing_test() { 
+    assert!(6 == 2 + 3); 
+} </pre>
+<p>In this case <kbd>failing_test</kbd> passes OK, because this was what we expected! We'd better add the text <kbd>expected = assertion failed</kbd> to be sure the panic is caused by the assertion failing.</p>
+<p>You can disable a test by giving it the additional <kbd>#[ignore]</kbd> attribute.</p>
+<p>Passing tests are indicated in green, failing tests in red.</p>
+<p>Unit test your functions by comparing the actual function result to the expected result with the macro call <kbd>assert_eq!(actual, expected)</kbd>. So, consider a function that looks like the following:</p>
+<pre>pub fn double(n: i32) -&gt; i32 { 
+    n * 2 
+} </pre>
+<p>It is tested, as follows:</p>
+<pre>assert_eq!(double(42), 84); </pre>
+<p>The <kbd>pub</kbd> indicates that <kbd>double</kbd> is a public method, that can be called by client code using our library. Ordinary private methods should not be tested explicitly, they should be checked by calling public methods that test them.</p>
+<p>If you compile without the test attribute, like the following command:</p>
+<pre>    <strong>rustc attributes_testing.rs</strong></pre>
+<p>No test functions are compiled and when run the <kbd>main()</kbd> function executes, which in our case prints the following output:</p>
+<pre>    <strong>No tests are compiled, compile with rustc --test!</strong>  </pre>
+<p>No test code is included in a normal build.</p>
+<p>In a real project, the tests will be put in a separate <kbd>tests</kbd> module, as is done in next section (see <a href="d271499e-5fd5-48a4-8395-e5efedc8a482.xhtml"><span class="ChapterrefPACKT">Chapter 8</span></a>, <em>Organizing Code and Macros</em>).</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

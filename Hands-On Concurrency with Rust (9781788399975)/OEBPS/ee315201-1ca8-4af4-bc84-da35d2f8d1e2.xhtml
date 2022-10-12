@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">A conceptual view of hopper</h1>
+                </header>
+            
+            <article>
+                
+<p>Before we dig into the implementation, let's walk through how the previous example works at a conceptual level. We have enough in-memory space for 10 u32s. If the writer thread is much faster than the reader thread—or gets more scheduled time—we could end up with a situation like this:</p>
+<pre style="padding-left: 30px">write: 99
+
+in-memory-buffer: [90, 91, 92, 93, 94, 95, 96, 97, 98]
+disk-buffer: [87, 88, 89]</pre>
+<p>That is, a write of <kbd>99</kbd> is entering the system when the in-memory buffer is totally full and there are three queued writes in the diskbuffer. While it is possible for the state of the world to shift between the time a write enters the system for queuing and between the time it is queued, let's assume that no receivers pull items between queuing. The result will then be a system that looks like this:</p>
+<pre style="padding-left: 30px">in-memory-buffer: [90, 91, 92, 93, 94, 95, 96, 97, 98]
+disk-buffer: [87, 88, 89, 99]</pre>
+<p>The receivers, together, must read only three elements from the diskbuffer, then all the in-memory elements, and then a single element from the diskbuffer, to maintain the queue's ordering. This is further complicated considering that a write may be split by one or more reads from the receivers. We saw something analogous in the previous chapter with regard to guarding writes by doing loads and checks - the conditions that satisfy a check may change between the load, check, and operation. There's a further complication as well; the unified disk buffer displayed previously does not actually exist. Instead, there are potentially many individual queue files.</p>
+<p>Let's say that hopper has been configured to allow for 10 <kbd>u32</kbd> in-memory, as mentioned, and 10 on-disk but split across five possible queue files. Our revised after-write system is as follows:</p>
+<pre style="padding-left: 30px">in-memory-buffer: [90, 91, 92, 93, 94, 95, 96, 97, 98]
+disk-buffer: [ [87, 88], [89, 99] ]</pre>
+<p>The senders are responsible for creating queue files and filling them to their max. The <kbd>Receiver</kbd> is responsible for reading from the queue file and deleting the said file when it's exhausted. The mechanism for determining that a queue file is exhausted is simple; when the <kbd>Sender</kbd> exits a queue file, it moves on to create a new queue file, and marks the old path as read-only in the filesystem. When the <kbd>Receiver</kbd> attempts to read bytes from disk and finds there are none, it checks the write status of the file. If the file is still read-write, more bytes will come eventually. If the file is read-only, the file is exhausted. There's a little trick to it yet, and further unexplained cooperation between <kbd>Sender</kbd> and <kbd>Receiver</kbd>, but that should be enough abstract detail to let us dig in effectively.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

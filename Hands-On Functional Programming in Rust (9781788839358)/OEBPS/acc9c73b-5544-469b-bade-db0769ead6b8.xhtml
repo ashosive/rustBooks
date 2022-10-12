@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Learning the rules of ownership</h1>
+                </header>
+            
+            <article>
+                
+<p>Rust has three rules of ownership:</p>
+<ul>
+<li>Each value in Rust has a variable that's called its <strong>owner</strong></li>
+<li>There can only be one owner at a time</li>
+<li>When the owner goes out of scope, the value will be dropped</li>
+</ul>
+<p>In the simplest case, we can define a block with a variable that goes out of scope at the end of the block:</p>
+<pre>fn main()<br/>{<br/>   //variable x has not yet been defined<br/>   {<br/>      let x = 5;<br/>      //variable x is now defined and owned by this context<br/><br/>      //variable x is going out of scope and will be dropped here<br/>   }<br/>   //variable x has gone out of scope and is no longer defined<br/>}</pre>
+<p>We have brushed against the first two rules of ownership and lifetimes in previous chapters. However, this is the first chapter in which we have needed to work with the third rule—drop.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

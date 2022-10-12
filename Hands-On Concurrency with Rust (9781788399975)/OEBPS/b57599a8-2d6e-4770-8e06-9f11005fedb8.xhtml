@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Calling C functions</h1>
+                </header>
+            
+            <article>
+                
+<p>Now that we can create Rust structs with C-bit layout, we can start passing that memory down into C. It's important to understand, this is an inherently unsafe activity. The C code might fiddle with memory in a way that breaks Rust's invariants and the only way we can be sure this isn't true is auditing the C code ahead of time. This is the same with fuzzing, which we'll do too. How do we link with <kbd>libmars.a</kbd>? A small <kbd>extern</kbd> block will do it, in <kbd>src/mars.rs</kbd>:</p>
+<pre>#[link(name = "mars")]
+extern "C" {
+    fn sim_alloc_bufs(mars: *mut Mars) -&gt; isize;
+    fn sim_free_bufs(mars: *mut Mars) -&gt; ();
+    fn sim_clear_core(mars: *mut Mars) -&gt; ();
+    fn sim_load_warrior(mars: *mut Mars, pos: u32, <br/>                        code: *const Instruction, <br/>                        len: u16) -&gt; isize;
+    fn sim_mw(mars: *mut Mars, war_pos_tab: *const u16, <br/>              death_tab: *mut u32) -&gt; isize;
+}</pre>
+<p>With <kbd>#[link(name = "mars")]</kbd>, we're instructing the compiler to link to the <kbd>libmars.a</kbd> produced in the build process. If we were linking to a system library, the approach would be the same. The Rust Nomicon section on FFI—referenced in the <em>Further reading</em> section at the end of this chapter—links to libsnappy, for example. The extern block informs the compiler that these functions will need to be called with the C ABI, not Rust's. Let's compare <kbd>sim_load_warrior</kbd> side by side. Here is the C version:</p>
+<pre>int sim_load_warrior(mars_t* mars, uint32_t pos, <br/>                     const insn_t* const code, uint16_t len);</pre>
+<p>Here is the Rust version:</p>
+<pre>fn sim_load_warrior(mars: *mut Mars, pos: u32, <br/>                    code: *const Instruction, <br/>                    len: u16) -&gt; isize;</pre>
+<p>These are similar. C doesn't have the same mutability concept as Rust, though there are const annotations for code that Rust picks up for free. We've enhanced that by making all of Instruction's query functions take <kbd>&amp;self</kbd>. Rule of thumb—unless the C is const-correct, you should probably assume the Rust needs a <kbd>*mut</kbd>. This isn't always true, but it saves a fair deal of headache. Now, on that notion, the careful reader may note that as I ported exhaust's code into feruscore, I adapted it to use <kbd>stdint.h</kbd>. In the unaltered code, <kbd>pos</kbd> has the unsigned int type or <kbd>usize</kbd>. The simulator C code assumes <kbd>pos</kbd> will be at least 32 bits wide, hence the explicit conversation to a 32-bit integer. This wasn't entirely necessary, but it's good form to used fixed-width types as they minimize surprises moving between CPU architectures.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

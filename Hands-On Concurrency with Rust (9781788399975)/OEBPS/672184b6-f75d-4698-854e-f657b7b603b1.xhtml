@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Creating C-structs from Rust</h1>
+                </header>
+            
+            <article>
+                
+<p>Now, how do we call these functions from Rust? Moreover, how do we create instances of <kbd>mars_t</kbd> or <kbd>insn_t</kbd>? Well, recall back in <a href="605ce307-29ed-4b5a-961e-8d327467b84f.xhtml">Chapter 03</a>, <em>The Rust Memory Model – Ownership, References, and Manipulation</em>, that Rust allows control over memory layout in structures. Specifically, all Rust structures are implicitly <kbd>repr(Rust)</kbd>, types aligned to byte boundaries with structure fields being reordered as the compiler sees fit, among other details. We also noted the existence of a <kbd>repr(C)</kbd> for structures, in which Rust would lay out a structure's memory representation in the same manner as C. That knowledge now comes to bear.</p>
+<p>What we will do is this. First, we'll compile our C code as a library and rig it to link into feruscore. That's done by placing a <kbd>build.rs</kbd> at the root of the project and using the cc (<a href="https://crates.io/crates/cc">https://crates.io/crates/cc</a>) crate to produce a static archive, like so:</p>
+<pre>extern crate cc;
+
+fn main() {
+    cc::Build::new()
+        .file("c_src/sim.c")
+        .flag("-std=c11")
+        .flag("-O3")
+        .flag("-Wall")
+        .flag("-Werror")
+        .flag("-Wunused")
+        .flag("-Wpedantic")
+        .flag("-Wunreachable-code")
+        .compile("mars");
+}</pre>
+<p>Cargo will produce <kbd>libmars.a</kbd> into <kbd>target/</kbd> when the project is built. But, how do we make <kbd>insn_t</kbd>? We copy the representation. The C side of this project defines <kbd>insn_t</kbd> like so:</p>
+<pre>typedef struct insn_st {
+  uint16_t a, b;
+  uint16_t in;
+} insn_t;</pre>
+<p><kbd>uint16_t a</kbd> and <kbd>uint16_t b</kbd> are the <em>a</em>-field and <em>b</em>-field of the instruction,  where <kbd>uint16_t</kbd> is a compressed representation of the <kbd>OpCode</kbd>, <kbd>Modifier</kbd>, and <kbd>Modes</kbd> in an instruction. The Rust side of the project defines an instruction like so:</p>
+<pre>#[derive(PartialEq, Eq, Copy, Clone, Debug, Default)]
+#[repr(C)]
+pub struct Instruction {
+    a: u16,
+    b: u16,
+    ins: u16,
+}</pre>
+<p>This is the exact layout of the <kbd>inst_t</kbd> C. The reader will note that this is quite different from the definition of <kbd>Instruction</kbd> we saw in the previous chapter. Also, note that the field names do not matter, only the bit representation. The C structure calls the last field of the struct in, but this is a reserved keyword in Rust, so it is <kbd>ins</kbd> in the Rust side. Now, what is going on with that <kbd>ins</kbd> field? Recall that the <kbd>Mode</kbd> enumeration only had five fields. All we really need to encode a mode is three bits, converting the enumeration into numeric representation. A similar idea holds for the other components of an instruction. The layout of the <kbd>ins</kbd> field is:</p>
+<pre>bit         15 14 13 12 11 10 09 08 07 06 05 04 03 02 01 00
+field       |-flags-| |–-opcode–-| |–mod-| |b-mode| |a-mode|</pre>
+<p>The <kbd>Mode</kbd> for a-field is encoded in bits 0, 1 and, 2. The <kbd>Mode</kbd> for b-field is in bits 3, 4, and 5, and so on for the other instruction components. The last two bits, 14 and 15, encode a <kbd>flag</kbd> that is almost always zero. A non-zero flag is an indicator to the simulator that the non-zero instruction is the <kbd>START</kbd> instruction—the 0<sup>th</sup> instruction of a warrior is not necessarily the one executed first by MARS. This compact structure requires a little more work on the part of the programmer to support it. For instance, the <kbd>Instruction</kbd> can no longer be created directly by the programmer but has to be constructed through a builder. The <kbd>InstructionBuilder</kbd>, defined in <kbd>src/instruction.rs</kbd>, is:</p>
+<pre>pub struct InstructionBuilder {
+    core_size: u16,
+    ins: u16,
+    a: u16,
+    b: u16,
+}</pre>
+<p>As always, we have to keep track of the core size. Building the builder is straightforward enough, by this point:</p>
+<pre>impl InstructionBuilder {
+    pub fn new(core_size: u16) -&gt; Self {
+        InstructionBuilder {
+            core_size,
+            ins: 0_u16,
+            a: 0,
+            b: 0,
+        }
+    }</pre>
+<p>Writing a field into the instruction requires a little bit manipulation. Here's writing a <kbd>Modifier</kbd>:</p>
+<pre>    pub fn modifier(mut self, modifier: Modifier) -&gt; Self {
+        let modifier_no = modifier as u16;
+        self.ins &amp;= !MODIFIER_MASK;
+        self.ins |= modifier_no &lt;&lt; MODIFIER_MASK.trailing_zeros();
+        self
+    }</pre>
+<p>The constant <kbd>MODIFIER_MASK</kbd> is defined in a block at the top of the source file with the other field masks:</p>
+<pre>const AMODE_MASK: u16 = 0b0000_0000_0000_0111;
+const BMODE_MASK: u16 = 0b0000_0000_0011_1000;
+const MODIFIER_MASK: u16 = 0b0000_0001_1100_0000;
+const OP_CODE_MASK: u16 = 0b0011_1110_0000_0000;
+const FLAG_MASK: u16 = 0b1100_0000_0000_0000;</pre>
+<p>Observe that the relevant bits in the masks are 1 bits. In <kbd>InstructionBuilder::modifier</kbd> we <kbd>&amp;=</kbd> the negation of the mask, which boolean-ands <kbd>ins</kbd> with the negation of the modifier mask, zero-ing the <kbd>Modifier</kbd> that was previously there. That done, the <kbd>Modifier</kbd> encoded as u16 is shifted left and boolean-or'ed into place. The <kbd>trailing_zeros()</kbd> function returns the total number of contiguous zeros in the lower end of a word, the exact number we need to shift by for each mask. Those readers that have done bit-manipulation work in other languages may find this to be very clean. I think so as well. Rust's explicit binary form for integers makes writing, and later, understanding, masks a breeze. Common bit-manipulation operations and queries are implemented on every basic integer type. Very useful.</p>
+<p>The <kbd>OpCode</kbd> layout has changed somewhat. We don't <kbd>repr(C)</kbd> the enum, as the bit representation does not matter. What does matter, since this is enumeration is field-less, is which integer the variants cast to. First in the source maps to 0, the second to 1, and so forth. The C code has op-codes defined like so in <kbd>c_src/insn.h</kbd>:</p>
+<pre>enum ex_op {
+    EX_DAT,             /* must be 0 */
+    EX_SPL,
+    EX_MOV,
+    EX_DJN,
+    EX_ADD,
+    EX_JMZ,
+    EX_SUB,
+    EX_SEQ,
+    EX_SNE,
+    EX_SLT,
+    EX_JMN,
+    EX_JMP,
+    EX_NOP,
+    EX_MUL,
+    EX_MODM,
+    EX_DIV,             /* 16 */
+};</pre>
+<p>The Rust version is as follows:</p>
+<pre>#[derive(PartialEq, Eq, Copy, Clone, Debug, Rand)]
+pub enum OpCode {
+    Dat,  // 0
+    Spl,  // 1
+    Mov,  // 2
+    Djn,  // 3
+    Add,  // 4
+    Jmz,  // 5
+    Sub,  // 6
+    Seq,  // 7
+    Sne,  // 8
+    Slt,  // 9
+    Jmn,  // 10
+    Jmp,  // 11
+    Nop,  // 12
+    Mul,  // 13
+    Modm, // 14
+    Div,  // 15
+}</pre>
+<p>The other instruction components have been shuffled around just a little bit to cope with the changes required by the C code. The good news is, this representation is more compact than the one from the previous chapter and should probably be maintained, even if all the C code were ported into Rust, a topic we'll get into later. But—and I'll spare you the full definition of <kbd>InstructionBuilder</kbd> because once you've seen one set-function you've seen them all—all this bit fiddling does make the implementation harder to see, and to correct at a glance. The instruction module now has QuickCheck tests to verify that all the fields get set correctly, meaning they can be ready right back out again no matter how many times fields are set and reset. You are encouraged to examine the QuickCheck tests yourself.</p>
+<p>The high-level idea is this—a blank <kbd>Instruction</kbd> is made and a sequence of change orders is run over that Instruction—momentarily shifted into an <kbd>InstructionBuilder</kbd> to allow for modification—and then the changed field is read and confirmed to have become the value it was changed to. The technique is inline with what we've seen before elsewhere.</p>
+<p>Now, what about that <kbd>mars_t</kbd>? The C definition, in <kbd>c_src/sim.h</kbd>, is:</p>
+<pre>typedef struct mars_st {<br/>  uint32_t nWarriors;<br/><br/>  uint32_t cycles;<br/>  uint16_t coresize;<br/>  uint32_t processes;<br/><br/>  uint16_t maxWarriorLength;<br/><br/>  w_t* warTab;<br/>  insn_t* coreMem;<br/>  insn_t** queueMem;<br/>} mars_t;</pre>
+<p>The <kbd>nWarriors</kbd> field sets how many warriors will be in the simulation, which for feruscore is always two cycles controls the number of cycles a round will take before ending if both warriors are still alive, processes the maximum number of processes available, and <kbd>maxWarriorLength</kbd> shows the maximum number of instructions a warrior may be. All of these are more or less familiar from the last chapter, just in a new programming language and with different names. The final three fields are pointers to arrays and are effectively private to the simulation function. These are allocated and deallocated by <kbd>sim_alloc_bufs</kbd> and <kbd>sim_free_bufs</kbd>, respectively. The Rust side of this structure looks like so, from <kbd>src/mars.rs</kbd>:</p>
+<pre>#[repr(C)]
+pub struct Mars {
+    n_warriors: u32,
+    cycles: u32,
+    core_size: u16,
+    processes: u32,
+    max_warrior_length: u16,
+    war_tab: *mut WarTable,
+    core_mem: *mut Instruction,
+    queue_mem: *const *mut Instruction,
+}</pre>
+<p>The only new type here is <kbd>WarTable</kbd>. Even though our code will never explicitly manipulate the warrior table, we do still have to be bit-compatible with C. The definition of <kbd>WarTable</kbd> is:</p>
+<pre>#[repr(C)]
+struct WarTable {
+    tail: *mut *mut Instruction,
+    head: *mut *mut Instruction,
+    nprocs: u32,
+    succ: *mut WarTable,
+    pred: *mut WarTable,
+    id: u32,
+}</pre>
+<p>We could have maybe got away with just making these private fields in <kbd>Mars</kbd> pointers to void in <kbd>mars_st</kbd>, but that would have reduced type information on the C side of the project and this approach might hamper future porting efforts. With the type explicit on the Rust side of the project, it's much easier to consider rewriting the C functions in Rust.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

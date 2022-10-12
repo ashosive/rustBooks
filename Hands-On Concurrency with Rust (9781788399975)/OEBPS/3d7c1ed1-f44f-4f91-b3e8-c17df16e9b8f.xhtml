@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Smallcheck iteration</h1>
+                </header>
+            
+            <article>
+                
+<p>In <a href="8c61da2f-08c8-40be-89d4-d8afa8510850.xhtml" target="_blank">Chapters 2</a>, <em>Sequential Rust Performance and Testing</em>, <a href="e2de1ba7-c291-494e-82da-37fee7323c1d.xhtml" target="_blank"><span>Chapters </span>5</a>,<em> Locks<span> </span>–<span> </span>Mutex, Condvar, Barriers and RWLock</em>, and <a href="d42acb0b-a05e-4068-894f-81365d147bf4.xhtml" target="_blank"><span>Chapters </span>6</a>, <em>Atomics<span> </span>–<span> </span>the Primitives of Synchronization</em>, we've discussed the QuickCheck testing methodology, a structured way of inserting random, type-driven input into a function to search function property failures. Inspired by the work done by Claessen and Hughes in their QuickCheck paper, Runciman, Naylor and Lindblad observed that, in their experience, most failures were on small input and put forward the observation that a library that tested from small output to big first might find failures faster than purely random methods. Their hypothesis was more or less correct, for a certain domain of function, but the approach suffers from duplication of effort, resolved somewhat by the authors in the same paper with Lazy Smallcheck. We won't go into further detail here, but the paper is included in the <em>Further reading</em> section of this chapter and the reader is encouraged to check out the paper.</p>
+<p>Anyway, producing all values of a <em>small</em> to <em>big</em> type sounds like iteration. In fact, it is. Let's walk through producing iterators for signed and unsigned integers. The project's <kbd>Cargo.toml</kbd> is minimal:</p>
+<pre>[package]
+name = "smalliters"
+version = "0.1.0"
+authors = ["Brian L. Troutwine &lt;brian@troutwine.us&gt;"]
+
+[dependencies]</pre>
+<p>No dependencies, just the default that <kbd>cargo new</kbd> lays down. The project has only one file, <kbd>src/lib.rs</kbd>. The rest of our discussion will take place in the context of this file. First, the preamble:</p>
+<pre>use std::iter::Iterator;
+use std::mem;</pre>
+<p>We pull in <kbd>Iterator</kbd>, as you might expect, and then <kbd>std::mem</kbd>, which we've seen throughout this book. Nothing unusual here. What is unusual for this book is this:</p>
+<pre>macro_rules! unsized_iter {
+    ($name:ident, $int:ty, $max:expr) =&gt; {</pre>
+<p>A macro! We've been using macros throughout the entire book but have not written one yet. Macros in Rust are kind of a dark art and a touch on the fidgety side to get working. Our ambitions here are simple. The iterators for the Rust integer types are mostly the same, varying by signed/unsigned and total bit size of the type, hence <kbd>std::mem</kbd>. <kbd>($name:ident, $int:ty, and $max:expr)</kbd> declares three macro variables: <kbd>$name</kbd>, which is an identifier, <kbd>$int</kbd>, which is a type, and <kbd>$max</kbd>, which is an expression. Here is how we'll use the <kbd>unsigned_iter!</kbd> macro:</p>
+<pre>unsized_iter!(SmallU8, u8, u8::max_value());
+unsized_iter!(SmallU16, u16, u16::max_value());
+unsized_iter!(SmallU32, u32, u32::max_value());
+unsized_iter!(SmallU64, u64, u64::max_value());
+unsized_iter!(SmallUsize, usize, usize::max_value());</pre>
+<p>That's an identifier, followed by a type, followed by an expression. OK, now back to the macro definition:</p>
+<pre>macro_rules! unsized_iter {
+    ($name:ident, $int:ty, $max:expr) =&gt; {
+        #[derive(Default)]
+        pub struct $name {
+            cur: $int,
+            done: bool,
+        }</pre>
+<p>The first step in defining a small iterator for integer types is to produce some struct to store whatever data the Iterator implementation needs. We require two things, the current integer and a boolean flag to tell us when we're done iterating. When the macros expand, there will be structs called <kbd>SmallU8</kbd>, <kbd>SmallU16</kbd>, and so on in the expanded source code, like this:</p>
+<pre>#[derive(Default)]
+pub struct SmallU8 {
+    cur: u8,
+    done: bool,
+}</pre>
+<p>The <kbd>Iterator</kbd> implementation for unsigned types is straightforward: keep incrementing until you hit the maximum value for the type:</p>
+<pre>        impl Iterator for $name {
+            type Item = $int;
+
+            fn next(&amp;mut self) -&gt; Option&lt;$int&gt; {
+                if self.done {
+                    return None;
+                }
+                let old = self.cur;
+                if old == $max {
+                    self.done = true;
+                }
+                self.cur = self.cur.saturating_add(1);
+                return Some(old);
+            }</pre>
+<p>Technically, <kbd>saturating_add</kbd> is not needed and could be replaced with <kbd>+=</kbd>, but it's helpful to have to avoid wrap-around bugs. Finally, we also provide an <kbd>Iterator::size_hint</kbd> implementation:</p>
+<pre>            fn size_hint(&amp;self) -&gt; (usize, Option&lt;usize&gt;) {
+                let size = mem::size_of::&lt;$int&gt;() * 8;
+                let total = 2_usize.pow(size as u32);
+                let remaining = total - (self.cur as usize);
+                (remaining, Some(remaining))
+            }
+        }
+    };
+}</pre>
+<p>This function is an optional implementation, but it is neighborly to provide one. The return tuple estimates how many items remain in the iteration, the first element being a lower estimate and the second being an optional upper bound. We happen to know exactly how many elements remain to be iterated because our domain is finite. Implementing <kbd>Iterator::size_hint</kbd> will help out code with pre-allocating buffers, which includes other functions on <kbd>Iterator</kbd>.</p>
+<p>The sized integer types have a similar implementation. Their macro, <kbd>sized_iter!</kbd>, in use:</p>
+<pre>sized_iter!(SmallI8, i8, i8::min_value());
+sized_iter!(SmallI16, i16, i16::min_value());
+sized_iter!(SmallI32, i32, i32::min_value());
+sized_iter!(SmallI64, i64, i64::min_value());
+sized_iter!(SmallIsize, isize, isize::min_value());</pre>
+<p>The macro itself starts out in the same way as its unsigned counterpart:</p>
+<pre>macro_rules! sized_iter {
+    ($name:ident, $int:ty, $min:expr) =&gt; {
+        #[derive(Default)]
+        pub struct $name {
+            cur: $int,
+            done: bool,
+        }
+
+        impl Iterator for $name {
+            type Item = $int;
+
+            fn next(&amp;mut self) -&gt; Option&lt;$int&gt; {
+                if self.done {
+                    return None;
+                }</pre>
+<p>Only the inner part of <kbd>next</kbd> is different:</p>
+<pre>                let old = self.cur;
+                if self.cur == 0 {
+                    self.cur = -1;
+                } else if self.cur.is_negative() &amp;&amp; self.cur == $min {
+                    self.done = true;
+                } else if self.cur.is_positive() {
+                    self.cur *= -1;
+                    self.cur -= 1;
+                } else if self.cur.is_negative() {
+                    self.cur *= -1;
+                }
+                return Some(old);
+            }</pre>
+<p>This warrants some explanation. We take inspiration from the SmallCheck paper and iterate values out like so: 0, -1, 1, -2, 2, and so on. The implementation could follow the same method as the unsigned variant, proceeding up from <kbd>min_value()</kbd> to <kbd>max_value()</kbd>, but this would not be small to big, at least in terms of byte representation. Finally, <kbd>size_hint</kbd>:</p>
+<pre>            fn size_hint(&amp;self) -&gt; (usize, Option&lt;usize&gt;) {
+                let size = mem::size_of::&lt;$int&gt;() * 8;
+                let total = 2_usize.pow(size as u32);
+                let remaining = total - ((self.cur.abs() * 2) as usize);
+                (remaining, Some(remaining))
+            }
+        }
+    };
+}</pre>
+<p>If these implementations work correctly, the <kbd>Iterator::count</kbd> for our new iterators ought to be equal to the two-power of the bit size of the type, <kbd>count</kbd> being a function that keeps a tally of elements iterated out. The tests also rely on macros to cut down on duplication. First, the signed variants:</p>
+<pre>#[cfg(test)]
+mod tests {
+    use super::*;
+
+    macro_rules! sized_iter_test {
+        ($test_name:ident, $iter_name:ident, $int:ty) =&gt; {
+            #[test]
+            fn $test_name() {
+                let i = $iter_name::default();
+                let size = mem::size_of::&lt;$int&gt;() as u32;
+                assert_eq!(i.count(), 2_usize.pow(size * 8));
+            }
+        };
+    }
+
+    sized_iter_test!(i8_count_correct, SmallI8, i8);
+    sized_iter_test!(i16_count_correct, SmallI16, i16);
+    sized_iter_test!(i32_count_correct, SmallI32, i32);
+    // NOTE: These take forever. Uncomment if you have time to burn.
+    // sized_iter_test!(i64_count_correct, SmallI64, i64);
+    // sized_iter_test!(isize_count_correct, SmallIsize, isize);</pre>
+<p>And now the unsigned variants:</p>
+<pre>    macro_rules! unsized_iter_test {
+        ($test_name:ident, $iter_name:ident, $int:ty) =&gt; {
+            #[test]
+            fn $test_name() {
+                let i = $iter_name::default();
+                let size = mem::size_of::&lt;$int&gt;() as u32;
+                assert_eq!(i.count(), 2_usize.pow(size * 8));
+            }
+        };
+    }
+
+    unsized_iter_test!(u8_count_correct, SmallU8, u8);
+    unsized_iter_test!(u16_count_correct, SmallU16, u16);
+    unsized_iter_test!(u32_count_correct, SmallU32, u32);
+    // NOTE: These take forever. Uncomment if you have time to burn.
+    // unsized_iter_test!(u64_count_correct, SmallU64, u64);
+    // unsized_iter_test!(usize_count_correct, SmallUsize, usize);
+}</pre>
+<p>If you run the tests, you should find that they pass. It'll take a minute for the larger types. But, that's iterators. All they are is some kind of base type—in this case, the built-in integers—plus a state-tracking type—our <kbd>Small*</kbd> structs—and an implementation of <kbd>Iterator</kbd> for that state-tracking type. Remarkably useful, and the optimizer is reasonably good at turning iterator chains into loops and getting better at it all the time.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

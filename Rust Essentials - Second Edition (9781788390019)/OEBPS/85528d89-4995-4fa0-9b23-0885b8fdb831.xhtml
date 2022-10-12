@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style00.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style01.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Getting input from the console</h1>
+                </header>
+            
+            <article>
+                
+<p>Suppose we want to capture the nickname of our <kbd>player</kbd>(s) before starting the game, how would we do that? Input or output functionality is handled by the module <kbd>io</kbd> in the crate <kbd>std</kbd>. It has a function <kbd>stdin()</kbd> to read input from the console. This function returns an object of type <kbd>Stdin</kbd>, which is a handle to the input stream. The object <kbd>Stdin</kbd> has a method <kbd>read_line(buf)</kbd> to read a full line of input, that ends with a new line character (that is, when the user hits <em><span class="KeyPACKT">Enter</span></em>). This input is read into a <kbd>String</kbd> buffer <kbd>buf</kbd>. A method is a name for a function defined for a certain type, and it is called using dot notation, like <kbd>object.method</kbd> (see <span class="ChapterrefPACKT"><a href="2535f67f-e1a7-4ef7-af15-dcebffd38149.xhtml">Chapter 6</a>,</span> ;<em>Using Traits and OOP in Rust</em>).</p>
+<p>So our code will look like this:</p>
+<pre>let mut buf = String::new(); 
+io::stdin().read_line(&amp;mut buf); </pre>
+<p>But that is not good enough for Rust, it gives us the following warning:</p>
+<pre>    <strong>warning: unused result which must be used</strong>  </pre>
+<p>Rust is foremost a safe language and we must be ready to cope with everything than can occur. Reading a line might work if an input value is given. But it can also fail, for example, if this code was running in a background job on a machine, so that no console is available to get input from.</p>
+<p>How to cope with that? Well, the function <kbd>read_line()</kbd> returns a value <kbd>Result</kbd>, that can either be a real value (an <kbd>Ok</kbd>), when everything works fine, or an error value (an <kbd>Err</kbd>), when there is a problem. To cope with a possible error, we need an <kbd>ok()</kbd> and an <kbd>expect()</kbd> function. The function <kbd>ok()</kbd> converts the value <kbd>Result</kbd> into a value <kbd>Option</kbd> (which contains how many bytes were read), the function <kbd>expect()</kbd> gives that value, or shows its message when an error occurs. In Rust a program panics when an error occurs that cannot be recovered from, and the string argument from the function <kbd>expect()</kbd> is displayed to tell us where it occurs.</p>
+<p>This is written in Rust in a chained form (a bit unusual the first time you see it) as follows:</p>
+<pre>    <strong>io::stdin().read_line(&amp;mut buf).ok().expect("Error!");</strong>  </pre>
+<p>Rust allows us to write these successive calls on separate lines, which for most people clarifies the code a lot:</p>
+<pre>// from Chapter 4/code/input.rs 
+use std::io; 
+ 
+fn main() { 
+   println!("What's your name, noble warrior?"); 
+   let mut buf = String::new(); 
+   io::stdin().read_line(&amp;mut buf) 
+              .ok() 
+              .expect("Failed to read line"); 
+   println!("{}, that's a mighty name indeed!", buf); 
+} </pre>
+<p>When running this code from the command line we get the following conversation:</p>
+<pre>    <strong>What's your name, noble warrior?</strong>
+    <strong>Riddick</strong>
+    <strong>Riddick</strong>
+    <strong>that's a mighty name indeed!</strong>  </pre>
+<p>Can you guess why <kbd>that's a mighty name indeed!</kbd> appears on a new line? Indeed, the input <kbd>buf</kbd> still contains a newline character <kbd>\n</kbd>! Luckily we have a method <kbd>trim()</kbd> to remove trailing and leading whitespace from a string. If we insert the line:</p>
+<pre>let name = buf.trim(); 
+println!("{}, that's a mighty name indeed!", name); </pre>
+<p>We now get a correct output, like the following:</p>
+<pre>    <strong>Riddick, that's a mighty name indeed!</strong> </pre>
+<p>In case the input does not succeed, our program crashes with the following output:</p>
+<pre>    <strong>What's your name, noble warrior?</strong>
+    <strong>thread '&lt;main&gt;' panicked at 'Failed to read line'</strong>  </pre>
+<p>Instead of using this chained <kbd>.ok().expect()</kbd> form, you can also use a shorter form with a function <kbd>unwrap()</kbd> like this:</p>
+<pre>io::stdin().read_line(&amp;mut buf).unwrap(); </pre>
+<p>This unwraps a value <kbd>Result</kbd>, yielding the content of a value <kbd>Ok</kbd> (or of a value <kbd>Some</kbd> in the case of a value <kbd>Option</kbd>), but panics if the value is an <kbd>Err</kbd> (or a <kbd>None</kbd> for <kbd>Option</kbd>), with a panic message provided by the <kbd>Err</kbd>'s value.</p>
+<p>Another alternative is to test with the function <kbd>is_ok()</kbd>, which returns <kbd>true</kbd> if the result is <kbd>Ok</kbd>:</p>
+<pre>if io::stdin().read_line(&amp;mut buf).is_ok() { 
+    let name = buf.trim(); 
+    println!("{}, that's a mighty name indeed!", name); 
+} 
+else { 
+    println!("Failed to read line!"); 
+} </pre>
+<p>How would we read in a positive integer number from the console?</p>
+<pre>// from Chapter 4/code/pattern_match.rs 
+let mut buf = String::new(); 
+io::stdin().read_line(&amp;mut buf) 
+              .ok() 
+              .expect("Failed to read number"); 
+   let input_num: Result&lt;u32, _&gt; = buf.trim().parse(); </pre>
+<p>We read the number in from the console in a <kbd>String</kbd> buffer <kbd>buf</kbd> and function <kbd>trim()</kbd> the value; the function <kbd>expect()</kbd> will show us the message if something goes wrong. But what we have read in this is still a <kbd>String</kbd>, we must convert that <kbd>String</kbd> to a number.</p>
+<p>The method <kbd>parse()</kbd> tries to convert the input to an unsigned 32-bit integer in this case. What it returns is in fact again a value <kbd>Result</kbd>, this can either be an integer (<kbd>Ok&lt;u32&gt;</kbd>), or an error (<kbd>Err</kbd>) when the conversion fails.</p>
+<p>We will encounter more examples of <kbd>Option</kbd> and <kbd>Result</kbd> in the section <em>Generics</em> in <a href="680a0457-8a2d-4196-9ef4-ddc2476dd715.xhtml"><span class="ChapterrefPACKT">Chapter 5</span></a>, <em>Higher Order Functions and Error-Handling</em>.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

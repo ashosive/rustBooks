@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Smaller is better</h1>
+                </header>
+            
+            <article>
+                
+<p>There is an argument that the smaller you make the parent structure, the easier it becomes to manage. This is true, but let's look at it in a different way. As it stands, we have a couple of what can be described as objects in their own right within that structure. Here, an object is something that will have its own properties. Let's look at the window.</p>
+<p>A window has a size—width and height; it has a type—sash, for instance; it has blinds or curtains, and the blinds/curtains have a color. The window may also have a lock. It may also be a single or double window and the opening may be at the top or side.</p>
+<p>There is also no reason why there should only be a single window. If there is more than one window, then we will need to define our window multiple times. Therefore, it makes more sense to define our window and reference that back as a vector in the main structure.</p>
+<p>Before that, though, we said the window will have a size (width, length). Each room will have a size and, probably, so will many other things within the house; therefore, we will remove the size and have that as its own <kbd>struct</kbd>.</p>
+<p>Therefore, we have this following <kbd>struct</kbd> for the window:</p>
+<pre>struct Area 
+{ 
+    width: f32, 
+    length: f32, 
+} 
+ 
+struct Window 
+{ 
+    window_area: Area, 
+    window_type: String, 
+    has_blinds: bool, 
+    curtain_color: String, 
+    has_lock: bool, 
+    top_open: bool, 
+    single_window: bool, 
+} </pre>
+<p>This, back in the parent <kbd>struct</kbd>, will transform into the following:</p>
+<pre>struct Room 
+{  
+    is_upstairs: bool, 
+    number_of_doors: i32, 
+    window: Vec&lt;Window&gt; ,
+    wood_or_carpet: bool, 
+    carpet_color: String, 
+    room_name: String, 
+    has_wardrobe: bool, 
+    room_area: Area, 
+} </pre>
+<p>We can carry on doing this for anything else in the room, including a <kbd>struct</kbd> variable for furniture, as well as possibly reducing the size for carpet—what you do with it is up to you. For now, we'll keep it at this level.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

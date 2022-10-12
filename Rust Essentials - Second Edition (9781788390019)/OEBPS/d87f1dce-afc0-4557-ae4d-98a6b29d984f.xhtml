@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style00.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style01.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Error-handling with try!</h1>
+                </header>
+            
+            <article>
+                
+<p>In the same way as we did for reading a file, we could also use the <kbd>try!</kbd> macro when writing to a file, like here:</p>
+<pre>// code from Chapter 11/code/write_file_try.rs: 
+use std::path::Path; 
+use std::fs::File; 
+use std::io::prelude::*; 
+use std::error::Error; 
+use std::io; 
+ 
+struct Info { 
+    name: String, 
+    age: i32, 
+    rating: i32 
+} 
+ 
+impl Info { 
+    fn as_bytes(&amp;self) -&gt; &amp;[u8] { 
+        self.name.as_bytes() 
+    } 
+ 
+    fn format(&amp;self) -&gt; String { 
+        format!("{};{};{}\n", self.name, self.age, self.rating)  
+    } 
+} 
+ 
+fn main() { 
+    let path = Path::new("info.txt"); 
+    let display = path.display(); 
+ 
+    let file = match write_file(&amp;path) { 
+        Err(why) =&gt; panic!("couldn't write info to file {}: {}", 
+                           display, 
+                           Error::description(&amp;why)), 
+        Ok(file) =&gt; file, 
+    }; 
+} 
+ 
+<strong>fn write_file(path: &amp;Path) -&gt; Result&lt;File, io::Error&gt; {</strong><strong>    let mut file = try!(File::create(path));</strong> 
+    let info1 = Info { name:"Barak".to_string(), age: 56, rating: 8 }; 
+    let info2 = Info { name:"Vladimir".to_string(), age: 55, rating: 6 }; 
+<strong>    try!(file.write(info1.as_bytes()));</strong><strong>    <br/>    try!(file.write(b"\r\n"));</strong><strong>    <br/>    try!(file.write(info2.as_bytes()));</strong> 
+    Ok(file) 
+} </pre>
+<p>To open a file in other modes, use the <kbd>OpenOptions</kbd> struct from <kbd>std::fs</kbd>.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

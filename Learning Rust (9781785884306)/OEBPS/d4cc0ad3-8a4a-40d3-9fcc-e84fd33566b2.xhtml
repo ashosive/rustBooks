@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style00.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style01.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">An owned pointer example</h1>
+                </header>
+            
+            <article>
+                
+<p>Consider the following piece of code:</p>
+<pre>    struct MyRectangle 
+    { 
+        x: i32, 
+        y: i32, 
+        length: i32, 
+        breadth: i32, 
+    } 
+ 
+    fn allocate_rect() 
+    { 
+        let x: Box&lt;MyRectangle&gt; = Box::new (MyRectangle {x: 5, y: 5, length: 25, breadth:15}); 
+    } </pre>
+<p>The <kbd>x</kbd> variable is the single owner of the <kbd>my_rectangle</kbd> object on the heap. As soon as <kbd>allocate_rect()</kbd> is complete, the memory on the heap allocated to <kbd>x</kbd> is freed, since the last owner is gone.</p>
+<p>The single owner is enforced by the compiler. The following example demonstrates transferring ownership. Once the transfer is complete, the original cannot be used again:</p>
+<pre>fn swap_around() 
+{ 
+    let my_rect: Box&lt;MyRectangle&gt; = Box::new(MyRectangle{x:5, y:5, length:25, breadth:15}); 
+    let dup_rect = my_rect; // dup_rect is now the owner 
+    println!("{}", dup_rect.x); 
+    println!("{}", my_rect.x); // won't work - use of moved value 
+} </pre>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

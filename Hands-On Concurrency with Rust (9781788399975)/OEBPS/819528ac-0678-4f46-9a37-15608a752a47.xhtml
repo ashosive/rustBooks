@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style00.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style01.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Should I use unsafe?</h1>
+                </header>
+            
+            <article>
+                
+<p>It's not uncommon to hear some variant of the following position—<em>I won't use any library that has an</em> <kbd>unsafe</kbd> <em>block in it</em>. The reasoning behind this position is that <kbd>unsafe</kbd>, well, advertises that the crate is potentially unsafe and might crash your otherwise carefully crafted program. That's true—kind of. As we've seen in this book, it's entirely possible to put together a project using <kbd>unsafe</kbd> that is totally safe at runtime. We've also seen that it's entirely possible to put together a project without <kbd>unsafe</kbd> blocks that flame out at runtime. The existence or absence of <kbd>unsafe</kbd> blocks shouldn't reduce the original programmer's responsibilities for due diligence—writing tests, probing the implementation with fuzzing tools, and so on. Moreover, the existence or absence of <kbd>unsafe</kbd> blocks does not relieve the user of a crate from that same responsibility. Any software, at some level, should be considered suspect unless otherwise demonstrated to be safe.</p>
+<p>Go ahead and use the <kbd>unsafe</kbd> keyword. Do so when it's necessary. Keep in mind that the compiler won't be able to help you as much as it normally would—that's all. </p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

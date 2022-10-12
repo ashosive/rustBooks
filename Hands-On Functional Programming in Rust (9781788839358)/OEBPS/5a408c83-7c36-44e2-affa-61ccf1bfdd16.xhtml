@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Inspecting the foreign library tests</h1>
+                </header>
+            
+            <article>
+                
+<p>The previous team seemed very confident in the library subsystem that they developed; however, they found Rust code difficult to work with. The tests make this problem apparent. Two test sets seem to support the notion that the library works as intended, but the Rust components fail in edge cases. It will be your responsibility to pick up the pieces and salvage the project.</p>
+<p>Looking at the library tests in <kbd>src/tests/magic.rs</kbd>, the intended behavior is as follows:</p>
+<ul>
+<li>Override codes are issued to the subsystem through either elevator control panel or from the software directly</li>
+<li>Status information and authorization sessions are accessed through the <kbd>poll</kbd> functions</li>
+<li>Authorization sessions must be freed before others can authorize</li>
+<li>In override mode, privileged commands may be issued, such as:
+<ul>
+<li>Change elevator to manual operation</li>
+<li>Use elevator display panel to communicate</li>
+</ul>
+</li>
+<li>Privileged commands may not be issued without an active session</li>
+</ul>
+<p>All library tests are passing, confirming the correct behavior of the library under the limited conditions tested. It should also be noted that the library is a bit obtuse in how it handles state, events, and sessions. These patterns are common in linked libraries, but to see the pattern, let's look at the resulting code in Rust.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

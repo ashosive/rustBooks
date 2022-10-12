@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Hazard pointers</h1>
+                </header>
+            
+            <article>
+                
+<p>We touched on hazard pointers as a method for safe memory reclamation in the previous chapter. We'll now examine the concept in-depth and in the context of a more or less ready-to-use implementation via the Redox project (<a href="https://crates.io/crates/conc">https://crates.io/crates/conc</a>). We'll be inspecting <kbd>conc</kbd> as a part of its parent project, tfs (<a href="https://github.com/redox-os/tfs">https://github.com/redox-os/tfs</a>), at SHA <kbd>3e7dcdb0c586d0d8bb3f25bfd948d2f418a4ab10</kbd>. Incidentally, if you're unfamiliar with this, Redox is a Rust microkernel-based operating system. The allocator, coreutils, and netutils are all encouraged reading.</p>
+<div class="packt_infobox"><span>The conc crate is not listed in its entirety. You can find the full listing in this book's source repository. </span></div>
+<p>Hazard pointers were introduced by Maged Michael—of Michael and Scott Queue fame—in his 2004 book, <em>Hazard Pointers: Safe Memory Reclamation for Lock-Free Objects</em>. A <em>hazard</em>, in this context, is any pointer that is subject to races or ABA issues in the rendezvous of multiple treads participating in some shared data structure. In the previous section's Treiber stack, the hazard is the head pointer inside of the Stack struct, and in the Michael and Scott queue, it is the head and tail pointers. A hazard pointer associates these hazards with <em>single-writer multireader shared pointers</em>, owned by a single writer thread and read by any other threads participating in the data structure.</p>
+<p>Every participating thread maintains a reference to its own hazard pointers and all other participating threads in addition to private, thread-local lists for the coordination of deallocation. The algorithm description in section 3 of Michael's paper is done at a high level and is difficult to follow with an eye towards producing a concrete implementation. Rather than repeat that here, we will instead examine a specific implementation, <kbd>conc</kbd>. The reader is encouraged to read Michael's paper ahead of the discussion of <kbd>conc</kbd>, but this is not mandatory.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

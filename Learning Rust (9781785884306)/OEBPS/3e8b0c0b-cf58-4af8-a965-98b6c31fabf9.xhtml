@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style00.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style01.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">The Rust borrowing rules</h1>
+                </header>
+            
+            <article>
+                
+<p>There are two rules that must be observed with borrowing, which are as follows:</p>
+<ul>
+<li>What you borrow must not outlive the original</li>
+<li>You can have one of the following types of borrow, but never at the same time:
+<ul>
+<li>One (or more) references of type <kbd>&amp;T</kbd> to a resource</li>
+<li>Only one mutable reference</li>
+</ul>
+</li>
+</ul>
+<p>The first rule makes sense: you can't have the reference outlive where it came from as once where it comes from goes out of scope, it is destroyed and, once destroyed, what are you borrowing exactly?</p>
+<p>The second one requires a bit more thought about why it is as it should be and what it is that Rust is trying to achieve.</p>
+<p>In this case, Rust is ensuring that something known as a <strong>race condition</strong> occurs (if you are used to writing multithreaded applications, you'll already understand these).</p>
+<p>Here, Rust is trying to prevent two references trying to access the same point of memory at the same time. In other words, Rust is trying to prevent a synchronization error.</p>
+<p>With non-mutable references, you can have as many as you'd like, as the references can never be written to. With a mutable reference, Rust prevents the problem by allowing just a single reference to be valid.</p>
+<p>With this in mind, can we use these rules to fix our code from <kbd>mutableref2</kbd> in order to do away with the <kbd>{}</kbd> braces around the mutable reference?</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

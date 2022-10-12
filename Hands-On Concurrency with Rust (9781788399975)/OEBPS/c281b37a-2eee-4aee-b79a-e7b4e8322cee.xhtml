@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style00.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style01.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">The server</h1>
+                </header>
+            
+            <article>
+                
+<p>Let's put together a vulnerable server, then blow it up. Lay out your <kbd>Cargo.toml</kbd> like so:</p>
+<pre>[package]
+name = "overwhelmed_tcp_server"
+version = "0.1.0"
+authors = ["Brian L. Troutwine &lt;brian@troutwine.us&gt;"]
+
+[dependencies]
+clap = "2.31"
+slog = "2.2"
+slog-term = "2.4"
+slog-async = "2.3"
+
+[[bin]]
+name = "server"
+
+[[bin]]
+name = "client"</pre>
+<p>The library slog (<a href="https://crates.io/crates/slog">https://crates.io/crates/slog</a>) is a structured logging library that I highly recommend in production systems. Slog itself is very flexible, being more of a framework for composing a logging system rather than a set thing. Here we'll be logging to terminal, which is what slog-term is for. The <kbd>slog-async</kbd> dependency defers actual writing to the terminal, in our case, to a dedicated thread. This dedication is more important when slog is emitting logs over a network, rather than quickly to terminal. We won't go in-depth on slog in this book but the documentation is comprehensive and I imagine you'll appreciate slog if you aren't already using it. The library clap (<a href="https://crates.io/crates/clap">https://crates.io/crates/clap</a>) is a command-line parsing library, which I also highly recommend for use in production systems. Note, finally, that we produce two binaries in this project, called <kbd>server</kbd> and <kbd>client</kbd>. Let's dig into <kbd>server</kbd> first. As usual, our projects start with a preamble:</p>
+<pre style="padding-left: 30px">#[macro_use]
+extern crate slog;
+extern crate clap;
+extern crate slog_async;
+extern crate slog_term;
+
+use clap::{App, Arg};
+use slog::Drain;
+use std::io::{self, BufRead, BufReader, BufWriter, Write};
+use std::net::{TcpListener, TcpStream};</pre>
+<pre style="padding-left: 30px">use std::sync::atomic::{AtomicUsize, Ordering};
+use std::thread;
+
+static TOTAL_STREAMS: AtomicUsize = AtomicUsize::new(0);</pre>
+<p>By this point in the book, there's nothing surprising here. We import the external libraries we've just discussed as well as a host of standard library material. The networking-related imports are unfamiliar, with regard to the previous content of this book, but we'll go into that briefly below. We finally create a static <kbd>TOTAL_STREAMS</kbd> at the top of the program that the <kbd>server</kbd> will use to track the total number of TCP streams it has connected. The <kbd>main</kbd> function starts off setting up slog:</p>
+<pre>fn main() {
+    let decorator = slog_term::TermDecorator::new().build();
+    let drain = slog_term::CompactFormat::new(decorator).build().fuse();
+    let drain = slog_async::Async::new(drain).build().fuse();
+    let root = slog::Logger::root(drain, o!());</pre>
+<p>The exact details here are left to the reader to discover in slog's documentation. Next, we set up the clap and <kbd>parse</kbd> program arguments:</p>
+<pre>    let matches = App::new("server")
+        .arg(
+            Arg::with_name("host")
+                .long("host")
+                .value_name("HOST")
+                .help("Sets which hostname to listen on")
+                .takes_value(true),
+        )
+        .arg(
+            Arg::with_name("port")
+                .long("port")
+                .value_name("PORT")
+                .help("Sets which port to listen on")
+                .takes_value(true),
+        )
+        .get_matches();
+
+    let host: &amp;str = matches.value_of("host").unwrap_or("localhost");
+    let port = matches
+        .value_of("port")
+        .unwrap_or("1987")
+        .parse::&lt;u16&gt;()
+        .expect("port-no not valid");</pre>
+<p>The details here are also left to the reader to discover in clap's documentation, but hopefully the intent is clear enough. We're setting up two arguments, <kbd>host</kbd> and <kbd>port</kbd>, which the server will listen for connections on. Speaking of:</p>
+<pre>    let listener = TcpListener::bind((host, port)).unwrap();</pre>
+<p>Note that we're unwrapping if it's not possible for the server to establish a connection. This is user-hostile and in a production-worthy application you should match on the error and print out a nice, helpful message to explain the error. Now that the server is listening for new connections, we make a server-specific logger and start handling incoming connections:</p>
+<pre>    let server = root.new(o!("host" =&gt; host.to_string(),<br/>                             "port" =&gt; port));
+    info!(server, "Server open for business! :D");
+
+    let mut joins = Vec::new();
+    for stream in listener.incoming() {
+        if let Ok(stream) = stream {
+            let stream_no = TOTAL_STREAMS.fetch_add(1, <br/>            Ordering::Relaxed);
+            let log = root.new(o!("stream-no" =&gt; stream_no,
+                   "peer-addr" =&gt; stream.peer_addr()<br/>                                  .expect("no peer address")<br/>                                  .to_string()));
+            let writer = BufWriter::new(<br/>                             stream.try_clone()<br/>                             .expect("could not clone stream"));
+            let reader = BufReader::new(stream);
+            match handle_client(log, reader, writer) {
+                Ok(handler) =&gt; {
+                    joins.push(handler);
+                }
+                Err(err) =&gt; {
+                    error!(server, <br/>                           "Could not make client handler. {:?}",<br/>                           err);
+                }
+            }
+        } else {
+            info!(root, "Shutting down! {:?}", stream);
+        }
+    }
+
+    info!(
+        server,
+        "No more incoming connections. Draining existing connections."
+    );
+    for jh in joins {
+        if let Err(err) = jh.join() {
+            info!(server, <br/>                  "Connection handler died with error: {:?}", <br/>                  err);
+        }
+    }
+}</pre>
+<p>The key thing here is <kbd>handle_client(log, reader, writer)</kbd>. This function accepts the newly created <kbd>stream :: TcpStream</kbd>– in its buffered reader and writer guise—and returns <kbd>std::io::Result&lt;JoinHandler&lt;()&gt;</kbd>. We'll see the implementation of this function directly. Before that and somewhat as an aside, it's very important to remember to add buffering to your IO. If we did not have <kbd>BufWriter</kbd> and <kbd>BufReader</kbd> in place here, every read and write to <kbd>TcpStream</kbd> would result in a system call on most systems doing per-byte transmissions over the network. It is <em>significantly</em> more efficient for everyone involved to do reading and writing in batches, which the <kbd>BufReader</kbd> and <kbd>BufWriter</kbd> implementations take care of. I have lost count of how many overly slow programs I've seen fixed with a judicious application of buffered-IO. Unfortunately, we won't dig into the implementations of <kbd>BufReader</kbd> and <kbd>BufWriter</kbd> here as they're outside the scope of this book. If you've read this far and I've done alright job explaining, then you've learned everything you need to understand the implementations and you are encouraged to dig in at your convenience. Note that here we're also allocating a vector for <kbd>JoinHandler&lt;()&gt;</kbd>s returned by <kbd>handle_client</kbd>. This is not necessarily ideal. Consider if the first connection were to be long-lived and every subsequent connection short. None of the handlers would be cleared out, though they were completed, and the program would gradually grow in memory consumption. The resolution to this problem is going to be program-specific but, at least here, it'll be sufficient to ignore the handles and force mid-transaction exits on worker threads. Why? Because the server is only echoing:</p>
+<pre style="padding-left: 30px">fn handle_client(
+    log: slog::Logger,
+    mut reader: BufReader&lt;TcpStream&gt;,
+    mut writer: BufWriter&lt;TcpStream&gt;,
+) -&gt; io::Result&lt;thread::JoinHandle&lt;()&gt;&gt; {
+    let builder = thread::Builder::new();
+    builder.spawn(move || {
+        let mut buf = String::with_capacity(2048);
+
+        while let Ok(sz) = reader.read_line(&amp;mut buf) {
+            info!(log, "Received a {} bytes: {}", sz, buf);
+            writer
+                .write_all(&amp;buf.as_bytes())
+                .expect("could not write line");
+            buf.clear();
+        }
+        TOTAL_STREAMS.fetch_sub(1, Ordering::Relaxed);
+    })
+}</pre>
+<p>A network protocol must, anyway, be resilient to hangups on either end, owing to the unreliable nature of networks. In fact, the reader who has enjoyed this book and especially <a href="d42acb0b-a05e-4068-894f-81365d147bf4.xhtml">Chapter 6</a>, <em>Atomics<span> </span>–<span> </span>the Primitives of Synchronization</em>, and <a href="2099e79d-45cd-46cb-bf58-fc27b27b84ec.xhtml" target="_blank">Chapter 7</a>, <em>Atomics<span> </span>–<span> </span>Safely Reclaiming Memory</em>, will be delighted to learn that distributed systems face many of the same difficulties with the added bonus of unreliable transmission. Anyway, note that <kbd>handle_client</kbd> isn't doing all that much, merely using the <kbd>thread::Builder</kbd> API to construct threads, which we discussed in <a href="e2de1ba7-c291-494e-82da-37fee7323c1d.xhtml" target="_blank">Chapter 5</a>, <em>Locks<span> </span>–<span> </span>Mutex, Condvar, Barriers and RWLock</em>. Otherwise, it's a fairly standard TCP echo.</p>
+<p>Let's see the server in operation. In the top of the project, run <kbd>cargo run --release --bin server</kbd> and you should be rewarded with something much like:</p>
+<pre><strong>&gt; cargo run --release --bin server
+    Finished release [optimized] target(s) in 0.26 secs
+     Running `target/release/server`
+host: localhost
+ port: 1987
+  Apr 22 21:31:14.001 INFO Server open for business! :D</strong></pre>
+<p>So far so good. This server is listening on localhost, port 1987. In some other terminal, you can run a telnet to the server:</p>
+<pre><strong>&gt; telnet localhost 1987
+Trying ::1...
+Connected to localhost.
+Escape character is '^]'.
+hello server</strong></pre>
+<p>I've sent <kbd>hello server</kbd> to my running instance and have yet to receive a response because of the behavior of the write buffer. An explicit flush would correct this, at the expense of worse performance. Whether a flush should or should not be placed will depend entirely on setting. Here? Meh.</p>
+<p>The server dutifully logs the interaction:</p>
+<pre><strong>stream-no: 0
+ peer-addr: [::1]:65219
+  Apr 22 21:32:54.943 INFO Received a 14 bytes: hello server</strong></pre>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Making it work</h1>
+                </header>
+            
+            <article>
+                
+<p>The final step is to add a <kbd>main</kbd> function. We can use the same function as was in the non-generic trait example but with the oval removed:</p>
+<pre class="mce-root">fn main() <br/>{<br/>  let peri = Shape<br/>  {<br/>    line_one: 5,<br/>    line_two: 12<br/>  };<br/>  println!("line_one = 5, line_two = 12, Perimeter = {}", <br/>            peri.calc ()); <br/>}</pre>
+<p>When compiled, this gives the following output:</p>
+<div class="CDPAlignCenter CDPAlign"><img src="Images/83f8a7c9-3341-424b-9109-789ab0cd91c0.png" width="584" height="118"/></div>
+<p>As we have created the second implementation, extending the <kbd>main</kbd> function to include the second calculation should be trivial.</p>
+<div class="packt_infobox">See <kbd>09/generic_trait_full</kbd> for the code files of this part.</div>
+<p>We also need to implement the <kbd>f32</kbd> calculation:</p>
+<pre class="mce-root">impl Calculate&lt;f32&gt; for Shape&lt;f32&gt; <br/>{<br/>  fn calc(&amp;self) -&gt; f32 <br/>  {<br/>    3.1415927f32 * self.line_one * self.line_two<br/>  } <br/>}</pre>
+<p>When this is compiled, we see the following:</p>
+<div class="CDPAlignCenter CDPAlign"><img src="Images/bbbc7383-3a50-40fc-a5fc-9ed8e6204ec3.png" width="583" height="127"/></div>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

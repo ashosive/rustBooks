@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">The struct option</h1>
+                </header>
+            
+            <article>
+                
+<p>The problem with the third option is that, when we call within the library, we either have a return type of <kbd>tuple(bool, f32)</kbd> or <kbd>f32</kbd>. Therefore, in a function that only returns a single type, we will need to set <kbd>calc_completed</kbd> to <kbd>true</kbd>.</p>
+<p>It is possible to set a default value on the <kbd>struct</kbd> by deriving or implementing <kbd>std::Default</kbd> (we will cover the standard library in <span class="ChapterrefPACKT"><a href="b22d5775-6084-4eda-af26-6dd545f50dd6.xhtml">Chapter 13</a>, <em>The Standard Library</em>,  and <a href="6392ba81-7725-47e5-a5ce-ce2f7384a1d5.xhtml">Chapter 14</a>, <em>Foreign Function Interfaces</em></span>). Here's a derived version:</p>
+<pre>#[derive(Default)] 
+pub struct MathsAnswers { 
+    calc_complete : bool, 
+    fanswer : f32, 
+    ianswer : i32, 
+}  </pre>
+<p>All primitive types in Rust have a sensible default value: numbers are zeroes, bool is false, Strings are empty strings, and so on. The preceding code is equivalent to the following manually implemented <kbd>Default</kbd> :</p>
+<pre>impl Default for MathsAnswers { 
+  fn default () -&gt; MathsAnswers { 
+    MathsAnswers {calc_complete: false, fanswer: 0f32, ianswer: 0i32 } 
+  } 
+} </pre>
+<p>However, we want the calc_complete default to be true, so we'll use this implementation instead:</p>
+<pre>impl Default for MathsAnswers { 
+  fn default () -&gt; MathsAnswers { 
+    MathsAnswers {calc_complete: false, fanswer: 0f32, ianswer: 0i32 } 
+  } 
+} </pre>
+<p>After the <kbd>Default</kbd> implementation, we may choose to only fill in some of the values when creating an instance and supply <kbd>Default::default()</kbd> for the rest:</p>
+<pre><span>// do calculation then</span><br/>let answers =  MathsAnswers { fanswer: calc_ans, ..Default::default() }; 
+return MathsAnswers; </pre>
+<p>The potential problem is where to put the struct in terms of scope. Where would it be best to place it?</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

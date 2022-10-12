@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Strings and arrays</h1>
+                </header>
+            
+            <article>
+                
+<p>Back in the first section of this chapter we saw that the sequence of characters in a string is given by the function <kbd>chars()</kbd>. Doesn't this look like an array to you? A string is backed up by an array if we look at the memory allocation of its characters; it is stored as a vector of bytes <kbd>Vec&lt;u8&gt;</kbd>.</p>
+<p>That means we can also take a slice of type <kbd>&amp;str</kbd> from a string:</p>
+<pre>let location = "Middle-Earth"; 
+let part = &amp;location[7..12]; 
+println!("{}", part); // Earth </pre>
+<p>We can collect the characters of a string slice into a vector and sort them as follows:</p>
+<pre>let magician = "Merlin"; 
+let mut chars: Vec&lt;char&gt; = magician.chars().collect(); 
+chars.sort(); 
+for c in chars.iter() { 
+    print!("{} ", c); 
+} </pre>
+<p>This prints out the following output:</p>
+<pre>    <strong>M e i l n r </strong></pre>
+<p>The capital letters come before small letters in the sort order.</p>
+<p>Here are some other examples of using the method <kbd>collect()</kbd>:</p>
+<pre>let v: Vec&lt;&amp;str&gt; = "The wizard of Oz".split(' ').collect(); </pre>
+<p>The variable <kbd>v</kbd> then contains, <kbd>["The", "wizard", "of", "Oz"]</kbd>.</p>
+<pre>let v: Vec&lt;&amp;str&gt; = "abc1def2ghi".split(|c: char| c.is_numeric()).collect(); </pre>
+<p>The variable <kbd>v</kbd> is split on the integers and now contains, <kbd>["abc", "def", "ghi"]</kbd>.</p>
+<p>Here <kbd>split()</kbd> takes a closure to determine on which character to split.</p>
+<p>To convert from a <kbd>&amp;str</kbd> to a <kbd>&amp;[u8]</kbd> use <kbd>as_bytes()</kbd>:</p>
+<pre>let arr = magician.as_bytes(); 
+println!("{:?}", arr ); // [77, 101, 114, 108, 105, 110] </pre>
+<p>Both slice types, <kbd>&amp;str</kbd> and <kbd>&amp;[T]</kbd>, can be seen as views into strings and vectors respectively. The following schema compares the types we have just encountered (<kbd>T</kbd> denotes a generic type):</p>
+<table class="table">
+<tbody>
+<tr>
+<td>
+<p>fixed-size</p>
+<p>(stack-allocated)</p>
+</td>
+<td>
+<p>slices</p>
+</td>
+<td>
+<p>are view into</p>
+</td>
+<td>
+<p>dynamic size (growable)</p>
+<p>(heap-allocated)</p>
+</td>
+</tr>
+<tr>
+<td>
+<p>String slice <kbd>&amp;str</kbd></p>
+</td>
+<td>
+<p>Type: <kbd>&amp;[u8]</kbd></p>
+</td>
+<td/>
+<td>
+<p>String</p>
+</td>
+</tr>
+<tr>
+<td>
+<p>Array</p>
+<p>Type: <kbd>[T; size]</kbd></p>
+</td>
+<td>
+<p>Type: <kbd>&amp;[T]</kbd></p>
+</td>
+<td/>
+<td>
+<p>Vector-type: <kbd>Vec&lt;T&gt;</kbd></p>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="packt_tip packt_infobox"><span class="packt_screen">Exercises</span>:<span class="packt_screen"><br/></span><br/>
+(see <kbd>Chapter 4/exercises/chars_string.rs</kbd>):<br/>
+1. Try out whether you can get the first or the fifth character of a string by using <kbd>[0]</kbd> or <kbd>[4]</kbd>.<br/>
+2. Compare the <kbd>bytes()</kbd> method with <kbd>chars()</kbd> on the string ;<kbd><span>let greeting = "Hello ;</span>world!";</kbd> ;</div>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

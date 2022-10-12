@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Using MPSC</h1>
+                </header>
+            
+            <article>
+                
+<p>We've come at Ring from an odd point of view, looking to build a malfunctioning program from the start only to improve it later. In a real program where purposes and functions gradually drift from their origins, it's worth occasionally asking what a piece of software actually <em>does</em> as an abstract concept. So, what is it that Ring actually <em>does</em>? For one, it's bounded, we know that. It has a fixed capacity and the reader/writer pair are careful to stay within that capacity. Secondly, it's a structure that's intended to be operated on by two or more threads with two roles: reading and writing. Ring is a means of passing <kbd>u32</kbd> between threads, being read in the order that they were written.</p>
+<p>Happily, as long as we're willing to accept only a single reader thread, Rust ships with something in the standard library to cover this common need—<kbd>std::sync::mpsc</kbd>. The Multi Producer Single Consumer queue is one where the writer end—called <kbd>Sender&lt;T&gt;</kbd>—may be cloned and moved into multiple threads. The reader thread—called <kbd>Receiver&lt;T&gt;</kbd>—can only be moved. There are two variants of sender available—<kbd>Sender&lt;T&gt;</kbd> and <kbd>SyncSender&lt;T&gt;</kbd>. The first represents an unbounded MPSC, meaning the channel will allocate as much space as needed to hold the <kbd>Ts</kbd> sent into it. The second represents a bounded MPSC, meaning that the internal storage of the channel has a fixed upper capacity. While the Rust documentation describes <kbd>Sender&lt;T&gt;</kbd> and <kbd>SyncSender&lt;T&gt;</kbd> as being asynchronous and synchronous respectively this is not, strictly, true. <kbd>SyncSender&lt;T&gt;::send</kbd> will block if there is no space available in the channel but there is also a <kbd>SyncSender&lt;T&gt;::try_send</kbd> which is of type <kbd>try_send(&amp;self, t: T) -&gt; Result&lt;()</kbd>, <kbd>TrySendError&lt;T&gt;&gt;</kbd>. It's possible to use Rust's MPSC in bounded memory, keeping in mind that the caller will have to have a strategy for what to do with inputs that are rejected for want of space to place them in.</p>
+<p>What does our <kbd>u32</kbd> passing program look like using Rust's MPSC? Like so:</p>
+<pre style="padding-left: 30px">use std::thread;
+use std::sync::mpsc;
+
+fn writer(chan: mpsc::SyncSender&lt;u32&gt;) -&gt; () {
+    let mut cur: u32 = 0;
+    while let Ok(()) = chan.send(cur) {
+        cur = cur.wrapping_add(1);
+    }
+}
+
+fn reader(read_limit: usize, chan: mpsc::Receiver&lt;u32&gt;) -&gt; () {
+    let mut cur: u32 = 0;
+    while (cur as usize) &lt; read_limit {
+        let num = chan.recv().unwrap();
+        assert_eq!(num, cur);
+        cur = cur.wrapping_add(1);
+    }
+}
+
+fn main() {
+    let capacity = 10;
+    let read_limit = 1_000_000;
+    let (snd, rcv) = mpsc::sync_channel(capacity);
+
+    let reader_jh = thread::spawn(move || {
+        reader(read_limit, rcv);
+    });
+    let _writer_jh = thread::spawn(move || {
+        writer(snd);
+    });
+
+    reader_jh.join().unwrap();
+}</pre>
+<p>This is significantly shorter than any of our previous programs as well as being not at all prone to arithmetic bugs. The send type of <kbd>SyncSender</kbd> is <kbd>send(&amp;self, t: T) -&gt; Result&lt;()</kbd>, <kbd>SendError&lt;T&gt;&gt;</kbd>, meaning that <kbd>SendError</kbd> has to be cared for to avoid a program crash. <kbd>SendError</kbd> is only returned when the remote side of an MPSC channel is disconnected, as will happen in this program when the reader hits its <kbd>read_limit</kbd>. The performance characteristics of this odd program are not quite as quick as for the last <kbd>Ring</kbd> program:</p>
+<pre><strong>&gt; perf stat --event task-clock,context-switches,page-faults,cycles,instructions,branches,branch-misses,cache-references,cache-misses ./data_race03
+
+ Performance counter stats for './data_race03':
+
+        760.250406      task-clock (msec)   #    0.765 CPUs utilized
+           200,011      context-switches    #    0.263 M/sec
+               135      page-faults         #    0.178 K/sec
+     1,740,006,788      cycles              #    2.289 GHz
+     1,533,396,017      instructions        #    0.88  insn per cycle
+       327,682,344      branches            #  431.019 M/sec
+     741,095      branch-misses             #    0.23% of all branches
+        71,426,781      cache-references    #   93.952 M/sec
+          4,082      cache-misses          #  0.006 % of all cache refs
+
+       0.993142979 seconds time elapsed</strong></pre>
+<p>But it's well within the margin of error, especially considering the ease of programming. One thing worth keeping in mind is that messages in MPSC flow in only one direction: the channel is not bi-directional. In this way, MPSC is not suitable for request/response patterns. It's not unheard of to layer two or more MPSCs together to achieve this, with the understanding that a single consumer on either side is sometimes not suitable.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

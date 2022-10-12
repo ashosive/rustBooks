@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Compiling with release mode</h1>
+                </header>
+            
+            <article>
+                
+<p>This is a really simple suggestion that you should know about if you are at all concerned about performance.</p>
+<ul>
+<li>Rust normally compiles in debug mode, which is slow:</li>
+</ul>
+<pre style="padding-left: 60px" class="p1"><strong><span class="s1">cargo build</span></strong></pre>
+<ul>
+<li>Rust optionally compiles in release mode, which is fast:</li>
+</ul>
+<pre style="padding-left: 60px" class="p1"><strong><span class="s1">cargo build --release</span></strong></pre>
+<ul>
+<li>Here is a comparison using debug mode for a toy program:</li>
+</ul>
+<pre style="padding-left: 60px" class="p1"><strong><span class="s1">$ time performance_release_mode<br/></span><span class="s1">real<span class="Apple-tab-span"> </span>0m13.424s<br/></span><span class="s1">user<span class="Apple-tab-span"> </span>0m13.406s<br/></span><span class="s1">sys<span class="Apple-tab-span"> </span>0m0.010s</span></strong></pre>
+<ul>
+<li>The following is the release mode:</li>
+</ul>
+<pre style="padding-left: 60px" class="p1"><strong><span class="s1">$ time ./performance_release_mode<br/></span><span class="s1">real<span class="Apple-tab-span"> </span>0m0.316s<br/></span><span class="s1">user<span class="Apple-tab-span"> </span>0m0.309s<br/></span><span class="s1">sys<span class="Apple-tab-span"> </span>0m0.005s</span></strong></pre>
+<p>Release mode is 98% more efficient with regard to CPU usage for this example.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">The deque</h1>
+                </header>
+            
+            <article>
+                
+<p>Roughly speaking, hopper is a concurrent deque with two cooperating finite state machines layered on top. We'll start in with the deque, defined in <kbd>src/deque.rs</kbd>.</p>
+<div class="packt_infobox"><span>The discussion of hopper that follows lists almost all of its source code. We'll call out the few instances where the reader will need to refer to the listing in the book's source repository. </span></div>
+<p>To be totally clear, a deque is a data structure that allows for queuing and dequeuing at either end of the queue. Rust's <kbd>stdlib</kbd> has <kbd>VecDeque&lt;T&gt;</kbd>, which is very useful. Hopper is unable to use it, however, as one of its design goals is to allow for parallel sending and receiving against the hopper queue and <kbd>VecDeque</kbd> is not thread-safe. Also, while there are concurrent deque implementations in the crate ecosystem, the hopper deque is closely tied to the finite state machines it supports and to hopper's internal ownership model. That is, you probably can't use hopper's deque in your own project without some changes. Anyhow, here's the preamble:</p>
+<pre style="padding-left: 30px">use std::sync::{Condvar, Mutex, MutexGuard};
+use std::sync::atomic::{AtomicUsize, Ordering};
+use std::{mem, sync};
+
+unsafe impl&lt;T, S&gt; Send for Queue&lt;T, S&gt; {}
+unsafe impl&lt;T, S&gt; Sync for Queue&lt;T, S&gt; {}</pre>
+<p>The only unfamiliar piece here are the things imported from <kbd>std::sync::atomic</kbd>. We'll be covering atomics in more detail in the next chapter, but we're going to breeze over them at a high-level as needed in the explanation to follow. Note as well the unsafe declarations of <kbd>send</kbd> and <kbd>sync</kbd> for some as yet unknown type <kbd>Queue&lt;T, S&gt;</kbd>. We're about to go off-road:</p>
+<pre>pub struct Queue&lt;T, S&gt; {
+    inner: sync::Arc&lt;InnerQueue&lt;T, S&gt;&gt;,
+}</pre>
+<p>The <kbd>Queue&lt;T, S&gt;</kbd> definition is similar to what we saw in previous chapters: a simple structure wrapping an inner structure, here called <kbd>InnerQueue&lt;T, S&gt;</kbd>. The <kbd>InnerQueue</kbd> is wrapped in an <kbd>Arc,</kbd> meaning there's only one allocated <kbd>InnerQueue</kbd> on the heap. As you might expect, the clone of <kbd>Queue</kbd> is a copy of the <kbd>Arc</kbd> into a new struct:</p>
+<pre style="padding-left: 30px">impl&lt;T, S&gt; Clone for Queue&lt;T, S&gt; {
+    fn clone(&amp;self) -&gt; Queue&lt;T, S&gt; {
+        Queue {
+            inner: sync::Arc::clone(&amp;self.inner),
+        }
+    }
+}</pre>
+<p>It's important that every thread that interacts with <kbd>Queue</kbd> sees the same <kbd>InnerQueue</kbd>. Otherwise, the threads are dealing with distinct areas of memory and have no relationship with one another. Let's look at <kbd>InnerQueue</kbd>:</p>
+<pre style="padding-left: 30px">struct InnerQueue&lt;T, S&gt; {
+    capacity: usize,
+    data: *mut Option&lt;T&gt;,
+    size: AtomicUsize,
+    back_lock: Mutex&lt;BackGuardInner&lt;S&gt;&gt;,
+    front_lock: Mutex&lt;FrontGuardInner&gt;,
+    not_empty: Condvar,
+}</pre>
+<p>Okay, this is much more akin to the internals we saw in Rust itself, and there's a lot going on. The field <kbd>capacity</kbd> is the maximum number of elements that the <kbd>InnerQueue</kbd> will hold in data. Like the first <kbd>Ring</kbd> in the previous chapter, <kbd>InnerQueue</kbd> uses a contiguous block of memory to store its <kbd>T</kbd> elements, exploding a <kbd>Vec</kbd> to get that contiguous block. Also, like the first <kbd>Ring</kbd>, we store <kbd>Option&lt;T&gt;</kbd> elements in the contiguous block of memory. Technically, we could deal with a contiguous block of raw pointers or copy memory blocks in and out. But the use of <kbd>Option&lt;T&gt;</kbd> simplifies the code, both for insertion and removal, at the cost of a single byte of memory per element. The added complication just isn't worth it for the performance goals hopper is trying to hit.</p>
+<p><span>The <kbd>size</kbd> field is an atomic <kbd>usize.</kbd> Atomics will be covered in more detail in the next chapter, but the behavior of <kbd>size</kbd> is going to be important. For now, think of it as a very small piece of synchronization between threads; a little hook that will allow us to order memory accesses that happens also to act like a <kbd>usize.</kbd> The condvar</span> <kbd>not_empty</kbd> <span>is used to signal to any potential readers waiting for new elements to pop that there are, in fact, elements to pop. The use of condvar greatly reduces the CPU load of</span> hopper <span>without sacrificing latency to busy loops with sleeps. Now,</span> <kbd>back_lock</kbd> <span>and</span> <kbd>front_lock</kbd><span>. What's going on here? Either side of the deque is protected by a mutex, meaning there can be only one enqueuer and one dequeuer at a time, but these can be running in parallel to each other. Here are the definitions of the two inner values of the mutexes:</span></p>
+<pre style="padding-left: 30px">#[derive(Debug, Clone, Copy)]
+pub struct FrontGuardInner {
+    offset: isize,
+}
+
+#[derive(Debug)]
+pub struct BackGuardInner&lt;S&gt; {
+    offset: isize,
+    pub inner: S,
+}</pre>
+<p> <kbd>FrontGuardInner</kbd>   is the easier to explain of the two. The only field is <kbd>offset</kbd>, which defines the offset from the first pointer of <kbd>InnerGuard</kbd>'s data of the thread manipulating the front of the queue. This contiguous store is also used in a ring buffer fashion. In <kbd>BackGuardInner</kbd>, we see the same offset, but an additional <kbd>inner</kbd>, <kbd>S</kbd>. What is this? As we'll see, the threads manipulating the back of the buffer need extra coordination between them. Exactly what that is, the queue does not care. Therefore, we make it a type parameter and allow the caller to sort everything out, being careful to pass the data around as needed. In this fashion, the queue smuggles state through itself but does not have to inspect it.</p>
+<p>Let's start on the implementation of <kbd>InnerQueue</kbd>:</p>
+<pre>impl&lt;T, S&gt; InnerQueue&lt;T, S&gt;
+where
+    S: ::std::default::Default,
+{
+    pub fn with_capacity(capacity: usize) -&gt; InnerQueue&lt;T, S&gt; {
+        assert!(capacity &gt; 0);
+        let mut data: Vec&lt;Option&lt;T&gt;&gt; = Vec::with_capacity(capacity);
+        for _ in 0..capacity {
+            data.push(None);
+        }
+        let raw_data = (&amp;mut data).as_mut_ptr();
+        mem::forget(data);
+        InnerQueue {
+            capacity: capacity,
+            data: raw_data,
+            size: AtomicUsize::new(0),
+            back_lock: Mutex::new(BackGuardInner {
+                offset: 0,
+                inner: S::default(),
+            }),
+            front_lock: Mutex::new(FrontGuardInner { offset: 0 }),
+            not_empty: Condvar::new(),
+        }
+    }</pre>
+<p>The type lacks a <kbd>new() -&gt; InnerQueue</kbd>, as there was no call for it to be made. Instead, there's only <kbd>with_capacity</kbd> and that's quite similar to what we saw of <kbd>Ring</kbd>'s <kbd>with_capacity</kbd>—a vector is allocated, and exploded into a raw pointer, and the original reference is forgotten before the pointer is loaded into a newly minted struct.</p>
+<p>The type <kbd>S</kbd> has to implement a default for initialization that is sufficient, as the caller's smuggled state will always be the same value, which is more than adequately definable as a default. If this deque were intended for general use, we'd probably need to offer a <kbd>with_capacity</kbd> that also took an <kbd>S</kbd> directly. Now, a few further functions in the implementation that we'll just breeze right past:</p>
+<pre>    pub fn capacity(&amp;self) -&gt; usize {
+        self.capacity
+    }
+
+    pub fn size(&amp;self) -&gt; usize {
+        self.size.load(Ordering::Relaxed)
+    }
+
+    pub fn lock_back(&amp;self) -&gt; MutexGuard&lt;BackGuardInner&lt;S&gt;&gt; {
+        self.back_lock.lock().expect("back lock poisoned")
+    }
+
+    pub fn lock_front(&amp;self) -&gt; MutexGuard&lt;FrontGuardInner&gt; {
+        self.front_lock.lock().expect("front lock poisoned")
+    }</pre>
+<p>The next function, <kbd>push_back</kbd>, is very important and subtle:</p>
+<pre>    pub unsafe fn push_back(
+        &amp;self,
+        elem: T,
+        guard: &amp;mut MutexGuard&lt;BackGuardInner&lt;S&gt;&gt;,
+    ) -&gt; Result&lt;bool, Error&lt;T&gt;&gt; {
+        let mut must_wake_dequeuers = false;
+        if self.size.load(Ordering::Acquire) == self.capacity {
+            return Err(Error::Full(elem));
+        } else {
+            assert!((*self.data.offset((*guard).offset)).is_none());
+            *self.data.offset((*guard).offset) = Some(elem);
+            (*guard).offset += 1;
+            (*guard).offset %= self.capacity as isize;
+            if self.size.fetch_add(1, Ordering::Release) == 0 {
+                must_wake_dequeuers = true;
+            }
+        }
+        Ok(must_wake_dequeuers)
+    }</pre>
+<p><kbd>InnerQueue::push_back</kbd> is responsible for placing a <kbd>T</kbd> onto the current back of the ring buffer, or failing capacity to signal that the buffer is full. When we discussed Ring, we noted that the <kbd>size == capacity</kbd> check was a race. Not so in <kbd>InnerQueue</kbd>, thanks to the atomic nature of the size. <kbd>self.size.load(Ordering::Acquire)</kbd> performs a memory load of the <kbd>self.size</kbd> but does so with certainty that it's the only thread with <kbd>self.size</kbd> as a manipulable value. Subsequent memory operations in the thread will be ordered after <kbd>Acquire</kbd>, at least until a store of <kbd>Ordering::Release</kbd> happens. A store of that nature does happen just a handful of lines down—<kbd>self.size.fetch_add(1, Ordering::Release)</kbd>. Between these two points, we see the element <kbd>T</kbd> loaded into the buffer—with a prior check to ensure that we're not stomping a <kbd>Some</kbd> value—and a wrapping bump of the <kbd>BackGuardInner</kbd>'s offset. Just like in the last chapter. Where this implementation differs is the return of <kbd>Ok(must_wake_dequeuers)</kbd>. Because the inner <kbd>S</kbd> is being guarded, it's not possible for the queue to know if there will be any further work that needs to be done before the mutex can be given up. As a result, the queue cannot itself signal that there's a value to read, even though it's already been written to memory by the time the function returns. The caller has to run the notification. That's a sharp edge. If the caller forgets to notify a thread blocked on the condvar, the blocked thread will stay that way forever.</p>
+<p>The <kbd>InnerQueue::push_front</kbd> is a little simpler and not a radical departure from <kbd>push_back</kbd>:</p>
+<pre>    pub unsafe fn pop_front(&amp;self) -&gt; T {
+        let mut guard = self.front_lock.lock()<br/>                            .expect("front lock poisoned");
+        while self.size.load(Ordering::Acquire) == 0 {
+            guard = self.not_empty
+                .wait(guard)
+                .expect("oops could not wait pop_front");
+        }
+        let elem: Option&lt;T&gt; = mem::replace(&amp;mut <br/>        *self.data.offset((*guard).offset), None);
+        assert!(elem.is_some());
+        *self.data.offset((*guard).offset) = None;
+        (*guard).offset += 1;
+        (*guard).offset %= self.capacity as isize;
+        self.size.fetch_sub(1, Ordering::Release);
+        elem.unwrap()
+    }
+}</pre>
+<p>The thread popping front, because it does not have to coordinate, is able to take the front lock itself, as there's no state that needs to be threaded through. After receiving the lock, the thread then enters a condition check loop to guard against spurious wake-ups on <kbd>not_empty</kbd>, replacing the item at offset with <kbd>None</kbd> when the thread is able to wake up. The usual offset maintenance occurs.</p>
+<p>The implementation of <kbd>Queue&lt;T, S&gt;</kbd> is pretty minimal in comparison to the inner structure. Here's <kbd>push_back</kbd>:</p>
+<pre style="padding-left: 30px">pub fn push_back(
+    &amp;self,
+    elem: T,
+    mut guard: &amp;mut MutexGuard&lt;BackGuardInner&lt;S&gt;&gt;,
+) -&gt; Result&lt;bool, Error&lt;T&gt;&gt; {
+    unsafe { (*self.inner).push_back(elem, &amp;mut guard) }
+}</pre>
+<p>The only function that's substantially new to <kbd>Queue</kbd> is <kbd>notify_not_empty(&amp;self, _guard: &amp;MutexGuard&lt;FrontGuardInner&gt;) -&gt; ()</kbd>. The caller is responsible for calling this whenever <kbd>push_back</kbd> signals that the dequeuer must be notified and, while the guard is not used, one rough edge of the library is smoothed down by requiring that it be passed in, proving that it's held.</p>
+<p>That's the deque at the core of hopper. This structure was very difficult to get right. Any slight re-ordering of the load and store on the atomic size with respect to other memory operations will introduce bugs, such as parallel access to the same memory of a region without coordination. These bugs are <em>very</em> subtle and don't manifest immediately. Liberal use of helgrind plus quickcheck testing across x86 and ARM processors—more on that later—will help drive up confidence in the implementation. Test runs of hours were not uncommon to find bugs that were not deterministic but could be reasoned about, given enough time and repeat examples. Building concurrent data structures out of very primitive pieces is <em>hard</em>.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

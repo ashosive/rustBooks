@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style00.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style01.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">The Copy trait</h1>
+                </header>
+            
+            <article>
+                
+<p>The code for this section can be found in <kbd>08/copyint</kbd> and <kbd>08/copyf32</kbd>.</p>
+<p>Rust does have a way to create a copy of the original: the <kbd>Copy</kbd> trait (traits are covered in <a href="4925c4c4-a4ec-4c62-8a2a-f5563e2592b6.xhtml"><span class="ChapterrefPACKT">Chapter 10</span></a>, <em>Creating your own Crate</em>) and all primitives implement <kbd>Copy</kbd>. If we have something along the lines of <kbd>let varone = 1i32;</kbd> or <kbd>let vartwo = varone;</kbd>, then <kbd>i32</kbd> is a primitive type and the <kbd>vartwo</kbd> variable will contain a copy of <kbd>varone</kbd>. Both will have their own allocations on the stack, rather than <kbd>vartwo</kbd> pointing to <kbd>varone</kbd>. Ownership will not be changed; the value is duplicated and bound to the new variable.</p>
+<div class="packt_tip">The code for this section can be found in the <kbd>08/copyint</kbd> and <kbd>08/copyf32</kbd> folders in the supporting code bundle provided for this book.</div>
+<p>Therefore, we can write the code as follows:</p>
+<pre>fn do_something(number: i32) -&gt; i32  
+{ 
+    number + 32 
+} 
+ 
+fn main()  
+{ 
+    let num = 10i32;  
+    let numtwo = do_something(num);  
+    println!("num is: {}", num); 
+    println!("numtwo is : {}", numtwo); 
+} </pre>
+<p>The preceding code will give the following output when compiled (<kbd>numone</kbd> is an <kbd>i32</kbd> value, which is a primitive, so it makes a copy of itself when passed to <kbd>do_something</kbd> with an <kbd>i32</kbd> being returned into <kbd>numtwo</kbd>):</p>
+<div class="packt_figure CDPAlignCenter CDPAlign"><img class=" image-border" src="Images/f749abba-220c-4124-b16c-10eb2a64fc0c.png"/></div>
+<p>The <kbd>copyf32</kbd> example shows the same <kbd>Copy</kbd> trait in action but for an <kbd>f32</kbd> primitive.</p>
+<p>There must be a way around this.</p>
+<p>In a way, we've seen an answer already in many examples used throughout this book—we hand the ownership back; however, as the following code block shows, it can get a bit messy:</p>
+<pre>fn sumprod(v1: Vec&lt;i32&gt;, v2: Vec&lt;i32&gt;) -&gt; (Vec&lt;i32&gt;, Vec&lt;i32&gt;, i32) 
+{ 
+    let sum = v1.iter().fold(0i32, |a, &amp;b| a + b); 
+    let product = v2.iter().fold(1i32, |a, &amp;b| a * b); 
+    return (v1, v2, sum + product); // return ownership 
+} 
+ 
+fn main()  
+{ 
+    let vecone = vec![2,3,5]; 
+    let vectwo = vec![3,5];  
+    let (vecone, vectwo, ans) = sumprod(vecone, vectwo); // pass ownership  
+    println!("ans = {}", ans); 
+} </pre>
+<p>The preceding code will give the following output:</p>
+<div class="packt_figure CDPAlignCenter CDPAlign"><img class=" image-border" src="Images/096a92fc-8333-4ea4-a37c-a59c85ab121d.png"/></div>
+<div class="packt_tip">The code for this section can be found in the <kbd>Chapter8/handback</kbd> folder in the supporting code bundle provided for this book.</div>
+<p>Thankfully, Rust does provide a neater way to pass ownership around. Instead of giving ownership, we can borrow ownership.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

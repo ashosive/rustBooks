@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style00.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style01.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Adding and removing from the vector</h1>
+                </header>
+            
+            <article>
+                
+<p>In a similar fashion to string, it is possible to add and remove from the vector list using the <kbd>push</kbd> and <kbd>pull</kbd> methods. These add or remove from the top of the vector stack. Consider the following example:</p>
+<pre>fn main() { 
+    let mut my_vec : Vec&lt;i32&gt; = (0..10).collect(); 
+    println!("{:?}", my_vec);  
+    my_vec.push(13); 
+    my_vec.push(21); 
+    println!("{:?}", my_vec);  
+    let mut twenty_one = my_vec.pop(); // removes the last value 
+    println!("twenty_one= {:?}", twenty_one);  
+    println!("{:?}", my_vec);  
+} </pre>
+<p>We create the vector list with values from 0 going up to 10 (so the last value is 9).</p>
+<p>The line <kbd>println!("{:?}", my_vec);</kbd> outputs the entire contents of <kbd>my_vec</kbd>. <kbd>{:?}</kbd> is required here due to the type <kbd>Vec&lt;i32&gt;</kbd> not implementing certain formatting functionalities.</p>
+<p>We then push onto the top of the vector list 13 then 21, display the output on the screen, and then remove the top-most value on the vector list, and output it again.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

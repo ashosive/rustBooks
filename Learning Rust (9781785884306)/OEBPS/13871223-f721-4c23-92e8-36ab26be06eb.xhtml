@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Prelude</h1>
+                </header>
+            
+            <article>
+                
+<p>Prelude is very useful. You may have wondered why many of the examples in this book use standard modules, but you rarely see <kbd>use std::</kbd> at the top of source files. The reason is that Rust auto-injects the prelude module into every source file, which provides the source file with a number of core modules. It inserts the following in no particular order:</p>
+<ul>
+<li><kbd>std::marker::{Copy, Send, Sized, Sync}</kbd></li>
+<li><kbd>std::ops::{Drop, Fn, FnMut, FnOnce}</kbd></li>
+<li><kbd>std::mem::drop</kbd></li>
+<li><kbd>std::boxed::Box</kbd></li>
+<li><kbd>std::borrow::ToOwned</kbd></li>
+<li><kbd>std::clone::Clone</kbd></li>
+<li><kbd>std::cmp::{PartialEq, PartialOrd, Eq, Ord }</kbd></li>
+<li><kbd>std::convert::{AsRef, AsMut, Into, From}</kbd></li>
+<li><kbd>std::default::Default</kbd></li>
+<li><kbd>std::iter::{Iterator, Extend, IntoIterator, DoubleEndedIterator, ExactSizeIterator}</kbd></li>
+<li><kbd>std::option::Option::{self, Some, None}</kbd></li>
+<li><kbd>std::result::Result::{self, Ok, Err}</kbd></li>
+<li><kbd>std::slice::SliceConcatExt</kbd></li>
+<li><kbd>std::string::{String, ToString}</kbd></li>
+<li><kbd>std::vec::Vec</kbd></li>
+</ul>
+<p>It inserts into each crate <kbd>extern crate std;</kbd> and into each module <kbd>use std::prelude::v1::*;</kbd>. This is all that is needed for prelude - it is that simple! Each module, though, will be dealt with in turn.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Methods on tuples and enums</h1>
+                </header>
+            
+            <article>
+                
+<p>In Rust, methods cannot only be defined on structs, they can also be defined on tuples and enums, and even on built-in types like integers.</p>
+<p>Here is an example of an instance method <kbd>mood</kbd> defined on the variants of an <kbd>Day</kbd> <span>enum</span>. It matches the variant to print out the <kbd>mood</kbd> string of the day:</p>
+<pre>// see code in Chapter 6/code/method_enum.rs 
+enum Day {   
+    Monday, 
+    Tuesday, 
+    Wednesday, 
+    Thursday, 
+    Friday, 
+    Saturday, 
+    Sunday, 
+} 
+ 
+impl Day { 
+    fn mood(&amp;self) { 
+        println!("{}", match *self { 
+            Day::Friday =&gt; "it's friday!", 
+            Day::Saturday | Day::Sunday =&gt; "weekend :-)", 
+            _ =&gt; "weekday...", 
+        }) 
+    } 
+} 
+ 
+fn main() { 
+    let today = Day::Tuesday; 
+    today.mood(); 
+} </pre>
+<p>This prints out the following output:</p>
+<pre>    <strong>weekday...</strong>  </pre>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

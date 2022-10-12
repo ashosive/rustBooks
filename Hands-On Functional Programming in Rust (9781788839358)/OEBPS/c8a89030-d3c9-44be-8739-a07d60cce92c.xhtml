@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style00.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style01.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Defining lifetimes on traits</h1>
+                </header>
+            
+            <article>
+                
+<p>When defining, implementing, and instantiating an object implementing a trait, it is possible that both the object and trait will require a lifetime. Usually, it is possible to infer the lifetime of the trait from the lifetime of the object. When this is not possible, the programmer must declare a lifetime for the trait, which is compatible with all other constraints. The code is as follows:</p>
+<pre style="padding-left: 30px"><span class="hljs-class"><span class="hljs-keyword">trait</span> <span class="hljs-title">Red</span></span><span> { }<br/><br/></span><span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">Ball</span></span><span>&lt;</span><span class="hljs-symbol">'a</span><span>&gt; {<br/>   diameter: &amp;</span><span class="hljs-symbol">'a</span><span> </span><span class="hljs-built_in">i32</span><span>,<br/>}<br/><br/></span><span class="hljs-keyword">impl</span><span>&lt;</span><span class="hljs-symbol">'a</span><span>&gt; Red </span><span class="hljs-keyword">for</span><span> Ball&lt;</span><span class="hljs-symbol">'a</span><span>&gt; { }<br/><br/></span><span>static num: i32 = </span><span class="hljs-number">5</span><span>;<br/></span><span class="hljs-keyword">let</span><span> obj = </span><span class="hljs-built_in">Box</span><span>::new(Ball { diameter: &amp;num }) </span><span class="hljs-keyword">as</span><span> </span><span class="hljs-built_in">Box</span><span>&lt;Red + 'static&gt;;</span></pre>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style00.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style01.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Mutable borrows</h1>
+                </header>
+            
+            <article>
+                
+<p>This is more a writable DVD than a prerecorded one if we use the analogy of borrowing a DVD.</p>
+<p>Here, we are using a mutable reference, and we have to be careful how we use these.</p>
+<div class="packt_tip">The code for this section is in the <kbd>08/mutableref1</kbd> and <kbd>08/mutableref2</kbd> folders in the supporting code bundle provided for this book.</div>
+<p>In our first example <kbd>(mutableref1</kbd>), we will create a variable, the reference, do something, and get a new value out:</p>
+<pre>fn main()  
+{ 
+    let mut mutvar = 5; 
+    { 
+        println!("{}", mutvar); // outputs 5 
+        let y = &amp;mut mutvar; // creates the mutable ref to mutvar 
+        *y += 1; // adds one to the reference and passes it back in to mutvar 
+    } 
+    println!("{}", mutvar); // outputs 6 
+} </pre>
+<p>The important line here is <kbd>*y += 1</kbd>; and, in particular, the <kbd>*</kbd>, as this means we're directly altering the value of the memory position that the reference points to. When dealing with anything to do with memory, absolute care has to be observed.</p>
+<p>The second important point to observe is that we have a set of braces around the code used in the mutable reference. Remove them and everything fails (<kbd>mutableref2</kbd>):</p>
+<div class="packt_figure CDPAlignCenter CDPAlign"><img class=" image-border" src="Images/7337e04c-87b8-4a5e-8161-a50dde5a50a8.png"/></div>
+<p>The important line is the result of the error; it is saying that you cannot borrow the same item as both mutable and immutable at the same time. It's like saying you can borrow something that can and can't be changed at the same time! Utter nonsense. This is down to borrowing having rules.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

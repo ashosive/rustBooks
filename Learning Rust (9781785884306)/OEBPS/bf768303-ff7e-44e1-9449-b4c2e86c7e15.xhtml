@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style00.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style01.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Formatting parameters</h1>
+                </header>
+            
+            <article>
+                
+<p>There are essentially four formatting parameters available. They are listed in the following table:</p>
+<table class="MsoTableGrid">
+<tbody>
+<tr>
+<td>
+<p><strong>Parameter</strong></p>
+</td>
+<td>
+<p><strong>Use</strong></p>
+</td>
+</tr>
+<tr>
+<td>
+<p><kbd>Fill</kbd>/<kbd>Alignment</kbd></p>
+</td>
+<td>
+<p>Used in conjunction with the <kbd>Width</kbd> parameter. Essentially, this will add extra characters if the output is smaller than the width.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><kbd>Sign</kbd>/<kbd>#</kbd>/<kbd>0</kbd></p>
+</td>
+<td>
+<p>Flags for the formatter being used:</p>
+<ul>
+<li><kbd>Sign</kbd> indicates that the sign should always be outputted (numeric values only). If the value is positive, the <kbd>+</kbd> sign will never show; similarly, a <kbd>-</kbd> will only show for a <kbd>Signed</kbd> value.</li>
+<li><kbd><em>#</em></kbd> indicates that an alternate form of printing will be used. Normally, if <kbd>{:x}</kbd> is used, the lowercase hex format is used. By using <kbd>#x</kbd>, the argument is preceded with <kbd>0x</kbd>.</li>
+<li><kbd>0</kbd> is used to pad a result with the <kbd>0</kbd> character. It is sign-aware.</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td>
+<p><kbd>Width</kbd></p>
+</td>
+<td>
+<p>Specifies how the output should be represented. For example, if you have a float calculation that has to be outputted to four decimal places, and the result only comes to two decimal places, the width formatter (in conjunction with the fill formatting parameter) will create the required filled output.</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><kbd>Precision</kbd></p>
+</td>
+<td>
+<p>For anything non-numeric, the precision is the maximum width. For example, if you have a maximum width of five and a string containing eight characters, it will be truncated after five characters. It is ignored for integers. For floating point types, it indicates the number of decimal points after the point:</p>
+<p> </p>
+<ul>
+<li><span>Integer </span><kbd>.N:</kbd><span>: In this case, </span><kbd>N</kbd><span> is the precision.</span></li>
+<li>Integer followed by a <kbd>$ (.N$:)</kbd>: This uses the format argument <kbd>N</kbd> as the precision. The argument must be a <kbd>usize</kbd>.</li>
+<li><kbd>.*:</kbd>: This means that the contents of the <kbd>{}</kbd> is associated with two format inputs. The first holds the <kbd>usize</kbd> precision, the second holds the value to be printed.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p> </p>
+<p>Examples of all of these formatters are in the source code examples for this chapter.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

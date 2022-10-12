@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style00.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style01.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Running feruscore</h1>
+                </header>
+            
+            <article>
+                
+<p>Before you attempt to run feruscore, please make sure pmars is available on your PATH. Some operating systems bundle pmars in their package distribution, others, such as OS X, require gcc to compile the program. The pMARS project is <em>venerable</em> C code and getting it compiled can be a bit fiddly. On my Debian system, I had to tweak the makefile some, but on OS X I found a helpful brew cask to get pMARS installed.</p>
+<p>Once you've got pMARS installed, you should be able to run <kbd>cargo run --release</kbd> at the head of the project and receive output like the following:</p>
+<pre><strong>GENERATION(0):
+    STATE:          Tournament
+    RUNTIME (sec):  4
+    GENS/s:         0
+    PARENTS:        2
+       PARENTS/s:   1
+    BATTLES:        660
+       R_BATTLES/s: 131
+       F_BATTLES/s: 25
+    FITNESS:
+        00...10:    625
+        11...20:    1
+        21...30:    3
+        31...40:    0
+        41...50:    130
+        51...60:    3
+        61...60:    0
+        71...70:    0
+        81...80:    0
+        91...100:   550</strong></pre>
+<p>Woo! Look at it go. This instance of feruscore has been running for 4 seconds—RUNTIME (sec): 4—and has computed two parents so far. This generation has gone through 660 battles: 131 regional and 25 final. The fitness histogram shows that the population is pretty evenly bad, otherwise we'd expect to see a clump at the 0 end and a clump at the 100 end. You should see something similar. I bet you'll also find that your CPUs are pegged. But, there's a problem. This is <em>slow</em>. It gets worse. Once I evolved more fit warriors, the generations took longer and longer to compute:</p>
+<pre><strong>GENERATION(45):
+    STATE:          Tournament
+    RUNTIME (sec):  25297
+    GENS/s:         0
+    PARENTS:        8
+       PARENTS/s:   0
+    BATTLES:        1960
+       R_BATTLES/s: 12
+       F_BATTLES/s: 1
+    FITNESS:
+        00...10:    3796
+        11...20:    0
+        21...30:    0
+        31...40:    0
+        41...50:    0
+        51...60:    0
+        61...60:    0
+        71...70:    0
+        81...80:    0
+        91...100:   118</strong></pre>
+<p>That makes sense though. The better the population is, the longer members will hold out in a round. It's not uncommon to run a genetic algorithm for <em>thousands</em> of generations before it settles on a really excellent solution. A generation in the present implementation takes, generously, 30 seconds at least. By the time we're able to evolve a halfway-decent warrior, it'll be the 30th anniversary of the '94 ICWS Corewars standard! That's no good.</p>
+<p>Turns out, serializing an <kbd>Individual</kbd> to disk, spawning a pMARS process, and forcing it to parse the serialized format—the load file—is not a fast operation. We could also compact our <kbd>Individual</kbd> representation significantly, improving cache locality of simulation. There's also something fishy about performing a <em>regional</em> and then a <em>finals</em> tournament just to fit the iterator style rayon requires. We can fix all of these things, but it'll have to wait until the next chapter. We're going to embed a MARS written in C into feruscore and all sorts of changes will fall out as a result.</p>
+<p>Should be fun!</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

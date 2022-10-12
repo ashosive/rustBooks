@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style00.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style01.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">crossbeam_epoch::Guard::defer</h1>
+                </header>
+            
+            <article>
+                
+<p>Now, again, how is the following in <kbd>TreiberStack::try_pop</kbd> a safe operation?</p>
+<pre style="padding-left: 30px">guard.defer(move || head_shared.into_owned());
+return Some(ptr::read(&amp;(*head).data));</pre>
+<p>What we need to explore now is <kbd>defer</kbd>, which lives in crossbeam-epoch at <kbd>src/guard.rs</kbd>:</p>
+<pre>    pub unsafe fn defer&lt;F, R&gt;(&amp;self, f: F)
+    where
+        F: FnOnce() -&gt; R,
+    {
+        let garbage = Garbage::new(|| drop(f()));
+
+        if let Some(local) = self.local.as_ref() {
+            local.defer(garbage, self);
+        }
+    }</pre>
+<p>We need to understand <kbd>Garbage</kbd>. It's defined in <kbd>src/garbage.rs</kbd> as:</p>
+<pre style="padding-left: 30px">pub struct Garbage {
+    func: Deferred,
+}
+
+
+unsafe impl Sync for Garbage {}
+unsafe impl Send for Garbage {}</pre>
+<p>The implementation of <kbd>Garbage</kbd> is very brief: </p>
+<pre style="padding-left: 30px">impl Garbage {
+    /// Make a closure that will later be called.
+    pub fn new&lt;F: FnOnce()&gt;(f: F) -&gt; Self {
+        Garbage { func: Deferred::new(move || f()) }
+    }
+}
+
+impl Drop for Garbage {
+    fn drop(&amp;mut self) {
+        self.func.call();
+    }
+}</pre>
+<p><kbd>Deferred</kbd> is a small structure that wraps <kbd>FnOnce()</kbd>, storing it inline or on the heap as size allows. You are encouraged to examine the implementation yourself, but the basic idea is to maintain the same properties of <kbd>FnOnce</kbd> in a heap-allocated structure that finds use in the <kbd>Garbage</kbd> drop implementation. What drops <kbd>Garbage</kbd>? This is where the following comes into play:</p>
+<pre>        if let Some(local) = self.local.as_ref() {
+            local.defer(garbage, self);
+        }
+    }</pre>
+<p>The <kbd>self.local</kbd> of <kbd>Guard</kbd> is <kbd>*const Local</kbd>, a struct called a participant for garbage collection in crossbeam's documentation. We need to understand where and how this <kbd>Local</kbd> is created. Let's understand the <kbd>Guard</kbd> internals, first:</p>
+<pre style="padding-left: 30px">pub struct Guard {
+    pub(crate) local: *const Local,
+}</pre>
+<p><kbd>Guard</kbd> is a wrapper around a const pointer to <kbd>Local</kbd>. We know that instances of <kbd>Guard</kbd> are created by <kbd>crossbeam_epoch::pin</kbd>, defined in <kbd>src/default.rs</kbd>:</p>
+<pre style="padding-left: 30px">pub fn pin() -&gt; Guard {
+    HANDLE.with(|handle| handle.pin())
+}</pre>
+<p><kbd>HANDLE</kbd> is a thread-local static variable:</p>
+<pre style="padding-left: 30px">thread_local! {
+    /// The per-thread participant for the default garbage collector.
+    static HANDLE: Handle = COLLECTOR.register();
+}</pre>
+<p><kbd>COLLECTOR</kbd> is a static, global variable:</p>
+<pre style="padding-left: 30px">lazy_static! {
+    /// The global data for the default garbage collector.
+    static ref COLLECTOR: Collector = Collector::new();
+}</pre>
+<p>This is a lot of new things all at once. Pinning is a non-trivial activity! As its name implies and its documentation states, <kbd>COLLECTOR</kbd> is the entry point for crossbeam-epoch's global garbage collector, called <kbd>Global</kbd>. <kbd>Collector</kbd> is defined in <kbd>src/collector.rs</kbd> and has a very brief implementation:</p>
+<pre style="padding-left: 30px">pub struct Collector {
+    pub(crate) global: Arc&lt;Global&gt;,
+}
+
+unsafe impl Send for Collector {}
+unsafe impl Sync for Collector {}
+
+impl Collector {
+    /// Creates a new collector.
+    pub fn new() -&gt; Self {
+        Collector { global: Arc::new(Global::new()) }
+    }
+
+    /// Registers a new handle for the collector.
+    pub fn register(&amp;self) -&gt; Handle {
+        Local::register(self)
+    }
+}</pre>
+<p>We know that <kbd>Collector</kbd> is a global static, implying that <kbd>Global::new()</kbd> will be called only once. <kbd>Global</kbd>, defined in <kbd>src/internal.rs</kbd>, is the data repository for the global garbage collector:</p>
+<pre style="padding-left: 30px">pub struct Global {
+    /// The intrusive linked list of `Local`s.
+    locals: List&lt;Local&gt;,
+
+    /// The global queue of bags of deferred functions.
+    queue: Queue&lt;(Epoch, Bag)&gt;,
+
+    /// The global epoch.
+    pub(crate) epoch: CachePadded&lt;AtomicEpoch&gt;,
+}</pre>
+<p>List is an intrusive list, which we saw reference to in the definition of <kbd>Local</kbd>. An intrusive list is a linked list in which the pointer to the next node in the list is stored in the data itself, the <kbd>entry: Entry</kbd> field of <kbd>Local</kbd>. Intrusive lists pop up fairly rarely, but they are quite useful when you're concerned about small memory allocations or need to store an element in multiple collections, both of which apply to crossbeam. <kbd>Queue</kbd> is a Michael and Scott queue. The epoch is a cache-padded <kbd>AtomicEpoch</kbd>, cache-padding being a technique to disable write contention on cache lines, called false sharing. <kbd>AtomicEpoch</kbd> is a wrapper around <kbd>AtomicUsize</kbd>. <kbd>Global</kbd> is, then, a linked-list of instances of <kbd>Local</kbd> – which, themselves, are associated with thread-pinned <kbd>Guards</kbd>—a queue of <kbd>Bag</kbd>s, which we haven't investigated yet, associated with some epoch number (a <kbd>usize</kbd>) and an atomic, global <kbd>Epoch</kbd>. This layout is not unlike what the algorithm description suggests. Once the sole <kbd>Global</kbd> is initialized, every thread-local <kbd>Handle</kbd> is created by calling <kbd>Collector::register</kbd>, which is <kbd>Local::register</kbd> internally:</p>
+<pre>    pub fn register(collector: &amp;Collector) -&gt; Handle {
+        unsafe {
+            // Since we dereference no pointers in this block, it is <br/>            // safe to use `unprotected`.
+
+            let local = Owned::new(Local {
+                entry: Entry::default(),
+                epoch: AtomicEpoch::new(Epoch::starting()),
+                collector: UnsafeCell::new(<br/>                    ManuallyDrop::new(collector.clone())<br/>                ),
+                bag: UnsafeCell::new(Bag::new()),
+                guard_count: Cell::new(0),
+                handle_count: Cell::new(1),
+                pin_count: Cell::new(Wrapping(0)),
+            }).into_shared(&amp;unprotected());
+            collector.global.locals.insert(local, &amp;unprotected());
+            Handle { local: local.as_raw() }
+        }
+    }</pre>
+<p>Note, specifically, that the <kbd>collector.global.locals.insert(local, &amp;unprotected())</kbd> call is inserting the newly created <kbd>Local</kbd> into the list of <kbd>Global</kbd> locals. (<kbd>unprotected</kbd> is a <kbd>Guard</kbd> that points to a null, rather than some valid <kbd>Local</kbd>). Every pinned thread has a <kbd>Local</kbd> registered with the global garbage collector's data. In fact, let's look at what happens when <kbd>Guard</kbd> is dropped, before we finish <kbd>defer</kbd>:</p>
+<pre>impl Drop for Guard {
+    #[inline]
+    fn drop(&amp;mut self) {
+        if let Some(local) = unsafe { self.local.as_ref() } {
+            local.unpin();
+        }
+    }
+}</pre>
+<p>The <kbd>unpin</kbd> method of <kbd>Local</kbd> is called:</p>
+<pre>    pub fn unpin(&amp;self) {
+        let guard_count = self.guard_count.get();
+        self.guard_count.set(guard_count - 1);
+
+        if guard_count == 1 {
+            self.epoch.store(Epoch::starting(), Ordering::Release);
+
+            if self.handle_count.get() == 0 {
+                self.finalize();
+            }
+        }
+    }</pre>
+<p>The <kbd>guard_count</kbd> field, recall, is the total number of participating threads or otherwise arranged for guards that keep the thread pinned. The <kbd>handle_count</kbd> field is a similar mechanism, but one used by <kbd>Collector</kbd> and <kbd>Local</kbd>. <kbd>Local::finalize</kbd> is where the action is:</p>
+<pre>    fn finalize(&amp;self) {
+        debug_assert_eq!(self.guard_count.get(), 0);
+        debug_assert_eq!(self.handle_count.get(), 0);
+
+        // Temporarily increment handle count. This is required so that  <br/>        // the following call to `pin` doesn't call `finalize` again.
+        self.handle_count.set(1);
+        unsafe {
+            // Pin and move the local bag into the global queue. It's <br/>            // important that `push_bag` doesn't defer destruction <br/>            // on any new garbage.
+            let guard = &amp;self.pin();
+            self.global().push_bag(&amp;mut *self.bag.get(), guard);
+        }
+        // Revert the handle count back to zero.
+        self.handle_count.set(0);</pre>
+<p><kbd>Local</kbd> contains a <kbd>self.bag</kbd> field of the <kbd>UnsafeCell&lt;Bag&gt;</kbd> type. Here's <kbd>Bag</kbd>, defined in <kbd>src/garbage.rs</kbd>:</p>
+<pre style="padding-left: 30px">pub struct Bag {
+    /// Stashed objects.
+    objects: ArrayVec&lt;[Garbage; MAX_OBJECTS]&gt;,
+}</pre>
+<p><kbd>ArrayVec</kbd> is new to this book. It's defined in the <kbd>ArrayVec</kbd> crate and is a <kbd>Vec</kbd> but with a capped maximum size. It's the same growable vector we know and love, but one that can't allocate to infinity. <kbd>Bag</kbd>, then, is a growable vector of <kbd>Garbage</kbd>, capped at <kbd>MAX_OBJECTS</kbd> total size:</p>
+<pre style="padding-left: 30px">#[cfg(not(feature = "strict_gc"))]
+const MAX_OBJECTS: usize = 64;
+#[cfg(feature = "strict_gc")]
+const MAX_OBJECTS: usize = 4;</pre>
+<p>Attempting to push garbage into a bag above <kbd>MAX_OBJECTS</kbd> will fail, signaling to the caller that it's time to collect some garbage. What <kbd>Local::finalize</kbd> is doing, specifically with <kbd>self.global().push_bag(&amp;mut *self.bag.get(), guard)</kbd>, is taking the <kbd>Local</kbd>'s bag of garbage and pushing it into the <kbd>Global</kbd>'s bag of garbage as a part of shutting <kbd>Local</kbd> down. <kbd>Global::push_bag</kbd> is:</p>
+<pre>    pub fn push_bag(&amp;self, bag: &amp;mut Bag, guard: &amp;Guard) {
+        let bag = mem::replace(bag, Bag::new());
+
+        atomic::fence(Ordering::SeqCst);
+
+        let epoch = self.epoch.load(Ordering::Relaxed);
+        self.queue.push((epoch, bag), guard);
+    }</pre>
+<p>Unpinning <kbd>Guard</kbd> potentially shuts down a <kbd>Local</kbd>, which pushes its garbage into the queue of epoch-tagged garbage in <kbd>Global</kbd>. Now that we understand that, let's finish <kbd>Guard::defer</kbd> by inspecting <kbd>Local::defer</kbd>:</p>
+<pre>    pub fn defer(&amp;self, mut garbage: Garbage, guard: &amp;Guard) {
+        let bag = unsafe { &amp;mut *self.bag.get() };
+
+        while let Err(g) = bag.try_push(garbage) {
+            self.global().push_bag(bag, guard);
+            garbage = g;
+        }
+    }</pre>
+<p>The pinned caller signals garbage to its <kbd>Guard</kbd> by calling <kbd>defer</kbd>. The <kbd>Guard</kbd>, in turn, defers this garbage to its <kbd>Local</kbd>, which enters a while loop wherein it attempts to push garbage onto the local bag of garbage but will shift garbage into <kbd>Global</kbd> so long as the local bag is full.</p>
+<p>When does garbage get collected from <kbd>Global</kbd>? The answer is in a function we've not yet examined, <kbd>Local::pin</kbd>.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

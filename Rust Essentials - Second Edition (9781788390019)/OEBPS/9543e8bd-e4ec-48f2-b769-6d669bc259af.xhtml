@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Some more examples of error-handling</h1>
+                </header>
+            
+            <article>
+                
+<p>Another way to obtain the same result is to wrap the dangerous read operation in a separate function, here the function <kbd>read_u32()</kbd> returns an <kbd>Option</kbd> type value to be tested in the main code:</p>
+<pre>// see code in Chapter 5/code/input_number2.rs 
+use std::io; <br/>fn main() { 
+    println!("Give an integer number bigger than 0:"); 
+    let num = read_u32(); 
+    match num { 
+        Some(val) =&gt; println!("That's the number: {}", val), 
+        None =&gt; println!("Failed to read number.") 
+    } 
+} 
+ 
+fn read_u32() -&gt; Option&lt;u32&gt; { 
+    let mut buf = String::new(); 
+    if io::stdin().read_line(&amp;mut buf).is_ok() { 
+        let result = buf.trim().parse::&lt;u32&gt;(); 
+        return match result {                            // (1)
+            Ok(value) =&gt; Some(value), 
+            Err(_) =&gt; None  //Failed to parse 
+        }; 
+    } 
+    None //Failed to read from stream 
+} </pre>
+<p>In this code, we effectively transform a <kbd>Result</kbd> type value into an <kbd>Option</kbd> type value in the <kbd>match</kbd> as it can be seen in line (1).</p>
+<p>Here is another example how we can use <kbd>Result</kbd> type to return an error condition and making a safe function for calculating the square root of a floating point number using the <kbd>std::f32<span>::sqrt()</span></kbd> function:</p>
+<pre>// see code in Chapter 5/code/sqrt_match.rs 
+fn sqroot(r: f32) -&gt; Result&amp;lt;f32, String&gt; { 
+if r &lt; 0.0 { 
+return Err("Number cannot be negative!".to_string()); 
+ } 
+    Ok(f32::sqrt(r)) 
+} </pre>
+<p>We guard against taking the square root of a negative number (which would give <kbd>NAN</kbd>--Not a Number) by returning an <kbd>Err</kbd> value.</p>
+<pre>let m = sqroot(42.0); </pre>
+<p>In the calling code, we use our trusted pattern match mechanism to distinguish between the two cases:</p>
+<pre>match m { 
+   Ok(sq) =&gt; println!("The square root of 42 is {}", sq), 
+   Err(str) =&gt; println!("{}", str) 
+} </pre>
+<p>So, in the normal case, we get output as follows:</p>
+<pre>    <strong>The square root of 42 is 6.480741</strong></pre>
+<p>With <kbd>let m = sqroot(-5.0);</kbd> the error message is printed as follows:</p>
+<pre>    <strong>Number cannot be negative!</strong>  </pre>
+<div class="packt_tip">Why are <kbd>Option</kbd> and <kbd>Result</kbd> killer features of Rust? The use of <kbd>match</kbd> for both <kbd>Option</kbd> and <kbd>Result</kbd> type values ensures that no null values or errors can propagate through your code, leaving no room for null pointer runtime errors or other exceptions to crash your program.</div>
+<p>Moving from a <em>crash on error</em> strategy to a strategy of actually <em>handling the error</em> means switching from <kbd>ok().expect()</kbd> or <kbd>ok().unwrap()</kbd> to a <kbd>match</kbd> statement that tests on the <kbd>Ok(T)</kbd> or <kbd>Err(E)</kbd> value outcome of the <kbd>Result</kbd> type value. You can still use the function <kbd>unwrap()</kbd> for quick prototyping.</p>
+<p>Another way of handling a <kbd>Result</kbd> type value which shows more clearly why an errors occurs is as follows:</p>
+<pre>let result = match process_result_value { 
+      Err(why) =&gt; panic!("some error occurred: {}", 
+      Error::description(&amp;why)), 
+      Ok(result) =&gt; result 
+}; </pre>
+<p>If the program could, in some way, recover from the error, we could decide not to stop it here, but just return to the calling function, like this:</p>
+<pre>let result = match process_result_value() { 
+    Err(why) =&gt; { println!("some error occurred: {}", 
+                               Error::description(&amp;why)); 
+             return; 
+ }, 
+    Ok(result) =&gt; result 
+}; </pre>
+<p>In many cases, you can also just test the outcome of the operation with the following:</p>
+<pre>if process_result_value().is_err() { 
+  // process error value 
+} </pre>
+<p>This will return <kbd>false</kbd> in case of an error.</p>
+<p>So, in Rust, errors are not exception objects like in other languages: that would not be possible because Rust has no virtual machine to catch exceptions. Rust uses a type-based approach to error-handling, instead of an exception being raised, an error is returned from a function in the <kbd>Result</kbd> type value, so that the developer can handle the error case.</p>
+<p>Exceptions result in complicated control-flow and they don't work well with multithreaded code, Rust avoids this with its error-handling mechanism.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

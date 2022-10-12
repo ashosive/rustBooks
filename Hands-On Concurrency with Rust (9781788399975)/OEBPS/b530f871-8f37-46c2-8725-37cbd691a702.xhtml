@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style00.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style01.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Pointers to memory</h1>
+                </header>
+            
+            <article>
+                
+<p>Rust defines several kinds of pointers, each with a specific purpose. <kbd>&amp;T</kbd> is a shared reference and there may be many duplicates of that shared reference. The owner of <kbd>&amp;T</kbd> does not necessarily, own <kbd>T</kbd> and may not modify it. Shared references are immutable. Mutable references—written <kbd>&amp;mut T</kbd>—also do not imply that the other  <kbd>&amp;mut T</kbd> owns <kbd>T</kbd> necessarily but the reference may be used to mutate <kbd>T</kbd>. There may be only one reference for any <kbd>T</kbd> with a <kbd>&amp;mut T</kbd>. This complicates some code but means that Rust is able to prove that two variables do not overlap in memory, unlocking a variety of optimization opportunities absent from C/C++. Rust references are designed so that the compiler is able to prove the liveness of the referred to type: references cannot dangle. This is not true of Rust's raw pointer types—<kbd>*const T</kbd> and <kbd>*mut T</kbd>—which work analogously to C pointers: they are, strictly, an address in memory and no guarantees about the data at that address are made. As such, many operations on raw pointers require the <kbd>unsafe</kbd> keyword and they are almost always seen solely in the context of performance-sensitive code or FFI interfaces. Put another way, a raw pointer may be null; a reference may never be null.</p>
+<p>The rules around references often cause difficulty in situations where an immutable borrow is accidentally made of a mutable reference. The Rust documentation uses the following small program to illustrate the difficulty:</p>
+<pre style="padding-left: 30px">fn main() {
+    let mut x: u8 = 5;
+    let y: &amp;mut u8 = &amp;mut x;
+
+    *y += 1;
+
+    println!("{}", x);
+}</pre>
+<p>The <kbd>println!</kbd> macro takes its arguments by reference, implicitly here, creating a <kbd>&amp;x</kbd>. The compiler rejects this program as <kbd>y: &amp;mut u8</kbd> is invalid. Were this program to compile, we would be subject to a race between the update of <kbd>y</kbd> and the read of <kbd>x</kbd>, depending on the CPU and memory ordering. The exclusive nature of references could be potentially limiting when working with structures. Rust allows programs to split borrows for a structure, providing that the disjoint fields cannot be aliased.</p>
+<p>We demonstrate this in the following brief program:</p>
+<pre style="padding-left: 30px">use std::fmt;
+
+enum Project {
+    Apollo,
+    Gemini,
+    Mercury,
+}
+
+impl fmt::Display for Project {
+    fn fmt(&amp;self, f: &amp;mut fmt::Formatter) -&gt; fmt::Result {
+        match *self {
+            Project::Apollo =&gt; write!(f, "Apollo"),
+            Project::Mercury =&gt; write!(f, "Mercury"),
+            Project::Gemini =&gt; write!(f, "Gemini"),
+        }
+    }
+}
+
+struct Mission {
+    project: Project,
+    number: u8,
+    duration_days: u8,
+}
+
+fn main() {
+    let mut mission = Mission {
+        project: Project::Gemini,
+        number: 2,
+        duration_days: 0,
+    };
+    let proj: &amp;Project = &amp;mission.project;
+    let num: &amp;mut u8 = &amp;mut mission.number;
+    let dur: &amp;mut u8 = &amp;mut mission.duration_days;
+
+    *num = 12;
+    *dur = 3;
+
+    println!("{} {} flew for {} days", proj, num, dur);
+}</pre>
+<p>This same trick is difficult to impossible for general container types. Consider a map where two keys map to the same referenced <kbd>T</kbd>. Or, for now, a slice:</p>
+<pre style="padding-left: 30px">use std::fmt;
+
+enum Project {
+    Apollo,
+    Gemini,
+    Mercury,
+}
+
+impl fmt::Display for Project {
+    fn fmt(&amp;self, f: &amp;mut fmt::Formatter) -&gt; fmt::Result {
+        match *self {
+            Project::Apollo =&gt; write!(f, "Apollo"),
+            Project::Mercury =&gt; write!(f, "Mercury"),
+            Project::Gemini =&gt; write!(f, "Gemini"),
+        }
+    }
+}
+
+struct Mission {
+    project: Project,
+    number: u8,
+    duration_days: u8,
+}
+
+fn main() {
+    let mut missions: [Mission; 2] = [
+        Mission {
+            project: Project::Gemini,
+            number: 2,
+            duration_days: 0,
+        },
+        Mission {
+            project: Project::Gemini,
+            number: 12,
+            duration_days: 2,
+        },
+    ];
+
+    let gemini_2 = &amp;mut missions[0];
+    let _gemini_12 = &amp;mut missions[1];
+
+    println!(
+        "{} {} flew for {} days",
+        gemini_2.project, gemini_2.number, gemini_2.duration_days
+    );
+}</pre>
+<p>This program fails to compile with the following error:</p>
+<pre><strong>&gt; rustc borrow_split_array.rs
+error[E0499]: cannot borrow `missions[..]` as mutable more than once at a time
+  --&gt; borrow_split_array.rs:40:27
+   |
+39 |     let gemini_2 = &amp;mut missions[0];
+   |                         ----------- first mutable borrow occurs here
+40 |     let _gemini_12 = &amp;mut missions[1];
+   |                           ^^^^^^^^^^^ second mutable borrow occurs here
+...
+46 | }
+   | - first borrow ends here
+
+error: aborting due to previous error</strong></pre>
+<p>We, the programmers<em>,</em> know that this was safe—<kbd>gemini_2</kbd> and <kbd>gemini_12</kbd> don't overlap in memory—but it's not possible for the compiler to prove this. What if we had done the following:</p>
+<pre style="padding-left: 30px">use std::fmt;
+
+enum Project {
+    Apollo,
+    Gemini,
+    Mercury,
+}
+
+impl fmt::Display for Project {
+    fn fmt(&amp;self, f: &amp;mut fmt::Formatter) -&gt; fmt::Result {
+        match *self {
+            Project::Apollo =&gt; write!(f, "Apollo"),
+            Project::Mercury =&gt; write!(f, "Mercury"),
+            Project::Gemini =&gt; write!(f, "Gemini"),
+        }
+    }
+}
+
+struct Mission {
+    project: Project,
+    number: u8,
+    duration_days: u8,
+}
+
+fn main() {
+    let gemini_2 = Mission {
+        project: Project::Gemini,
+        number: 2,
+        duration_days: 0,
+    };
+
+    let mut missions: [&amp;Mission; 2] = [&amp;gemini_2, &amp;gemini_2];
+
+    let m0 = &amp;mut missions[0];
+    let _m1 = &amp;mut missions[1];
+
+    println!(
+        "{} {} flew for {} days",
+        m0.project, m0.number, m0.duration_days
+    );
+}</pre>
+<p>By definition, <kbd>missions[0]</kbd> and <kbd>missions[1]</kbd> overlap in memory. We, the programmers, know we're breaking the aliasing rules and the compiler, being conservative, assumes that the rules are being broken.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

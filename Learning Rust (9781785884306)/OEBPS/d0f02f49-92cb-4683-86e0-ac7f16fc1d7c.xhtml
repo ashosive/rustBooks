@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style00.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style01.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Comparison to C</h1>
+                </header>
+            
+            <article>
+                
+<p>Consider the following C code:</p>
+<pre>    void myFunction() 
+    { 
+        int *memblock = malloc(sizeof(int)); 
+        *memblock = 256; 
+        printf("%d\n", *memblock); 
+        free(memblock); 
+    } </pre>
+<p>Here's what the preceding code does:</p>
+<ol>
+<li>The <kbd>int</kbd> line allocates a block of memory large enough to store an integer value. The <kbd>memblock</kbd> variable will be in the stack, and the block of memory it points to will be in the heap.</li>
+<li>A value <kbd>256</kbd> is placed at the location pointed to by <kbd>x</kbd>.</li>
+<li>The value of the memory location pointed to by <kbd>x</kbd> is printed out.</li>
+<li>The memory allocated to <kbd>memblock</kbd> is deallocated.</li>
+</ol>
+<p>This works well, but has the following three major drawbacks:</p>
+<ul>
+<li>Once the memory is deallocated, it is still entirely possible to use <kbd>memblock</kbd>. Should you try to do this, the application will exhibit undefined behavior; most likely, the application will just quit, but there is also a chance that it will corrupt memory, which will cause a system crash. The compiler will make no attempt to warn you that you've done this, as it assumes you know what you're doing.</li>
+<li>If you allocate a type larger than what was placed into the <kbd>sizeof</kbd>, this will also give rise to undefined behavior. You are essentially trying to put a quart into a pint pot.</li>
+<li>If <kbd>free</kbd> is not called, the memory remains reserved, even though nothing points to it anymore, which leads to memory leaks.</li>
+</ul>
+<p>You can perform something similar in Rust but, as we'll see, Rust prevents this undefined behavior automatically:</p>
+<pre>    fn myMemory() 
+    { 
+        let memblock: Box&lt;i64&gt; = Box::new(256); 
+        println!("{}", memblock); 
+    } </pre>
+<p>There are a number of differences between the C and Rust code versions. They are as follows:</p>
+<ul>
+<li>In C, you allocate heap memory with the <kbd>malloc</kbd> function. In Rust, we use an owned pointer via the <kbd>Box&lt;T&gt;</kbd> generic.</li>
+<li>The call to <kbd>malloc</kbd> in C returns an <kbd>int</kbd> pointer (<kbd>int *</kbd>). In Rust, a smart pointer (<kbd>Box&lt;T&gt;</kbd>) is returned, in this case to an <kbd>i64</kbd>. A smart pointer is called smart as it controls when the object is freed. This can be when the pointer goes out of scope without the pointer being given away. Rust keeps track of objects and how to clean the memory up.</li>
+</ul>
+<p>Another useful smart pointer type is the reference counted pointer, <kbd>Rc&lt;T&gt;</kbd>. This generic type allows the sharing of the data inside it over multiple locations. It works so that whenever the <kbd>Rc</kbd> binding gets cloned, a reference count is incremented. Whenever such a binding gets deallocated, the reference count is decremented. Only when the reference count reaches zero is the underlying value deallocated. Note that <kbd>Rc&lt;T&gt;</kbd> works only in single-threaded scenarios.</p>
+<p>It is used like this:</p>
+<pre>   // 05/rc-1/src/main.rs <br/>   use std::rc::Rc; 
+ 
+    fn main() 
+    { 
+        let memblock: Rc&lt;i64&gt; = Rc::new(256); <br/>        // allocate space on the heap and assign 
+        secondMethod(memblock.clone()); <br/>        // clone a new reference counted pointer and pass it on to the method 
+        println!("{}", memblock); <br/>        // output the value 
+    } // free memory here 
+ 
+    fn secondMethod(memblock: Rc&lt;i64&gt;) 
+    { 
+        println!("In secondMethod and memblock is {}", memblock); 
+        let secMemblock: Rc&lt;i64&gt; = memblock.clone(); <br/>        // yet another reference counted pointer to memblock 
+    } <br/>    // secMemblock goes out of scope, but the memory is not deallocated </pre>
+<p>In this code, we make several clones of the reference counted pointer. At the peak (on the second line of the <kbd>secondMethod</kbd> function), we have a total of three pointers to the underlying heap. When we leave <kbd>secondMethod</kbd>, the pointer allocated via the <kbd>secMemBlock</kbd> variable gets destructed. Then the <kbd>memBlock</kbd> clone gets deallocated. Finally, when we exit the main function, the last pointer goes away and the heap memory is deallocated.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

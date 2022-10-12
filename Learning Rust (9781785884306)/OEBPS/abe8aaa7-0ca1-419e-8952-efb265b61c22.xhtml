@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Impl</h1>
+                </header>
+            
+            <article>
+                
+<p>The <kbd>impl</kbd> keyword works in a very similar way to a function. The structure of an implementation needs to considered as being closer to a static class (in C#) or as a function within a function:</p>
+<pre class="mce-root">impl MyImpl<br/>{<br/>  fn reference_name (&amp;self) ... <br/>}</pre>
+<p>This would be more for a non-generic type. For generics, the preceding code becomes the following:</p>
+<pre class="mce-root">impl &lt;T&gt; MyGenericImpl&lt;T&gt;<br/>{<br/>  fn reference_name(&amp;self) ... <br/>}</pre>
+<p>Note that the <kbd>&lt;T&gt;</kbd> is required to tell the compiler that the <kbd>impl</kbd> is for a generic. <kbd>reference_name</kbd> is the name used to access the <kbd>impl</kbd> function. It can be anything you wish.</p>
+<div class="packt_infobox">An example of <kbd>impl</kbd> can be found in <kbd>09/impl_example</kbd>.</div>
+<p>If you build and run the <kbd>impl_example</kbd> code, you will get a result like this:</p>
+<div class="CDPAlignCenter CDPAlign"><img src="Images/aa093cbc-009c-4051-97c1-4e68fc56b2c5.png" width="583" height="133"/></div>
+<p>The code creates two implementations for two functions that provide a defined functionality.</p>
+<p>The <kbd>impl_example</kbd> is a very simple example. An <kbd>impl</kbd> can be as complex as required.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style00.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style01.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Working with Cargo</h1>
+                </header>
+            
+            <article>
+                
+<p>Cargo is Rust's package and dependency manager, like Bundler, npm, pub, or pip for other languages. Although you can write Rust programs without it, Cargo is nearly indispensable for any larger project. It works the same whether you work on a Windows, Linux, or OS X system. The installation procedure from the previous section includes the Cargo tool, <strong>cargo</strong>, so Rust is shipped with the batteries included.</p>
+<p>Cargo does the following things for you:</p>
+<ul>
+<li>It makes a tidy folder structure and some templates for your project, with the following command:</li>
+</ul>
+<pre>    <strong>cargo new</strong>  </pre>
+<ul>
+<li>It compiles (builds) your code, using the following command:</li>
+</ul>
+<pre>    <strong>cargo build</strong></pre>
+<ul>
+<li>It runs your project, using the following command:</li>
+</ul>
+<pre>    <strong>cargo run</strong></pre>
+<ul>
+<li>If your project contains unit-tests, it can execute them for you, using the following command:</li>
+</ul>
+<pre>    <strong>cargo test</strong></pre>
+<ul>
+<li>If your project depends on packages, it will download them and it will build these packages according to the needs of your code, using the following command:</li>
+</ul>
+<pre><strong>    cargo update</strong></pre>
+<p>We'll introduce how to use Cargo now, and we'll come back to it later, but you can find more info at <a href="http://doc.crates.io/guide.html"><span class="URLPACKT">http://doc.crates.io/guide.html</span></a>.</p>
+<p>Let's remake our first project, <kbd>welcome</kbd>, using Cargo through the following steps:</p>
+<ol>
+<li>Start a new project, <kbd>welcomec</kbd>, with the following command:</li>
+</ol>
+<pre><strong>cargo new welcomec --bin</strong>  </pre>
+<ul>
+<li class="packt_nosymbol">The option <kbd>--bin</kbd> tells Cargo that we want to make an executable program (a binary). This outputs the message <kbd>Created binary (application) `welcomec` project</kbd> <span class="NormalPACKTChar">a</span>nd creates the following directory structure:
+<div class="packt_figure CDPAlignCenter CDPAlign"><img height="135" width="304" class=" image-border" src="Images/0d782c55-7a2e-4a91-b96e-000656a91f17.png"/></div>
+</li>
+<li class="packt_nosymbol">A folder with the same name as the project is created as a local Git project. In this folder, you can put all kinds of general info such as a License file, a README file, and so on. Also, a subfolder, <kbd>src,</kbd> is created, containing a template source file named <kbd>main.rs</kbd> (this contains the same code as our <kbd>welcome.rs</kbd>, but prints out the string <kbd>"Hello, world!"</kbd>).</li>
+<li class="packt_nosymbol">The file <kbd>Cargo.toml</kbd> (with a capital C) is the configuration file or manifest of your project; it contains all the metadata Cargo needs to compile your project. It follows the so called <strong>TOML format</strong> (for more details about this format, see <a href="https://github.com/toml-lang/toml"><span class="URLPACKT">https://github.com/toml-lang/toml</span></a>), and contains the following text with information about the project:</li>
+</ul>
+<pre>[package] 
+name = "welcomec" 
+version = "0.1.0" 
+authors = ["Your name &lt;you@example.com&gt;"] 
+<a>[dependencies]</a></pre>
+<ul>
+<li class="packt_nosymbol">This file is editable and other sections can be added. For example, you can add a section to tell Cargo that we want a binary with name:</li>
+</ul>
+<pre>welcome: 
+<a>[[bin]]  </a> 
+name = "welcome" </pre>
+<ol start="2">
+<li>We build our project (no matter how many source files it contains) with the following command:</li>
+</ol>
+<pre><strong>cargo build</strong></pre>
+<ul>
+<li class="packt_nosymbol">Which gives us the following output (on Linux):</li>
+</ul>
+<pre>    <strong>Compiling welcomec v0.1.0 (file:///home/ivo/Rust_Book/welcomec)</strong>
+    <strong>Finished dev [unoptimized + debuginfo] target(s) in 0.66 secs</strong></pre>
+<ul>
+<li class="packt_nosymbol">Now, the following folder structure is produced:
+<div class="packt_figure CDPAlignCenter CDPAlign"><img height="192" width="354" class=" image-border" src="Images/d4cfea22-971c-4ae3-9ebe-810391f4dcad.png"/></div>
+</li>
+<li class="packt_nosymbol">The <kbd>target/debug</kbd>directory contains the executable <kbd>welcome</kbd>.</li>
+</ul>
+<ol start="3">
+<li>To execute this program, give the following command:</li>
+</ol>
+<pre>    <strong>cargo run</strong></pre>
+<ul>
+<li class="packt_nosymbol">Which produces as output:</li>
+</ul>
+<pre><strong>    Running `target/debug/welcome`</strong>
+    <strong>Hello, world!</strong></pre>
+<p>Step 2 has also produced a file called <kbd>Cargo.lock</kbd>; this is used by Cargo to keep track of dependencies in your application. At this moment, it contains only the following:</p>
+<pre>[root] 
+name = "welcomec" 
+version = "0.1.0" </pre>
+<p>The same format is used to lock down the versions of libraries or packages your project depends on. If your project is built in the future, when updated versions of the libraries are available, Cargo will make sure that only the versions recorded in <kbd>Cargo.lock</kbd> are used, so that your project is not built with an incompatible version of a library. This ensures a repeatable build process.</p>
+<p>The <kbd>cargo -list</kbd> gives you an overview of the commands you can use within this tool.</p>
+<div class="packt_infobox"><span class="packt_screen">Exercise</span>: <strong><br/></strong>Make, build, and run a project, <kbd>name</kbd>, that prints out your name with Cargo.</div>
+<p>The site <a href="https://crates.io/"><span class="URLPACKT">https://crates.io/</span></a> is the central repository for Rust packages, or crates as they are called, containing over 10000 crates at the end of June 2017. You can search for crates with specific terms, or browse them alphabetically or by number of downloads. The site looks like the following:</p>
+<div class="packt_figure CDPAlignCenter CDPAlign"><img height="383" width="625" class=" image-border" src="Images/161a8b30-4375-47d9-bf70-e3b277381f10.png"/></div>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

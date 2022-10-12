@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style00.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style01.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Is there anything Cargo can't do?</h1>
+                </header>
+            
+            <article>
+                
+<p>For a Rust developer, Cargo is an amazing utility. In addition to these common facilities, it also has other commands, which are listed in the table that follows. All commands follow this form:</p>
+<pre><strong>cargo &lt;command&gt; &lt;opts&gt;</strong>  </pre>
+<table class="MsoTableGrid">
+<tbody>
+<tr>
+<td>
+<p><strong>Command</strong></p>
+</td>
+<td>
+<p><strong>What it does</strong></p>
+</td>
+</tr>
+<tr>
+<td>
+<pre><strong>fetch</strong></pre></td>
+<td>
+<p>This command fetches the dependencies of a package from the network. If a lockfile is available, this command will ensure that all of the Git dependencies and/or registry dependencies are downloaded and locally available. The network is never called after a <kbd>cargo fetch</kbd> unless the lockfile changes.</p>
+<p>If the lockfile is not available, then this is the equivalent of <kbd>cargo generate-lockfile</kbd>. A lockfile is generated and all the dependencies are also updated.</p>
+</td>
+</tr>
+<tr>
+<td>
+<pre><strong>generate-lockfile</strong></pre></td>
+<td>
+<p>This command generates the lockfile for a project. The lockfile is typically generated when <kbd>cargo build</kbd> is issued (you will see it as <kbd>Cargo.lockfile</kbd> in the directory structure).</p>
+</td>
+</tr>
+<tr>
+<td>
+<pre><strong>git-checkout</strong></pre></td>
+<td>
+<p>This command checks out a Git repository. You will need to use it in the following form:</p>
+<pre><strong>cargo git-checkout -url=URL</strong>        </pre></td>
+</tr>
+<tr>
+<td>
+<pre><strong>locate-project</strong></pre></td>
+<td>
+<p>This command locates a package.</p>
+</td>
+</tr>
+<tr>
+<td>
+<pre><strong>login</strong></pre></td>
+<td>
+<p>This command saves an API token from the registry locally. The call is in the following form:</p>
+<pre><strong>cargo login -host=HOST   token</strong>        </pre></td>
+</tr>
+<tr>
+<td>
+<pre><strong>owner</strong></pre></td>
+<td>
+<p>This command manages the owners of a crate on the registry. This allows the ownership of a crate (a crate is a Rust library) to be altered (<kbd>--add LOGIN</kbd> or <kbd>-remove LOGIN</kbd>) as well as adding tokens to the crate.</p>
+<p>This command will modify the owners for a package on the specified registry (or the default). Note that the owners of a package can upload new versions, yank old versions, and also modify the set of owners, so be cautious!</p>
+</td>
+</tr>
+<tr>
+<td>
+<pre><strong>package</strong></pre></td>
+<td>
+<p>This command assembles the local package into a distributable tarball.</p>
+</td>
+</tr>
+<tr>
+<td>
+<pre><strong>pkgid</strong></pre></td>
+<td>
+<p>This command prints a fully qualified package specification.</p>
+</td>
+</tr>
+<tr>
+<td>
+<pre><strong>publish</strong></pre></td>
+<td>
+<p>This command uploads a package to the registry.</p>
+</td>
+</tr>
+<tr>
+<td>
+<pre><strong>read-manifest</strong></pre></td>
+<td>
+<p>This command reads the manifest file (<kbd>.toml</kbd>).</p>
+</td>
+</tr>
+<tr>
+<td>
+<pre><strong>rustc</strong></pre></td>
+<td>
+<p>This command compiles the complete package.</p>
+<p>The specified target for the current package will be compiled along with all of its dependencies. The specified options will all be passed to the final compiler invocation, not any of the dependencies. Note that the compiler will still unconditionally receive arguments such as <kbd>-L</kbd>, <kbd>--extern</kbd>, and <kbd>--crate-type</kbd>, and the specified options will simply be added to the compiler invocation.</p>
+<p>This command requires that only one target is being compiled. If more than one target is available for the current package, the filters <kbd>--lib</kbd>, <kbd>--bin</kbd>, and so on—must be used to select which target is compiled.</p>
+</td>
+</tr>
+<tr>
+<td>
+<pre><strong>search</strong></pre></td>
+<td>
+<p>This command searches for packages at <a href="https://crates.io/"><span class="URLPACKT">https://crates.io/</span></a>.</p>
+</td>
+</tr>
+<tr>
+<td>
+<pre><strong>update</strong></pre></td>
+<td>
+<p>This command updates dependencies as recorded in the local lockfile.</p>
+<p>Typical options are:</p>
+<ul>
+<li><kbd>--package SPEC</kbd> (package to update)</li>
+<li><kbd>--aggressive</kbd> (forcibly update all dependencies of <kbd>&lt;name&gt;</kbd> as well)</li>
+<li><kbd>--precise PRECISE</kbd> (update a single dependency to exactly <kbd>PRECISE</kbd>)</li>
+</ul>
+<p>This command requires that a <kbd>Cargo.lock</kbd> file already exists as generated by <kbd>cargo build</kbd> or related commands.</p>
+<p>If a package spec name (<kbd>SPEC</kbd>) is given, then a conservative update of the lockfile will be performed. This means that only the dependency specified by <kbd>SPEC</kbd> will be updated. Its transitive dependencies will be updated only if <kbd>SPEC</kbd> cannot be updated without updating the dependencies. All other dependencies will remain locked at their currently recorded versions.</p>
+<p>If <kbd>PRECISE</kbd> is specified, then <kbd>--aggressive</kbd> must not also be specified. The argument <kbd>PRECISE</kbd> is a string representing a precise revision that the package being updated should be updated to. For example, if the package comes from a Git repository, then <kbd>PRECISE</kbd> would be the exact revision that the repository should be updated to.</p>
+<p>If <kbd>SPEC</kbd> is not given, then all the dependencies will be re-resolved and updated.</p>
+</td>
+</tr>
+<tr>
+<td>
+<pre><strong>verify-project</strong></pre></td>
+<td>
+<p>This command ensures that the project is correctly created.</p>
+</td>
+</tr>
+<tr>
+<td>
+<pre><strong>version</strong></pre></td>
+<td>
+<p>This command shows the version of Cargo.</p>
+</td>
+</tr>
+<tr>
+<td>
+<pre><strong>yank</strong></pre></td>
+<td>
+<p>This command removes a pushed crate from the index.</p>
+<p>The <kbd>yank</kbd> command removes a previously pushed crate version from the server's index. This command does not delete any data, and the crate will still be available for download via the registry's download link.</p>
+<p>Note that existing crates locked to a yanked version will still be able to download the yanked version to use it. Cargo will, however, not allow any new crates to be locked to any yanked version.</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p> </p>
+<p>As you can now appreciate, the Cargo utility script is extremely powerful and flexible.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

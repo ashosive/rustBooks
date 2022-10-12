@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style00.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style01.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Binding variables to values</h1>
+                </header>
+            
+            <article>
+                
+<p>Storing all values in constants is not an option. It is not good because constants live as long as the program and moreover can't change, and often we want to change values. In Rust, we can bind a value to a variable by using a <kbd>let</kbd> binding.</p>
+<pre>// see Chapter 2/code/bindings.rs 
+fn main() { 
+  let energy = 5; // value 5 is bound to variable energy 
+} </pre>
+<p>Unlike in many other languages, such as Python or Go, the semicolon,<kbd>;</kbd>, is needed here to end the statement. Otherwise, the compiler throws an error, as follows:</p>
+<pre><strong>error: expected one of `.`, `;`, or an operator, found `}`</strong></pre>
+<p>We also want to create bindings only when they are used in the rest of the program, but don't worry, the Rust compiler warns us about that. The warning looks like the following:</p>
+<pre><strong>    
+values.rs:2:6: 2:7 warning: unused variable: `energy`, #[warn(unused_variables)] on by default
+    
+  </strong></pre>
+<p>For prototyping purposes, you can suppress that warning by prefixing the variable name with an <kbd>_</kbd>, like in <kbd>let _ energy = 5;</kbd> in general <kbd>_</kbd> is used for variables we don't need.</p>
+<p>Notice that in the declaration above we did not need to indicate the type. Rust infers the type of the <kbd>energy</kbd> variable to be an integer; the <kbd>let</kbd> binding triggers that. If the type is not obvious, the compiler searches in the code context where the variable gets a value or how it is used.</p>
+<p>But giving type hints like <kbd>let energy = 5u16;</kbd> is also OK; that way, you help the compiler a bit by indicating the type of <kbd>energy</kbd>, in this case a two-byte unsigned integer.</p>
+<p>We can use the variable <kbd>energy</kbd> by using it in an expression, for example assigning it to another variable, or printing it:</p>
+<pre>let copy_energy = energy; 
+println!("Your energy is {}", energy);); </pre>
+<p>Here are some other declarations:</p>
+<pre>let level_title = "Level 1"; 
+let dead = false; 
+let magic_number = 3.14f32; 
+let empty = ();  // the value of the unit type () </pre>
+<p>The value of the <kbd>magic_number</kbd> variable could also be written as <kbd>3.14_f32</kbd>; the <kbd>_</kbd> separates the digits from the type to improve readability.</p>
+<p>Declarations can replace previous declarations of the same variable. Consider a statement like the following:</p>
+<pre>let energy = "Abundant"; </pre>
+<p>It would now bind the variable <kbd>energy</kbd> to the value <kbd>Abundant</kbd> of type string. The old declaration can no longer be used and its memory is freed.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

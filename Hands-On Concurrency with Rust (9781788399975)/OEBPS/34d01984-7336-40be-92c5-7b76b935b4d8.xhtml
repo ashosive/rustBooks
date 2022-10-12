@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style00.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style01.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Further reading</h1>
+                </header>
+            
+            <article>
+                
+<ul>
+<li><em>Hazard Pointers: Safe Memory Reclamation for Lock-Free Objects</em>, Maged Michael. This paper introduces the hazard-pointer reclamation technique discussed in this chapter. The paper specifically discusses the newly invented technique in comparison to reference counting and demonstrates the construction of a safe Michael and Scott queue using the hazard pointer technique.</li>
+<li><em>Practical Lock-Freedom</em>, Keir Fraser. This is Keir Fraser's PhD thesis and is quite long, being concerned with the introduction of abstractions to ease the writing of lock-free structures—one of which is epoch-based reclamation—and the introduction of lock-free search structures, skip-lists, binary search trees, and red-black trees. Warmly recommended.</li>
+<li><em>Performance of Memory Reclamation for Lockless Synchronization</em>, Thomas Hart et al. This paper provides an overview of four techniques, all of which were discussed in passing in <a href="d42acb0b-a05e-4068-894f-81365d147bf4.xhtml" target="_blank">Chapter 6</a>, <em>Atomics –<span> </span>the Primitives of Synchronization</em>, of this book, and three of which were discussed in-depth in this chapter. Further, the paper introduces an optimization to epoch-based reclamation, which has influenced crossbeam, if your author is not mistaken. The paper is an excellent overview of the algorithms and provides comparative measurements of the algorithms' performance in a well-defined manner.</li>
+<li><em>RFCs for changes to Crossbeam</em>, available at <a href="https://github.com/crossbeam-rs/rfcs">https://github.com/crossbeam-rs/rfcs</a>. This Github repository is the primary discussion point for large-scale changes to the crossbeam library and is an especially important read for its discussions. For instance, RFC 2017-07-23-relaxed-memory lays out the changes necessary to crossbeam to operate on relaxed-memory systems, a topic rarely discussed in the literature.</li>
+<li><em>CDSCHECKER: Checking Concurrent Data Structures Written with C/C++ Atomics</em>, Brian Norris and Brian Demsky. This paper introduces a tool for checking the behavior of concurrent data structures according to the C++11/LLVM memory model. Given how utterly confounding relaxed-memory ordering can be, this tool is extremely useful when doing C++ work. I am unaware of a Rust analog but hope this will be seen as an opportunity for some bright spark reading this. Good luck, you.</li>
+<li><em>A Promising Semantics for Relaxed-Memory Concurrency</em>, Jeehoon Kang et al. Reasoning about the memory model proposed in C++/LLVM is very difficult. Which, despite how many people have thought about it in-depth over the years, there's still active research into formalizing this model to validate the correct function of optimizers and algorithms. Do read this paper in conjunction with <kbd>CDSCHECKER</kbd> by Norris and Demsky.</li>
+</ul>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

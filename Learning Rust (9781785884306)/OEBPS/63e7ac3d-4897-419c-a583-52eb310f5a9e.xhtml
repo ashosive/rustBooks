@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">std::Any</h1>
+                </header>
+            
+            <article>
+                
+<p>This module enables the dynamic casting of <kbd>'static</kbd> via runtime reflection.</p>
+<div class="mce-root packt_tip packt_infobox">It can be used to obtain a <kbd>TypeId</kbd>. When used as a borrowed trait reference (<kbd>&amp;Any</kbd>), it can be used to determine whether the value is a given type (using <kbd>Is</kbd>) and also to get a reference to the inner value as a type (using <kbd>downcast_ref</kbd>). <kbd>&amp;mut Any</kbd> will allow access to <kbd>downcast_mut</kbd>, which obtains the mutable reference to the inner value. <kbd>&amp;Any</kbd> can only be used for testing a specific type and cannot be used to test whether a type implements a trait.</div>
+<p><strong>Structs</strong></p>
+<ul>
+<li><kbd>TypeId</kbd>: <kbd>TypeId</kbd> is an opaque object that cannot be examined, but does allow for clone, compare, print, and show. Only available for types that use <kbd>'static</kbd>.</li>
+</ul>
+<p><strong>Implement</strong></p>
+<ul>
+<li><kbd>of&lt;T&gt;() -&gt; TypeId where T:’static + Reflect + ?Sized</kbd>: <span>This returns the <kbd>TypeId</kbd> of the type <kbd>T</kbd> the function was instantiated with.</span></li>
+</ul>
+<p><strong>Traits</strong></p>
+<ul>
+<li><kbd>pub trait Any: 'static + Reflect {fn get_type_id(&amp;self) -&gt; TypeId;}</kbd>: <span>Emulates dynamic typing.</span></li>
+</ul>
+<p style="font-weight: 400"><strong>Trait methods</strong></p>
+<ul>
+<li><kbd>impl Any + 'static</kbd>
+<ul>
+<li><kbd>is&lt;T&gt;(&amp;self) -&gt; bool where T:Any</kbd>: Returns <kbd>true</kbd> if the boxed type is the same as <kbd>T</kbd></li>
+<li><kbd>downcast_ref&lt;T&gt;(&amp;self) -&gt; Option&lt;&amp;T&gt; where T:Any</kbd>: Returns <kbd>ref</kbd> to the boxed value whether it is of type <kbd>T</kbd> or <kbd>None</kbd></li>
+<li><kbd>downcast_mut&lt;T&gt;(&amp;mut self) -&gt; Option&lt;&amp;mut T&gt; where T:Any</kbd>: As for <kbd>downcast_ref</kbd> but returns a mutable <kbd>ref</kbd> or <kbd>None</kbd></li>
+</ul>
+</li>
+<li><kbd>impl Any + 'static + Send</kbd>
+<ul>
+<li><kbd>is&lt;T&gt;(&amp;self) -&gt; bool where T:Any</kbd>: Sends to the method defined on the type <kbd>Any</kbd></li>
+<li><kbd>downcast_ref&lt;T&gt;(&amp;self) -&gt; Option&lt;&amp;T&gt; where T:Any</kbd>: Sends to the method defined on the type <kbd>Any</kbd></li>
+<li><kbd>downcast_mut&lt;T&gt;(&amp;mut self) -&gt; Option&lt;&amp;mut T&gt; where T:Any</kbd>: Sends to the method defined on the type <kbd>Any</kbd></li>
+</ul>
+</li>
+</ul>
+<p><strong>Trait implementations</strong></p>
+<ul>
+<li><kbd>impl Debug for Any + ‘static</kbd> 
+<ul>
+<li><kbd>fmt(&amp;self, f: &amp;mut Formatter) -&gt; Result&lt;(), Error&gt;</kbd>: Format the value using the formatter</li>
+</ul>
+</li>
+<li><kbd>impl Debug for Any + ‘static + Send</kbd> 
+<ul>
+<li>
+<p><kbd>fmt(&amp;self, f: &amp;mut Formatter) -&gt; Result&lt;(), Error&gt;</kbd>: Sends to the method defined on the <kbd>Debug</kbd> method</p>
+</li>
+</ul>
+</li>
+</ul>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

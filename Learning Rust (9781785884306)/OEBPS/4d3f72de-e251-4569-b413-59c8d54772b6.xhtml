@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">The structure of a struct</h1>
+                </header>
+            
+            <article>
+                
+<p>A <kbd>struct</kbd> type consists of three parts: the keyword <kbd>struct</kbd>, the <kbd>struct</kbd> name, and the variables it holds. Let's consider the following command as an example:</p>
+<pre>struct MyStruct 
+{ 
+    foo: i32, 
+    bar: f32, 
+} </pre>
+<p>It is important to note that, unlike normal variable definitions, a comma follows directly after the variable type and not a semicolon.</p>
+<p>For our example, we can define two <kbd>struct</kbd> types, one for the room and one for the house, as follows:</p>
+<pre>struct Room 
+{  
+    is_upstairs: bool, 
+    number_of_doors: i32, 
+    number_of_windows: i32, 
+    window_type: String, 
+    has_curtains: bool, 
+    wood_or_carpet: bool, 
+    carpet_color: String, 
+    room_name: String, 
+    has_wardrobe: bool, 
+    room_width: f32, 
+    room_height: f32, 
+} </pre>
+<p>Our house will therefore be as follows:</p>
+<pre>struct House 
+{ 
+    room:... um... 
+} </pre>
+<p>A <kbd>struct</kbd>, while a special type of variable, is still a variable, and as such as a type; a <kbd>struct</kbd>. We can therefore assign it the same way as we can any other variable type:</p>
+<pre>struct House 
+{ 
+     room: Room, 
+} </pre>
+<p>This is fine if we have a house with a single room! We can define an array of rooms, but then that means we will have a fixed number of rooms. Instead, we will define it as the type used within a vector:</p>
+<pre>struct House 
+{ 
+     rooms: Vec&lt;Room&gt; 
+} </pre>
+<p>We created two special types of variable that we can declare and access as we would with any other variable. If we look at the room definition, we can break the structure down further; but why would we want to do that?</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

@@ -1,0 +1,1107 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style00.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style01.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+            <header>
+                <h1>Table of Contents</h1>
+            </header>
+
+            <article>
+                <nav epub:type="toc" id="toc">
+                    <ol><li style="list-style-type:none" hidden="hidden" class="front-matter miscellaneous ">
+            <a href="45298e32-c1c3-488b-876c-7495a4e576eb.xhtml" class="front-matter miscellaneous ">Title Page</a>
+    
+    
+</li>
+<li style="list-style-type:none" hidden="hidden" class="front-matter miscellaneous ">
+            <a href="142d21b9-9445-48ac-9134-62727f5c8d72.xhtml" class="front-matter miscellaneous ">Copyright and Credits</a>
+    
+    <ol><li style="list-style-type:none" hidden="hidden" class="">
+            <a href="cfd07947-b3a4-4553-a924-334a079fc686.xhtml" class="">Hands-On Functional Programming in Rust</a>
+    
+    
+</li>
+</ol>
+</li>
+<li style="list-style-type:none" hidden="hidden" class="front-matter miscellaneous ">
+            <a href="826fbd74-48d7-4db0-81a1-fa0fbe464926.xhtml" class="front-matter miscellaneous ">Packt Upsell</a>
+    
+    <ol><li style="list-style-type:none" hidden="hidden" class="">
+            <a href="4353c2e2-332d-45ea-acac-793c7cee996d.xhtml" class="">Why subscribe?</a>
+    
+    
+</li>
+<li style="list-style-type:none" hidden="hidden" class="">
+            <a href="832d728e-b63b-42c2-807d-a31c047dd2a1.xhtml" class="">PacktPub.com</a>
+    
+    
+</li>
+</ol>
+</li>
+<li style="list-style-type:none" hidden="hidden" class="front-matter miscellaneous ">
+            <a href="b61766ab-fb03-4b4b-a717-9319a7b4c279.xhtml" class="front-matter miscellaneous ">Contributors</a>
+    
+    <ol><li style="list-style-type:none" hidden="hidden" class="">
+            <a href="962e90f5-fd0b-4f5a-a687-d33bc63d611a.xhtml" class="">About the author</a>
+    
+    
+</li>
+<li style="list-style-type:none" hidden="hidden" class="">
+            <a href="3c241bda-70e5-44f3-b76a-843c28dff8d0.xhtml" class="">About the reviewer</a>
+    
+    
+</li>
+<li style="list-style-type:none" hidden="hidden" class="">
+            <a href="6fc0cd0c-f544-468e-a856-0001339bff97.xhtml" class="">Packt is searching for authors like you</a>
+    
+    
+</li>
+</ol>
+</li>
+<li style="list-style-type:none" class="front-matter preface ">
+            <a href="8f1ab6a3-2312-42b8-a865-8bc2b39dc1d8.xhtml" class="front-matter preface ">Preface</a>
+    
+    <ol><li style="list-style-type:none" class="">
+            <a href="6cd1b27d-a3d0-4512-abf7-76cf8964149c.xhtml" class="">Who this book is for</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="26c73723-1841-47f8-8f09-7b3eb8105c29.xhtml" class="">What this book covers</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="763667b7-9c23-471c-a2ce-4208bcaa4578.xhtml" class="">To get the most out of this book</a>
+    
+    <ol><li style="list-style-type:none" class="">
+            <a href="d0309d2c-a01d-4777-a00e-0e85f552eae4.xhtml" class="">Download the example code files</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="25e98f80-c936-4c7f-ad55-847d29bae94d.xhtml" class="">Conventions used</a>
+    
+    
+</li>
+</ol>
+</li>
+<li style="list-style-type:none" class="">
+            <a href="fdad0154-5419-438f-9be7-06d00ab7bd34.xhtml" class="">Get in touch</a>
+    
+    <ol><li style="list-style-type:none" class="">
+            <a href="6b2e238e-ede5-4c18-bc2c-ea471775ea91.xhtml" class="">Reviews</a>
+    
+    
+</li>
+</ol>
+</li>
+</ol>
+</li>
+<li style="list-style-type:decimal" value="1" class="chapter chapter ">
+            <a href="9221248a-8815-4394-8042-b2b5bb10cd5e.xhtml" class="chapter chapter ">Functional Programming &amp;#x2013; a Comparison</a>
+    
+    <ol><li style="list-style-type:none" class="">
+            <a href="f5789e97-09ec-4129-b1e3-1ac27824d75e.xhtml" class="">Technical requirements</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="cd72107a-4b58-4340-9984-2b041ed11c00.xhtml" class="">Reducing code weight and complexity</a>
+    
+    <ol><li style="list-style-type:none" class="">
+            <a href="0a921ea1-e50a-45d2-abe3-1f57e31dbfde.xhtml" class="">Making generics more generic</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="fa2078a3-bbab-432f-b5f4-133dc56a8e25.xhtml" class="">Functions as values</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="bb904024-427e-43d1-9b0f-bd526fa1092c.xhtml" class="">Iterators</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="35e0d983-a8a8-4882-9b66-a102832fbfaf.xhtml" class="">Compact legible expressions</a>
+    
+    
+</li>
+</ol>
+</li>
+<li style="list-style-type:none" class="">
+            <a href="d4a51533-49b7-40d7-b009-699f1aa09a4d.xhtml" class="">Strict abstraction means safe abstraction</a>
+    
+    <ol><li style="list-style-type:none" class="">
+            <a href="e39714c3-09e9-4603-9e9b-41839dcebe2f.xhtml" class="">Scoped data binding</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="df529679-28a0-4930-aa3f-13da1e192036.xhtml" class="">Algebraic datatypes</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="ad07927f-0407-416f-8fa3-5986f42406a5.xhtml" class="">Mixing object-oriented programming and functional programming</a>
+    
+    
+</li>
+</ol>
+</li>
+<li style="list-style-type:none" class="">
+            <a href="fbab74dd-cf7a-4ffa-af1e-77fea17ab68d.xhtml" class="">Improving project architecture</a>
+    
+    <ol><li style="list-style-type:none" class="">
+            <a href="a4053149-0e44-4253-9c3c-a2bd4180cf9b.xhtml" class="">File hierarchy, modules, and namespace design</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="6e577445-afa0-4404-ac41-debf4fd974ed.xhtml" class="">Functional design patterns</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="7a0b6a92-66a9-4a93-8f1d-821fb38427fe.xhtml" class="">Metaprogramming</a>
+    
+    
+</li>
+</ol>
+</li>
+<li style="list-style-type:none" class="">
+            <a href="19664b44-672c-4a24-9368-2ffc73804c39.xhtml" class="">Summary</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="3d750f08-4024-4048-8492-8931ed0e6064.xhtml" class="">Questions</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="85adba7c-6c4d-4390-82f3-037747d608dd.xhtml" class="">Further reading</a>
+    
+    
+</li>
+</ol>
+</li>
+<li style="list-style-type:decimal" value="2" class="chapter chapter ">
+            <a href="bf10aff4-ca84-44a7-a982-b156c9cde41e.xhtml" class="chapter chapter ">Functional Control Flow</a>
+    
+    <ol><li style="list-style-type:none" class="">
+            <a href="38966c2c-4b17-4712-8d64-84d4c9ee7449.xhtml" class="">Technical requirements</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="a020dc10-1d84-43f7-aac9-200e5c81f397.xhtml" class="">Designing the program</a>
+    
+    <ol><li style="list-style-type:none" class="">
+            <a href="fd21b36c-9978-4691-a397-7fbed8e2fdd7.xhtml" class="">Gathering project requirements</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="bc2f51eb-064d-4dac-97e0-3a2e862525a4.xhtml" class="">Architecting a code map from requirements</a>
+    
+    <ol><li style="list-style-type:none" class="">
+            <a href="766ea118-6847-4dff-98ce-009f9e2d1694.xhtml" class="">Creating a Rust project</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="10e04150-4537-49b4-89bc-7fc61deb64aa.xhtml" class="">Writing stubs for each program requirement</a>
+    
+    
+</li>
+</ol>
+</li>
+</ol>
+</li>
+<li style="list-style-type:none" class="">
+            <a href="29c4228c-869d-4fc2-b79b-c42287d44b8e.xhtml" class="">Implementing program logic</a>
+    
+    <ol><li style="list-style-type:none" class="">
+            <a href="4fee0a98-9ff5-49d1-a9cd-4f74fad4b720.xhtml" class="">Filling in the blanks</a>
+    
+    <ol><li style="list-style-type:none" class="">
+            <a href="d7069b9c-f8c8-4e5a-a534-e1251856b373.xhtml" class="">Parsing input and storing as building description and floor requests</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="7308a88e-94c0-4034-9618-42c8c1f72f88.xhtml" class="">Updating location, velocity, and acceleration</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="a0be8e93-0117-4027-aaac-837e7e9a020a.xhtml" class="">If the next floor request in the queue is satisfied, then remove it from the queue</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="af37f35e-d1b0-4df2-9d4d-fa596297a318.xhtml" class="">Adjusting motor control to process the next floor request</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="3b38fdf2-f7de-4af2-878b-139252c72b40.xhtml" class="">Printing real-time statistics</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="9cfbd397-4066-47ff-8c2f-898eef422bc1.xhtml" class="">Printing summary</a>
+    
+    
+</li>
+</ol>
+</li>
+<li style="list-style-type:none" class="">
+            <a href="211fb888-cc1e-4238-a396-825d2e1273a8.xhtml" class="">Breaking down long segments into components</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="4e94a0f3-fb9b-45ed-969a-766f5cf4bf01.xhtml" class="">Searching for abstractions</a>
+    
+    
+</li>
+</ol>
+</li>
+<li style="list-style-type:none" class="">
+            <a href="66e6bbd8-90ee-43c1-89bd-d89aabdb866b.xhtml" class="">Writing tests</a>
+    
+    <ol><li style="list-style-type:none" class="">
+            <a href="96fde733-7bf0-479b-a9bd-71abed89506a.xhtml" class="">Unit testing</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="937a9b0e-12c3-4112-a1c2-a3982b50405e.xhtml" class="">Integration testing</a>
+    
+    
+</li>
+</ol>
+</li>
+<li style="list-style-type:none" class="">
+            <a href="a74bfd33-69a1-4755-9639-f7033ca4ac00.xhtml" class="">Summary</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="c154ef67-e036-4ec9-8b00-8a0a84592039.xhtml" class="">Questions</a>
+    
+    
+</li>
+</ol>
+</li>
+<li style="list-style-type:decimal" value="3" class="chapter chapter ">
+            <a href="a7c186b6-4fab-40d8-a684-bc0cc5695ab6.xhtml" class="chapter chapter ">Functional Data Structures</a>
+    
+    <ol><li style="list-style-type:none" class="">
+            <a href="d8e0a0c0-176c-4756-809f-4c78bd169a87.xhtml" class="">Technical requirements</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="b1891dfa-1f3b-4646-beb3-7afe1b9ee0f7.xhtml" class="">Adjusting to changing the scope of the project</a>
+    
+    <ol><li style="list-style-type:none" class="">
+            <a href="c3c99f16-956b-43d2-a8f7-9a14dbda49b4.xhtml" class="">Gathering new project requirements</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="e463823d-4bb9-4f02-958d-806174a8a6e4.xhtml" class="">Architecting a change map from requirements</a>
+    
+    <ol><li style="list-style-type:none" class="">
+            <a href="e88ef301-184a-4c51-8b5a-281b9f68fda7.xhtml" class="">Translating expectations into requirements</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="5bd3fd1b-4335-47f8-b3fa-6a41aad26f49.xhtml" class="">Translating requirements into a change map</a>
+    
+    
+</li>
+</ol>
+</li>
+</ol>
+</li>
+<li style="list-style-type:none" class="">
+            <a href="29e3c0d2-ea68-4985-9a3a-fa061b65153b.xhtml" class="">Mapping requirements directly to code</a>
+    
+    <ol><li style="list-style-type:none" class="">
+            <a href="0d37998e-3fae-46ab-b2c8-c8681d98ea03.xhtml" class="">Writing the physics simulator</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="37950a27-a5a5-47d6-a32b-666644de7e8f.xhtml" class="">Writing the motor controller</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="c1fcd60d-4365-4a83-91d0-c52250c38ba7.xhtml" class="">Writing the executable to run a simulation</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="d1cb12f6-fb27-470a-bf0a-59ffc434a2c2.xhtml" class="">Writing the executable to analyze a simulation</a>
+    
+    
+</li>
+</ol>
+</li>
+<li style="list-style-type:none" class="">
+            <a href="d056e8e5-2c09-4a21-8ced-adfbb9e610be.xhtml" class="">Running simulations and analyzing data</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="90d75c2e-4d57-46fb-ad6c-5bb23ac6a9e2.xhtml" class="">Summary</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="433569df-e24d-42e4-ad30-cb1df37cc08b.xhtml" class="">Questions</a>
+    
+    
+</li>
+</ol>
+</li>
+<li style="list-style-type:decimal" value="4" class="chapter chapter ">
+            <a href="17b4796f-bd1b-4844-afe2-46653b0792f8.xhtml" class="chapter chapter ">Generics and Polymorphism</a>
+    
+    <ol><li style="list-style-type:none" class="">
+            <a href="42c499c7-7194-470a-8ea4-d99ad17f388a.xhtml" class="">Technical requirements</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="5cffc471-6603-44ef-97fc-1701b0c5a173.xhtml" class="">Staying productive during downtime</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="b962a7e4-66fd-40ac-8b0a-2cdd66d5005c.xhtml" class="">Learning about generics</a>
+    
+    <ol><li style="list-style-type:none" class="">
+            <a href="39aec917-783b-43a8-b954-e521885eff73.xhtml" class="">Investigating generics</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="250a2513-89da-41bd-9cb2-f21cb9274c70.xhtml" class="">Investigating parametric polymorphism</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="64c4d8a4-1dab-4970-93bb-04237544306f.xhtml" class="">Investigating generalized algebraic datatypes</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="550a316a-edda-48e7-9849-c5443c6c949d.xhtml" class="">Investigating parametric lifetimes</a>
+    
+    <ol><li style="list-style-type:none" class="">
+            <a href="08e7f156-076b-48e8-a7fe-7bf68e0a7030.xhtml" class="">Defining lifetimes on ground types</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="bbd3e863-a238-4506-9839-4bc0d51ccfe9.xhtml" class="">Defining lifetimes on generic types</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="c8a89030-d3c9-44be-8739-a07d60cce92c.xhtml" class="">Defining lifetimes on traits</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="cd7cb2ae-1e32-4b59-8af0-b1f172ac1117.xhtml" class="">Defining lifetime subtyping</a>
+    
+    
+</li>
+</ol>
+</li>
+<li style="list-style-type:none" class="">
+            <a href="229fa6ec-72d6-4470-bcd1-7f741fd8058b.xhtml" class="">Investigating parametric types</a>
+    
+    
+</li>
+</ol>
+</li>
+<li style="list-style-type:none" class="">
+            <a href="27cac8d8-62ec-4e1f-b39e-c4c9060f898d.xhtml" class="">Applying parameterization concepts</a>
+    
+    <ol><li style="list-style-type:none" class="">
+            <a href="e0adcc6c-6d94-4f9e-bd38-174a683390d8.xhtml" class="">Parameterizing data</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="6c0fc803-2dfa-47cb-87a2-2ffc25173646.xhtml" class="">Parameterizing functions and trait objects</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="b61ea87b-94c6-47b7-87e8-cf3e88263bc9.xhtml" class="">Parametric traits and implementations</a>
+    
+    
+</li>
+</ol>
+</li>
+<li style="list-style-type:none" class="">
+            <a href="4c888060-2d7b-4d56-96c2-f53026a6632f.xhtml" class="">Summary</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="84316ea8-d725-459d-91ce-1a683330538d.xhtml" class="">Questions</a>
+    
+    
+</li>
+</ol>
+</li>
+<li style="list-style-type:decimal" value="5" class="chapter chapter ">
+            <a href="1424cb34-bb60-4cd3-9490-559e041251ed.xhtml" class="chapter chapter ">Code Organization and Application Architecture</a>
+    
+    <ol><li style="list-style-type:none" class="">
+            <a href="f7572e5c-f827-45e4-aafc-935c68885085.xhtml" class="">Technical requirements</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="c4fe0f13-046e-4c7b-9a7c-2b0b24f38f54.xhtml" class="">Shipping a product without sacrificing quality</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="c48c04b7-ecdf-46ce-88e8-2b879a9080f5.xhtml" class="">Reorganizing the project</a>
+    
+    <ol><li style="list-style-type:none" class="">
+            <a href="48f78d0e-727e-42a7-b946-fa7f427e0b84.xhtml" class="">Planning content of files by type</a>
+    
+    <ol><li style="list-style-type:none" class="">
+            <a href="54300335-97d8-4963-80bc-f4453cf27912.xhtml" class="">Organizing the motor_controllers.rs module</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="8d497d8b-580a-45a3-a847-f1f8d9d01558.xhtml" class="">Organizing the buildings.rs module</a>
+    
+    
+</li>
+</ol>
+</li>
+<li style="list-style-type:none" class="">
+            <a href="3366ec4f-ed09-4d8e-9cd7-fe99984fbdd2.xhtml" class="">Planning content of files by purpose</a>
+    
+    <ol><li style="list-style-type:none" class="">
+            <a href="801123de-0994-4fde-9764-5bf1d2957856.xhtml" class="">Organizing the motion_controllers.rs module</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="538d7311-6609-457d-99f6-d6a3aff44013.xhtml" class="">Organizing the trip_planning.rs module</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="51dccde7-34a6-4ff7-99f0-45df5b3e2d68.xhtml" class="">Organizing the elevator_drivers.rs module</a>
+    
+    
+</li>
+</ol>
+</li>
+<li style="list-style-type:none" class="">
+            <a href="77e60a95-bbae-46a7-9435-09982bfdf3ea.xhtml" class="">Planning content of files by layer</a>
+    
+    <ol><li style="list-style-type:none" class="">
+            <a href="a5fb45d5-d5ea-449f-8b25-01cbe3e37537.xhtml" class="">Organizing the physics.rs module</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="2faa1419-b8e6-4093-b4e4-0d4218f63171.xhtml" class="">Organizing the data_recorder.rs module</a>
+    
+    
+</li>
+</ol>
+</li>
+<li style="list-style-type:none" class="">
+            <a href="da83c241-2292-40d9-b12f-ffc29beb2eb1.xhtml" class="">Planning the content of files by convenience</a>
+    
+    <ol><li style="list-style-type:none" class="">
+            <a href="a2708e9c-726a-4ba0-b11e-52af58de7a4d.xhtml" class="">Organizing the simulate_trip.rs executable</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="15992897-44f1-418d-bb12-83eb161080c0.xhtml" class="">Organizing the analyze_trip.rs executable</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="63da5eb8-0d5d-4e86-ad05-3a07a5ead83a.xhtml" class="">Organizing the operate_elevator.rs executable</a>
+    
+    
+</li>
+</ol>
+</li>
+</ol>
+</li>
+<li style="list-style-type:none" class="">
+            <a href="51e77b67-e8d2-4de6-b8ec-8cdfdef0567d.xhtml" class="">Mapping code changes and additions</a>
+    
+    <ol><li style="list-style-type:none" class="">
+            <a href="86775fab-6d1d-46f1-8299-b8156a95b088.xhtml" class="">Developing code by type</a>
+    
+    <ol><li style="list-style-type:none" class="">
+            <a href="f1a1417a-6339-47c7-b5c7-9b89a033a69c.xhtml" class="">Writing the motor_controllers.rs module</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="5f70c78e-c633-4dec-a721-0b1aafc92081.xhtml" class="">Writing the buildings.rs module</a>
+    
+    
+</li>
+</ol>
+</li>
+<li style="list-style-type:none" class="">
+            <a href="fdd041a3-46d3-48e1-af8f-5ade34d62e0b.xhtml" class="">Developing code by purpose</a>
+    
+    <ol><li style="list-style-type:none" class="">
+            <a href="7feb6726-f866-471e-90cc-e34388277a44.xhtml" class="">Writing the motion_controllers.rs module</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="35d358ab-2862-4649-b643-e20d40ac0f44.xhtml" class="">Writing the trip_planning.rs module</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="f753d0db-0e40-44ad-a1e6-fb207561d779.xhtml" class="">Writing the elevator_drivers.rs module</a>
+    
+    
+</li>
+</ol>
+</li>
+<li style="list-style-type:none" class="">
+            <a href="c44c8540-060d-4155-911f-3ec09a6a94d1.xhtml" class="">Developing code by layer</a>
+    
+    <ol><li style="list-style-type:none" class="">
+            <a href="c922c5c3-072c-4212-b1d6-7d686ef7d5e1.xhtml" class="">Writing the physics.rs module</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="29b7004f-69e1-49e2-ab9a-33ff5dffacea.xhtml" class="">Writing the data_recorders.rs module</a>
+    
+    
+</li>
+</ol>
+</li>
+<li style="list-style-type:none" class="">
+            <a href="2c74b83d-abf6-4d47-98bf-395a527f0105.xhtml" class="">Developing code by convenience</a>
+    
+    <ol><li style="list-style-type:none" class="">
+            <a href="73076187-19ad-4169-a61f-550878f9b5bc.xhtml" class="">Writing the simulate_trip.rs executable</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="489e0503-52bb-48c2-bff1-b446896dd89c.xhtml" class="">Writing the analyze_trip.rs executable</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="dda58e90-3947-4a16-8f95-70c43a4826c0.xhtml" class="">Writing the operate_elevator.rs executable</a>
+    
+    
+</li>
+</ol>
+</li>
+<li style="list-style-type:none" class="">
+            <a href="2ebba3e2-a1cf-4e89-a436-7dfb4cc45a53.xhtml" class="">Reflecting on the project structure</a>
+    
+    
+</li>
+</ol>
+</li>
+<li style="list-style-type:none" class="">
+            <a href="e2498c9c-8b0a-4aef-9ba0-afbdb97108a3.xhtml" class="">Summary</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="60e5e1b2-bf90-4a5e-8aac-dcfa684286f6.xhtml" class="">Questions</a>
+    
+    
+</li>
+</ol>
+</li>
+<li style="list-style-type:decimal" value="6" class="chapter chapter ">
+            <a href="b2733e9a-c163-4204-9a6e-6b1a2b8af397.xhtml" class="chapter chapter ">Mutability, Ownership, and Pure Functions</a>
+    
+    <ol><li style="list-style-type:none" class="">
+            <a href="7cb94897-df50-41dd-a717-0b3379cf0626.xhtml" class="">Technical requirements</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="a011893c-00ab-4d2c-a0c1-aaa65878e554.xhtml" class="">Recognizing anti-patterns of ownership</a>
+    
+    <ol><li style="list-style-type:none" class="">
+            <a href="bf68a9f7-8c70-4026-bd09-52d17917c6b5.xhtml" class="">Inspecting the microcontroller drivers</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="1a8af5c8-aab1-42a6-b386-a3f2380aaf2b.xhtml" class="">Inspecting the type and trait definitions</a>
+    
+    <ol><li style="list-style-type:none" class="">
+            <a href="c26efc48-f801-4ebf-a546-f68a1d019f30.xhtml" class="">Defining the OverrideCode enum</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="61ba27d4-1ee6-431c-8d37-c51b2568a409.xhtml" class="">Defining the ErrorCode enum</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="e85ac169-9b6c-446f-ba01-4d0801474f14.xhtml" class="">Defining the AuthorizedSession struct and deconstructor</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="5f7648af-08eb-4d0b-85b8-8cdda0855c69.xhtml" class="">Authorizing sessions</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="62b9bf4b-316a-422c-9412-ddf9c4903c90.xhtml" class="">Checking errors and resetting state</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="70180d43-0f10-4a6a-86ce-8dbcd38656c2.xhtml" class="">Privileged commands</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="e0391c5b-e8c9-4dec-9468-b243445a9a08.xhtml" class="">Normal commands</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="1f418530-b756-4c68-9593-e36bb6676ea8.xhtml" class="">Querying library and session state</a>
+    
+    
+</li>
+</ol>
+</li>
+<li style="list-style-type:none" class="">
+            <a href="5a408c83-7c36-44e2-affa-61ccf1bfdd16.xhtml" class="">Inspecting the foreign library tests</a>
+    
+    <ol><li style="list-style-type:none" class="">
+            <a href="c1d1f60e-6b0e-40b0-9716-fbfcdd454e88.xhtml" class="">Issuing override codes</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="e992ecd1-fd06-442d-b4de-e0f8a2bd6cec.xhtml" class="">Accessing status information and sessions</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="a8bec9ee-9fd4-4bf8-bfed-77e2c5ab0727.xhtml" class="">Deactivating active sessions</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="e36b844e-5b06-4b3a-b2f4-e18e2cb0e1bd.xhtml" class="">Issuing normal commands</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="00643e3c-ac6d-44a7-852c-f8bdb7e1db26.xhtml" class="">Issuing privileged commands</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="e1a6f1cb-52dc-4c22-97a1-4c9eff744b9c.xhtml" class="">Denying unauthorized commands</a>
+    
+    
+</li>
+</ol>
+</li>
+<li style="list-style-type:none" class="">
+            <a href="084d5ac8-2ba6-4950-a1a9-340fb4f01e2c.xhtml" class="">Inspecting the Rust tests</a>
+    
+    <ol><li style="list-style-type:none" class="">
+            <a href="c0449b9c-e594-4265-ad7b-a14364703182.xhtml" class="">Rust authorization with sessions</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="0f43e668-15cf-4fdf-8b79-d41bb003fa7e.xhtml" class="">Rust sharing session reference</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="517baabc-a251-4084-8ed2-d15239aeaa7b.xhtml" class="">Privileged commands</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="cba23d50-623b-4179-b10f-1539084a6233.xhtml" class="">Unprivileged commands</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="e9dfedaa-e7c1-4c9f-aebf-f7e6a6598931.xhtml" class="">Denying access to privileged commands</a>
+    
+    
+</li>
+</ol>
+</li>
+</ol>
+</li>
+<li style="list-style-type:none" class="">
+            <a href="acc9c73b-5544-469b-bade-db0769ead6b8.xhtml" class="">Learning the rules of ownership</a>
+    
+    <ol><li style="list-style-type:none" class="">
+            <a href="98daff07-245d-46c9-a363-0315f96a90c3.xhtml" class="">When the owner goes out of scope, the value will be dropped</a>
+    
+    
+</li>
+</ol>
+</li>
+<li style="list-style-type:none" class="">
+            <a href="92ce0b0a-7b06-420f-9b54-deee59ffc6bc.xhtml" class="">Using immutable data</a>
+    
+    <ol><li style="list-style-type:none" class="">
+            <a href="38cfaacb-c889-4879-8bec-130c54314f83.xhtml" class="">Fixing the hard-to-reproduce bug</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="e891742d-67c4-40bd-ac80-66747be52e93.xhtml" class="">Preventing hard-to-reproduce bugs</a>
+    
+    
+</li>
+</ol>
+</li>
+<li style="list-style-type:none" class="">
+            <a href="685a6dad-c2a5-46ee-8cb7-8fbf35c09d37.xhtml" class="">Using pure functions</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="f664b5f7-6015-4dd3-a9d2-f9ea454254f4.xhtml" class="">Summary</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="0609bdf8-457e-475b-9e05-40d2926b3ea3.xhtml" class="">Questions</a>
+    
+    
+</li>
+</ol>
+</li>
+<li style="list-style-type:decimal" value="7" class="chapter chapter ">
+            <a href="c696c1cd-80aa-4ffe-a4e5-c7d9bcdcc430.xhtml" class="chapter chapter ">Design Patterns</a>
+    
+    <ol><li style="list-style-type:none" class="">
+            <a href="c621f3d3-0720-4281-9b31-1140b935a12c.xhtml" class="">Technical requirements</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="ab1ae0ac-f688-4e54-aad3-a8767839b357.xhtml" class="">Using the functor pattern</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="a71cd2eb-f96e-482d-95b5-3c48ea252ea5.xhtml" class="">Using the monad pattern</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="a6b8eb8a-a60f-4e8a-ba76-39eba3963c76.xhtml" class="">Using the combinator pattern</a>
+    
+    <ol><li style="list-style-type:none" class="">
+            <a href="dcfdb7a1-3703-4314-9893-9a3c16dbb54b.xhtml" class="">Parser combinators</a>
+    
+    
+</li>
+</ol>
+</li>
+<li style="list-style-type:none" class="">
+            <a href="a3d98607-27b2-43a9-9d78-c5c4d8364de1.xhtml" class="">Using the lazy evaluation pattern</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="b9752851-c536-4ece-9f9a-3a5907ff5140.xhtml" class="">Summary</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="ccce89a8-bea9-448c-ac1f-905c8408e176.xhtml" class="">Questions</a>
+    
+    
+</li>
+</ol>
+</li>
+<li style="list-style-type:decimal" value="8" class="chapter chapter ">
+            <a href="3066190b-837d-4a1e-b919-2bd04e810c41.xhtml" class="chapter chapter ">Implementing Concurrency</a>
+    
+    <ol><li style="list-style-type:none" class="">
+            <a href="7998bf21-c362-441e-8b88-2733b6273c2b.xhtml" class="">Technical requirements</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="fcede278-44aa-4d63-8e6f-1edf15488993.xhtml" class="">Using subprocess concurrency</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="3b1981a4-c744-404a-af90-222d00bea706.xhtml" class="">Understanding nix fork concurrency</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="0ce13ad3-1eba-4ed5-af7b-0726a94a4743.xhtml" class="">Using thread concurrency</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="c56e6bc4-5d1d-4aba-b529-17af45ca4afa.xhtml" class="">Understanding Send and Sync traits</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="05b47201-3d06-4d78-8c43-7e0d27f39717.xhtml" class="">Using functional design for concurrency</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="1e379cd4-adb3-467b-afc7-7f5cf6b6f1bb.xhtml" class="">Summary</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="9a5c8cf7-124a-44eb-97ab-17c3eb7de85e.xhtml" class="">Questions</a>
+    
+    
+</li>
+</ol>
+</li>
+<li style="list-style-type:decimal" value="9" class="chapter chapter ">
+            <a href="c9c0719e-d50d-462a-b6e5-e8c02a1ee67e.xhtml" class="chapter chapter ">Performance, Debugging, and Metaprogramming</a>
+    
+    <ol><li style="list-style-type:none" class="">
+            <a href="23df0c46-beb8-43a1-9754-1a3f05c12de6.xhtml" class="">Technical requirements</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="60f14aeb-ddcb-4202-b3f8-9480004a7db4.xhtml" class="">Writing faster code</a>
+    
+    <ol><li style="list-style-type:none" class="">
+            <a href="126efdd6-7d69-4e05-8071-f42d42651187.xhtml" class="">Compiling with release mode</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="03b1c54b-31b4-43f4-b29b-4f51fda12986.xhtml" class="">Doing less work</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="577628db-3c2c-4635-a2e1-bda9e6c4845f.xhtml" class="">Optimizing the code that needs it &amp;#x2013; profiling</a>
+    
+    <ol><li style="list-style-type:none" class="">
+            <a href="b3249d37-51d6-4860-a44a-ee57a41b925f.xhtml" class="">For a code rarely executed, performance is not affected</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="a624f3d6-6f0b-4c16-b8a5-b704fb43b831.xhtml" class="">Multiples of small numbers are also small numbers</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="0298b70e-a703-43a3-b31e-4e8b6f98c8fa.xhtml" class="">Measuring first, to optimize it</a>
+    
+    
+</li>
+</ol>
+</li>
+<li style="list-style-type:none" class="">
+            <a href="4f5cabc7-d01d-4938-b7d7-89a0289fb6c6.xhtml" class="">Putting the fridge next to the computer</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="89b812fd-46e8-416b-ab3b-1e9be92bd0ba.xhtml" class="">Capping the Big O</a>
+    
+    <ol><li style="list-style-type:none" class="">
+            <a href="97212567-4ff6-427f-a817-4e590de1e7a2.xhtml" class="">Constanting no growth</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="27258019-0598-4d01-96cc-1e04917ce294.xhtml" class="">Logarithmic growth</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="53346c1f-c78e-45a2-972b-d6acf0db214a.xhtml" class="">Polynomial growth</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="bacd8b13-33ff-45e7-8c7d-16befc59756c.xhtml" class="">Exponential growth</a>
+    
+    
+</li>
+</ol>
+</li>
+<li style="list-style-type:none" class="">
+            <a href="38854814-4418-40b8-b5b2-72cf1afda0e1.xhtml" class="">Referencing data is faster</a>
+    
+    
+</li>
+</ol>
+</li>
+<li style="list-style-type:none" class="">
+            <a href="cf48a5f7-237f-48e2-a77b-6ba5316ab7b4.xhtml" class="">Preventing bugs with defensive coding</a>
+    
+    <ol><li style="list-style-type:none" class="">
+            <a href="024a2da1-9891-4f4b-8da3-4d027dc5a697.xhtml" class="">Using Option and Result instead of panic!</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="778a2499-839c-4619-ba82-c53044a5c398.xhtml" class="">Using typesafe interfaces instead of stringly typed interfaces</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="33be69fe-2327-4eaa-b622-8b1518657a94.xhtml" class="">Using the heartbeat pattern for long running processes</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="3ebff10d-a8b9-48c4-ba2d-b4ba3828eb36.xhtml" class="">Validating input and output</a>
+    
+    
+</li>
+</ol>
+</li>
+<li style="list-style-type:none" class="">
+            <a href="ce3c418c-aa25-472c-a2cb-deae36154282.xhtml" class="">Finding and fixing bugs</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="4d9e1c1b-0b36-4028-a4e7-1bd2be258896.xhtml" class="">Metaprogramming</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="dbb2dcab-1d67-4fcd-bf56-5e49bf0b5680.xhtml" class="">Summary</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="fe8788bc-4218-4ec8-98a9-efdeda642847.xhtml" class="">Questions</a>
+    
+    
+</li>
+</ol>
+</li>
+<li style="list-style-type:none" class="back-matter miscellaneous ">
+            <a href="8f56f024-c37e-4e57-ad13-a4fa68026643.xhtml" class="back-matter miscellaneous ">Assessments</a>
+    
+    <ol><li style="list-style-type:none" class="">
+            <a href="23d7d081-b838-4126-b749-543bb4739b43.xhtml" class="">Functional Programming&amp;#xA0;&amp;#x2013; a Comparison</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="35767110-12e7-4779-8fa4-c2aad435ebc2.xhtml" class="">Functional Control Flow</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="a56bff7e-8d9d-4ae6-87ff-da85c428b84a.xhtml" class="">Functional Data Structures</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="9b193135-2840-4707-8ae0-afbcffad67cc.xhtml" class="">Generics and Polymorphism</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="46dd3ed2-ffc8-4a0d-b1d8-d44e92654af5.xhtml" class="">Code Organization and Application Architecture</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="e0f77678-fe72-4200-a3dd-82702c1dd1cd.xhtml" class="">Mutability, Ownership, and Pure Functions</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="cad7965e-c1b9-433b-92cf-e0d583ab8943.xhtml" class="">Design Patterns</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="693bb9f8-537d-4ecf-af80-05f143c3ee02.xhtml" class="">Implementing Concurrency</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="c276b093-4ee8-4533-b09a-0930fc84b502.xhtml" class="">Performance, Debugging, and Metaprogramming</a>
+    
+    
+</li>
+</ol>
+</li>
+<li style="list-style-type:none" class="back-matter miscellaneous ">
+            <a href="f8843e87-c397-4435-bcd3-371a496fc4f2.xhtml" class="back-matter miscellaneous ">Other Books You May Enjoy</a>
+    
+    <ol><li style="list-style-type:none" class="">
+            <a href="bb58c9b7-ccee-4d94-ab91-d0136522b4e5.xhtml" class="">Leave a review - let other readers know what you think</a>
+    
+    
+</li>
+</ol>
+</li>
+</ol>
+                </nav>
+            </article>
+
+            <footer style="margin-top: 5em;"/>
+        </section>
+    </div></body>
+</html>

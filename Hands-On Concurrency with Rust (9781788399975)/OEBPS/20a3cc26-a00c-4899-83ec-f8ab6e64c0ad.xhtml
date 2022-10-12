@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Into Python</h1>
+                </header>
+            
+            <article>
+                
+<p>Let's look at embedding Rust into Python. We'll write a function to sum up the trailing zeros in a cytpes array, built by Python. We can't link statically into Python as the interpreter is already compiled and linked, so we'll need to create a dynamic library. The <kbd>Cargo.toml</kbd> project reflects this:</p>
+<pre>[package]
+name = "zero_count"
+version = "0.1.0"
+authors = ["Brian L. Troutwine &lt;brian@troutwine.us&gt;"]
+
+[dependencies]
+
+[lib]
+name = "zero_count"
+crate-type = ["dylib"]</pre>
+<p>The sole Rust file, <kbd>src/lib.rs</kbd>, has a single function in it:</p>
+<pre style="padding-left: 30px">#[no_mangle]
+pub extern "C" fn tail_zero_count(arr: *const u16, len: usize) -&gt; u64 {
+    let mut zeros: u64 = 0;
+    unsafe {
+        for i in 0..len {
+            zeros += (*arr.offset(i as isize)).trailing_zeros() as u64
+        }
+    }
+    zeros
+}</pre>
+<p>The <kbd>tail_zero_count</kbd> function takes a pointer to an array of <kbd>u16</kbd>s and the length of that array. It zips through the array, calling <kbd>trailing_zeros()</kbd> on each <kbd>u16</kbd> and adding the value to a global sum: <kbd>zeros</kbd>. This global sum is then returned. In the top of the project, run <kbd>cargo build --release</kbd> and you'll find the project's dynamic library—possibly <kbd>libzero_count.dylib</kbd>, <kbd>libzero_count.dll</kbd>, or <kbd>libzero_count.so</kbd>, depending on your host—in <kbd>target/release</kbd>. So far, so good.</p>
+<p>Calling this function is now up to Python. Here's a small example, which lives at <kbd>zero_count.py</kbd> in the root of the project:</p>
+<pre>import ctypes
+import random
+
+length = 1000000
+lzc = ctypes.cdll.LoadLibrary("target/release/libzero_count.dylib")
+arr = (ctypes.c_uint16 * length)(*[random.randint(0, 65000) for _ in range(0, length)])
+print(lzc.tail_zero_count(ctypes.pointer(arr), length))</pre>
+<p>We import the cytpes and random libraries, then load the shared library—here, pegged to OS X's naming convention—and bind it to <kbd>lzc</kbd>. Do edit this to read <kbd>[so|dll]</kbd> if you're running this on an operating system other than OS X. Once <kbd>lzc</kbd> is bound, we use the ctypes API to create a random array of <kbd>u16</kbd> values and call <kbd>tail_zero_count</kbd> on that array. Python is forced to allocate the full array before passing it into Rust using this approach, so don't increase the length too much. Running the program is a matter of calling Python's <kbd>zero_count.py</kbd>, like so:</p>
+<pre><strong>&gt; python zero_count.py
+1000457
+&gt;  python zero_count.py
+999401
+&gt; python zero_count.py
+1002295</strong></pre>
+<p>Coping with opaque struct pointers—as we did in the C example—is well-documented in the ctypes documentation. Rust will not know the difference; it's just kicking out objects conforming to the C ABI.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

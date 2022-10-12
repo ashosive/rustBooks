@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style00.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style01.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Creating threads</h1>
+                </header>
+            
+            <article>
+                
+<p>A <kbd>thread</kbd> can be created by spawning it; this creates an independent detached child thread that in general can outlive its parent. This is demonstrated in the following code snippet:</p>
+<pre>// code from Chapter 9/code/thread_spawn.rs:  
+use std::thread; 
+use std::time; 
+ 
+fn main() { 
+    thread::spawn(move || { 
+ println!("Hello from the goblin in the spawned thread!"); 
+    }); 
+} </pre>
+<p>The argument to <kbd>spawn</kbd> is a closure (here, without parameters, it is indicated as <kbd>||</kbd>), which is scheduled to execute independently from the parent thread, which is shown here as <kbd>main()</kbd>. Notice that it is a moving closure which takes ownership of the variables in a given context. Our closure here is a simple print statement, but in a real situation this could be replaced by a heavy or time-consuming operation.</p>
+<p>When we execute this code, we normally don't see any output. Why is this? It turns out that <kbd>main()</kbd> is a bad parent (as far as threading is concerned) and doesn't wait for its children to end properly. The output of the spawned thread only becomes visible if we let <kbd>main()</kbd> pause for a brief moment before terminating. This can be done with the <kbd>thread::sleep</kbd> method,which takes the <kbd>Duration</kbd>, a type defined in the <kbd>std::time</kbd> module:</p>
+<pre>   fn main() { 
+    thread::spawn(move || { ...  }); 
+    thread::sleep(time::Duration::from_millis(50)); 
+} </pre>
+<p>This prints out the following:</p>
+<pre><strong>Hello from the goblin in the spawned thread!.</strong>  </pre>
+<p>In general, this pause period is not needed. Child threads that are spawned can live longer than their parent threads, and will continue to execute when their parents have already stopped.</p>
+<p>Better practice in this case, however, is to capture the <kbd>handle</kbd> join that <kbd>spawn</kbd> returns in a variable. Calling the <kbd>join()</kbd> method on <kbd>handle</kbd> will block the parent thread, making it wait until the child thread is finished. This returns a <kbd>Result</kbd> instance. <kbd>unwrap()</kbd> will take the value from <kbd>Ok</kbd>, returning the result of the child thread, which is <kbd>()</kbd> in this case because it is a print statement, or panic in the <kbd>Err</kbd> case:</p>
+<pre>fn main() { 
+    let handle = thread::spawn(move || { 
+        println!("Hello from the goblin in the spawned thread!"); 
+    }); 
+// do other work in the meantime 
+   let output = handle.join().unwrap(); // wait for child thread 
+   println!("{:?}", output); // () 
+} </pre>
+<p>If no other work has to be done while the child thread is executing, we can also write this:</p>
+<pre>thread::spawn(move || {  
+// work done in child thread  
+}).join(); </pre>
+<p>In this case, we are waiting synchronously for the child thread to finish, so there is no good reason to start a new thread.</p>
+<p>Why do we need a moving closure when spawning a thread? Examine the following code, which does not compile:</p>
+<pre>// code from Chapter 9/code/moving_closure.rs:   
+use std::thread; 
+ 
+fn main() { 
+      read(); 
+} 
+ 
+fn read() { 
+    let book = read_book("book1.txt"); 
+    thread::spawn(|| { 
+        println!("{:?}", book); 
+    }); 
+} 
+fn read_book(s: &amp;str) { } </pre>
+<p>This gives us <kbd>error: closure may outlive the current function, but it borrows `book`, which is owned by the current function</kbd>. Indeed, the closure may be run by the spawned thread long after the <kbd>read()</kbd> function has terminated, as it has freed the memory of <kbd>book</kbd>. But if we make it a moving closure, which takes ownership of its environment, the code compiles:</p>
+<pre>thread::spawn(move|| { 
+        println!("{:?}", book); 
+   }); </pre>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Inlining assembly code</h1>
+                </header>
+            
+            <article>
+                
+<p>In Rust, we can embed assembly code. This should be extremely rare, but one can imagine situations where this might be useful, for example, when you require utmost performance or very low-level control. But of course, the portability of your code and perhaps its stability decrease when doing this. The Rust compiler will probably generate better assembly code than you would write, so it isn't worth the effort most of the time.</p>
+<p>The mechanism works by using the <kbd>asm!</kbd> macro, as in this example, where we calculate <kbd>a - b</kbd> in the <kbd>subtract</kbd> function by calling the assembly code:</p>
+<pre>// code from Chapter 10/code/asm.rs: 
+<strong>#![feature(asm)]</strong> 
+ 
+fn subtract(a: i32, b: i32) -&gt; i32 { 
+    let sub: i32; 
+    unsafe { 
+<strong>        asm!("sub $2, $1; mov $1, $0" </strong><strong>: "=r"(sub) </strong><strong>: "r"(a), "r"(b)</strong> 
+); 
+    } 
+    sub 
+} 
+ 
+fn main() { 
+    println!("{}", subtract(42, 7))  </pre>
+<p>This prints out the result <kbd><span class="packt_screen">35</span></kbd>.</p>
+<p><kbd>asm!</kbd> can only be used with the feature gate <kbd>#![feature(asm<span>)]</span></kbd>.</p>
+<p><kbd>asm!</kbd> has a number of parameters separated by <kbd>:</kbd>. The first is the assembly template, containing the assembly code as a string, then come the output and input operands.</p>
+<p>You can indicate the kind of processors your assembly code is meant to execute on with the <kbd>cfg</kbd> attribute and its value, <kbd>target_arch</kbd>, for example:</p>
+<pre><strong>#[cfg(any(target_arch = "x86", target_arch = "x86_64"))] </strong></pre>
+<p>The compiler will then check whether you have specified valid assembly code for that processor.</p>
+<div class="packt_tip">This feature is not yet enabled in Rust 1.21 on the stable release channel. To use this mechanism (or other unstable features) in the meantime, you have to use Rust from the master branch (which is the nightly release). Install that version and change to it with the command rustup default nightly.</div>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style00.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style01.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">It's all for your own good</h1>
+                </header>
+            
+            <article>
+                
+<p>These compiler rules are there to help you as a developer. They prevent the sorts of issues commonly found in other languages, the biggest being writing to a variable after it is destroyed or doing something stupid, such as trying to mutate a vector inside of a loop iterating through that vector:</p>
+<pre>fn main()  
+{ 
+    let mut myvec = vec![5i32, 10i32, 15i32, 20i32, 25i32, 30i32]; 
+     
+    for i in &amp;myvec 
+    { 
+        println!("i = {}", i); 
+        myvec.push(35i32);  
+    } 
+} </pre>
+<div class="packt_infobox">The source for this section is in the <kbd>08/invaliditerator</kbd> folder in the supporting code bundle for this book, with additional discussion in <span class="ChapterrefPACKT">Chapter 5, </span><em>Memory Management</em>.</div>
+<p>This is obviously never going to work. If you think about it, we have a loop that takes <kbd>myvec</kbd> as the argument and then, within the loop, we will add to the vector, so the loop never knows about one of the guarantees, as that guarantee is not there: the iterator count. It won't build as well because we are breaking the second borrowing rule.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

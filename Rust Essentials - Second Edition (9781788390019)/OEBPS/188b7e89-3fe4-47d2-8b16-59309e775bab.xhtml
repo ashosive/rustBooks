@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style00.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style01.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Expressions</h1>
+                </header>
+            
+            <article>
+                
+<p>Rust is an expression-oriented language, which means that most pieces of code are in fact expressions, that is, they compute a value and return that value. However, expressions on themselves do not form meaningful code; they must be used in statements.</p>
+<p><kbd>let</kbd> bindings like the following are declaration statements; they are not expressions:</p>
+<pre>// see Chapter 2/code/expressions.rs 
+let a = 2;    // a binds to 2 
+let b = 5;    // b binds to 5 
+let n = a + b;   // n binds to 7 </pre>
+<p>But, here, <kbd>a + b</kbd> is an expression and, if we omit the semicolon at the end, the resulting value (here the value <kbd>7</kbd>) is returned. This is often used when a function needs to return its value (see examples in the next chapter). Ending an expression with a semicolon like <kbd>a + b;</kbd> suppresses this behaviour, thus throwing away the return value and making it an expression statement returning the unit value <kbd>()</kbd>.</p>
+<p>Code is usually a sequence of statements, one on each code line and Rust has to know when a statement ends, that's why nearly every Rust code line ends with a semicolon.</p>
+<p>What do you think the assignment <kbd>m = 42;</kbd> is? It is not a binding, because there is no <kbd>let</kbd> binding (that should have happened on a previous code line). It is an expression that returns the unit value <kbd>()</kbd>.</p>
+<p>A compound binding like <kbd>let p = q = 3;</kbd> is not allowed in Rust, it returns the following error:</p>
+<pre><strong>error: unresolved name q</strong></pre>
+<p>However, you can chain <kbd>let</kbd> bindings like this:</p>
+<pre>let mut n = 0; 
+let mut m = 1; 
+let t = m; m = n; n  = t; 
+println!("{} {} {}", n, m, t); // </pre>
+<p>This gives an output as: <kbd>1 0 1</kbd></p>
+<div class="packt_infobox"><span class="packt_screen">Exercise</span>:
+<p>Print out the values of <kbd>a</kbd>, <kbd>b</kbd>, and <kbd>n</kbd> after this code snippet. Explain the value of <kbd>a</kbd><span>(For an example code, see</span><kbd>compound_let.rs</kbd><span>)</span>:</p>
+<kbd>let mut a = 5;<br/></kbd><kbd>let mut b = 6;</kbd><br/>
+<kbd>let n = 7;</kbd><br/>
+<kbd>let a = b = n;</kbd></div>
+<p>A code block is also an expression, which returns the value of its last expression if we omit the semicolon. For example, in the following code snippet, <kbd>n1</kbd> gets the value <kbd>7</kbd>, but <kbd>n2</kbd> gets no value (or, rather, the unit value <kbd>()</kbd>), because the return value of the second block was suppressed:</p>
+<pre>let n1 = { 
+let a = 2; 
+let b = 5; 
+a + b   // &lt;-- no semicolon! 
+}; 
+  println!("n1 is: {}", n1);  // prints: n1 is 7 
+  let n2 = { 
+    let a = 2; 
+    let b = 5; 
+    a + b; 
+  }; 
+  println!("n2 is: {:?}", n2);  // prints: n2 is () </pre>
+<p>The variables <kbd>a</kbd> and <kbd>b</kbd> are here declared in a code block and live only as long as the block itself, they are local to the block. Note that the semicolon after the closing brace of the block, <kbd>};,</kbd> is needed. To print out the unit value <kbd>()</kbd>, we need <kbd>{:?}</kbd> as format specifier.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

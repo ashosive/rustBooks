@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Ordering::SeqCst</h1>
+                </header>
+            
+            <article>
+                
+<p>Finally, and on the opposite side of the spectrum from <kbd>Relaxed</kbd>, there is <kbd>SeqCst</kbd>, which stands for SEQuentially ConsiSTent. <kbd>SeqCst</kbd> is like <kbd>AcqRel</kbd> but with the added bonus that there's a total order across all threads between sequentially consistent operations, hence the name. <kbd>SeqCst</kbd> is a pretty serious synchronization primitive and one that you should use only at great need, as forcing a total order between all threads is not cheap; every atomic operation is going to require a synchronization cycle, for whatever that means for your CPU. A mutex, for instance, is an acquire-release structure—more on that shortly—but there are legitimate cases for a super-mutex like <kbd>SeqCst</kbd>. For one, implementing older papers. In the early days of atomic programming, the exact consequence of more relaxed—but not <kbd>Relaxed</kbd>—memory orders were not fully understood. You'll see literature that'll make use of sequentially consistent memory and think nothing of it. At the very least, follow along and then relax as needed. This happens more than you might think, at least to your author. Your mileage may vary. There are cases where it seems like we're stuck on <kbd>SeqCst</kbd>. Consider a multiple-producer, multiple-consumer setup like this one that has been adapted from CppReference (see the <em>Further reading</em> section shown in the final section):</p>
+<pre style="padding-left: 30px">#[macro_use]
+extern crate lazy_static;
+
+use std::thread;
+use std::sync::Arc;
+use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
+
+lazy_static! {
+static ref X: Arc&lt;AtomicBool&gt; = Arc::new(AtomicBool::new(false));
+static ref Y: Arc&lt;AtomicBool&gt; = Arc::new(AtomicBool::new(false));
+static ref Z: Arc&lt;AtomicUsize&gt; = Arc::new(AtomicUsize::new(0));
+}
+
+fn write_x() {
+    X.store(true, Ordering::SeqCst);
+}
+
+fn write_y() {
+    Y.store(true, Ordering::SeqCst);
+}
+
+fn read_x_then_y() {
+    while !X.load(Ordering::SeqCst) {}
+    if Y.load(Ordering::SeqCst) {
+        Z.fetch_add(1, Ordering::Relaxed);
+    }
+}
+
+fn read_y_then_x() {
+    while !Y.load(Ordering::SeqCst) {}
+    if X.load(Ordering::SeqCst) {
+        Z.fetch_add(1, Ordering::Relaxed);
+    }
+}
+
+fn main() {
+    let mut jhs = Vec::new();
+    jhs.push(thread::spawn(write_x)); // a
+    jhs.push(thread::spawn(write_y)); // b
+    jhs.push(thread::spawn(read_x_then_y)); // c
+    jhs.push(thread::spawn(read_y_then_x)); // d
+    for jh in jhs {
+        jh.join().unwrap();
+    }
+    assert!(Z.load(Ordering::Relaxed) != 0);
+}</pre>
+<p>Say we weren't enforcing <kbd>SeqCst</kbd> between the threads in our example. What then? The thread <kbd>c</kbd> loops until the thread <kbd>a</kbd> flips Boolean <kbd>X</kbd>, loads <kbd>Y</kbd> and, if true, increments <kbd>Z</kbd>. Likewise for thread <kbd>d</kbd>, except <kbd>b</kbd> flips the Boolean <kbd>Y</kbd> and the increment is guarded on <kbd>X</kbd>. For this program to not crash after its threads have hung up, the threads have to see the flips of <kbd>X</kbd> and <kbd>Y</kbd> happen in the same order. Note that the order itself does not matter, only so much as it is the same as seen from every thread. Otherwise it's possible that the stores and loads will interleave in such a way as to avoid the increments. The reader is warmly encouraged to fiddle with the ordering on their own.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

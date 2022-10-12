@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Returning a closure</h1>
+                </header>
+            
+            <article>
+                
+<p>As threads within Rust use a return from a closure, it makes sense for us to consider that it is entirely possible to return a closure. However, returning a closure is not as straightforward as you'd expect.</p>
+<p>Let's consider a normal function first:</p>
+<pre>fn add_five(x : i32) -&gt; i32  
+{ 
+    return x + 5; 
+} 
+fn main() 
+{ 
+    let test = add_five(5); 
+    println!("{}", test); 
+} </pre>
+<p>This will output the value <kbd>10</kbd>. It's not rocket science. Let's change this to a closure:</p>
+<pre>fn add_five_closure() -&gt;(Fn(i32)-&gt;i32) 
+{ 
+    let num = 5; 
+    |x| x + num 
+} 
+fn main() 
+{ 
+    let test = add_five_closure(); 
+    let f = test(5); 
+    println!("{}", f); 
+} </pre>
+<div class="packt_infobox">The code for the example can be found in <kbd>Chapter 11/return_closure_one</kbd>.</div>
+<p>When we run this, though, we don't get the expected answer of <kbd>10</kbd>—instead we get this:</p>
+<div class="CDPAlignCenter CDPAlign"><img class=" image-border" src="Images/61c0d8be-6e5e-4883-bd02-70ece030ec0c.png" width="1170" height="1012"/></div>
+<div class="CDPAlignCenter CDPAlign packt_figref">Figure 9</div>
+<p>So what has gone wrong? When we return from a function, we have to tell the compiler the type we're returning. However, <kbd>Fn</kbd> is a trait, so we have to somehow satisfy this requirement. We could always have it return a reference:</p>
+<pre>fn add_five_closure() -&gt; &amp;(Fn(i32)-&gt;i32) </pre>
+<p>This will generate another compiler error as it needs a lifetime expectancy applied.</p>
+<p>We could always make the function return a lifetime static reference:</p>
+<pre>fn add_five_closure() -&gt; &amp;'static (Fn(i32) → i32) </pre>
+<p>However, this will produce a different error, which may look somewhat confusing:</p>
+<div class="CDPAlignCenter CDPAlign"><img class=" image-border" src="Images/31c1303e-7ee2-44ca-9477-8f3c5bb0b3d1.png" width="1170" height="536"/></div>
+<div class="CDPAlignCenter CDPAlign packt_figref">Figure 10</div>
+<p>Why are the types mismatched? It's expecting an <kbd>i32</kbd>, but has found a closure. Makes sense really, but why is this happening?</p>
+<p>This is down to how Rust works. For a closure, it generates its own struct and implementation of <kbd>Fn</kbd> (and anything else required) therefore, we're dealing not with a literal, but something else.</p>
+<p>Trying to return a trait object (such as <kbd>Box</kbd>) won't work either as the function relies on the <kbd>num</kbd> binding (which is stack allocated). However, if we move from the stack to the heap, we can now return the closure:</p>
+<pre>fn add_five_closure() -&gt; Box&lt;(Fn(i32) -&gt;→ i32)&gt; 
+{ 
+    let num = 5; 
+    Box::new(move |x| x + num) 
+} 
+fn main() 
+{ 
+    let test = add_five_closure(); 
+    let f = test(5); 
+    println!("{}", f); 
+} </pre>
+<div class="packt_infobox">The source for this can be found in <kbd>Chapter 11/return_closure_three</kbd>.</div>
+<p>This will now compile and give the following:</p>
+<div class="CDPAlignCenter CDPAlign"><img height="145" width="1140" class="alignnone size-full wp-image-166 image-border" src="Images/0e494a10-add4-4530-9453-5b7d4715fe5f.png"/></div>
+<div class="CDPAlignCenter CDPAlign packt_figref">Figure 11</div>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

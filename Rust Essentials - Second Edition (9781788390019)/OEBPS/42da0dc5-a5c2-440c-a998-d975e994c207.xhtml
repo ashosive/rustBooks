@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Some other examples</h1>
+                </header>
+            
+            <article>
+                
+<p>In the following macro, <kbd>massert</kbd>, we mimic the behavior of the <kbd>assert!</kbd> macro, which does nothing when its expression argument is true, but panics when it is false:</p>
+<pre>macro_rules! massert { 
+    ($arg:expr) =&gt; ( 
+            if $arg {} 
+            else { panic!("Assertion failed!"); } 
+    ); 
+} </pre>
+<p>For example: <kbd>massert!(1 == 42);</kbd> will print out:</p>
+<pre><strong>thread '&lt;main&gt;' panicked at 'Assertion failed!'</strong>  </pre>
+<p>In the following statements, we test whether vector <kbd>v</kbd> contains certain elements:</p>
+<pre>    let v = [10, 40, 30]; 
+    massert!(v.contains(&amp;30)); 
+    massert!(!v.contains(&amp;50)); </pre>
+<p>The macro <kbd>unless</kbd> mimics an unless statement, where a <kbd>branch</kbd> is executed if the <kbd>arg</kbd> condition is not true. For example:</p>
+<pre>unless!(v.contains(&amp;25), println!("v does not contain 25")); </pre>
+<p>It should print out:</p>
+<pre><strong>v does not contain 25</strong>  </pre>
+<p>Because the condition is not true. This is also a one-line macro:</p>
+<pre>macro_rules! unless { 
+    ($arg:expr, $branch:expr) =&gt; ( if !$arg { $branch }; ); 
+} </pre>
+<p>The last example combines the techniques we have seen so far. In <a href="59b7261a-67fa-4a7e-9928-27ae01a25ceb.xhtml"><span class="ChapterrefPACKT">Chapter 3</span></a>, <em>Using Functions and Control Structures</em>, in the <em>Attributes - testing</em> section, we saw how to make a test function with the <kbd>#[test]</kbd> attribute. Let us create a macro, <kbd>test_eq</kbd>, that when invoked with <kbd>test_eq!(seven_times_six_is_forty_two, 7 * 6, 42);</kbd> generates a test function:</p>
+<pre>        #[test] 
+        fn seven_times_six_is_forty_two() { 
+            assert_eq!(7 * 6, 42); 
+        } </pre>
+<p>We also want a test that fails:</p>
+<pre>test_eq!(seven_times_six_is_not_forty_three, 7 * 6, 43); </pre>
+<p>The first argument to <kbd>test_eq</kbd> is the test's name, and the second and third arguments are values to be compared for equality, so in general <kbd>test_eq!(name, left, right);</kbd>.</p>
+<p>Here, <kbd>name</kbd> is an identifier; <kbd>left</kbd> and <kbd>right</kbd> are expressions. Like the <kbd>create_fn</kbd> invocation previously, the <kbd>test_eq!</kbd> calls are written outside any function.</p>
+<p>Now we can compose our macro as follows:</p>
+<pre>macro_rules! test_eq { 
+    ($name:ident, $left:expr, $right:expr) =&gt; { 
+        #[test] 
+        fn $name() { 
+            assert_eq!($left, $right); 
+        } 
+    } 
+} </pre>
+<p>Create the test <kbd>runner</kbd> by calling <kbd>rustc --test macros.rs</kbd>.</p>
+<p>When the <kbd>macros</kbd> executable is run, it prints out this:</p>
+<pre>    <strong>running 2 tests</strong>
+    <strong>test seven_times_six_is_forty_two ... ok</strong>
+    <strong>test seven_times_six_is_not_forty_three ... FAILED</strong>  </pre>
+<p>A macro can also be recursive, calling itself in the expansion branch. This is useful for processing tree-structured input, like when parsing HTML code.</p>
+<p>The compiler can show us the expanded macro. Let us say we want to compile <kbd>main.rs</kbd> which contains some macro(s). Call <kbd>rustc</kbd> with the following options to show the expanded output (you will have to use the nightly compiler version here):</p>
+<pre><strong>rustc main.rs --pretty=expanded -Z unstable-options</strong> </pre>
+<p>To debug a macro, and to give you more info about how your macro works, the macros <kbd>log_syntax</kbd> and <kbd>trace_macros(true)</kbd> can be used. Again, both macros are unstable features, so you must use them with a Rust compiler from the nightly branch and behind these feature gates:</p>
+<pre>#![feature(trace_macros)]  
+#![feature(log_syntax)] </pre>
+<p>For a complete example, see <kbd>macro_debug.rs</kbd>.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

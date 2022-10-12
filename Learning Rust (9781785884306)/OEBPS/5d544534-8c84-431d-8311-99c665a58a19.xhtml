@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">And it's obviously mutable, it has mut in the definition</h1>
+                </header>
+            
+            <article>
+                
+<p>Let's consider a different example:</p>
+<pre>let vc: Vec&lt;i32&gt; = Vec::new(); 
+let dup = vc.clone(); </pre>
+<p>This example is not what it seems. When the clone trait is called, <kbd>vc</kbd> has to update its reference count. The problem is, <kbd>vc</kbd> is not mutable, yet this code compiles and runs.</p>
+<p>To understand how, we have to know how the borrowing system works (for more information on borrowing, please refer to <span class="ChapterrefPACKT"><a href="9764ae84-9948-4bc8-a9d7-7537b2f31723.xhtml">Chapter 8</a>, <em>The Rust Application Lifetime</em></span>) in this instance. Borrowing has two very clear modes of operation:</p>
+<ul>
+<li>One (or more) references to the resource</li>
+<li>Exactly one mutable reference</li>
+</ul>
+<p>Really, then, when we talk about immutability, we're not really talking about whether a variable is fixed, but whether it is safe to have more than one reference to the variable. In the preceding case, the mutation occurs within the vector structure and we have the <kbd>&amp;T</kbd> from there.</p>
+<p>As the vector structure is not user facing, it is called as <strong>exterior mutable</strong>.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

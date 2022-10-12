@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Strings</h1>
+                </header>
+            
+            <article>
+                
+<p>The way Rust works with strings differs a bit from strings in other languages. All strings are valid sequences of Unicode (UTF8) bytes. They can contain null bytes, but they are not null terminated as in C.</p>
+<p>Rust distinguishes two types of string:</p>
+<ul>
+<li>The strings we have used until now are <strong>string slices</strong>, whose type is <kbd>&amp;str</kbd>. The <kbd>&amp;</kbd> points out that a string slice is a reference to a string. They are immutable and have a fixed size. For example, the following bindings declare string slices:</li>
+</ul>
+<pre>    // from Chapter 4/code/strings.rs 
+    let magician1 = "Merlin"; 
+    let greeting = "Hello, world!"; </pre>
+<ul>
+<li class="packt_nosymbol">Or if we explicitly annotate the string variable with its type:</li>
+</ul>
+<pre>    let magician2: &amp;str = "Gandalf"; </pre>
+<ul>
+<li class="packt_nosymbol">We can also define it as a string literal:</li>
+</ul>
+<pre>    let magician2: &amp;'static str = "Gandalf"; </pre>
+<ul>
+<li class="packt_nosymbol">The <kbd>&amp;'static</kbd> denotes that the string is statically allocated, and stored directly in the executable program. When declaring global constants, indicating the type is mandatory, but for a let binding it is optional because the compiler infers the type.</li>
+</ul>
+<pre>    println!("Magician {} greets magician {} with {}", 
+    magician1, magician2, greeting);</pre>
+<ul>
+<li class="packt_nosymbol">This gives the following output:</li>
+</ul>
+<pre>    <strong>Magician Merlin greets magician Gandalf with Hello, world!</strong>  </pre>
+<ul>
+<li class="packt_nosymbol">Literal strings live as long as the program; they have the lifetime of the program, which is the <kbd>static</kbd> lifetime. They are defined in the <kbd>std::str</kbd> module.</li>
+</ul>
+<ul>
+<li>A String on the other hand can grow dynamically in size (in fact it is a buffer), and so it must be allocated on the heap. We can create an empty string with:</li>
+</ul>
+<pre>    let mut str1 = String::new();</pre>
+<ul>
+<li class="packt_nosymbol">Each time the string grows it has to be reallocated in memory. So if you know it will start out as 25 bytes for example, you can create the string with this amount of memory allocated as:</li>
+</ul>
+<pre>    let mut str2 = String::with_capacity(25); </pre>
+<ul>
+<li>
+<p>As long as the size of <kbd>str2</kbd> is less than 25, there is no reallocation when adding to it. This type is described in the module <kbd>std::string</kbd>.</p>
+</li>
+<li class="packt_nosymbol">To convert a string slice into a string, use the method <kbd>to_string</kbd>:</li>
+</ul>
+<pre>    let mut str3 = magician1.to_string(); </pre>
+<p>The method <kbd>to_string()</kbd> can be used to convert any object to a string (more precisely; any object that implements the <kbd>ToString</kbd> trait; we will talk about traits in the next chapter) and this method needs to allocate memory on the heap.</p>
+<p>If <kbd>str3</kbd> is a string, then you can make a string slice from it with <kbd>&amp;str3</kbd>:</p>
+<pre>let sl1 = &amp;str3; </pre>
+<p>A string slice created this way can be considered as a view into the string. It is a reference to the interior of the string, and making it has no cost.</p>
+<p>This way is preferable to <kbd>to_string()</kbd> when comparing strings, because using <kbd>&amp;</kbd> doesn't consume resources, while the function <kbd>to_string()</kbd> allocates heap memory:</p>
+<pre>if &amp;str3 == magician1 { 
+    println!("We got the same magician alright!") 
+} </pre>
+<p>String slices can also be created with a range notation like <kbd>&amp;str3[1..3]</kbd>. In fact <kbd>&amp;str3[..]</kbd> is the same as <kbd>&amp;str3</kbd>.</p>
+<p>To build up a string, we can use a number of methods:</p>
+<ul>
+<li><kbd>push</kbd>: To append a character to the string</li>
+<li><kbd>push_str</kbd>: To append another string to the string</li>
+</ul>
+<p>You can see them in action in this code snippet:</p>
+<pre>let c1 = 'Θ';  // character c1 
+str1.push(c1);       
+println!("{}", str1); // Θ 
+str1.push_str(" Level 1 is finished - "); 
+println!("{}", str1); // Θ Level 1 is finished -  
+str1.push_str("Rise up to Level 2"); 
+println!("{}", str1); // Θ Level 1 is finished - Rise up to Level 2 </pre>
+<p>If you need to get the characters of a string one by one and in order, use the method <kbd>chars()</kbd>. This method returns an <kbd>Iterator</kbd>, so we can use the <kbd>for in</kbd> loop (see the section <em>Looping</em> in <a href="4e1f4309-1ce5-4eb2-9860-99a814bdd2ea.xhtml"><span class="ChapterrefPACKT">Chapter 2</span></a>, <em>Using Variables and Types</em>):</p>
+<pre>for c in magician1.chars() { 
+    print!("{} - ", c); 
+} </pre>
+<p>This prints the output as:</p>
+<pre>    <strong>M - e - r - l - i - n -</strong></pre>
+<p>To loop over the parts of a string separated by whitespace, we can use the method <kbd>split()</kbd>, which also returns an <kbd>Iterator</kbd>:</p>
+<pre>for word in str1.split(" ") {  
+    print!("{} / ", word); 
+} </pre>
+<p>This prints out the following output:</p>
+<pre>    <strong>Θ / Level / 1 / is / finished / - / Rise / up / to / Level / 2 /</strong>  </pre>
+<p>To change the first part of a string that matches with another string, use the <kbd>replace</kbd>:</p>
+<pre>let str5 = str1.replace("Level", "Floor"); </pre>
+<p>This code allocates new heap memory for the modified string <kbd>str5</kbd>.</p>
+<p>It prints out the following output:</p>
+<pre>    <strong>Floor 1 is finished - Rise up to Floor 2</strong>  </pre>
+<p>Strings can be concatenated with the <kbd>+</kbd> operator, but the second argument needs to be of the type string slice <kbd>&amp;str</kbd>:</p>
+<pre>let st1 = "United ".to_string(); // st1 is of type String 
+let st2 = "States"; 
+let country = st1 + st2; 
+println!("The country is {}", country); 
+let st3 = "United ".to_string(); 
+let st4 = "States".to_string(); 
+let country = st3 + &amp;st4; 
+println!("The country is {}", country); </pre>
+<p>This gives the following output:</p>
+<pre>    <strong>The country is United States</strong>
+    <strong>The country is United States</strong> </pre>
+<p>When writing a function that takes a string as argument, always declare it as a string slice, which is a view into the string, like this:</p>
+<pre>fn how_long(s: &amp;str) -&gt; usize {  s.len() } </pre>
+<p>The reason is that passing a string <kbd>str1</kbd> as an argument allocates memory, and passing it as a slice does not allocate. The easiest way to do this is the following:</p>
+<pre>println!("Length of Merlin: {}", how_long(magician1)); 
+println!("Length of str1: {}", how_long(&amp;str1)); </pre>
+<p>You can also pass a part of the string with the range notation, or you can even do the following:</p>
+<pre>println!("Length of str1: {}", how_long(&amp;str1[3..4])); </pre>
+<p>The preceding statements print out the following output:</p>
+<pre>    <strong>Length of Merlin: 6</strong>
+    <strong>Length of str1: 43</strong>
+    <strong>Length of str1: 4</strong></pre>
+<p>Raw strings are prefixed with <kbd>r</kbd> or <kbd>r#</kbd>. They are printed out literally - new lines or escaped characters are not interpreted, like this:</p>
+<pre>println!("{}", "Ru\nst"); 
+println!("{}", r"Ru\nst"); 
+println!("{}", r#"Ru\nst"#); </pre>
+<p>This prints out the following output:</p>
+<pre>    <strong>Ru\nst</strong>
+    <strong>Ru\nst</strong>
+    <strong>Ru\nst</strong> </pre>
+<p>To convert numbers into strings, use the method <kbd>from_str</kbd>, illustrated here:</p>
+<pre>println!("{:?}", f64::from_str("3.6")); 
+let number: f64 = f64::from_str("3.6").unwrap(); </pre>
+<p>The <kbd>from_str</kbd> method also needs the trait <kbd>FromStr</kbd>; to use it, you must import the trait with <kbd>use</kbd>, as follows:</p>
+<pre>use std::str::FromStr; </pre>
+<p>Consult the docs (<a href="http://doc.rust-lang.org/std/str/"><span class="URLPACKT">http://doc.rust-lang.org/std/str/</span></a> and <a href="http://doc.rust-lang.org/std/string/"><span class="URLPACKT">http://doc.rust-lang.org/std/string/</span></a>) for more functionality.</p>
+<p>Here is a schema to better see the difference between the two string types:</p>
+<table class="table">
+<tbody>
+<tr>
+<td>
+<p><strong>String</strong></p>
+</td>
+<td>
+<p><strong>String slice (</strong><kbd>&amp;str</kbd><strong>)</strong></p>
+</td>
+</tr>
+<tr>
+<td>
+<p>Mutable: heap memory allocation</p>
+<p>Module: <kbd>std::string</kbd></p>
+</td>
+<td>
+<p>Fixed size: view on string reference(<kbd>&amp;</kbd>)</p>
+<p>Module: <kbd>std::str</kbd></p>
+</td>
+</tr>
+</tbody>
+</table>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

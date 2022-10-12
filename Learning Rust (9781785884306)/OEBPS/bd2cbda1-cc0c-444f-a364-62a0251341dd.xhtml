@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Beware of double name scopes</h1>
+                </header>
+            
+            <article>
+                
+<p>It is quite a common problem to create a crate that may run into an issue known as double name scope. Consider the following example:</p>
+<pre>mathslib::conversions::temperature::temperature </pre>
+<p>Writing the preceding line instead of the following line causes a major problem:</p>
+<pre>mathslib::conversions::temperature; </pre>
+<p>The problem is down to the mod.rs and the temperature file.</p>
+<p>If you look at <kbd>lib.rs</kbd>, it has in it the name of the module that has to marry up with the name of the directory, which, in turn, contains the <kbd>mod.rs</kbd> file. The <kbd>mod.rs</kbd> file (as we have seen) needs to contain a public interface to the module. Now, following this logic, the code in the <kbd>temperature.rs</kbd> file should also have <kbd>pub mod temperature { ... }</kbd>. It is this final <kbd>pub mod</kbd> that gives the double name scope.</p>
+<p>To avoid this problem, just leave the <kbd>pub mod temperature</kbd> line out. As long as the filename matches the <kbd>pub mod</kbd> name in <kbd>mod.rs</kbd>, the compiler will consider that code as belonging to the named mod from <kbd><span>mod.rs</span></kbd>.</p>
+<p>Check out the following code snippet:</p>
+<pre>// in mod.rs 
+pub mod temperature; 
+// all code in temperature.rs "belongs" to mod temperature 
+fn celcius_to_kelvin(c: f32) -&gt; (bool, f32) { ... } </pre>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

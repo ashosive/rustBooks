@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Methods on structs</h1>
+                </header>
+            
+            <article>
+                
+<p>All the functions defined for our <kbd>struct</kbd> until now are so called <strong>associated functions</strong>, they are associated with the <kbd>struct</kbd> and are called with the syntax:</p>
+<pre>Struct_name::ass_function() </pre>
+<p>We can also define real methods in Rust, that are called on a <kbd>struct</kbd> instance and that have a reference to that instance <kbd>&amp;self</kbd> as first parameter.</p>
+<p>When a specific struct <kbd>Alien</kbd> attacks, we can define a method for that <kbd>Alien</kbd> struct like this:</p>
+<pre>fn attack(&amp;self) { 
+    println!("I attack! Your health lowers with {} damage points.", self.damage); 
+} </pre>
+<p>And call it on the function <kbd>alien berserk</kbd> as follows:</p>
+<pre>berserk.attack(); </pre>
+<p>A reference to <kbd>berserk</kbd> object (the <kbd>Alien</kbd> object on which the method is invoked) is passed as <kbd>&amp;self</kbd> to the method. In fact the <kbd>self</kbd> object is like the <kbd>self</kbd> object in Python or <kbd>this</kbd> in Java or C#. A method always has <kbd>&amp;self</kbd> instance as a parameter, in contrast to a static method.</p>
+<p>Here the object is passed immutably, but what if attacking also lowers the <kbd>Alien</kbd> structs own <kbd>health</kbd>? Let's add a second <kbd>attack</kbd> method:</p>
+<pre>fn attack(&amp;self) { 
+    self.health -= 10; 
+} </pre>
+<p>But Rust rejects this with two compiler errors. First it says the following:</p>
+<pre>    <strong>cannot assign to immutable field self.health</strong>  </pre>
+<p>This we can remedy by passing a mutable reference to the <kbd>self</kbd> instance like this:</p>
+<pre>fn attack(&amp;mut self) </pre>
+<p>But now Rust complains:</p>
+<pre>    <strong>duplicate definition of value 'attack'</strong>  </pre>
+<p>This means that Rust does not allow two methods with the same name, as there is no method overloading in Rust. This is because of the way type inference works.</p>
+<p>Changing the name to <kbd>attack_and_suffer</kbd>, we get:</p>
+<pre>fn attack_and_suffer(&amp;mut self, damage_from_other: u32) { 
+   println!("I attack! Your health lowers with {} damage points.", self.damage); 
+   self.health -= damage_from_other; 
+   } </pre>
+<p>After calling the <kbd>berserk.attack_and_suffer(31);</kbd> function; the <kbd>berserk</kbd> variables's <kbd>health</kbd> is now <kbd>69</kbd> (where <kbd>31</kbd> is the number of damage points inflicted upon the object <kbd>berserk</kbd> by another attacking <kbd>Alien</kbd>).</p>
+<div class="packt_tip packt_infobox"><span class="packt_screen">Exercise:<br/>
+<br/></span> Complex numbers like 2 + 5i (i is the square root of -1) have a real part (here 2) and an imaginary part (5); both are floating point numbers. Define a <kbd>struct Complex</kbd> and some methods for it, for example: A new method to construct a complex number a <kbd>to_string</kbd> method that prints a complex number like 2 + 5i or 2 - 5i (hint: use the <kbd>format!</kbd> macro which works the same way as the <kbd>println!</kbd> macro but returns a string). An <kbd>add</kbd> method to add two complex numbers; this is a new complex number where the real part is the sum of the real parts of the operands, and the same for the imaginary part. A <kbd>times_ten</kbd> method that changes the object itself by multiplying both parts by 10 (hint: think carefully about the method's argument). As a bonus, make an <kbd>abs</kbd> method that calculates the absolute value of a complex number (see: <a href="http://en.wikipedia.org/wiki/Absolute_value"><span class="URLPACKT">http://en.wikipedia.org/wiki/Absolute_value</span></a>) Note: If you need to work with complex numbers in a real project use the <kbd>Complex</kbd> struct from the <kbd>num</kbd> crate <kbd>num::Complex</kbd> (see <a href="https://rust-num.github.io/num/num/struct.Complex.html"><span class="URLPACKT">https://rust-num.github.io/num/num/struct.Complex.html</span></a>). Test your methods! (for example code see <kbd>Chapter 6/exercises/complex.rs</kbd>).</div>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

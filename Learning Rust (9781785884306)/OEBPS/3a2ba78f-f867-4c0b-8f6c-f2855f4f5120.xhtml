@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style00.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style01.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Variable binding</h1>
+                </header>
+            
+            <article>
+                
+<p>Let's consider the creation of a variable:</p>
+<pre>let myvar = 10i32; </pre>
+<p>We have created a non-mutable variable with the name <kbd>myvar</kbd>. We will then say that this variable has the value <kbd>10</kbd> as a 32-bit integer. In other words, if this was in C, it would be as follows:</p>
+<pre>const int myvar = 32; </pre>
+<p>What we have actually done here is create a binding between the variable name and the value. We say that <kbd>10i32</kbd> is bound to <kbd>myvar</kbd>. Bindings are very important when it comes to ownership. Rust has a rule that you can only have something bound to something else once.</p>
+<p>Let's consider the following snippet as it demonstrates why things go wrong when at the zero-cost abstraction level:</p>
+<pre>let myvec = vec![1i32, 2i32, 3i32]; 
+let myothervec = myvec; </pre>
+<p>Normally, as a developer, you'd look at this and say that <kbd>myvec</kbd> is bound to a vector of type <kbd>i32</kbd>, which contains three elements. You'd then assume that <kbd>myothervec</kbd> is just a copy of the first vector as in the likes of C, C++, and C#; that is what it means. The implementation will vary, but the meaning is the same.</p>
+<p>The problem is that, in Rust, what it means is that I have first created <kbd>myvec</kbd>. When I then say that <kbd>myothervec = myvec</kbd>, I am actually telling the compiler that the ownership of what <kbd>myvec</kbd> was bound to has now been given to <kbd>myothervec</kbd> and therefore <kbd>myvec</kbd> is out of scope and if (as a developer) I try to do anything with <kbd>myvec</kbd>, then the compiler is to fail the build.</p>
+<p>The following screenshot demonstrates this (it can be found in <kbd>Chapter 8/outofscope</kbd>). When you attempt to build it, you will get the following results:</p>
+<div class="packt_figure CDPAlignCenter CDPAlign"><img class=" image-border" src="Images/c0767162-b7ba-41b9-8b18-4b3aba2cd67c.png"/></div>
+<p>We will get a similar sort of issue when a function takes ownership.</p>
+<p>The following can be found in <kbd>08/function_outofscope</kbd>:</p>
+<pre>fn transfer_vec(v: Vec&lt;i32&gt;)  
+{ 
+    println!("v[0] in transfer_vec = {}", v[0]); 
+} 
+ 
+fn main()  
+{ 
+    let myvec = vec![1i32, 2i32, 3i32];  
+    transfer_vec(myvec);  
+    println!("myvec[0] is: {}", myvec[0]); 
+} </pre>
+<p>On the first look through, we don't see the obvious transfer of ownership and, usually, when you pass a variable to a function, you don't really consider that as a transfer. In Rust, passing a variable directly to another function is the same as in our first example: the ownership is released from <kbd>myvec</kbd> and passed to the function.</p>
+<p>To prove this, try to compile the code and you will end up with the following output:</p>
+<div class="packt_figure CDPAlignCenter CDPAlign"><img class=" image-border" src="Images/9cc0e99e-cbff-482f-b58e-168125d60872.png"/></div>
+<p>In other words, it's the same error as earlier.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

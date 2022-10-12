@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style00.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style01.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Casting</h1>
+                </header>
+            
+            <article>
+                
+<p>Rust allows for variables to be cast differently. This is achieved using the <kbd>as</kbd> keyword. This works in the same way as it does in C#:</p>
+<pre>let my_score = 10i32; 
+let mut final_score : u32 = 100; 
+let final_score = my_score as u32; </pre>
+<p>We can also cast to a different type (for example, <kbd>float</kbd> to <kbd>int</kbd>):</p>
+<pre>let pi = 3.14; 
+let new_pi = pi as i32; // new_pi = 3 </pre>
+<p>However, the effects of precision-losing casts like this one may not be desirable. For instance, if you cast a float that's over the bit size of <kbd>i8</kbd> to <kbd>i8</kbd>, the number gets truncated to <kbd>0</kbd>:</p>
+<pre>let n = 240.51; 
+let n_as_int = n as i8; // n_as_int = 0   </pre>
+<p>An error will occur if the types you are attempting to cast to are not compatible; for example:</p>
+<pre>let my_home = "Newton-le-Willows"; 
+let my_number = my_home as u32; // cannot convert &amp;str to u32 </pre>
+<p>Rust does not do implicit casting between primitive types, even when it would be safe. That is, if a function expects an <kbd>i8</kbd> as a parameter, you must cast an <kbd>i16</kbd> value to <kbd>i8</kbd> before passing it. The reason for this is to achieve the maximum type checking and, therefore, reduce the number of potential (and more problematic) hidden bugs.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

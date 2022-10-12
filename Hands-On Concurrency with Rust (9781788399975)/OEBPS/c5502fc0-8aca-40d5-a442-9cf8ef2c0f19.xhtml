@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style00.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style01.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Inspecting with Linux perf</h1>
+                </header>
+            
+            <article>
+                
+<p>It's worth keeping in mind that Valgrind's cachegrind is a simulation. If you have access to a Linux system you can make use of the perf tool to get real, honest numbers about your program's cache performance and more. This is highly recommended and something we'll do throughout this book. Like git, perf is many tools arranged under a banner—perf—with its own subcommands that have their own options.</p>
+<p>It is a tool well worth reading the documentation for. Anyhow, what does the standard look like under perf?</p>
+<pre><strong>naive_hashmap &gt; perf stat --event task-clock,context-switches,page-faults,cycles,instructions,branches,branch-misses,cache-references,cache-misses target/release/standard &gt; /dev/null
+
+ Performance counter stats for 'target/release/standard':
+
+      6.923765      task-clock (msec)         #    0.948 CPUs utilized
+             0      context-switches          #    0.000 K/sec
+           633      page-faults               #    0.091 M/sec
+    19,703,427      cycles                    #    2.846 GHz
+    26,234,708      instructions              #    1.33  insn per cycle
+     2,802,334      branches                  #  404.741 M/sec
+      290,475      branch-misses             #   10.37% of all branches
+       635,526      cache-references          #   91.789 M/sec
+     67,304      cache-misses              # 10.590 % of all cache refs
+
+       0.007301775 seconds time elapsed</strong></pre>
+<p>How does the naive implementation stand up?</p>
+<pre><strong>naive_hashmap &gt; perf stat --event task-clock,context-switches,page-faults,cycles,instructions,branches,branch-misses,cache-references,cache-misses target/release/naive &gt; /dev/null
+
+ Performance counter stats for 'target/release/naive':
+
+    1323.724713      task-clock (msec)         #    1.000 CPUs utilized
+              1      context-switches          #    0.001 K/sec
+            254      page-faults               #    0.192 K/sec
+  3,953,955,131      cycles                    #    2.987 GHz 15,390,499,356      instructions               #  3.89  insn per cycle    4,428,637,974      branches                    # 3345.588 M/sec
+      204,132      branch-misses               #  0.00% of all branches
+    455,719,875      cache-references          #  344.271 M/sec
+   21,311      cache-misses                 # 0.005 % of all cache refs
+
+       1.324163884 seconds time elapsed</strong></pre>
+<p>This squares pretty well with the Valgrind simulation and leads to the same conclusion: too much work is being done to insert. Too many branches, too many instructions, the well-studied reader will have seen this coming a mile off, it's just worthwhile to be able to put a thing you know to numbers.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style00.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style01.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Program arguments</h1>
+                </header>
+            
+            <article>
+                
+<p>Reading in program parameters from the command line at the startup of a program is easy in Rust, just use the method <kbd>std::env::args()</kbd>. We can use the function <kbd>collect()</kbd> to these parameters into a vector of <kbd>String</kbd>, like this:</p>
+<pre>// code from Chapter 4/code/arguments.rs: 
+use std::env; 
+ 
+fn main() { 
+   let args: Vec&lt;String&gt; = env::args().collect(); 
+   println!("The program's name is: {}", args[0]); 
+   for arg in args.iter() { 
+         println!("Next argument is: {}", arg) 
+   } 
+   println!("Total arguments supplied: {}", args.len() - 1); 
+   for n in 1..args.len() { 
+      println!("The {}th argument is {}", n, args[n]); 
+   } 
+} </pre>
+<p>Call the program like this:</p>
+<ul>
+<li><kbd>arguments arg1 arg2</kbd> on Windows</li>
+<li><kbd>./arguments arg1 arg2</kbd> on Linux and OS X</li>
+</ul>
+<p>Here is the output from a real call:</p>
+<div class="mce-root CDPAlignCenter CDPAlign"><img height="152" width="339" src="Images/34ebcb05-4257-43ed-845e-ebeec9adffe8.png"/></div>
+<p class="packt_figure">The argument <kbd>args[0]</kbd> is the program's name, the next arguments are the command-line parameters. We can iterate through the arguments or access them by index. The argument <kbd>args.len()<span>- 1</span></kbd> ;gives us the number of parameters.</p>
+<p>For more complex parsing with options and flags use the <kbd>getopts</kbd> or the <kbd>docopt</kbd> crate. To get started there is an example at <span class="URLPACKT"><a href="http://rustbyexample.com/arg/getopts.html">http://rustbyexample.com/arg/getopts.html</a>.</span></p>
+<p>In the same way <kbd>env::vars()</kbd> returns the operating system environment variables:</p>
+<pre>let osvars = env::vars(); 
+for (key, value) in osvars { 
+    println!("{}: {}", key, value); 
+} </pre>
+<p>This starts with printing out on Windows for example:</p>
+<pre>    <strong>HOMEDRIVE: C:</strong>
+    <strong>USERNAME: CVO</strong>
+    <strong>LOGONSERVER: \\MicrosoftAccount</strong></pre>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

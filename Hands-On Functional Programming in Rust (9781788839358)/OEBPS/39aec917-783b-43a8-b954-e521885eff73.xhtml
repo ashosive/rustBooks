@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style00.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style01.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Investigating generics</h1>
+                </header>
+            
+            <article>
+                
+<p>Generics refers to the practice of parameterizing classes in object-oriented programming languages. Rust does not have an exact equivalent of classes. However, the concept of datatypes paired with a trait is very similar to a class if used in that sense. So, in Rust, generics would refer to the parameterization of datatypes and traits.</p>
+<p>Choosing a common example from OOP, let's look at the animal kingdom. In the following code, we will define some animals and actions that they can take. First, let's define two animals:</p>
+<pre style="padding-left: 30px">struct Cat<br/>{<br/>   weight: f64,<br/>   speed: f64<br/>}<br/><br/>struct Dog<br/>{<br/>   weight: f64,<br/>   speed: f64<br/>}</pre>
+<p>Now, let's define an <kbd>animal trait</kbd> and its implementations. All animals will have the <kbd>max_speed</kbd> method. Here is the code:</p>
+<pre style="padding-left: 30px">trait Animal<br/>{<br/>   fn max_speed(&amp;self) -&gt; f64;<br/>}<br/><br/>impl Animal for Cat<br/>{<br/>   fn max_speed(&amp;self) -&gt; f64<br/>   {<br/>      self.speed<br/>   }<br/>}<br/><br/>impl Animal for Dog<br/>{<br/>   fn max_speed(&amp;self) -&gt; f64<br/>   {<br/>      self.speed<br/>   }<br/>}</pre>
+<p>Here, we have defined the Rust equivalent of interfaces from OOP. However, we have not parameterized anything, so nothing here should be considered generic. We will add the following code, a trait defining the concept of an animal chasing a toy. First, we will define the concept of a toy. This will follow the same OOP-like pattern as in the preceding code:</p>
+<pre style="padding-left: 30px">struct SqueakyToy<br/>{<br/>   weight: f64<br/>}<br/><br/>struct Stick<br/>{<br/>   weight: f64<br/>}<br/><br/>trait Toy<br/>{<br/>   fn weight(&amp;self) -&gt; f64;<br/>}<br/><br/>impl Toy for SqueakyToy<br/>{<br/>   fn weight(&amp;self) -&gt; f64<br/>   {<br/>      self.weight<br/>   }<br/>}<br/><br/>impl Toy for Stick<br/>{<br/>   fn weight(&amp;self) -&gt; f64<br/>   {<br/>      self.weight<br/>   }<br/>}</pre>
+<p>Now, we have two traits, each having two possible implementations. Let's define an action for an animal chasing a toy. More than one possible animal has been defined, and more than one possible toy, so we will need to use a generic definition. The struct definition also constrains each parameter with a trait bound, which adds additional information to the <kbd>struct</kbd>; now, we can guarantee that each animal will implement the <kbd>Animal</kbd> trait and similarly, each toy will implement <kbd>Toy</kbd>. We will also define some associated logic that uses the parameterized traits' methods. The code is as follows:</p>
+<pre style="padding-left: 30px" class="p1"><span class="s1">struct AnimalChasingToy&lt;A: Animal, T: Toy&gt;<br/></span><span class="s1">{<br/></span><span class="s1">   animal: A,<br/></span><span class="s1">   toy: T<br/></span><span class="s1">}<br/><br/></span><span class="s1">trait AnimalChasesToy&lt;A: Animal, T: Toy&gt;<br/></span><span class="s1">{<br/></span><span class="s1">   fn chase(&amp;self);<br/></span><span class="s1">}<br/><br/></span><span class="s1">impl&lt;A: Animal, T: Toy&gt; AnimalChasesToy&lt;A, T&gt; for AnimalChasingToy&lt;A, T&gt;<br/></span><span class="s1">{<br/></span><span class="s1">   fn chase(&amp;self)<br/></span><span class="s1">   {<br/></span><span class="s1">      println!("chase")<br/></span><span class="s1">   }<br/></span><span class="s1">}</span></pre>
+<p>At this point, we have defined a generic <kbd>struct</kbd> and <kbd>trait</kbd> that accepts types, knowing only some limited information regarding the traits of each object. Multiple traits, or none, can be specified to declare all expected interfaces. Multiple traits or lifetime bounds can be declared with the <kbd>'l + Trait1 + Trait2</kbd> syntax.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style00.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style01.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Embedding C into Rust – feruscore without processes</h1>
+                </header>
+            
+            <article>
+                
+<p>When we wrapped up our discussion of feruscore in the previous chapter, we'd constructed a program that could discover corewars warriors through simulated natural selection. This was done by writing evolved warriors out to disk, using Rust's OS process interface to call out to pmars—the de facto standard MARS—and competing them to discover their relative fitness. We used Rayon—Rust's very convenient data parallelism library—to distribute the workload of competitions between available CPUs. Unfortunately, the implementation was pretty slow. Building a tournament selection criteria was maybe more difficult to express than we might have hoped—though I'm sure there a bright-spark of a reader out there who will improve that substantially and wow me. The real pain point was serializing <em>every</em> warrior to disk multiple times, allocating similar structures repeatedly to establish each round, and then eating pmars' allocation and parsing overhead. It's this last step, calling out to an external program to run competitions, is something we'll address in this chapter. We will also address the other two issues because, well, why not go all-in?</p>
+<div class="packt_infobox"><span>Not all of feruscore's source code appears in this chapter. Some of it was discussed in-depth in the previous chapter, some of it—such as benchmarking code—would be a rehash of material already covered in the book. The C code is not printed in its entirety as it's very dense and very long. You can find the full listing in the book's source repository. </span></div>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

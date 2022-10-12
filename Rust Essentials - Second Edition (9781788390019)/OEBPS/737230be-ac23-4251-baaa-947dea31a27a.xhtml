@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Using trait constraints</h1>
+                </header>
+            
+            <article>
+                
+<p>Back in the section on <em>Generic data structures and functions</em> in <a href="680a0457-8a2d-4196-9ef4-ddc2476dd715.xhtml"><span class="ChapterrefPACKT">Chapter 5</span></a>, <em>Higher Order Functions and Error-Handling</em>, we made a function <kbd>sqroot</kbd> to calculate the square root of a 32-bit floating point number:</p>
+<pre>// see code in Chapter 5/code/sqrt_match.rs 
+Use std::f32; 
+ 
+fn sqroot(r: f32) -&gt; Result&lt;f32, String&gt; { 
+if r &lt; 0.0 {  
+return Err("Number cannot be negative!".to_string());  
+} 
+   Ok(f32::sqrt(r)) 
+} </pre>
+<p>What if we wanted to calculate the square root of an <kbd>f64</kbd> type number? It would be very unpractical to make a different version of the function for each type. A first attempt would be to just replace an <kbd>f32</kbd> type with a generic type <kbd>&lt;T&gt;</kbd>:</p>
+<pre>// see code in Chapter 6/code/trait_constraints.rsfn sqroot&lt;T&gt;(r: T) -&gt; Result&lt;T, String&gt; { 
+   if r &lt; 0.0 {  
+      return Err("Number cannot be negative!".to_string());  
+   } 
+    Ok(T::sqrt(r)) 
+} </pre>
+<p>But Rust does not agree because it doesn't know anything about <kbd>T</kbd>, signaling multiple errors:</p>
+<pre><strong>      binary operation `&lt;` cannot be applied to type `T`
+    </strong>
+    <strong>and no function or associated item named `sqrt` found for type `T` in</strong>
+    <strong>the current scope</strong>
+    <strong>...</strong>  </pre>
+<p>A <kbd>Float</kbd> trait exists that would be general enough, but not in the standard library, it lives in the <kbd>num</kbd> crate, more specifically as <kbd>num::traits::Float</kbd>. To be able to use that crate, we must create a project with <kbd>cargo</kbd>:</p>
+<pre><strong>cargo new trait_constraints - -bin  </strong></pre>
+<p>Then we have to edit the <kbd>Cargo.toml</kbd> file and add the following section:</p>
+<pre>[dependencies] 
+num = "*" </pre>
+<p>Now give the commands <kbd>cargo update</kbd> to add crate <kbd>num</kbd> to your project.</p>
+<p>To be able to use our external crate <kbd>num</kbd>, we add the following code at the start of our file:</p>
+<pre>extern crate num; 
+use num::traits::Float; </pre>
+<p>We can assert that <kbd>T</kbd> must implement this trait as follows:</p>
+<pre>fn sqroot&lt;T: num::traits::Float&gt;(r: T) -&gt; Result&lt;T, String&gt; {...} </pre>
+<p>This is called putting a <strong>trait constraint</strong> or a <strong>trait bound</strong> on the type <kbd>T</kbd>. We assert that type <kbd>T</kbd> implements the trait <kbd>num::traits::Float</kbd>, and it ensures that the function can use all methods of the specified trait.</p>
+<p>To be as general as possible, we also use the special indicator for 0 that exists in the <kbd>num</kbd> crate, named <kbd>num::zero()</kbd>, so our function now becomes:</p>
+<pre>fn sqroot&lt;T: num::traits::Float&gt;(r: T) -&gt; Result&lt;T, String&gt; { 
+      if r &lt; num::zero() {  
+            return Err("Number cannot be negative!".to_string());  
+      } 
+      Ok(num::traits::Float::sqrt(r)) 
+} </pre>
+<p>This works for both of the following calls:</p>
+<pre>println!("The square root of {} is {:?}", 42.0f32, sqroot(42.0f32) ); 
+println!("The square root of {} is {:?}", 42.0f64, sqroot(42.0f64) ); </pre>
+<p>This produces the following output:</p>
+<pre>    <strong>The square root of 42 is Ok(6.480741)</strong>
+    <strong>The square root of 42 is Ok(6.48074069840786)</strong>  </pre>
+<p>But if we try to call the function <kbd>sqroot</kbd> on an integer, like this:</p>
+<pre>println!("The square root of {} is {:?}", 42, sqroot(42) );     </pre>
+<p>We get the following error:</p>
+<pre>    <strong>the trait `num::Float` is not implemented for {integer}</strong>  </pre>
+<p>Because an integer is not a <kbd>Float</kbd> type.</p>
+<p>Another way to write the same trait constraint is with a <kbd>where</kbd> clause like this:</p>
+<pre>fn sqroot&lt;T&gt;(r: T) -&gt; Result&lt;T, String&gt; where T: Float { ... } </pre>
+<p>Why does this other form exist? Well, there can be more than one generic type <kbd>T</kbd> and <kbd>U</kbd>, and each type can be constrained to multiple traits (indicated by a <kbd>+</kbd> between the traits) <kbd>Trait1</kbd>, <kbd>Trait2</kbd>, and so on, like in this fictitious example:</p>
+<pre>fn multc&lt;T: Trait1, U: Trait1 + Trait2&gt;(x: T, y: U) {...} </pre>
+<p>With the <kbd>where</kbd> syntax this can be made much more readable, like this:</p>
+<pre>fn multc&lt;T, U&gt;(x: T, y: U) where T: Trait1, U: Trait1 + Trait2 {...}</pre>
+<div class="packt_tip packt_infobox"><span class="packt_screen">Exercise:<br/></span><br/>
+Define a trait <kbd>Draw</kbd> with a <kbd>draw</kbd> method.<br/>
+Define struct types <kbd>S1</kbd> with an integer field, and <kbd>S2</kbd> with a float field. Implement the trait <kbd>Draw</kbd> for <kbd>S1</kbd> and <kbd>S2</kbd> (<kbd>draw</kbd> prints the values out surrounded by <kbd>***</kbd>).<br/>
+Make a generic <kbd>draw_object</kbd> function that takes any object that implements <kbd>Draw</kbd>.<br/>
+Test it out! (see example code in <kbd>Chapter 6/exercises/draw_trait.rs)</kbd></div>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

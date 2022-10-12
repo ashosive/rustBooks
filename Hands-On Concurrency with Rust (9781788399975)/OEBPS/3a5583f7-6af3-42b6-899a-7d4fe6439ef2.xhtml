@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style00.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style01.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">The client</h1>
+                </header>
+            
+            <article>
+                
+<p>The real challenge for our server comes with a specially constructed client. Let's go through it before we see the client in action. The preamble is typical:</p>
+<pre>#[macro_use]
+extern crate slog;
+extern crate clap;
+extern crate slog_async;
+extern crate slog_term;
+
+use clap::{App, Arg};
+use slog::Drain;
+use std::net::TcpStream;
+use std::sync::atomic::{AtomicUsize, Ordering};
+use std::{thread, time};
+
+static TOTAL_STREAMS: AtomicUsize = AtomicUsize::new(0);</pre>
+<p>In fact, this client preamble hews fairly close to that of the server. So, too, the <kbd>main</kbd> function, as we'll see shortly. As with many other programs in this book, we dedicate a thread to reporting on the behavior of the program. In this client, this thread runs the long-lived <kbd>report</kbd>:</p>
+<pre>fn report(log: slog::Logger) {
+    let delay = time::Duration::from_millis(1000);
+    let mut total_streams = 0;
+    loop {
+        let streams_per_second = TOTAL_STREAMS.swap(0, Ordering::Relaxed);
+        info!(log, "Total connections: {}", total_streams);
+        info!(log, "Connections per second: {}", streams_per_second);
+        total_streams += streams_per_second;
+        thread::sleep(delay);
+    }
+}</pre>
+<p>Every second <kbd>report</kbd> swaps <kbd>TOTAL_STREAMS</kbd>, maintaining its own <kbd>total_streams</kbd>, and uses the reset value as a per-second gauge. Nothing we haven't seen before in this book. Now, in the <kbd>main</kbd> function, we set up the logger and parse the same command options as in the server:</p>
+<pre>fn main() {
+    let decorator = slog_term::TermDecorator::new().build();
+    let drain = slog_term::CompactFormat::new(decorator).build().fuse();
+    let drain = slog_async::Async::new(drain).build().fuse();
+    let root = slog::Logger::root(drain, o!());
+
+    let matches = App::new("server")
+        .arg(
+            Arg::with_name("host")
+                .long("host")
+                .value_name("HOST")
+                .help("Sets which hostname to listen on")
+                .takes_value(true),
+        )
+        .arg(
+            Arg::with_name("port")
+                .long("port")
+                .value_name("PORT")
+                .help("Sets which port to listen on")
+                .takes_value(true),
+        )
+        .get_matches();
+
+    let host: &amp;str = matches.value_of("host").unwrap_or("localhost");
+    let port = matches
+        .value_of("port")
+        .unwrap_or("1987")
+        .parse::&lt;u16&gt;()
+        .expect("port-no not valid");
+
+    let client = root.new(o!("host" =&gt; host.to_string(), "port" =&gt; port));
+    info!(client, "Client ready to be mean. &gt;:)");</pre>
+<p>In <kbd>main,</kbd> we start the reporter thread and ignore its handle:</p>
+<pre>    let reporter_log = root.new(o!("meta" =&gt; "report"));
+    let _ = thread::spawn(|| report(reporter_log));</pre>
+<p>That leaves only committing the slowloris attack, which is disappointingly easy for the client to do:</p>
+<pre>    let mut streams = Vec::with_capacity(2048);
+    loop {
+        match TcpStream::connect((host, port)) {
+            Ok(stream) =&gt; {
+                TOTAL_STREAMS.fetch_add(1, Ordering::Relaxed);
+                streams.push(stream);
+            }
+            Err(err) =&gt; error!(client, <br/>                               "Connection rejected with error: {:?}", <br/>                               err),
+        }
+    }
+}</pre>
+<p>Yep, that's it, one simple loop connecting as quickly as possible. A more sophisticated setup would send a trickle of data through the socket to defeat aggressive timeouts or limit the total number of connections made to avoid suspicion, coordinating with other machines to do the same.</p>
+<p>Mischief on networks is an arms race that nobody really wins, is the moral.</p>
+<p>Anyway, let's see this client in action. If you run <kbd>cargo run --release --bin client</kbd>, you should be rewarded with:</p>
+<pre><strong>&gt; cargo run --release --bin client
+    Finished release [optimized] target(s) in 0.22 secs
+     Running `target/release/client`
+host: localhost
+ port: 1987
+  Apr 22 21:50:49.200 INFO Client ready to be mean. &gt;:)
+meta: report
+ Apr 22 21:50:49.200 INFO Total connections: 0
+ Apr 22 21:50:49.201 INFO Connections per second: 0
+ Apr 22 21:50:50.200 INFO Total connections: 0
+ Apr 22 21:50:50.200 INFO Connections per second: 1160
+ Apr 22 21:50:51.204 INFO Total connections: 1160
+ Apr 22 21:50:51.204 INFO Connections per second: 1026
+ Apr 22 21:50:52.204 INFO Total connections: 2186
+ Apr 22 21:50:52.204 INFO Connections per second: 915</strong></pre>
+<p>You'll find a spew of errors in the server log as well as high-CPU load due to the OS scheduler thrash. It's not a good time.</p>
+<p>The ultimate problem here is that we've allowed an external party, the client, to decide the allocation patterns of our program. Fixed sizes make for safer software. In this case, we'll need to fix the total number of threads at startup, thereby capping the number of connections the server is able to sustain to a relatively low number. Though, it will be a safe low number. Note that the deficiency of allocating a whole OS thread to a single network connection is what inspired C10K Problem in the late 1990s, leading to more efficient polling capabilities in modern operating systems. These polling syscalls are the basis of Mio and thereby Tokio, though the discussion of either is well outside the scope of this book. Look them up. It's the future of Rust networking.</p>
+<p>What this program needs is a way of fixing the number of threads available for connections. That's exactly what a thread pool is.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

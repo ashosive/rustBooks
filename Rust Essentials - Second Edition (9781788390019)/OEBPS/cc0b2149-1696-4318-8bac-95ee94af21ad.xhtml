@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Testing with cargo</h1>
+                </header>
+            
+            <article>
+                
+<p>An executable project, or crate as it is called in Rust, needs to have a startup function <kbd>main()</kbd>, but a library crate, to be used in other crates, does not need a function <kbd>main()</kbd>. Create a new library crate <kbd>mylib</kbd> with <kbd>cargo</kbd> as follows:</p>
+<pre>cargo new mylib</pre>
+<p>This creates a subfolder <kbd>src</kbd> with a source file <kbd>lib.rs</kbd> which contains the following:</p>
+<pre>#[cfg(test)] 
+mod tests { 
+    #[test] 
+    fn it_works() { 
+    } 
+} </pre>
+<p>So, a library crate is created with no code of its own, but it does contain a test template annotated with a <kbd>cfg(test)</kbd> attribute. This attribute indicates that the code that follows will only be compiled in test mode. To differentiate with normal library code, use a prefix not in the attribute like this:</p>
+<pre>#[cfg(not(test))] 
+fn main() { 
+    println!("Normal mode, no test was compiled"); 
+} </pre>
+<p>In the test section you can add the unit tests you write on the functions of your library. To run these tests, go to the project root folder and type <kbd>cargo test</kbd>, which produces similar output as in the previous section.</p>
+<p>You can run a single test by supplying its function name, like this:</p>
+<pre>    <strong>cargo test it_works</strong>  </pre>
+<p>The command <kbd>cargo test</kbd> runs tests in parallel whenever possible. If this can pose a problem, perhaps because one test depends on another, you can execute them all in one thread using the following command:</p>
+<pre>    <strong>cargo test - - - -test-threads=1</strong>  </pre>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

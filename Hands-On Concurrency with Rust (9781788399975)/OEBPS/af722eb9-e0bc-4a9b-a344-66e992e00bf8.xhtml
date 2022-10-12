@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Ordering::AcqRel</h1>
+                </header>
+            
+            <article>
+                
+<p>This variant is a combination of <kbd>Acquire</kbd> and <kbd>Release.</kbd> When a load is performed with <kbd>AcqRel</kbd>, then <kbd>Acquire</kbd> is used, and stored to <kbd>Release</kbd>. <kbd>AcqRel</kbd> is not just a convenience in that it combines the ordering behaviors of both <kbd>Acquire</kbd> and <kbd>Release</kbd>—the ordering is porous on neither side. That is, loads and stores after an <kbd>AcqRel</kbd> cannot move up, as with <kbd>Acquire</kbd>, and loads and stores prior to an <kbd>AcqRel</kbd> cannot move down, as with <kbd>Release</kbd>. Nifty trick.</p>
+<p>Before moving on to the next ordering variation, it's worth pointing out that so far we've only seen examples of a thread performing an <kbd>Acquire</kbd>/<kbd>Release</kbd> in a pair, in cooperation with another thread. It doesn't have to be this way. One thread can always perform <kbd>Acquire</kbd> and another can always perform <kbd>Release</kbd>. The causality definition is specifically in terms of threads that perform one but not both, except in cases when <kbd>A</kbd> is equal to <kbd>B</kbd>, of course. Let's break down an example:</p>
+<pre style="padding-left: 30px">A: store X                   1
+A: store[Release] Y          2
+B: load[Acquire] Y           3
+B: load X                    4
+B: store[Release] Z          5
+C: load[Acquire] Z           6
+C: load X                    7</pre>
+<p>Here, we have three threads, <kbd>A</kbd>, <kbd>B</kbd>, and <kbd>C</kbd>, performing a mix of plain loads and stores with atomic loads and stores. <kbd>store[Release]</kbd> is an atomic store where store is not. As in the section on linearizability, we've numbered each one of the operations, but be aware that this does not represent a timeline so much as the numbers are convenient names. What can we say of the causality of this example? We know:</p>
+<ul>
+<li><kbd>1 happens-before 2</kbd></li>
+<li><kbd>2 synchronizes-with 3</kbd></li>
+<li><kbd>3 happens-before 4</kbd></li>
+<li><kbd>3 happens-before 5</kbd></li>
+<li><kbd>5 synchronizes-with 6</kbd></li>
+<li><kbd>6 happens-before 7</kbd></li>
+</ul>
+<p>We'll see more analysis of this sort later in the chapter.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

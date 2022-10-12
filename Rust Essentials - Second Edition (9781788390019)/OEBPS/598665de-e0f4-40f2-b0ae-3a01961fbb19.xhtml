@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Working with random numbers</h1>
+                </header>
+            
+            <article>
+                
+<p>Let's see another example of how to work with external crates using the <kbd>rand</kbd> crate.</p>
+<p>Games often involve random choices, such as deciding which monster should attack our player or at which place you will find treasure; the <kbd>rand</kbd> ;crate provides for this. Start a Cargo project, <kbd>random</kbd>. To compile the <kbd>rand</kbd> crate with your program, add the following to the <kbd>Cargo.toml</kbd> configuration file:</p>
+<pre>[dependencies] 
+rand = "*" </pre>
+<p>To import the crate into your program, add the following lines at the start of your source code, <kbd>random\scr\main.rs</kbd>:</p>
+<pre>extern crate rand; 
+use rand::Rng; </pre>
+<p>The <kbd>rand</kbd> crate contains a <kbd>random()</kbd> function for generating a random value, but it can generate values of lots of different types, not only integer numbers; in other words, it is <em>generic</em>.</p>
+<p>Using it looks like this: <kbd>let rnd = rand::random();</kbd>. This gives us the <kbd>error unable to infer enough type information about `_`; type annotations required</kbd>.</p>
+<p>So we have to give Rust a hint regarding which type of value the <kbd>random()</kbd> function must generate. To tell it to produce integer values of 32 bits in size, attach <kbd>::&lt;i32&gt;</kbd> to the function name like this:</p>
+<p> </p>
+<pre>let rnd = rand::random::&lt;i32&gt;(); </pre>
+<p>The following program illustrates some basic functionality for generating random values:</p>
+<p> </p>
+<pre>   // from Chapter 8/code/random/src/main.rs 
+fn main() { 
+    println!("Give me 5 random numbers:"); 
+    for _ in 0..5 { 
+        let rnd = rand::random::&lt;i32&gt;(); 
+        print!("{} / ", rnd); 
+    } 
+    println!(""); 
+    println!("Give me 5 positive random numbers smaller than 32:"); 
+    for _ in 0..5 { 
+        let rnd = (rand::random::&lt;u32&gt;() % 32) + 1; 
+        print!("{} / ", rnd); 
+    } 
+    println!(""); 
+ 
+    let mut rng = rand::thread_rng(); 
+    if rng.gen() { // random bool 
+        println!("i32: {}, u32: {}", rng.gen::&lt;i32&gt;(), rng.gen::&lt;u32&gt;()) 
+    } 
+ 
+// generate a random number in a range, for example: 1 - 100: 
+    let secret_number = rand::thread_rng().gen_range(1, 101); 
+    println!("The secret number is: {}", secret_number); 
+ 
+    let tuple = rand::random::&lt;(f64, char)&gt;(); 
+    println!("{:?}", tuple) 
+}      </pre>
+<p>As always, build the crate with <kbd>cargo build</kbd>, and then execute it with <kbd>cargo run</kbd>.</p>
+<p>This gives an output like this (because it is random, each time the program executes, the output will contain different values):</p>
+<pre>    <strong>Give me 5 random numbers:</strong>
+    <strong>-1786096291 / -312872251 / 959357270 / 1391515785 / -1379700184 / </strong>
+    <strong>Give me 5 positive random numbers smaller than 32:</strong>
+    <strong>11 / 15 / 28 / 13 / 23 /</strong>
+    <strong>The secret number is: 11</strong>
+    <strong>(0.279622, '\u{583cf}')</strong>
+    <strong>"¼¢Q¢jê«;aù"</strong>  </pre>
+<p>How would you make sure that only positive numbers are generated? You guessed it:</p>
+<pre>let rnd = rand::random::&lt;u32&gt;(); </pre>
+<p>What if we need numbers between 1 and 32 (because, let us assume, there are 32 monsters lurking around in this level)? Use the <kbd>%</kbd> operator to return the remainder from the integer division by 32 (which goes from 0 to 32) and then add 1, like this:</p>
+<pre>let rnd = (rand::random::&lt;u32&gt;() % 32) + 1; </pre>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

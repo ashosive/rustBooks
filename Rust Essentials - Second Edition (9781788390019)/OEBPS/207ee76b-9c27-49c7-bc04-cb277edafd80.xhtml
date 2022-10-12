@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">The stability of Rust and its evolution</h1>
+                </header>
+            
+            <article>
+                
+<p>Rust started out with version 1.0.0, and, at the time of writing, the current version is 1.20.0. Version numbers follow the semantic versioning principle (see <a href="http://semver.org/"><span class="URLPACKT">http://semver.org/</span></a> for further information):</p>
+<ul>
+<li><strong>Patch release</strong>: For bug fixes and other minor changes, increment the last number, for example 1.18.1</li>
+<li><strong>Minor release</strong>: For new features which don't break existing features, increment the middle number, for example 1.19.0</li>
+<li><strong>Major release</strong>: For changes which break backwards compatibility, increment the first number, for example 2.0.0</li>
+</ul>
+<p>So, no breaking changes will occur during the current 1.n.m cycle versions, as this cycle is backward compatible; Rust projects which are developed in the older versions of this cycle will still compile in a more recent version. However, to be able to work with new features which are only contained in the more recent version, it is mandatory to compile your code to that specific version.</p>
+<p>Rust has a very dynamic cycle of progression. Work is performed on three releases (called <strong>channels</strong> or builds simultaneously)--nightly, beta, and stable, and they follow a strict six-week release cycle like web browsers:</p>
+<ul>
+<li>The <strong>stable channel</strong> is the current stable release, which is advocated for Rust projects that are being used in production.</li>
+<li>The <strong>beta channel</strong> is where new features are deemed stable enough to be tested out in bigger, non-deployed projects.</li>
+<li>The <strong>nightly channel</strong> build contains the latest experimental features; it is produced from the master branch every 24 hours. You would use it only for experimentation.</li>
+</ul>
+<p>The beta and stable channel builds are only updated as new features are backported to their branch. With this arrangement, Rust allows users to access new features and bug fixes quickly.</p>
+<p>Here is a concrete example: 1.18 was released on 18th June, 2017, the 1.19-beta was released at the same time, and the master development branch was advanced to 1.20. Six weeks later, on 30th July, Rust 1.19 will come out of beta and become a stable release, 1.20 will be promoted to 1.21-beta, and the master will become the eventual 1.21.</p>
+<p>Some features in an experimental stage can only work when the code contains an attribute <kbd>#[feature]</kbd>. These may not be used on the stable release channel, only on a beta or nightly release; an example is the box syntax (see <kbd>chapter 2\code\references.rs</kbd>).</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

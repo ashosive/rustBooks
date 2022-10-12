@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Raw pointers</h1>
+                </header>
+            
+            <article>
+                
+<p>In unsafe code blocks, Rust allows the use of a new kind of pointers called <strong>raw pointers</strong>. These pointers have no built-in security, but you can work with them with the same freedom as you would with C pointers. They are written as:</p>
+<ul>
+<li><kbd>*const T</kbd> for a pointer to an immutable value, or type <kbd>T</kbd></li>
+<li><kbd>*mut T</kbd> for a mutable pointer</li>
+</ul>
+<p>These can point to invalid memory, and the memory resources need to be manually freed. This means that a raw pointer could inadvertently be used after freeing the memory it points to. Also, multiple concurrent threads have non-exclusive access to mutable raw pointers. Because you're not sure of its contents (at least, we have no compiler guarantee of valid content), dereferencing a raw pointer can also lead to program failure.</p>
+<p>This is why dereferencing a raw pointer can only be done inside an unsafe block, as illustrated in the following code fragment:</p>
+<pre>// code from Chapter 10/code/raw_pointers.rs: 
+<strong>let p_raw: *const u32 = &amp;10;</strong> 
+// let n = *p_raw; // compiler error! 
+unsafe { 
+<strong>     let n = *p_raw;</strong> 
+      println!("{}", n); // prints 10 
+} </pre>
+<p>If you try to do this in normal code, you get the error:</p>
+<pre><strong> error: dereference of unsafe pointer requires unsafe function or block [E0133]</strong></pre>
+<p>We can make raw pointers safe outside of references, implicitly or explicitly, with <kbd>&amp; as *const</kbd>, as in the following snippet:</p>
+<pre>   let gr: f32 = 1.618; 
+<strong>   let p_imm: *const f32 = &amp;gr as *const f32; // explicit cast</strong> 
+   let mut m: f32 = 3.14; 
+<strong>   let p_mut: *mut f32 = &amp;mut m; // implicit cast</strong></pre>
+<p>However, converting a raw pointer to a reference, which should be done through the <kbd>&amp;*</kbd> (address of a dereference) operation, must be done within an unsafe block:</p>
+<pre>unsafe { 
+<strong>     let ref_imm: &amp;f32 = &amp;*p_imm;</strong><strong>     let ref_mut: &amp;mut f32 = &amp;mut *p_mut;</strong> 
+   } </pre>
+<div class="packt_tip">It is recommended to abundantly use <kbd>assert!</kbd> statements inside unsafe code, to check at runtime that it is doing what you expect. For instance, before dereferencing a raw pointer <kbd>ptr</kbd> of unknown origin, always call <kbd>assert!(!ptr.is_null());</kbd> to ensure that the pointer points to a valid memory location.</div>
+<p>Raw pointers also allow pointer arithmetic with the <kbd>offset</kbd> method, but only in unsafe blocks. For the example code, see <kbd>pointer_offset.rs</kbd>:</p>
+<pre>fn main() { 
+    let items = [1u32, 2, 3, 4]; 
+    let ptr = &amp;items[1] as *const u32; 
+    println!("{}", unsafe { *ptr }); 
+<strong>    println!("{}", unsafe { *ptr.offset(-1) });</strong><strong>    <br/>    println!("{}", unsafe { *ptr.offset(1) });<br/></strong>}</pre>
+<p>However, doing arithmetic with pointers, as in C, is not allowed:</p>
+<pre>    println!("{}", unsafe { ptr + 2}); </pre>
+<p>This gives us the following compiler error:</p>
+<pre><strong> error: binary operation `+` cannot be applied to type `*const u32` [E0369]</strong></pre>
+<p>Raw pointers can also be useful when defining other, more intelligent pointers. For example, they are used to implement the <kbd>Rc</kbd> and <kbd>Arc</kbd> pointer types.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

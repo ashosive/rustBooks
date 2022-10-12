@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style00.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style01.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Matching</h1>
+                </header>
+            
+            <article>
+                
+<p>Let's look at a very unpleasant code block and then examine what it means:</p>
+<pre>fn my_test(x: i32) -&gt; String 
+{ 
+    if x == 1 
+    {   
+        return "one".to_owned(); 
+    } 
+    else if x == 2 
+    { 
+        return "two".to_owned(); 
+    } 
+    else if x == 3 
+    { 
+        return "three".to_owned(); 
+    } 
+    return "not found".to_owned(); 
+} </pre>
+<p>The code takes an <kbd>i32</kbd> parameter and tests to see what it equals. If the condition is met, some text is returned for that number; otherwise, <kbd>"not found"</kbd> is returned.</p>
+<p>This is a trivial example, but imagine if you're testing against 10 different conditions; the <kbd>if-else</kbd> construct will become ugly.</p>
+<p>If we were in C, we could use <kbd>switch</kbd>/<kbd>case</kbd> and Rust can also do something similar, but the keyword is <kbd>match</kbd> instead. If we used the <kbd>match</kbd> expression, our function would be as follows:</p>
+<pre>fn my_test(x: i32) -&gt; String 
+{ 
+    let mut t = "".to_owned(); 
+    match x 
+    { 
+        1 =&gt; t = "one".to_owned(), 
+        2 =&gt; t = "two".to_owned(), 
+        3 =&gt; t = "three".to_owned(), 
+        _ =&gt; t = "not found".to_owned() 
+    } 
+    return t; 
+} </pre>
+<p>In this instance, when <kbd>x</kbd> is matched to the value inside of the <kbd>match</kbd> expression, <kbd>t</kbd> is assigned. If it is not matched (<kbd>_ = &gt; ...</kbd>), then <kbd>t</kbd> is set to be <kbd>not found</kbd>. There must be a <kbd>_</kbd> wildcard pattern case within the <kbd>match</kbd>. This is down to Rust enforcing exhaustiveness checking. In other words, until the <kbd>_</kbd> wildcard is reached, Rust assumes that there must be other values to attempt to match.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

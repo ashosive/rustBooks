@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style00.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style01.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Graphics and games</h1>
+                </header>
+            
+            <article>
+                
+<p>Its high performance and low-level capabilities make Rust an ideal choice in this field. Searching for graphics reveals bindings for OpenGL <a>(</a><kbd>gl, glfw-sys</kbd>), Core Graphics, gfx, gdk, <kbd>gtk</kbd> (<a href="http://gtk-rs.org"><span class="URLPACKT">http://gtk-rs.org</span></a>), or the minimal Gtk+ library <kbd>mg</kbd>, and others. <kbd>conrod</kbd> is a 2D GUI library and <kbd>relm</kbd> is an asynchronous, GTK+-based GUI library, inspired by Elm. <kbd>gtk</kbd> is the most advanced library, but at the time of writing a complete cross-platform GUI toolkit is not yet available.</p>
+<p>Have a look at the <a href="http://arewegameyet.com"><span class="URLPACKT">http://arewegameyet.com</span></a> website to see what the current status is on the Rust game front. There is a modular game engine called <kbd>piston</kbd> (<a href="https://github.com/PistonDevelopers/piston"><span class="URLPACKT">https://github.com/PistonDevelopers/piston</span></a>), chipmunk 2D, and bindings for SDL2 and Allegro5. <kbd>kiss3d</kbd> (see <a href="http://kiss3d.org"><span class="URLPACKT">http://kiss3d.org</span></a>) is a crate for a simple 3D game engine. A number of physics (such as <kbd>ncollide</kbd>) and math (such as <kbd>nalgebra</kbd> and <kbd>cgmath</kbd>) crates exist that can be of use here.</p>
+<p>Here are the steps for a simple app that uses <kbd>piston</kbd> to draw a blue circle:</p>
+<ol>
+<li>Create a new project with <kbd>cargo new piston101 -bin</kbd>.</li>
+<li>Add <kbd>piston_window = "0.61.0"</kbd> to the <kbd>[dependencies]</kbd> section of <kbd>Cargo.toml</kbd>.</li>
+<li>Replace the code in <kbd>src\main.rs</kbd> with this:</li>
+</ol>
+<pre>extern crate piston_window; 
+ 
+use piston_window::*; 
+ 
+fn main() { 
+         let mut window: PistonWindow = 
+        WindowSettings::new("Hello Piston!", [640, 480]) 
+        .exit_on_esc(true).build().unwrap(); 
+    while let Some(event) = window.next() { 
+    window.draw_2d(&amp;event, |context, graphics| { 
+            clear([1.0; 4], graphics); 
+            ellipse([0.0, 0.0, 1.0, 0.5], 
+                    [0.0, 0.0, 100.0, 100.0], 
+                    context.transform, 
+                    graphics); 
+        }); 
+    } 
+} </pre>
+<ol start="4">
+<li>Do a <kbd>cargo run</kbd> in the <kbd>piston101</kbd> project folder. This will download tens of crates on which <kbd>piston_window</kbd> depends, compile them, compile the <kbd>piston101</kbd> app, and then the following window is shown:</li>
+</ol>
+<div class="CDPAlignCenter CDPAlign"><img style="text-align: center;font-size: 1em" height="356" width="440" src="Images/02e59aeb-5e69-40ab-a359-3d260ad24cf4.jpg"/></div>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

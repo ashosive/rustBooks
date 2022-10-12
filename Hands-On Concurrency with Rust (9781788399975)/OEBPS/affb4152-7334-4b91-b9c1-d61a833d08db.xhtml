@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style00.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style01.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">A better naive HashMap</h1>
+                </header>
+            
+            <article>
+                
+<p>How can we do better than our naive implementation? Obviously, there's scope for algorithmic improvement—we could implement any kind of probing—but if we're trying to compete with standard library's HashMap it's likely that we have a specialized reason for doing so. A specialized reason implies we know something unique about our data, or are willing to make a trade-off that a general data structure cannot. Speaking broadly, the main goals one should have when building software at the limit of machine performance are as follows:</p>
+<ol type="1">
+<li>Improve the underlying algorithm, reducing total work done.</li>
+<li>Improve cache locality of data accesses. This may mean:
+<ol type="a">
+<li>Keeping your working-set in L1 cache</li>
+<li>Compressing your data to fit better into cache.</li>
+</ol>
+</li>
+<li>Avoid branch mispredictions. This may mean:
+<ol type="a">
+<li>Shaving off branches entirely when possible</li>
+<li>Constraining the probability distribution of your branches.</li>
+</ol>
+</li>
+</ol>
+<p>How does that apply here? Well, say we knew that for our application <kbd>K == u8</kbd> but we still have an unconstrained <kbd>V</kbd>. <kbd>u8</kbd> is a key with low cardinality and we ought to be able to trade a little memory to build a faster structure for <kbd>u8</kbd> keys. Unfortunately, Rust does not yet have type specialization in a stable channel. Type specialization is <em>very important</em> for producing high-performance software without breaking abstractions. It allows the programmer to define an abstract interface and implementation for such and then, at a later date, specialize some of the parameterized types into concrete form with a special purpose implementation. Rust RFC 1210 (<a href="https://github.com/rust-lang/rfcs/pull/1210/files#diff-b652f1feca90247198ee29514ac22cf3">https://github.com/rust-lang/rfcs/pull/1210/files#diff-b652f1feca90247198ee29514ac22cf3</a>) details how specialization in Rust will work and Rust PR 31844 (<a href="https://github.com/rust-lang/rust/issues/31844">https://github.com/rust-lang/rust/issues/31844</a>) tracks the ongoing implementation, which is to say, all of this is only exposed in nightly. This chapter sticks to stable and so, unfortunately, we'll need to create a new HashMap rather than specializing. The reader is encouraged to try out specialization for themselves. It's quite nice.</p>
+<p>We'll park our <kbd>HashMapU8</kbd> implementation in <kbd>naive_hashmap/src/lib.rs</kbd>. The implementation is quite small:</p>
+<pre style="padding-left: 30px">pub struct HashMapU8&lt;V&gt;
+where
+    V: ::std::fmt::Debug,
+{
+    data: [Option&lt;V&gt;; 256],
+}
+
+impl&lt;V&gt; HashMapU8&lt;V&gt;
+where
+    V: ::std::fmt::Debug,
+{
+    pub fn new() -&gt; HashMapU8&lt;V&gt; {
+        let data = unsafe {
+            let mut data: [Option&lt;V&gt;; 256] = mem::uninitialized();
+            for element in data.iter_mut() {
+                ptr::write(element, None)
+            }
+            data
+        };
+        HashMapU8 { data: data }
+    }
+
+    pub fn insert(&amp;mut self, k: u8, v: V) -&gt; Option&lt;V&gt; {
+        mem::replace(&amp;mut self.data[(k as usize)], Some(v))
+    }
+
+    pub fn get(&amp;mut self, k: &amp;u8) -&gt; Option&lt;&amp;V&gt; {
+        let val = unsafe { self.data.get_unchecked((*k as usize)) };
+        val.as_ref()
+    }
+}</pre>
+<p>The idea here is simple—<kbd>u8</kbd> is a type with such cardinality that we can rework every possible key into an array offset. The value for each key is an <kbd>Option&lt;V&gt;</kbd>, <kbd>None</kbd> if no value has ever been set for the key, and <kbd>Some</kbd> otherwise. No hashing needs to be done and, absent specialization, we drop the type requirements for that. Every <kbd>HashMapU8</kbd> will reserve <kbd>256 * ::core::mem::size_of::&lt;Option&lt;V&gt;&gt;()</kbd> bytes. Being that there's unsafe code in this implementation, it's worthwhile doing an AFL run to search for crashes. The interpreter for the specialized map is similar to the naive interpreter, except that we now take care to parse for <kbd>u8</kbd> keys:</p>
+<pre style="padding-left: 30px">extern crate naive_hashmap;
+
+use std::io;
+use std::io::prelude::*;
+use std::str::FromStr;
+
+fn main() {
+    let mut hash_map = naive_hashmap::HashMapU8::new();
+
+    let n = io::stdin();
+    for line in n.lock().lines() {
+        if let Ok(line) = line {
+            let mut cmd = line.split(" ");
+            match cmd.next() {
+                Some("LOOKUP") =&gt; {
+                    if let Some(key) = cmd.next() {
+                        if let Ok(key) = u8::from_str(key) {
+                            let _ = hash_map.get(&amp;key);
+                        } else {
+                            continue;
+                        }
+                    } else {
+                        continue;
+                    }
+                }
+                Some("INSERT") =&gt; {
+                    if let Some(key) = cmd.next() {
+                        if let Ok(key) = u8::from_str(key) {
+                            if let Some(val) = cmd.next() {
+                          let _ = hash_map.insert(key, <br/>                           val.to_string());
+                            } else {
+                                continue;
+                            }
+                        }
+                    } else {
+                        continue;
+                    }
+                }
+                _ =&gt; continue,
+            }
+        } else {
+            break;
+        }
+    }
+}</pre>
+<p>I'll spare you the AFL output but, as a reminder, here's how you run the specialized interpreter through:</p>
+<pre><strong>&gt; cargo afl build --release
+&gt; cargo afl fuzz -i resources/in/ -o resources/out/ target/release/specialized_interpreter</strong></pre>
+<p>Producing a criterion benchmark will be very similar to the approach taken for the naive implementation, save that we'll swap out a few names here and there. We'll skip listing the code with the hopes that you'll be able to reproduce it as desired. The results, however, are promising:</p>
+<pre style="padding-left: 30px"><strong>HashMap/100000/speciali time:   [662.01 us 665.28 us 668.44 us]
+HashMap/100000/standard time:   [2.3471 ms 2.3521 ms 2.3583 ms]
+
+HashMap/10000/specializ time:   [64.294 us 64.440 us 64.576 us]
+HashMap/10000/standard  time:   [253.14 us 253.31 us 253.49 us]</strong></pre>
+<p>In a like manner to <kbd>naive.rs</kbd> and <kbd>standard.rs</kbd> from previously, we've also got a <kbd>specialized.rs</kbd> runner which, to avoid duplication, we'll avoid listing here. Let's run specialized through Valgrind cachegrind:</p>
+<pre><strong>naive_hashmap &gt; valgrind --tool=cachegrind --branch-sim=yes target/release/specialized
+==24235== Cachegrind, a cache and branch-prediction profiler
+==24235== Copyright (C) 2002-2015, and GNU GPL'd, by Nicholas Nethercote et al.
+==24235== Using Valgrind-3.12.0.SVN and LibVEX; rerun with -h for copyright info
+==24235== Command: target/release/specialized
+==24235==
+--24235-- warning: L3 cache found, using its data for the LL simulation.
+INSERT
+  empty:   256
+  present: 50032
+LOOKUP
+  fail:    199
+  success: 49513
+==24235==
+==24235== I   refs:      5,200,051
+==24235== I1  misses:        2,248
+==24235== LLi misses:        2,068
+==24235== I1  miss rate:      0.04%
+==24235== LLi miss rate:      0.04%
+==24235==
+==24235== D   refs:        443,562  (233,633 rd   + 209,929 wr)
+==24235== D1  misses:        4,736  (  3,249 rd   +   1,487 wr)
+==24235== LLd misses:        3,512  (  2,112 rd   +   1,400 wr)
+==24235== D1  miss rate:       1.1% (    1.4%     +     0.7%  )
+==24235== LLd miss rate:       0.8% (    0.9%     +     0.7%  )
+==24235==
+==24235== LL refs:           6,984  (  5,497 rd   +   1,487 wr)
+==24235== LL misses:         5,580  (  4,180 rd   +   1,400 wr)
+==24235== LL miss rate:        0.1% (    0.1%     +     0.7%  )
+==24235==
+==24235== Branches:        393,599  (391,453 cond +   2,146 ind)
+==24235== Mispredicts:      57,380  ( 56,657 cond +     723 ind)
+==24235== Mispred rate:       14.6% (   14.5%     +    33.7%   )</strong></pre>
+<p>Compared to the standard <kbd>valgrind</kbd> run, we're doing around 1/5 the total number of instructions and with substantially fewer <kbd>D1</kbd> and <kbd>LLd</kbd> misses. No surprise here. Our <em>hash</em> for <kbd>HashMapU8</kbd> is an exceedingly cheap pointer offset and the size of the storage is going to fit comfortably into the cache. Linux perf tells a similar story:</p>
+<pre><strong>naive_hashmap &gt; perf stat --event task-clock,context-switches,page-faults,cycles,instructions,branches,branch-misses,cache-references,cache-misses target/release/specialized &gt; /dev/null
+
+ Performance counter stats for 'target/release/specialized':
+
+     1.433884      task-clock (msec)         #    0.788 CPUs utilized
+            0      context-switches          #    0.000 K/sec
+          104      page-faults               #    0.073 M/sec
+    4,138,436      cycles                    #    2.886 GHz
+    6,141,529      instructions              #    1.48  insn per cycle
+      749,155      branches                  #  522.466 M/sec
+       59,914      branch-misses             #    8.00% of all branches
+       74,760      cache-references          #   52.138 M/sec
+
+       0.001818537 seconds time elapsed</strong></pre>
+<p>Phew! Let's summarize our efforts:</p>
+<p class="mce-root"/>
+<table style="border-collapse: collapse;width: 100%" border="1">
+<thead>
+<tr class="header">
+<th>name</th>
+<th>Task Clock (ms)</th>
+<th>Instructions</th>
+<th>Branches</th>
+<th>Branch Misses</th>
+<th>Cache References</th>
+<th>Cache Misses</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>specialized</td>
+<td>1.433884</td>
+<td>6,141,529</td>
+<td>749,155</td>
+<td>59,914</td>
+<td>74,760</td>
+<td>n/a</td>
+</tr>
+<tr class="even">
+<td>standard</td>
+<td>6.923765</td>
+<td>26,234,708</td>
+<td>2,802,334</td>
+<td>290,475</td>
+<td>635,526</td>
+<td>67,304</td>
+</tr>
+<tr class="odd">
+<td>naive</td>
+<td>1323.724713</td>
+<td>15,390,499,356</td>
+<td>4,428,637,974</td>
+<td>204,132</td>
+<td>455,719,875</td>
+<td>21,311</td>
+</tr>
+</tbody>
+</table>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

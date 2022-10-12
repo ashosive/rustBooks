@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Boxed types</h1>
+                </header>
+            
+            <article>
+                
+<p>That's the trait <kbd>Sized</kbd>, but what does <kbd>?Sized</kbd> mean? The <kbd>?</kbd> flags the relevant trait as optional. So, a box is a type in Rust parameterized over some other type <kbd>T</kbd> which may or may not have a size. A box is a kind of a pointer to heap allocated storage. Let's look into its implementation further. What of <kbd>Unique&lt;T&gt;</kbd>? This type is a signal to the Rust compiler that some <kbd>*mut T</kbd> is non-null and that the unique is the sole owner of <kbd>T</kbd>, even though <kbd>T</kbd> was allocated outside the <kbd>Unique</kbd>. <kbd>Unique</kbd> is defined like so:</p>
+<pre style="padding-left: 30px">pub struct Unique&lt;T: ?Sized&gt; {
+    pointer: NonZero&lt;*const T&gt;,
+    // NOTE: this marker has no consequences for variance, but is<br/>    // necessary for dropck to understand that we logically <br/>    // own a `T`.
+    _marker: PhantomData&lt;T&gt;,
+}</pre>
+<p><kbd>NonZero&lt;T&gt;</kbd> is a struct that the <kbd>rustc</kbd> source describes as a wrapper type for raw pointers and integers that will never be <kbd>NULL</kbd> or <kbd>0</kbd> that might allow certain optimizations. It's annotated in a special way to admit those null pointer optimizations discussed elsewhere in this chapter. Unique is also of interest for its use of <kbd>PhantomData&lt;T&gt;</kbd>. <kbd>PhantomData</kbd> is, in fact, a zero sized type, defined as <kbd>pub struct PhantomData&lt;T:?Sized&gt;;</kbd>. This type instructs the Rust compiler to consider <kbd>PhantomData&lt;T&gt;</kbd> as owning <kbd>T</kbd> even though, ultimately, there's nowhere for <kbd>PhantomData</kbd> to store its newfound <kbd>T</kbd>. This works well for <kbd>Unique&lt;T&gt;</kbd>, which must take ownership of <kbd>&lt;T&gt;</kbd> by maintaining a non-zero constant pointer to <kbd>T</kbd> but does not, itself, have <kbd>T</kbd> stored anywhere other than in the heap. A box is then, a unique, non-null pointer to a thing allocated somewhere in memory but not inside the storage space of the box.</p>
+<p>The internals of box are compiler intrinsics: they sit at the interplay of the allocator and are a special consideration in Rust's borrow checker. With that in mind, we will avoid chasing down the internal details of <kbd>Box</kbd> as they will change from compiler version to compiler version and this book is explicitly not a <kbd>rustc</kbd> internals book. For our purposes, however, it is worth considering the API exposed by box. The key functions are:</p>
+<ul>
+<li><kbd>fn from_raw(raw: *mut T) -&gt; Box&lt;T&gt;</kbd></li>
+<li><kbd>fn from_unique(u: Unique&lt;T&gt;) -&gt; Box&lt;T&gt;</kbd></li>
+<li><kbd>fn into_raw(b: Box&lt;T&gt;) -&gt; *mut T</kbd></li>
+<li><kbd>fn into_unique(b: Box&lt;T&gt;) -&gt; Unique&lt;T&gt;</kbd></li>
+<li><kbd>fn leak&lt;'a&gt;(b: Box&lt;T&gt;) -&gt; &amp;'a mut T</kbd></li>
+</ul>
+<p>Both <kbd>from_raw</kbd> and <kbd>from_unique</kbd> are unsafe. Conversion from a raw pointer is unsafe if a raw pointer is <em>boxed</em> more than once or if a box is made from a pointer that overlaps with another, as examples. There are other possibilities. Conversion from a <kbd>Unique&lt;T&gt;</kbd> is unsafe as the <kbd>T</kbd> may or may not be owned by  <kbd>Unique</kbd>, resulting in a possibility of the box not being the sole owner of its memory. The <kbd>into_*</kbd> functions, however, are safe in the sense that the resulting pointers will be valid but the caller will not have full responsibility for managing the lifetime of the memory. The <kbd>Box</kbd> documentation notes that the caller can release the memory themselves or convert the pointer back into the type they came from and allow Rust to do it for them. The latter is the approach this book will take. Finally, there's <kbd>leak</kbd>. Leak is a fun one and is not available on stable channel but is worth discussing for applications that will ship to embedded targets. A common memory management strategy for embedded systems is to pre-allocate all necessary memory and only operate on that memory for the lifetime of the program. In Rust, this is trivially accomplished if you desire uninitialized memory of a constant size: arrays and other primitive types. In the event you desire heap allocations at the start of your program, the situation is more complicated. That's where leak comes in: it causes memory to leak from a box—a heap allocation—to wherever you please. When the leaked memory is intended to live for the lifetime of the program—into the <kbd>static</kbd> lifetime—there's no issue. An example  is as follows, straight from the docs for <kbd>leak:</kbd></p>
+<pre style="padding-left: 30px">#![feature(box_leak)]
+
+fn main() {
+    let x = Box::new(41);
+    let static_ref: &amp;'static mut usize = Box::leak(x);
+    *static_ref += 1;
+    assert_eq!(*static_ref, 42);
+}</pre>
+<p>Here, we see a new <kbd>usize</kbd> allocated on the heap, leaked into <kbd>static_ref</kbd>—a mutable reference of static lifetime—and then fiddled with through the remaining lifetime of the program.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

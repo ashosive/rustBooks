@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style00.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style01.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Back to Strings</h1>
+                </header>
+            
+            <article>
+                
+<p>As we saw before diverting onto the heap and stack, we can also define a string like this:</p>
+<pre>let mut myString = String::new(); </pre>
+<p>The <kbd>String::</kbd> tells the compiler that we are going to use the standard library, <kbd>String</kbd>, and we tell the program that we are going to create a mutable String and store a reference to it on the stack in something called <kbd>myString</kbd>.</p>
+<p>The dynamic string can be created as either being empty, or with memory preallocated to it. For example, say we want to store the words <em>You'll never walk alone</em> (a total of 23 bytes), preallocating the space for them. This is how to do it:</p>
+<pre>let mut ynwa = String::with_capacity(23); 
+ynwa.push_str("You'll never walk alone"); </pre>
+<p>This is just a performance optimization and is not typically required, since Strings grow automatically when they need to. The following does roughly the same job:</p>
+<pre>let mut ynwa = "You'll never walk alone".to_owned(); </pre>
+<div class="packt_infobox">Rust strings are not null-terminated, and consist entirely of valid Unicode. Therefore, they can contain null bytes and characters from any language, but they may require more bytes than they contain characters.</div>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

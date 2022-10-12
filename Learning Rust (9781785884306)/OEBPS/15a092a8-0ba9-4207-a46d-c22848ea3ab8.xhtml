@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style00.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style01.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Loading a file</h1>
+                </header>
+            
+            <article>
+                
+<p>To open a file, we use <kbd>File::open(filename)</kbd>. We can catch exceptions using the <kbd>try!</kbd> macro or <kbd>match</kbd>, as follows:</p>
+<pre>let file = try!(File::open("my_file.txt")) </pre>
+<p>Or the following can be used:</p>
+<pre>let file = match File::open("my_file.txt") { 
+    Ok(file) =&gt; file, 
+    Err(..) =&gt; panic!("boom"), 
+} </pre>
+<p>If the file is available to open, <kbd>File::open</kbd> will grant read permissions to the file. To load the file, we create a <kbd>BufReader</kbd> based on the file:</p>
+<pre>let mut reader = BufReader::new(&amp;file); 
+let buffer_string = &amp;mut String::new(); 
+reader.read_line(buffer_string); 
+println!("Line read in: {}", buffer_string); </pre>
+<p>Once the file has been read, the stream can be explicitly closed with <kbd>reader.close()</kbd>. However, Rust's resource management system guarantees that the file will be closed when its binding goes out of scope, so this is not mandatory.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

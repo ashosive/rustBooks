@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style00.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style01.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Using loop labels</h1>
+                </header>
+            
+            <article>
+                
+<p>Rust allows us to label our loops. This can be very useful, for example with nested loops. These labels act as symbolic names for the loop and as we have a name for the loop, we can instruct the application to perform a task on that name.</p>
+<p>Consider the following simple example:</p>
+<pre>// 04/looplabels/src/main.rs<br/>fn main()  
+{ 
+    'outer_loop: for x in 0..10  
+    { 
+        'inner_loop: for y in 0..10  
+        { 
+            if x % 2 == 0 { continue 'outer_loop; }  
+            if y % 2 == 0 { continue 'inner_loop; } 
+            println!("x: {}, y: {}", x, y); 
+        } 
+    } 
+} </pre>
+<p>What will this code do?</p>
+<p>Here, <kbd>x % 2 == 0</kbd> (or <kbd>y % 2 == 0</kbd>) means that if a variable divided by two returns no remainder, then the condition is met and it executes the code in the braces. When <kbd>x % 2 == 0</kbd>, or when the value of the loop is an even number, we will tell the application to skip to the next iteration of <kbd>outer_loop</kbd>, which is an odd number. However, we will also have an inner loop. Again, when <kbd>y % 2</kbd> is an even value, we will tell the application to skip to the next iteration of <kbd>inner_loop</kbd>.</p>
+<p>In this case, the application will output the following results:</p>
+<div class="packt_figure CDPAlignCenter CDPAlign"><img class=" image-border" src="Images/92d14f9b-b236-42e4-b736-436e4fdd0105.png"/></div>
+<p>While this example may seem very simple, it does allow for a great deal of speed when checking data. Let's go back to our previous example of data being sent to the web service. Recall that we have two values—the recorded data and some other value; for ease, it will be a data point. Each data point is recorded 0.2 seconds apart; therefore, every fifth data point is one second.</p>
+<p class="mce-root">This time, we want all of the values where the data is greater than 1.5 and the associated time of that data point, but only on a time when it's dead on a second. As we want the code to be understandable and human-readable, we can use a loop label on each loop.</p>
+<p>The following code is not quite correct. Can you spot why? The code compiles as follows:</p>
+<pre>// 04/looplabels-2/src/main.rs<br/>fn main()  
+{ 
+    let my_array = vec![0.6f32, 0.4, 0.2, 0.8, 1.3, 1.1, 1.7, 1.9, 1.3, 0.1, 1.6, 0.6, 0.9, 1.1, 1.31, 1.49, 1.5, 0.7]; 
+    let my_time = vec![0.2f32, 0.4, 0.6, 0.8, 1.0, 1.2, 1.4, 1.6, 1.8, 2.0, 2.2, 2.4, 2.6, 2.8, 3.0, 3.2, 3.4, 3.6, 3.8]; 
+ 
+    'time_loop: for(_, time_value) in my_time.iter().enumerate() 
+    { 
+       'data_loop: for(_, value) in my_array.iter().enumerate() 
+       { 
+           if *value &lt; 1.5 
+           { 
+               continue 'data_loop; 
+           } 
+           if *time_value % 5f32 == 0f32 
+           { 
+               continue 'time_loop; 
+           } 
+           println!("Data point = {} at time {}s", *value, *time_value); 
+       } 
+    } 
+} </pre>
+<p>This example is a very good one to demonstrate the correct operator in use. The issue is the <kbd>if *time_value % 5f32 == 0f32</kbd> line. We are taking a float value and using the modulus of another float to see whether we end up with 0 as a float.</p>
+<p>Comparing any value that is not a <kbd>string</kbd>, <kbd>int</kbd>, <kbd>long</kbd>, or <kbd>bool</kbd> type to another is never a good plan, especially if the value is returned by some form of calculation. We can also not simply use <kbd>continue</kbd> on the time loop, so how can we solve this problem?</p>
+<p>If you recall, we're using <kbd>_</kbd> instead of a named parameter for the enumeration of the loop. These values are always an integer; therefore, if we replace <kbd>_</kbd> for a variable name, then we can use <kbd>% 5</kbd> to perform the calculation and the code becomes the following:</p>
+<pre>'time_loop: for(time_enum, time_value) in my_time.iter().enumerate() 
+    { 
+       'data_loop: for(_, value) in my_array.iter().enumerate() 
+       { 
+           if *value &lt; 1.5 
+           { 
+               continue 'data_loop; 
+           } 
+           if time_enum % 5 == 0 
+           { 
+               continue 'time_loop; 
+           } 
+           println!("Data point = {} at time {}s", *value, *time_value); 
+       } 
+    } 
+ </pre>
+<p>The next problem is that the output isn't correct. The code gives the following:</p>
+<pre>Data point = 1.7 at time 0.4s 
+Data point = 1.9 at time 0.4s 
+Data point = 1.6 at time 0.4s 
+Data point = 1.5 at time 0.4s 
+Data point = 1.7 at time 0.6s 
+Data point = 1.9 at time 0.6s 
+Data point = 1.6 at time 0.6s 
+Data point = 1.5 at time 0.6s </pre>
+<p>The data point is correct, but the time is way out and continually repeats. We still need the <kbd>continue</kbd> statement for the data point step, but the time step is incorrect. There are a couple of solutions, but possibly the simplest will be to store the data and the time in a new vector and then display that data at the end.</p>
+<p>The following code gets closer to what is required:</p>
+<pre>// 04/looplabels-3/src/main.rs<br/>fn main()  
+{ 
+    let my_array = vec![0.6f32, 0.4, 0.2, 0.8, 1.3, 1.1, 1.7, 1.9, 1.3, 0.1, 1.6, 0.6, 0.9, 1.1, 1.31, 1.49, 1.5, 0.7]; 
+    let my_time = vec![0.2f32, 0.4, 0.6, 0.8, 1.0, 1.2, 1.4, 1.6, 1.8, 2.0, 2.2, 2.4, 2.6, 2.8, 3.0, 3.2, 3.4, 3.6, 3.8]; 
+    let mut my_new_array = vec![]; 
+    let mut my_new_time = vec![]; 
+ 
+    'time_loop: for(t, _) in my_time.iter().enumerate() 
+    { 
+       'data_loop: for(v, value) in my_array.iter().enumerate() 
+       { 
+           if *value &lt; 1.5 
+           { 
+               continue 'data_loop; 
+           } 
+           else 
+           { 
+               if t % 5 != 0 
+               { 
+                    my_new_array.push(*value); 
+                    my_new_time.push(my_time[v]); 
+               }        
+           } 
+        
+           if v == my_array.len() 
+           { 
+               break; 
+           } 
+       } 
+    } 
+     
+    for(m, my_data) in my_new_array.iter().enumerate() 
+    { 
+        println!("Data = {} at time {}", *my_data, my_new_time[m]); 
+    } 
+} 
+ </pre>
+<p>We will now get the following output:</p>
+<pre>Data = 1.7 at time 1.4 
+Data = 1.9 at time 1.6 
+Data = 1.6 at time 2.2 
+Data = 1.5 at time 3.4 
+Data = 1.7 at time 1.4 </pre>
+<p>Yes, we now have the correct data, but the time starts again. We're close, but it's not right yet. We aren't continuing the <kbd>time_loop</kbd> loop and we will also need to introduce a <kbd>break</kbd> statement. To trigger the <kbd>break</kbd>, we will create a new variable called <kbd>done</kbd>. When <kbd>v</kbd>, the enumerator for <kbd>my_array</kbd>, reaches the length of the vector (this is the number of elements in the vector), we will change this from <kbd>false</kbd> to <kbd>true</kbd>. This is then tested outside of the <kbd>data_loop</kbd>. If <kbd>done == true</kbd>, break out of the loop.</p>
+<p>The final version of the code is as follows:</p>
+<pre>// 04/dataloop/src/main.rs<br/>fn main()  
+{ 
+    let my_array = vec![0.6f32, 0.4, 0.2, 0.8, 1.3, 1.1, 1.7, 1.9, 1.3, 0.1, 1.6, 0.6, 0.9, 1.1, 1.31, 1.49, 1.5, 0.7]; 
+    let my_time = vec![0.2f32, 0.4, 0.6, 0.8, 1.0, 1.2, 1.4, 1.6, 1.8, 2.0, 2.2, 2.4, 2.6, 2.8, 3.0, 3.2, 3.4, 3.6]; 
+    let mut my_new_array = vec![]; 
+    let mut my_new_time = vec![]; 
+    let mut done = false; 
+ 
+    'time_loop: for(t, _) in my_time.iter().enumerate() 
+    { 
+       'data_loop: for(v, value) in my_array.iter().enumerate() 
+       {  
+           if v == my_array.len() - 1 
+           { 
+               done = true; 
+           } 
+        
+           if *value &lt; 1.5 
+           { 
+               continue 'data_loop; 
+           } 
+           else 
+           { 
+                if t % 5 != 0 
+                { 
+                    my_new_array.push(*value); 
+                    my_new_time.push(my_time[v]); 
+                } 
+                else 
+                { 
+                    continue 'time_loop; 
+                } 
+           } 
+       } 
+       if done {break;} 
+    } 
+     
+    for(m, my_data) in my_new_array.iter().enumerate() 
+    { 
+        println!("Data = {} at time {}", *my_data, my_new_time[m]); 
+    } 
+} </pre>
+<p>Our final output from the code is this:</p>
+<div class="packt_figure CDPAlignCenter CDPAlign"><img class=" image-border" src="Images/9bc53052-dcc3-4d65-836b-bbe39bea6c6d.png"/></div>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

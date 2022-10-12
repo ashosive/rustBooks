@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">An easy approach to thinking about how threads work.</h1>
+                </header>
+            
+            <article>
+                
+<p>Threads are more easily thought of graphically (at least I think so). We start with our main thread:</p>
+<div class="CDPAlignCenter CDPAlign"><img height="49" width="398" class=" image-border" src="Images/7988a022-f8da-488c-978e-7617e9ade50f.png"/></div>
+<div class="CDPAlignCenter CDPAlign packt_figref">Figure 2</div>
+<p>The main thread goes from the start of the application to the end of the application.</p>
+<p>At any point on our main thread, we can create a new thread (or new threads, if required).</p>
+<div class="CDPAlignCenter CDPAlign"><img height="69" width="354" class=" image-border" src="Images/bc9eed03-35c4-4a31-b3f3-9ce116c33f6f.png"/></div>
+<div class="CDPAlignCenter CDPAlign packt_figref">Figure 3</div>
+<p>These two new threads can do anything the application needs them to do. There is a simple rule though: The threads can only last as long the application does. As <em>Figure 3</em> shows, the threads start and carry on their merry way; there is nothing to say the thread has to rejoin the main thread, nor is there any rule to say at what point the thread returns (which can cause some very large thread safety issues, leading to panics).</p>
+<p>It goes without saying that each thread can also spawn their own threads to perform sub-processes:</p>
+<div class="CDPAlignCenter CDPAlign"><img height="93" width="350" class=" image-border" src="Images/da2bfd7e-a4a1-4d98-95fc-7cc76810a95c.png"/></div>
+<div class="CDPAlignCenter CDPAlign packt_figref">Figure 4</div>
+<p>If you're accustomed to threading in the likes of C, C++, and C#, you'll already know that a thread can return to the main thread at any time and that this <em>at any time</em> can be disastrous to the safe running of the application. It is different in Rust.</p>
+<p>When a thread in Rust is spawned from either the main thread (or any subthread) a handle is created. Rust then uses this token to retrieve the thread at a given point; therefore, the issue of a race condition (where one thread returns before another, leading to crashes) is essentially removed.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

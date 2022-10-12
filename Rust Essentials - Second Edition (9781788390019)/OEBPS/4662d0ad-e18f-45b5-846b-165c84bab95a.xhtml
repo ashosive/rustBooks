@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style00.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style01.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Matching patterns</h1>
+                </header>
+            
+            <article>
+                
+<p>But how will we test whether <kbd>input_num</kbd> from the previous section, which is of type <kbd>Result</kbd>, contains a value or not? When the value is an <kbd>Ok(T)</kbd>, the function <kbd>unwrap()</kbd>can extract the value <kbd>T</kbd>, like this:</p>
+<pre>println!("Unwrap found {}", input_num.unwrap()); </pre>
+<p>This prints the following output:</p>
+<pre>    <strong>Unwrap found 42</strong>  </pre>
+<p>But when the result is an <kbd>Err</kbd> value, this lets the program crash with a panic:</p>
+<pre>    <strong>thread '&lt;main&gt;' panicked at 'called `Result::unwrap()` on an `Err` value'.</strong>  </pre>
+<p>This is bad! To solve this, no complex <kbd>if - else</kbd> constructs will do; we need Rust's magical <kbd>match</kbd> here, which has a lot more possibilities than the case or switch in other languages:</p>
+<pre>// from Chapter 4/code/pattern_match.rs 
+match input_num { 
+   Ok(num) =&gt; println!("{}", num), 
+   Err(ex) =&gt; println!("Please input an integer number! {}", ex) 
+};  </pre>
+<p>The <kbd>match</kbd> tests the value of an expression against all possible values. Only the code (which could be a block) after the arrow <kbd>=&gt;</kbd> of the first matching branch is executed. All branches are separated by commas. In this case the same number that is given as input is printed out. There is no fall through from one branch to the next, so a break statement is not necessary, avoiding a common bug in C and C++.</p>
+<p>The good thing about <kbd>match</kbd> is that it is exhaustive - all possible values must be present as branches. If we omit the <kbd>Ok</kbd> branch for example, we get a compiler error as follows: <kbd>error: pattern `Err(_)` not covered</kbd>.</p>
+<p>In order to continue working with the return value of <kbd>match</kbd>, we have to bind that value to a variable, which is possible because <kbd>match</kbd> itself is an expression:</p>
+<pre>let num = match input_num { 
+    Ok(num) =&gt; num, 
+    Err(_)  =&gt; 0 
+}; </pre>
+<p>This <kbd>match</kbd> extracts the number from <kbd>input_num</kbd>, so that we can compare it with other numbers or calculate with it. Both branches must return a value of the same type, that's why we returned <kbd>0</kbd> in the <kbd>Err</kbd> case (supposing we expect a number greater than <kbd>0</kbd>).</p>
+<p>An alternative way to get the <kbd>Result</kbd> <span class="NormalPACKTChar">or</span> <kbd>Option</kbd> <span class="NormalPACKTChar">value is using the</span> <kbd>if let</kbd> <span class="NormalPACKTChar">construct, like this:</span></p>
+<pre>if let Ok(val) = input_num { 
+    println!("Matched {:?}!", val); 
+} else { 
+    println!("No match!"); 
+} </pre>
+<p>The <kbd>input_num</kbd> is destructured and if it contains a value <kbd>val</kbd>, this is extracted.</p>
+<p>The same principle can be applied inside a <kbd>while</kbd> loop, like this:</p>
+<pre>while let Ok(val) = input_num { 
+    println!("Matched {:?}!", val); 
+    if val == 42 { break } 
+} </pre>
+<p>If another value than <kbd>42</kbd> is given, this causes an infinite loop, which you can stop with <em><span class="KeyPACKT">Ctrl</span></em>+<em><span class="KeyPACKT">C</span></em>.</p>
+<p>With <kbd>match,</kbd> all possible values must be covered, which is the case if we match on a <kbd>Result</kbd>, <kbd>Option</kbd> (<kbd>Some</kbd> or <kbd>None</kbd> is pretty exhaustive), or some other <kbd>enum</kbd> value.</p>
+<p>But watch what happens when we test on a string slice:</p>
+<pre>// from Chapter 4/code/pattern_match2.rs 
+let magician = "Gandalf"; 
+match magician { 
+    "Gandalf" =&gt; println!("A good magician!"), 
+    "Sauron"  =&gt; println!("A magician turned bad!") 
+} </pre>
+<p>This <kbd>match</kbd> on <kbd>magician</kbd> gives us the following error:</p>
+<pre>    <strong>error: non-exhaustive patterns: `_` not covered.</strong>  </pre>
+<p>After all there are other magicians besides <kbd>Gandalf</kbd> and <kbd>Sauron</kbd>! The compiler even gives us the solution; use an underscore (<kbd>_</kbd>) for all other possibilities, so this is a complete match:</p>
+<pre>match magician { 
+    "Gandalf" =&gt; println!("A good magician!"), 
+    "Sauron"  =&gt; println!("A magician turned bad!"), 
+    _         =&gt; println!("No magician turned up!") 
+} </pre>
+<p>To always be on the safe side, prefer <kbd>match</kbd> ;to other constructs when testing on the possible values of a variable or expression<span class="NormalPACKTChar">!</span></p>
+<p>The left-hand side of a branch can contain several values if they are separated by a pipe sign <kbd>|</kbd>, or an inclusive range of values written as <kbd>start ... end</kbd>. The following snippet shows this in action:</p>
+<pre>let magical_number: i32 = 42; 
+match magical_number { 
+      // Match a single value 
+       1 =&gt; println!("Unity!"), 
+      // Match several values 
+       2 | 3 | 5 | 7 | 11 =&gt; println!("Ok, these are primes"), 
+      // Match an inclusive range 
+       40...42 =&gt; println!("It is contained in this range"), 
+      // Handle the rest of cases 
+        _ =&gt; println!("No magic at all!"), 
+} </pre>
+<p>This prints out the following output:</p>
+<pre>    <strong>It is contained in this range</strong>  </pre>
+<p>The matched value can be captured in a variable (here <kbd>num</kbd>) using the <kbd>@</kbd> symbol, like this:</p>
+<pre>   num @ 40...42 =&gt; println!("{} is contained in this range", num) </pre>
+<p>This prints the following output:</p>
+<pre>    <strong>42 is contained in this range</strong>  </pre>
+<p>The use of the <kbd>..</kbd> and <kbd>...</kbd> notations can be confusing, so here is a summary:</p>
+<table class="table">
+<tbody>
+<tr>
+<td/>
+<td>
+<p><strong>What works</strong></p>
+</td>
+<td>
+<p><strong>Does not work</strong></p>
+</td>
+</tr>
+<tr>
+<td>
+<p><kbd>for in</kbd></p>
+</td>
+<td>
+<p>.. exclusive</p>
+</td>
+<td>
+<p>...</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><kbd>match</kbd></p>
+</td>
+<td>
+<p>... inclusive</p>
+</td>
+<td>
+<p>..</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p> </p>
+<p>Matching enums is very straightforward:</p>
+<pre>let direction = Compass::West; 
+    
+match direction { 
+    Compass::North   =&gt; println!("Go to the North!"), 
+    Compass::East    =&gt; println!("Go to the East!"), 
+    Compass::South   =&gt; println!("Go to the South!"), 
+    Compass::West    =&gt; println!("Go to the West!"), 
+} </pre>
+<p>This prints out the following output:</p>
+<pre>    <strong>Go to the West!</strong>  </pre>
+<p>The <kbd>destructure_enum.rs</kbd> has more examples of destructuring enums:</p>
+<pre>use En::*; 
+ 
+struct St { 
+   f1: i32, 
+   f2: f32 
+} 
+ 
+enum En { 
+   Var1, 
+   Var2, 
+   Var3(i32), 
+   Var4(i32, St, i32) 
+}  
+ 
+fn foo(x: En) { 
+   match x { 
+      Var1 =&gt; println!("first variant"), 
+      Var2 =&gt; println!("second variant"), 
+      Var3(..) =&gt; println!("third variant"), 
+      Var4(..) =&gt; println!("fourth variant") 
+   }   
+} 
+ 
+fn foo2(x: &amp;En) { 
+   match x { 
+      &amp;Var1 =&gt; println!("first variant"), 
+      &amp;Var2 =&gt; println!("second variant"), 
+      &amp;Var3(5) =&gt; println!("third variant with number 5"), 
+&amp;Var3(x) =&gt; println!("third variant with number {} (not 5)", x), 
+      &amp;Var4(3, St{ f1: 3, f2: x }, 45) =&gt; { 
+println!("destructuring an embedded struct, found {} in f2", x) 
+      } 
+      _ =&gt; println!("other (Var4)") 
+      // cannot move out of borrowed content: 
+      // &amp;Var4(_, v, _) =&gt; { 
+   //    println!("Some other Var4 with {} in f1 and {} in      // f2", v.f1, v.f2) 
+      // } 
+      // // _ =&gt; println!("other (Var2)") // unreachable pattern 
+   } 
+} 
+ 
+fn main() { 
+   let en1 = En::Var3(42); 
+   // foo(en1); // third variant 
+   foo2(&amp;en1); // third variant with number 42 (not 5) 
+   let st1 = St { f1: 3, f2: 10.0 }; 
+   // let en2 = En::Var4(3, st1, 45); 
+   // foo2(&amp;en2); // destructuring an embedded struct, found 10 in f2 
+   let en3 = En::Var4(3, st1, 42); 
+   foo2(&amp;en3); // other (Var4) 
+} 
+// third variant with number 42 (not 5) 
+// other (Var4) </pre>
+<p>Here is an example of matching a tuple:</p>
+<pre>   // from Chapter 4/code/match_tuple.rs 
+fn main() { 
+   let status = (42, true); 
+   match status { 
+      (0, true) =&gt; println!("Success"), 
+   // Any first value matches in the following branch: 
+      (_, true) =&gt; println!("Pyrrhic victory"),  
+      // Any pair of values will match in the following branch: 
+      (_, _)    =&gt; println!("Complete loss")  
+   } 
+} </pre>
+<p>This prints out the following output:</p>
+<pre>    <strong>Pyrrhic victory</strong>  </pre>
+<p>Matches are even more powerful than this; the expression that is being matched can be destructured in the left-hand side, and this can even be combined with <kbd>if</kbd> conditions called <strong>guards</strong>:</p>
+<pre> let loki = ("Loki", true, 800u32);  
+    match loki { 
+        (name, demi, _) if demi =&gt; { 
+                            print!("This is a demigod "); 
+                            println!("called {}", name); 
+                        }, 
+        (name, _, _) if name == "Thor" =&gt;  
+println!("This is Thor!"), 
+        (_, _, pow) if pow &lt;= 1000 =&gt;  
+println!("This is a powerless god"), 
+        _ =&gt; println!("This is something else") 
+    } </pre>
+<p>This prints out the following output:</p>
+<pre>    <strong>This is a demigod called Loki</strong>  </pre>
+<p>Note that because <kbd>demi</kbd> is a Boolean we don't have to write <kbd>if demi == true</kbd>. If you want to do nothing in a branch, then write <kbd>=&gt; {}</kbd>.</p>
+<p>Destructuring works not only for tuples like in this example, but can also be applied for structs:</p>
+<pre>struct Point { 
+    x: i32, 
+    y: i32 
+} 
+ 
+let origin = Point { x: 0, y: 0 }; 
+match origin { 
+Point { x: x, y: y } =&gt; println!("This is the point: ({},{})", x, y), 
+} </pre>
+<p>You can find a more elaborate example in <kbd>destructuring_structs.rs</kbd>.</p>
+<div class="packt_tip packt_infobox"><span class="packt_screen">Exercise</span>:<br/>
+What happens if you move the <kbd>_</kbd> branch from the last position upwards?<br/>
+See an example in <kbd>Chapter 4/exercises/pattern_match.rs</kbd></div>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

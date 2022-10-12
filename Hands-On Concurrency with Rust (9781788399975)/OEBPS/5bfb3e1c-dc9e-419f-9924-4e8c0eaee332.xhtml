@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style00.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style01.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Competition – calling out to pMARS</h1>
+                </header>
+            
+            <article>
+                
+<p>It's now time to consider how each <kbd>Individual</kbd> competes. Earlier, we discussed calling out to pmars on-system, which requires on-disk representations of the two competing Individual warriors. True to that, competition first serializes both warriors to temporary locations on the disk:</p>
+<pre>    pub fn compete(&amp;self, other: &amp;Individual) -&gt; Winner {
+        let dir = TempDir::new("simulate")<br/>                      .expect("could not make tempdir");
+
+        let l_path = dir.path().join("left.red");
+        let mut lfp = BufWriter::new(File::create(&amp;l_path)<br/>                          .expect("could not write lfp"));
+        self.serialize(&amp;mut lfp).expect("could not serialize");
+        drop(lfp);
+
+        let r_path = dir.path().join("right.red");
+        let mut rfp = BufWriter::new(File::create(&amp;r_path)<br/>                          .expect("could not write rfp"));
+        other.serialize(&amp;mut rfp).expect("could not serialize");
+        drop(rfp);</pre>
+<p>We haven't interacted much with the filesystem in this book but, suffice it to say, Rust has an <em>excellent</em> filesystem setup in the standard library, most of it under <kbd>std::fs</kbd>. You are warmly encouraged to take a gander at the documentation for any of the functions here if they are not already familiar with them. Anyway, with both warriors written to disk, we can run pmars on them:</p>
+<pre>        let output = Command::new("pmars")
+            .arg("-r") // Rounds to play
+            .arg(format!("{}", ROUNDS))
+            .arg("-b") // Brief mode (no source listings)
+            .arg(&amp;l_path)
+            .arg(&amp;r_path)
+            .output()
+            .expect("failed to execute process");</pre>
+<p>Let's break down what's happening here. <kbd>std::process::Command</kbd> is a builder struct for running an OS process. If we did nothing but call <kbd>Command::output(&amp;mut self)</kbd> on the new <kbd>Command</kbd> then:</p>
+<ul>
+<li>pmars would be run without arguments</li>
+<li>The working directory and environment of feruscore would become pmars</li>
+<li>The stdout of pmars will be piped back to the feruscore process</li>
+</ul>
+<p>Each of these can be changed. The actual execution of pmars does not take place until the output is called: or, spawn, which is intended for long-lived processes. The <kbd>Command::stdin</kbd>, <kbd>Command::stderr</kbd>, and <kbd>Command::stdout</kbd> functions control the IO behavior of the process, whether feruscore's descriptors are inherited by the child-process—which is the case with spawn—or piped back to feruscore, the default for output. We <em>don't</em> want pmars to write to feruscore's stdout/sterr, so the defaults of <kbd>output</kbd> are ideal for our needs. The call to <kbd>args</kbd> adds a new argument to the <kbd>Command</kbd> and a new call is required even for arguments that associate. We write <kbd>.arg("-r").arg(format("{}", ROUNDS))</kbd> rather than <kbd>.arg(format!("-r {}", ROUNDS))</kbd>. Here, we're crashing the program if pmars fails to make appropriate output, which might happen if the executable can't be found or we trigger a crash-bug in pmars and don't have permissions to run the program. Crashing is a bit user-hostile, but good enough for our purposes here.</p>
+<p>Now, <kbd>output: std::process::Output</kbd>, a struct with three members. We've ignored the exit status in favor of pulling the last stdio line:</p>
+<pre>        let result_line = ::std::str::from_utf8(&amp;output.stdout)
+            .expect("could not parse output")
+            .lines()
+            .last()
+            .expect("no output");</pre>
+<p>If there was output on stdio, then pmars successfully ran the passed warriors, if not, then the warriors were invalid. The parser in pmars is very forgiving if the warriors failed to load the serializer in Individual or Instruction is faulty. Note that <kbd>result_line</kbd> is the last line of output. The last line is always of the form <kbd>Results: 10 55 32</kbd>, meaning that the left program won 10 times, the right program won 55 times, and they tied 32 times. A tie happens when neither warrior is able to force the other out of the game by some pre-determined number of executions, often around 10,000. Parsing that last line is a rugged affair:</p>
+<pre>        let pieces = result_line.split(' ').collect::&lt;Vec&lt;&amp;str&gt;&gt;();
+
+        let l_wins = pieces[1].parse::&lt;u16&gt;()<br/>                         .expect("could not parse l_wins");
+        let r_wins = pieces[2].parse::&lt;u16&gt;()<br/>                         .expect("could not parse r_wins");
+        let ties = pieces[3].parse::&lt;u16&gt;()<br/>                         .expect("could not parse ties");
+        assert_eq!((l_wins + r_wins + ties) as usize, ROUNDS);</pre>
+<p>Note the assertion. <kbd>ROUNDS</kbd> is a constant set in the module, set to 100. Our <kbd>Command</kbd> informed pmars to play 100 rounds with the passed warriors, if the result doesn't add up to 100, we've got a real problem. Placing these sanity checks in code sometimes feels a bit silly but, lo and behold, they do turn up bugs. Likewise, it's rarely a wasted effort to invest in diagnostics. For instance, in genetic algorithms, it's hard to know how things are going in your population. Is every generation getting fitter? Has the population bottlenecked somewhere? To that end, the next step of compete is to tally the fitness of the left and right warriors:</p>
+<pre>        tally_fitness(l_wins as usize);
+        tally_fitness(r_wins as usize);</pre>
+<p>The <kbd>tally_fitness</kbd> function is defined like so:</p>
+<pre>fn tally_fitness(score: usize) -&gt; () {
+    assert!(score &lt;= ROUNDS);
+
+    match score {
+        0...10 =&gt; FITNESS_00010.fetch_add(1, Ordering::Relaxed),
+        11...20 =&gt; FITNESS_11020.fetch_add(1, Ordering::Relaxed),
+        21...30 =&gt; FITNESS_21030.fetch_add(1, Ordering::Relaxed),
+        31...40 =&gt; FITNESS_31040.fetch_add(1, Ordering::Relaxed),
+        41...50 =&gt; FITNESS_41050.fetch_add(1, Ordering::Relaxed),
+        51...60 =&gt; FITNESS_51060.fetch_add(1, Ordering::Relaxed),
+        61...70 =&gt; FITNESS_61070.fetch_add(1, Ordering::Relaxed),
+        71...80 =&gt; FITNESS_71080.fetch_add(1, Ordering::Relaxed),
+        81...90 =&gt; FITNESS_81090.fetch_add(1, Ordering::Relaxed),
+        91...100 =&gt; FITNESS_91100.fetch_add(1, Ordering::Relaxed),
+        _ =&gt; unreachable!(),
+    };
+}</pre>
+<p>What is this, you ask? Well, I'll tell you! <kbd>tally_fitness</kbd> takes the input score—the wins of the warrior—and buckets that score into a histogram. Usually this is done with a modulo operation but we're stuck here. The implementation has to assume that <kbd>tally_fitness</kbd> will be run by multiple threads at once. So, we've constructed a histogram from several discrete <kbd>AtomicUsize</kbd>s with names suggestive of their bucket purpose. The declaration of the statics is as repetitive as you'd imagine and we'll spare repeating it here. Maintaining this structure by hand is a real pain but it <em>does</em> get you an atomic histogram, so long as you're fine with that histogram also being static. This implementation is. The histogram is not used for decision making so much as it's meant for diagnostic display. We'll come to that when we discuss the main loop.</p>
+<p>The final lines of <kbd>compete</kbd> are underwhelming:</p>
+<pre>        if l_wins &gt; r_wins {
+            Winner::Left(l_wins)
+        } else if l_wins &lt; r_wins {
+            Winner::Right(r_wins)
+        } else {
+            Winner::Tie
+        }
+    }
+}</pre>
+<p>The win counts of each warrior are compared and the winner is declared to be the one with the higher score, or neither wins and a tie is declared. Depending on your problem domain, this fitness' rubric might be too coarse. From the output, we don't know how much fitter an individual was compared to its competitor, only that it was. The warriors may have tied at 0 wins each, or gone 50/50. We believe this simple signal is enough, at least for our purposes now.</p>
+<p>At least as far as creating an <kbd>Individual</kbd>, mutating it, reproducing it, and competing it, that's it! Now all that's left is to simulate evolution and for that we have to jump to <kbd>main.rs</kbd>. Before we do, though, I want to point out briefly that there's a submodule here, <kbd>individuals::ringers</kbd>. This module has functions such as:</p>
+<pre>pub fn imp(chromosome_sz: u16) -&gt; Individual {
+    let mut chromosome = vec![
+        // MOV.I $0, $1
+        Some(Instruction {
+            opcode: OpCode::Mov,
+            modifier: Modifier::I,
+            a_mode: Mode::Direct,
+            a_offset: Offset { offset: 0 },
+            b_mode: Mode::Direct,
+            b_offset: Offset { offset: 1 },
+        }),
+    ];
+    for _ in 0..(chromosome_sz - chromosome.len() as u16) {
+        chromosome.push(None);
+    }
+    Individual { chromosome }
+}</pre>
+<p>Sometimes it's wise to nudge evolution along by sprinkling a little starter into the random mixture. Feruscore has no parser—at least, not until some kind reader contributes one—so the ringers are written out long-form.</p>
+<p>Now, on to <kbd>main</kbd>!</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

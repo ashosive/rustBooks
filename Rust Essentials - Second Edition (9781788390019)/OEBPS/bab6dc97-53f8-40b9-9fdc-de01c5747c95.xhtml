@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Visibility of items</h1>
+                </header>
+            
+            <article>
+                
+<p>Items in a module are by default only visible in the module itself; they are private to the module they are defined in. If you want to make an item callable from code external to the module, you must explicitly indicate this by prefixing the item with <kbd>pub</kbd> (which stands for public). In the following code, trying to call <kbd>func1()</kbd> is not allowed by the compiler--<kbd>error: function `func1` is private</kbd>:</p>
+<pre>// from Chapter 8/code/modules.rs 
+mod game1 { 
+    // all of the module's code items go in here 
+    fn func1() { 
+        println!("Am I visible?"); 
+    } 
+ 
+    pub fn func2() { 
+        println!("You called func2 in game1!"); 
+    } 
+} 
+ 
+fn main() { 
+    // game1::func1(); // &lt;- error! 
+    game1::func2(); 
+} </pre>
+<p>Calling <kbd>func2()</kbd> works without any problem because it is public, and this prints out the following output:</p>
+<pre><strong>You called func2 in game1!</strong>  </pre>
+<p>A function in a nested module can only be called if it is public, and if the nested module itself is declared public, like in this code snippet:</p>
+<pre>mod game1 { 
+    // other code 
+    pub mod subgame1 { 
+      pub fn subfunc1() { 
+         println!("You called subfunc1 in subgame1!"); 
+      } 
+    } 
+} 
+ 
+fn main() { 
+    // other code 
+    game1::subgame1::subfunc1(); 
+} </pre>
+<p>This prints out the following output:</p>
+<pre><strong>You called subfunc1 in subgame1!</strong> </pre>
+<p>A function in a module must be prefixed with its module name when called. This distinguishes it from another function with the same name so that no name conflict can occur.</p>
+<p>When a struct is accessed from outside the module in which it is defined, it is only visible when it is declared with <kbd>pub</kbd>. Moreover, its fields are private by default, so you have to explicitly declare as public those fields that you want to be visible outside. This is the <strong>encapsulation property</strong> (also called information hiding) from traditional object-oriented languages. In the following example, the fields <kbd>name</kbd> and <kbd>age</kbd> of struct <kbd>Magician</kbd> belong to the public interface, but <kbd>power</kbd> does not:</p>
+<pre>    pub struct Magician { 
+        pub name: String, 
+        pub age: i32, 
+        power: i32 
+    } </pre>
+<p>So, this statement:</p>
+<pre>let mag1 = game1::Magician { name: "Gandalf".to_string(), age: 725, power: 98}; </pre>
+<p>Leads to the compiler error:</p>
+<pre><strong>error: field `power` of struct `game1::Magician` is private.</strong>  </pre>
+<p>To summarize, Rust has only two visibility modifiers:</p>
+<ul>
+<li>The default, which is only visible within the current module</li>
+<li><kbd>pub</kbd>, which is exported to the parent module</li>
+</ul>
+<div class="mce-root packt_infobox"><span class="packt_screen">Exercise</span>:<strong><br/>
+<br/></strong> Does this mean we cannot make instances from a struct with private fields?<br/>
+Try to think of a way around this. (Hint: think about a constructor-like <kbd>new</kbd> function, see <kbd>Chapter 8/exercises/priv_struct.rs</kbd>).</div>
+<p>Generalizing this way of reasoning, here you can see a general way to call a private method <kbd>f</kbd> on a private field <kbd>m_impl</kbd>, the so-called <strong>Private Implementation Pattern</strong> (<strong>PIMPL</strong>):</p>
+<pre>// see Chapter 8/code/mod_private.rs 
+mod library { 
+  pub struct Interface {   
+    m_impl: Impl    // private field 
+  } 
+   
+  impl Interface { 
+    pub fn new() -&gt; Interface { 
+      Interface{ m_impl: Impl } 
+    } 
+     
+    pub fn f(&amp;self){ 
+      self.m_impl.f(); 
+    } 
+  } 
+   
+  struct Impl; 
+   
+  impl Impl { 
+    fn f(&amp;self){   // private method 
+      println!("f"); 
+    } 
+  } 
+} 
+ 
+fn main() { 
+  let o = library::Interface::new(); 
+  o.f(); 
+} </pre>
+<p>This prints out <kbd>f</kbd>.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

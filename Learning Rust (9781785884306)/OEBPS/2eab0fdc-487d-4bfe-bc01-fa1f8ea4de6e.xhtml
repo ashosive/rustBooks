@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Variables, variables everywhere</h1>
+                </header>
+            
+            <article>
+                
+<p>Let's look at the house and create some variables to describe it, as well as types. Start with the house, which can be considered the most basic of objects. We will need only to model the number of rooms it has:</p>
+<pre>number_of_rooms: i32 </pre>
+<p>Let's consider rooms next.</p>
+<p>Each room will have a number of properties. Is it upstairs or downstairs, assuming it's a two-level house? Number of doors. Number of windows. Types of windows. Do the window have curtains? Wood or carpet floor covering? Color of the carpet. Room name. Does it have a wardrobe/closet? Room width. Room length. You can go deeper than that, but this will do for now.</p>
+<p>As variables, these will be as follows:</p>
+<pre>is_upstairs: bool 
+number_of_doors: i32 
+number_of_windows: i32 
+window_type: String 
+has_curtains: bool // true = yes 
+wood_or_carpet: bool // true = carpet 
+carpet_color: String 
+room_name: String 
+has_wardrobe: bool // true = yes 
+room_width: f32 
+room_height: f32 </pre>
+<p>There is no reason why you can't define these as discrete variables; however, as they are properties that describe a feature within the house or room, why not group them as we already have? This is where a <kbd>struct</kbd> type comes in useful.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

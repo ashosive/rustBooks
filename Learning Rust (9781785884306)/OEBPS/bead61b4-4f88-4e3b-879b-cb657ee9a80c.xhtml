@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">And back to traits we go...</h1>
+                </header>
+            
+            <article>
+                
+<p>The simplest way to think of a trait is that it creates a signature to the implementation. If you're used to C (or C++), then you will have seen this in code akin to this:</p>
+<pre class="mce-root">// mylib.h <br/>int myFunction(int a, int b, float c);<br/> <br/>// mylib.c<br/>#include "mylib.h"<br/>int myFunction(int a, int b, float c)<br/>{<br/>  // implement the code <br/>  return some_value; <br/>}<br/><br/>// myotherfile.c <br/>#include "mylib.h"<br/>int some_function()<br/>{<br/>  int value = myFunction(1, 2, 3.14f); <br/>  return value; <br/>}</pre>
+<p>The compiler accepts this code is correct as there is a signature in the <kbd>.h</kbd> file that says somewhere there is a compiled function that provides the implementation of this call. When the compiler comes to link everything together, the code that was promised by the signature is found and <kbd>myFunction</kbd> does whatever it's supposed to do and returns the <kbd>int</kbd>.</p>
+<p>In C#, this would be supplied via an <kbd>interface</kbd>.</p>
+<p>With Rust, we have something very similar.</p>
+<p>The <kbd>trait</kbd> supplies the signature, the <kbd>impl</kbd> supplies the implementation, and the code calls the <kbd>impl</kbd>.</p>
+<p>Now this may seem somewhat like overkill. Why would you create a stub when the implementation is typically in the same source file? The answer is we can use traits in a Rust library known as a <strong>crate</strong>. The trait tells the compiler that somewhere the code is implemented and it will be linked at the last stage of the build.</p>
+<p>We will look at crates in the next chapter.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

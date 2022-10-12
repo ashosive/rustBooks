@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style00.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style01.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Error-handling with try!</h1>
+                </header>
+            
+            <article>
+                
+<p>In order to program in a more structured way, we'll use the <kbd>try!</kbd> macro, which will propagate the error upwards, causing an early return from the function, or unpack the success value. When returning the result, it needs to be wrapped in either <kbd>Ok</kbd> to indicate success or <kbd>Err</kbd> to indicate failure. This is shown here:</p>
+<pre>// code from Chapter 11/code/read_file_try.rs: 
+use std::path::Path; 
+use std::fs::File; 
+use std::io::prelude::*; 
+use std::error::Error; 
+use std::io; 
+ 
+fn main() { 
+    let path = Path::new("hello.txt"); 
+    let display = path.display();  
+ 
+    let content = match read_file(path) { 
+         Err(why) =&gt; panic!("error reading {}: {}", display, Error::description(&amp;why)), 
+         Ok(content) =&gt; content 
+    }; 
+ 
+    println!("{}", content); 
+} 
+ 
+<strong>fn read_file(path: &amp;Path) -&gt; Result&lt;String, io::Error&gt; {</strong><strong>    <br/>let mut file = try!(File::open(path));</strong><strong>   <br/>let mut buf = String::new();</strong><strong>    <br/>try!(file.read_to_string(&amp;mut buf));</strong><strong>    <br/>Ok(buf)<br/></strong><strong>}</strong></pre>
+<p>This prints out:</p>
+<pre><strong>"Hello Rust World!"</strong></pre>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

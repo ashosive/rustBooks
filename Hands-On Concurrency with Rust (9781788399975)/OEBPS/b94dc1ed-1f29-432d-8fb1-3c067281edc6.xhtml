@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Hopper in use</h1>
+                </header>
+            
+            <article>
+                
+<p>Before we dig into the implementation of hopper, it'll be instructive to see it in practice. Let's adapt the last iteration of our ring program series. For reference, here's what that looked like:</p>
+<pre style="padding-left: 30px">use std::thread;
+use std::sync::mpsc;
+
+fn writer(chan: mpsc::SyncSender&lt;u32&gt;) -&gt; () {
+    let mut cur: u32 = 0;
+    while let Ok(()) = chan.send(cur) {
+        cur = cur.wrapping_add(1);
+    }
+}
+
+fn reader(read_limit: usize, chan: mpsc::Receiver&lt;u32&gt;) -&gt; () {
+    let mut cur: u32 = 0;
+    while (cur as usize) &lt; read_limit {
+        let num = chan.recv().unwrap();
+        assert_eq!(num, cur);
+        cur = cur.wrapping_add(1);
+    }
+}
+
+fn main() {
+    let capacity = 10;
+    let read_limit = 1_000_000;
+    let (snd, rcv) = mpsc::sync_channel(capacity);
+
+    let reader_jh = thread::spawn(move || {
+        reader(read_limit, rcv);
+    });
+    let _writer_jh = thread::spawn(move || {
+        writer(snd);
+    });
+
+    reader_jh.join().unwrap();
+}</pre>
+<p>The hopper version is a touch different. This is the preamble:</p>
+<pre>extern crate hopper;
+extern crate tempdir;
+
+use std::{mem, thread};</pre>
+<p>No surprise there. The function that will serve as the <kbd>writer</kbd> thread is:</p>
+<pre>fn writer(mut chan: hopper::Sender&lt;u32&gt;) -&gt; () {
+    let mut cur: u32 = 0;
+    while let Ok(()) = chan.send(cur) {
+        cur = cur.wrapping_add(1);
+    }
+}</pre>
+<p>Other than the switch from <kbd>mpsc::SyncSender&lt;u32&gt;</kbd> to <kbd>hopper::Sender&lt;u32&gt;</kbd>—all hopper senders are impliclty bounded—the only other difference is that <kbd>chan</kbd> must be mutable. Now, for the <kbd>reader</kbd> thread:</p>
+<pre>fn reader(read_limit: usize, <br/>          mut chan: hopper::Receiver&lt;u32&gt;) -&gt; () {
+    let mut cur: u32 = 0;
+    let mut iter = chan.iter();
+    while (cur as usize) &lt; read_limit {
+        let num = iter.next().unwrap();
+        assert_eq!(num, cur);
+        cur = cur.wrapping_add(1);
+    }
+}</pre>
+<p>Here there's a little more to do. In hopper, the receiver is intended to be used as an iterator, which <em>is</em> a little awkward here as we want to limit the total number of received values. The iterator will block on calls to <kbd>next</kbd>, never returning a <kbd>None</kbd>. However, the <kbd>send</kbd> of the sender in  hopper is very different to that of MPSC's—<kbd>hopper::Sender&lt;T&gt;::send(&amp;mut self, event: T) -&gt; Result&lt;(), (T, Error)&gt;</kbd>. Ignore <kbd>Error</kbd> for a second; why return a tuple in the error condition that contains a <kbd>T</kbd>? To be clear, it's the same <kbd>T</kbd> that is passed in. When the caller sends a <kbd>T</kbd> into hopper, its ownership is passed into hopper as well, which is a problem in the case of an error. The caller might well want that <kbd>T</kbd> back to avoid its loss. Hopper wants to avoid doing a clone of every <kbd>T</kbd> that comes through and, so, hopper smuggles the ownership of the <kbd>T</kbd> back to the caller. What of <kbd>Error</kbd>? It's a simple enumeration:</p>
+<pre style="padding-left: 30px">pub enum Error {
+    NoSuchDirectory,
+    IoError(Error),
+    NoFlush,
+    Full,
+}</pre>
+<p>The important one is <kbd>Error::Full</kbd>. This is the condition that occurs when both the in-memory and disk-backed buffers are full at the time of sending. This error is recoverable, but in a way that only the caller can determine. Now, finally, the <kbd>main</kbd> function of our hopper example:</p>
+<pre>fn main() {<br/>    let read_limit = 1_000_000;<br/>    let in_memory_capacity = mem::size_of::&lt;u32&gt;() * 10;<br/>    let on_disk_capacity = mem::size_of::&lt;u32&gt;() * 100_000;<br/><br/>    let dir = tempdir::TempDir::new("queue_root").unwrap();<br/>    let (snd, rcv) = hopper::channel_with_explicit_capacity::&lt;u32&gt;(<br/>        "example",<br/>        dir.path(),<br/>        in_memory_capacity,<br/>        on_disk_capacity,<br/>        1,<br/>    ).unwrap();
+
+    let reader_jh = thread::spawn(move || {
+        reader(read_limit, rcv);
+    });
+    let _writer_jh = thread::spawn(move || {</pre>
+<pre>        writer(snd);
+    });
+
+    reader_jh.join().unwrap();
+}</pre>
+<p>The <kbd>read_limit</kbd> is in place as before, but the big difference is the creation of the channel. First, hopper has to have some place to put its disk storage. Here we're deferring to some temporary directory—<kbd>let dir = tempdir::TempDir::new("queue_root").unwrap();</kbd>—to avoid cleaning up after running the example. In real use, the disk location is chosen carefully. <kbd>hopper::channel_with_explicit_capacity</kbd> creates the same sender as <kbd>hopper::channel</kbd> except that all the configuration knobs are open to the caller. The first argument is the <em>name</em> of the channel. This value is important as it will be used to create a directory under <kbd>dir</kbd> for disk storage. It is important for the channel name to be unique. <kbd>in_memory_capacity</kbd> is in bytes, as well as <kbd>on_disk_capacity</kbd>, which is why we have the use of our old friend <kbd>mem::size_of</kbd>. Now, what's that last configuration option there, set to <kbd>1</kbd>? That's the maximum number of <em>queue files</em>.</p>
+<p>Hopper's disk storage is broken into multiple <em>queue files</em>, each of <kbd>on_disk_capacity</kbd> size. Senders carefully coordinate their writes to avoid over-filling the queue files, and the receiver is responsible for destroying them once it's sure there are no more writes coming—we'll talk about the signalling mechanism later in this chapter. The use of queue files allows hopper to potentially reclaim disk space that it may not otherwise have been able to, were one large file to be used in a circular fashion. This does incur some complexity in the sender and receiver code, as we'll see, but is worth it to provide a less resource-intensive library.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

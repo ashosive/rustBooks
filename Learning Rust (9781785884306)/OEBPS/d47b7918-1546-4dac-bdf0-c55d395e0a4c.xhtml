@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style00.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style01.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Trait objects</h1>
+                </header>
+            
+            <article>
+                
+<p>Typically, when we call a function in Rust, we will have a line in the code similar to this:</p>
+<pre class="mce-root">call_some_method(some_value);</pre>
+<p>When we have a <kbd>struct</kbd> in the code which has an <kbd>impl</kbd> attached to it, we will have this:</p>
+<pre class="mce-root">let m = MyStruct {a: 3, b: 4, c: 1, d: 4}; m.call_some_method();</pre>
+<p>These are both fine.</p>
+<p>If you recall, back in the <kbd>generic_trait_full</kbd> example, we had <kbd>Calc</kbd> defined and <kbd>T</kbd> could be either an <kbd>f32</kbd> or <kbd>i32</kbd>. We also talked about how the application knew what to include in the final binary. This is known as <strong>static dispatch</strong> (which Rust prefers).</p>
+<p>Rust uses a system called a <strong>dispatch</strong>, of which there are two types: static (favored by Rust) and dynamic. Dynamic dispatch relies on something called a <strong><span class="MsoIntenseEmphasis">trait object</span></strong>.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

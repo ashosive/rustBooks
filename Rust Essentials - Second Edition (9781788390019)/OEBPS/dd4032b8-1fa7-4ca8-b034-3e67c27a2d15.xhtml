@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Sending references over a channel</h1>
+                </header>
+            
+            <article>
+                
+<p>Even references and pointers can be sent over a channel, like in this example:</p>
+<pre>// see code from Chapter 9/code/channel_box.rs 
+use std::thread; 
+use std::sync::mpsc; 
+ 
+trait Message : Send { 
+    fn print(&amp;self); 
+} 
+ 
+struct Msg1 { 
+    value: i32 
+} 
+ 
+impl Message for Msg1 { 
+    fn print(&amp;self) { 
+        println!("value: {:?}", self.value); 
+    } 
+} 
+ 
+fn main() { 
+    let (tx, rx) = mpsc::channel::&lt;Box&lt;Message&gt;&gt;(); 
+     
+    let handle = thread::spawn(move|| { 
+        let msg = rx.recv().unwrap(); 
+        msg.print(); 
+    }); 
+     
+    let msg = Box::new(Msg1{ value:1 }); 
+    tx.send(msg).unwrap(); 
+     
+    handle.join().ok(); 
+} </pre>
+<p>This prints out the following:</p>
+<pre><strong>value: 1</strong></pre>
+<div class="packt_infobox"><span class="packt_screen">Exercise</span>:<span class="packt_screen"><br/></span>Make a program, <kbd>shared_channel.rs</kbd>, that lets any number of threads share a channel to send in a value, and one receiver that collects all the values.<br/>
+(Hint: use <kbd>clone()</kbd> to give each thread access to the sending endpoint <kbd>tx</kbd>. See the example code in <kbd>Chapter 9/exercises/shared_channel.rs</kbd>.)</div>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

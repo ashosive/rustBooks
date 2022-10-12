@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style00.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style01.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">FFI and Embedding – Combining Rust and Other Languages</h1>
+                </header>
+            
+            <article>
+                
+<p>Up until this point in the book, we've discussed Rust more or less in isolation. Rust was intentionally designed to integrate with other programming languages by calling external programming languages through its <strong>Foreign Function Interface</strong> (<strong>FFI</strong>) and by being embedded itself. Many modern programming languages offer FFI, easy embedding, or both. Python, for instance, can very conveniently call out to libraries with C calling conventions and can be embedded with a little forethought. Lua, a high-level and garbage-collected language like Python, has a convenient FFI and can be embedded without much trouble. Erlang has a small handful of FFI interfaces but Erlang is not, itself, easily embedded into user-space environments. Amusingly, it's fairly straightforward to compile Erlang into an RTOS image.</p>
+<p>In this chapter, we'll discuss calling out to foreign code in Rust and embedding Rust into foreign programming languages. We'll start off by extending the corewars evolver program —feruscore—that we covered at the tail end of <a href="d4802512-564b-4037-9407-b6035bd38f31.xhtml">Chapter 8</a>, <em>High-Level Parallelism – Threadpools, Parallel Iterators, and Processes</em>. You are encouraged to read that material before starting this chapter. After we've extended feruscore by embedding a C MARS simulator inside it, we'll move on to calling Rust functions from a C program. We'll demonstrate embedding Lua into a Rust system for convenient scripting and close the chapter by embedding Rust in high-level garbage-collected languages—Python and Erlang.</p>
+<p><span>By the end of this chapter, we will have:</span></p>
+<ul>
+<li><span>Adapted the feruscore project from the last section to incorporate a C simulator</span></li>
+<li><span>Demonstrated the inclusion of Lua code into a Rust project</span></li>
+<li><span>Demonstrated the inclusion of Rust code into a C project</span></li>
+<li><span>Demonstrated the inclusion of Rust code into a Python project</span></li>
+<li><span>Demonstrated the inclusion of Rust code into an Erlang/Elixir project</span></li>
+</ul>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

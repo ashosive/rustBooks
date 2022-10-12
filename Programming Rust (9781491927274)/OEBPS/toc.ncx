@@ -1,0 +1,416 @@
+<?xml version="1.0" encoding="utf-8" standalone="no" ?>
+<!DOCTYPE ncx PUBLIC "-//NISO//DTD ncx 2005-1//EN" "http://www.daisy.org/z3986/2005/ncx-2005-1.dtd">
+<ncx xmlns="http://www.daisy.org/z3986/2005/ncx/" version="2005-1">
+<head>
+<meta content="ID:ISBN:9781491927281" name="dtb:uid"/>
+<meta content="3" name="dtb:depth"/>
+<meta content="0" name="dtb:totalPageCount"/>
+<meta content="0" name="dtb:maxPageNumber"/>
+</head>
+<docTitle><text>Programming Rust</text></docTitle>
+<docAuthor><text>Jim Blandy, Jason Orendorff</text></docAuthor>
+<navMap><navPoint id="preface" playOrder="1"><navLabel><text>Preface</text></navLabel><content src="preface01.xhtml#preface"/><navPoint id="who-should-read-this-book" playOrder="2"><navLabel><text>Who Should Read This Book</text></navLabel><content src="preface01.xhtml#who-should-read-this-book"/></navPoint>
+<navPoint id="why-we-wrote-this-book" playOrder="3"><navLabel><text>Why We Wrote This Book</text></navLabel><content src="preface01.xhtml#why-we-wrote-this-book"/></navPoint>
+<navPoint id="navigating-this-book" playOrder="4"><navLabel><text>Navigating This Book</text></navLabel><content src="preface01.xhtml#navigating-this-book"/></navPoint>
+<navPoint id="conventions-used-in-this-book" playOrder="5"><navLabel><text>Conventions Used in This Book</text></navLabel><content src="preface01.xhtml#conventions-used-in-this-book"/></navPoint>
+<navPoint id="using-code-examples" playOrder="6"><navLabel><text>Using Code Examples</text></navLabel><content src="preface01.xhtml#using-code-examples"/></navPoint>
+<navPoint id="_safari_books_online" playOrder="7"><navLabel><text>O’Reilly Safari</text></navLabel><content src="preface01.xhtml#_safari_books_online"/></navPoint>
+<navPoint id="how-to-contact-us" playOrder="8"><navLabel><text>How to Contact Us</text></navLabel><content src="preface01.xhtml#how-to-contact-us"/></navPoint>
+<navPoint id="acknowledgments" playOrder="9"><navLabel><text>Acknowledgments</text></navLabel><content src="preface01.xhtml#acknowledgments"/></navPoint>
+</navPoint>
+<navPoint id="why-rust" playOrder="10"><navLabel><text>1. Why Rust?</text></navLabel><content src="ch01.xhtml#why-rust"/><navPoint id="type-safety" playOrder="11"><navLabel><text>Type Safety</text></navLabel><content src="ch01.xhtml#type-safety"/></navPoint>
+</navPoint>
+<navPoint id="a-tour-of-rust" playOrder="12"><navLabel><text>2. A Tour of Rust</text></navLabel><content src="ch02.xhtml#a-tour-of-rust"/><navPoint id="downloading-and-installing-rust" playOrder="13"><navLabel><text>Downloading and Installing Rust</text></navLabel><content src="ch02.xhtml#downloading-and-installing-rust"/></navPoint>
+<navPoint id="a-simple-function" playOrder="14"><navLabel><text>A Simple Function</text></navLabel><content src="ch02.xhtml#a-simple-function"/></navPoint>
+<navPoint id="writing-and-running-unit-tests" playOrder="15"><navLabel><text>Writing and Running Unit Tests</text></navLabel><content src="ch02.xhtml#writing-and-running-unit-tests"/></navPoint>
+<navPoint id="handling-command-line-arguments" playOrder="16"><navLabel><text>Handling Command-Line Arguments</text></navLabel><content src="ch02.xhtml#handling-command-line-arguments"/></navPoint>
+<navPoint id="a-simple-web-server" playOrder="17"><navLabel><text>A Simple Web Server</text></navLabel><content src="ch02.xhtml#a-simple-web-server"/></navPoint>
+<navPoint id="tour-concurrency" playOrder="18"><navLabel><text>Concurrency</text></navLabel><content src="ch02.xhtml#tour-concurrency"/><navPoint id="what-the-mandelbrot-set-actually-is" playOrder="19"><navLabel><text>What the Mandelbrot Set Actually Is</text></navLabel><content src="ch02.xhtml#what-the-mandelbrot-set-actually-is"/></navPoint>
+<navPoint id="parsing-pair-command-line-arguments" playOrder="20"><navLabel><text>Parsing Pair Command-Line Arguments</text></navLabel><content src="ch02.xhtml#parsing-pair-command-line-arguments"/></navPoint>
+<navPoint id="mapping-from-pixels-to-complex-numbers" playOrder="21"><navLabel><text>Mapping from Pixels to Complex Numbers</text></navLabel><content src="ch02.xhtml#mapping-from-pixels-to-complex-numbers"/></navPoint>
+<navPoint id="plotting-the-set" playOrder="22"><navLabel><text>Plotting the Set</text></navLabel><content src="ch02.xhtml#plotting-the-set"/></navPoint>
+<navPoint id="writing-image-files" playOrder="23"><navLabel><text>Writing Image Files</text></navLabel><content src="ch02.xhtml#writing-image-files"/></navPoint>
+<navPoint id="a-concurrent-mandelbrot-program" playOrder="24"><navLabel><text>A Concurrent Mandelbrot Program</text></navLabel><content src="ch02.xhtml#a-concurrent-mandelbrot-program"/></navPoint>
+<navPoint id="running-the-mandelbrot-plotter" playOrder="25"><navLabel><text>Running the Mandelbrot Plotter</text></navLabel><content src="ch02.xhtml#running-the-mandelbrot-plotter"/></navPoint>
+<navPoint id="safety-is-invisible" playOrder="26"><navLabel><text>Safety Is Invisible</text></navLabel><content src="ch02.xhtml#safety-is-invisible"/></navPoint>
+</navPoint>
+</navPoint>
+<navPoint id="basic-types" playOrder="27"><navLabel><text>3. Basic Types</text></navLabel><content src="ch03.xhtml#basic-types"/><navPoint id="machine-types" playOrder="28"><navLabel><text>Machine Types</text></navLabel><content src="ch03.xhtml#machine-types"/><navPoint id="integer-types" playOrder="29"><navLabel><text>Integer Types</text></navLabel><content src="ch03.xhtml#integer-types"/></navPoint>
+<navPoint id="floating-point-types" playOrder="30"><navLabel><text>Floating-Point Types</text></navLabel><content src="ch03.xhtml#floating-point-types"/></navPoint>
+<navPoint id="the-bool-type" playOrder="31"><navLabel><text>The bool Type</text></navLabel><content src="ch03.xhtml#the-bool-type"/></navPoint>
+<navPoint id="characters" playOrder="32"><navLabel><text>Characters</text></navLabel><content src="ch03.xhtml#characters"/></navPoint>
+</navPoint>
+<navPoint id="tuples" playOrder="33"><navLabel><text>Tuples</text></navLabel><content src="ch03.xhtml#tuples"/></navPoint>
+<navPoint id="pointer-types" playOrder="34"><navLabel><text>Pointer Types</text></navLabel><content src="ch03.xhtml#pointer-types"/><navPoint id="pointers-references" playOrder="35"><navLabel><text>References</text></navLabel><content src="ch03.xhtml#pointers-references"/></navPoint>
+<navPoint id="boxes" playOrder="36"><navLabel><text>Boxes</text></navLabel><content src="ch03.xhtml#boxes"/></navPoint>
+<navPoint id="raw-pointers" playOrder="37"><navLabel><text>Raw Pointers</text></navLabel><content src="ch03.xhtml#raw-pointers"/></navPoint>
+</navPoint>
+<navPoint id="arrays-vectors-and-slices" playOrder="38"><navLabel><text>Arrays, Vectors, and Slices</text></navLabel><content src="ch03.xhtml#arrays-vectors-and-slices"/><navPoint id="arrays" playOrder="39"><navLabel><text>Arrays</text></navLabel><content src="ch03.xhtml#arrays"/></navPoint>
+<navPoint id="vectors" playOrder="40"><navLabel><text>Vectors</text></navLabel><content src="ch03.xhtml#vectors"/></navPoint>
+<navPoint id="slices" playOrder="41"><navLabel><text>Slices</text></navLabel><content src="ch03.xhtml#slices"/></navPoint>
+</navPoint>
+<navPoint id="string-types" playOrder="42"><navLabel><text>String Types</text></navLabel><content src="ch03.xhtml#string-types"/><navPoint id="string-literals" playOrder="43"><navLabel><text>String Literals</text></navLabel><content src="ch03.xhtml#string-literals"/></navPoint>
+<navPoint id="byte-strings" playOrder="44"><navLabel><text>Byte Strings</text></navLabel><content src="ch03.xhtml#byte-strings"/></navPoint>
+<navPoint id="strings-in-memory" playOrder="45"><navLabel><text>Strings in Memory</text></navLabel><content src="ch03.xhtml#strings-in-memory"/></navPoint>
+<navPoint id="string" playOrder="46"><navLabel><text>String</text></navLabel><content src="ch03.xhtml#string"/></navPoint>
+<navPoint id="using-strings" playOrder="47"><navLabel><text>Using Strings</text></navLabel><content src="ch03.xhtml#using-strings"/></navPoint>
+<navPoint id="other-string-like-types" playOrder="48"><navLabel><text>Other String-Like Types</text></navLabel><content src="ch03.xhtml#other-string-like-types"/></navPoint>
+</navPoint>
+<navPoint id="beyond-the-basics" playOrder="49"><navLabel><text>Beyond the Basics</text></navLabel><content src="ch03.xhtml#beyond-the-basics"/></navPoint>
+</navPoint>
+<navPoint id="ownership" playOrder="50"><navLabel><text>4. Ownership</text></navLabel><content src="ch04.xhtml#ownership"/><navPoint id="ownership-1" playOrder="51"><navLabel><text>Ownership</text></navLabel><content src="ch04.xhtml#ownership-1"/></navPoint>
+<navPoint id="moves" playOrder="52"><navLabel><text>Moves</text></navLabel><content src="ch04.xhtml#moves"/><navPoint id="more-operations-that-move" playOrder="53"><navLabel><text>More Operations That Move</text></navLabel><content src="ch04.xhtml#more-operations-that-move"/></navPoint>
+<navPoint id="moves-and-control-flow" playOrder="54"><navLabel><text>Moves and Control Flow</text></navLabel><content src="ch04.xhtml#moves-and-control-flow"/></navPoint>
+<navPoint id="moves-and-indexed-content" playOrder="55"><navLabel><text>Moves and Indexed Content</text></navLabel><content src="ch04.xhtml#moves-and-indexed-content"/></navPoint>
+</navPoint>
+<navPoint id="copy-types-the-exception-to-moves" playOrder="56"><navLabel><text>Copy Types: The Exception to Moves</text></navLabel><content src="ch04.xhtml#copy-types-the-exception-to-moves"/></navPoint>
+<navPoint id="rc" playOrder="57"><navLabel><text>Rc and Arc: Shared Ownership</text></navLabel><content src="ch04.xhtml#rc"/></navPoint>
+</navPoint>
+<navPoint id="references" playOrder="58"><navLabel><text>5. References</text></navLabel><content src="ch05.xhtml#references"/><navPoint id="references-as-values" playOrder="59"><navLabel><text>References as Values</text></navLabel><content src="ch05.xhtml#references-as-values"/><navPoint id="rust-references-versus-c-references" playOrder="60"><navLabel><text>Rust References Versus C++ References</text></navLabel><content src="ch05.xhtml#rust-references-versus-c-references"/></navPoint>
+<navPoint id="assigning-references" playOrder="61"><navLabel><text>Assigning References</text></navLabel><content src="ch05.xhtml#assigning-references"/></navPoint>
+<navPoint id="references-to-references" playOrder="62"><navLabel><text>References to References</text></navLabel><content src="ch05.xhtml#references-to-references"/></navPoint>
+<navPoint id="comparing-references" playOrder="63"><navLabel><text>Comparing References</text></navLabel><content src="ch05.xhtml#comparing-references"/></navPoint>
+<navPoint id="references-are-never-null" playOrder="64"><navLabel><text>References Are Never Null</text></navLabel><content src="ch05.xhtml#references-are-never-null"/></navPoint>
+<navPoint id="borrowing-references-to-arbitrary-expressions" playOrder="65"><navLabel><text>Borrowing References to Arbitrary Expressions</text></navLabel><content src="ch05.xhtml#borrowing-references-to-arbitrary-expressions"/></navPoint>
+<navPoint id="references-to-slices-and-trait-objects" playOrder="66"><navLabel><text>References to Slices and Trait Objects</text></navLabel><content src="ch05.xhtml#references-to-slices-and-trait-objects"/></navPoint>
+</navPoint>
+<navPoint id="reference-safety" playOrder="67"><navLabel><text>Reference Safety</text></navLabel><content src="ch05.xhtml#reference-safety"/><navPoint id="borrowing-a-local-variable" playOrder="68"><navLabel><text>Borrowing a Local Variable</text></navLabel><content src="ch05.xhtml#borrowing-a-local-variable"/></navPoint>
+<navPoint id="receiving-references-as-parameters" playOrder="69"><navLabel><text>Receiving References as Parameters</text></navLabel><content src="ch05.xhtml#receiving-references-as-parameters"/></navPoint>
+<navPoint id="passing-references-as-arguments" playOrder="70"><navLabel><text>Passing References as Arguments</text></navLabel><content src="ch05.xhtml#passing-references-as-arguments"/></navPoint>
+<navPoint id="returning-references" playOrder="71"><navLabel><text>Returning References</text></navLabel><content src="ch05.xhtml#returning-references"/></navPoint>
+<navPoint id="structs-containing-references" playOrder="72"><navLabel><text>Structs Containing References</text></navLabel><content src="ch05.xhtml#structs-containing-references"/></navPoint>
+<navPoint id="distinct-lifetime-parameters" playOrder="73"><navLabel><text>Distinct Lifetime Parameters</text></navLabel><content src="ch05.xhtml#distinct-lifetime-parameters"/></navPoint>
+<navPoint id="omitting-lifetime-parameters" playOrder="74"><navLabel><text>Omitting Lifetime Parameters</text></navLabel><content src="ch05.xhtml#omitting-lifetime-parameters"/></navPoint>
+</navPoint>
+<navPoint id="sharing-versus-mutation" playOrder="75"><navLabel><text>Sharing Versus Mutation</text></navLabel><content src="ch05.xhtml#sharing-versus-mutation"/></navPoint>
+<navPoint id="taking-arms-against-a-sea-of-objects" playOrder="76"><navLabel><text>Taking Arms Against a Sea of Objects</text></navLabel><content src="ch05.xhtml#taking-arms-against-a-sea-of-objects"/></navPoint>
+</navPoint>
+<navPoint id="expressions" playOrder="77"><navLabel><text>6. Expressions</text></navLabel><content src="ch06.xhtml#expressions"/><navPoint id="an-expression-language" playOrder="78"><navLabel><text>An Expression Language</text></navLabel><content src="ch06.xhtml#an-expression-language"/></navPoint>
+<navPoint id="blocks-and-semicolons" playOrder="79"><navLabel><text>Blocks and Semicolons</text></navLabel><content src="ch06.xhtml#blocks-and-semicolons"/></navPoint>
+<navPoint id="declarations" playOrder="80"><navLabel><text>Declarations</text></navLabel><content src="ch06.xhtml#declarations"/></navPoint>
+<navPoint id="if-and-match" playOrder="81"><navLabel><text>if and match</text></navLabel><content src="ch06.xhtml#if-and-match"/><navPoint id="if-let" playOrder="82"><navLabel><text>if let</text></navLabel><content src="ch06.xhtml#if-let"/></navPoint>
+</navPoint>
+<navPoint id="loops" playOrder="83"><navLabel><text>Loops</text></navLabel><content src="ch06.xhtml#loops"/></navPoint>
+<navPoint id="return-expressions" playOrder="84"><navLabel><text>return Expressions</text></navLabel><content src="ch06.xhtml#return-expressions"/></navPoint>
+<navPoint id="why-rust-has-loop" playOrder="85"><navLabel><text>Why Rust Has loop</text></navLabel><content src="ch06.xhtml#why-rust-has-loop"/></navPoint>
+<navPoint id="function-and-method-calls" playOrder="86"><navLabel><text>Function and Method Calls</text></navLabel><content src="ch06.xhtml#function-and-method-calls"/></navPoint>
+<navPoint id="fields-and-elements" playOrder="87"><navLabel><text>Fields and Elements</text></navLabel><content src="ch06.xhtml#fields-and-elements"/></navPoint>
+<navPoint id="reference-operators" playOrder="88"><navLabel><text>Reference Operators</text></navLabel><content src="ch06.xhtml#reference-operators"/></navPoint>
+<navPoint id="arithmetic-bitwise-comparison-and-logical-operators" playOrder="89"><navLabel><text>Arithmetic, Bitwise, Comparison, and Logical Operators</text></navLabel><content src="ch06.xhtml#arithmetic-bitwise-comparison-and-logical-operators"/></navPoint>
+<navPoint id="assignment" playOrder="90"><navLabel><text>Assignment</text></navLabel><content src="ch06.xhtml#assignment"/></navPoint>
+<navPoint id="type-casts" playOrder="91"><navLabel><text>Type Casts</text></navLabel><content src="ch06.xhtml#type-casts"/></navPoint>
+<navPoint id="expressions-closures" playOrder="92"><navLabel><text>Closures</text></navLabel><content src="ch06.xhtml#expressions-closures"/></navPoint>
+<navPoint id="precedence-and-associativity" playOrder="93"><navLabel><text>Precedence and Associativity</text></navLabel><content src="ch06.xhtml#precedence-and-associativity"/></navPoint>
+<navPoint id="onward" playOrder="94"><navLabel><text>Onward</text></navLabel><content src="ch06.xhtml#onward"/></navPoint>
+</navPoint>
+<navPoint id="error-handling" playOrder="95"><navLabel><text>7. Error Handling</text></navLabel><content src="ch07.xhtml#error-handling"/><navPoint id="panic" playOrder="96"><navLabel><text>Panic</text></navLabel><content src="ch07.xhtml#panic"/><navPoint id="unwinding" playOrder="97"><navLabel><text>Unwinding</text></navLabel><content src="ch07.xhtml#unwinding"/></navPoint>
+<navPoint id="aborting" playOrder="98"><navLabel><text>Aborting</text></navLabel><content src="ch07.xhtml#aborting"/></navPoint>
+</navPoint>
+<navPoint id="result" playOrder="99"><navLabel><text>Result</text></navLabel><content src="ch07.xhtml#result"/><navPoint id="catching-errors" playOrder="100"><navLabel><text>Catching Errors</text></navLabel><content src="ch07.xhtml#catching-errors"/></navPoint>
+<navPoint id="result-type-aliases" playOrder="101"><navLabel><text>Result Type Aliases</text></navLabel><content src="ch07.xhtml#result-type-aliases"/></navPoint>
+<navPoint id="printing-errors" playOrder="102"><navLabel><text>Printing Errors</text></navLabel><content src="ch07.xhtml#printing-errors"/></navPoint>
+<navPoint id="propagating-errors" playOrder="103"><navLabel><text>Propagating Errors</text></navLabel><content src="ch07.xhtml#propagating-errors"/></navPoint>
+<navPoint id="working-with-multiple-error-types" playOrder="104"><navLabel><text>Working with Multiple Error Types</text></navLabel><content src="ch07.xhtml#working-with-multiple-error-types"/></navPoint>
+<navPoint id="dealing-with-errors-that-cant-happen" playOrder="105"><navLabel><text>Dealing with Errors That “Can’t Happen”</text></navLabel><content src="ch07.xhtml#dealing-with-errors-that-cant-happen"/></navPoint>
+<navPoint id="ignoring-errors" playOrder="106"><navLabel><text>Ignoring Errors</text></navLabel><content src="ch07.xhtml#ignoring-errors"/></navPoint>
+<navPoint id="handling-errors-in-main" playOrder="107"><navLabel><text>Handling Errors in main()</text></navLabel><content src="ch07.xhtml#handling-errors-in-main"/></navPoint>
+<navPoint id="declaring-a-custom-error-type" playOrder="108"><navLabel><text>Declaring a Custom Error Type</text></navLabel><content src="ch07.xhtml#declaring-a-custom-error-type"/></navPoint>
+<navPoint id="why-results" playOrder="109"><navLabel><text>Why Results?</text></navLabel><content src="ch07.xhtml#why-results"/></navPoint>
+</navPoint>
+</navPoint>
+<navPoint id="crates-and-modules" playOrder="110"><navLabel><text>8. Crates and Modules</text></navLabel><content src="ch08.xhtml#crates-and-modules"/><navPoint id="crates" playOrder="111"><navLabel><text>Crates</text></navLabel><content src="ch08.xhtml#crates"/><navPoint id="build-profiles" playOrder="112"><navLabel><text>Build Profiles</text></navLabel><content src="ch08.xhtml#build-profiles"/></navPoint>
+</navPoint>
+<navPoint id="modules" playOrder="113"><navLabel><text>Modules</text></navLabel><content src="ch08.xhtml#modules"/><navPoint id="modules-in-separate-files" playOrder="114"><navLabel><text>Modules in Separate Files</text></navLabel><content src="ch08.xhtml#modules-in-separate-files"/></navPoint>
+<navPoint id="paths-and-imports" playOrder="115"><navLabel><text>Paths and Imports</text></navLabel><content src="ch08.xhtml#paths-and-imports"/></navPoint>
+<navPoint id="the-standard-prelude" playOrder="116"><navLabel><text>The Standard Prelude</text></navLabel><content src="ch08.xhtml#the-standard-prelude"/></navPoint>
+<navPoint id="items" playOrder="117"><navLabel><text>Items, the Building Blocks of Rust</text></navLabel><content src="ch08.xhtml#items"/></navPoint>
+</navPoint>
+<navPoint id="turning-a-program-into-a-library" playOrder="118"><navLabel><text>Turning a Program into a Library</text></navLabel><content src="ch08.xhtml#turning-a-program-into-a-library"/></navPoint>
+<navPoint id="the-srcbin-directory" playOrder="119"><navLabel><text>The src/bin Directory</text></navLabel><content src="ch08.xhtml#the-srcbin-directory"/></navPoint>
+<navPoint id="attributes" playOrder="120"><navLabel><text>Attributes</text></navLabel><content src="ch08.xhtml#attributes"/></navPoint>
+<navPoint id="tests-and-documentation" playOrder="121"><navLabel><text>Tests and Documentation</text></navLabel><content src="ch08.xhtml#tests-and-documentation"/><navPoint id="integration-tests" playOrder="122"><navLabel><text>Integration Tests</text></navLabel><content src="ch08.xhtml#integration-tests"/></navPoint>
+<navPoint id="documentation" playOrder="123"><navLabel><text>Documentation</text></navLabel><content src="ch08.xhtml#documentation"/></navPoint>
+<navPoint id="doc-tests" playOrder="124"><navLabel><text>Doc-Tests</text></navLabel><content src="ch08.xhtml#doc-tests"/></navPoint>
+</navPoint>
+<navPoint id="specifying-dependencies" playOrder="125"><navLabel><text>Specifying Dependencies</text></navLabel><content src="ch08.xhtml#specifying-dependencies"/><navPoint id="versions" playOrder="126"><navLabel><text>Versions</text></navLabel><content src="ch08.xhtml#versions"/></navPoint>
+<navPoint id="cargo.lock" playOrder="127"><navLabel><text>Cargo.lock</text></navLabel><content src="ch08.xhtml#cargo.lock"/></navPoint>
+</navPoint>
+<navPoint id="publishing-crates-to-crates.io" playOrder="128"><navLabel><text>Publishing Crates to crates.io</text></navLabel><content src="ch08.xhtml#publishing-crates-to-crates.io"/></navPoint>
+<navPoint id="workspaces" playOrder="129"><navLabel><text>Workspaces</text></navLabel><content src="ch08.xhtml#workspaces"/></navPoint>
+<navPoint id="more-nice-things" playOrder="130"><navLabel><text>More Nice Things</text></navLabel><content src="ch08.xhtml#more-nice-things"/></navPoint>
+</navPoint>
+<navPoint id="structs" playOrder="131"><navLabel><text>9. Structs</text></navLabel><content src="ch09.xhtml#structs"/><navPoint id="named-field-structs" playOrder="132"><navLabel><text>Named-Field Structs</text></navLabel><content src="ch09.xhtml#named-field-structs"/></navPoint>
+<navPoint id="tuple-like-structs" playOrder="133"><navLabel><text>Tuple-Like Structs</text></navLabel><content src="ch09.xhtml#tuple-like-structs"/></navPoint>
+<navPoint id="unit-like-structs" playOrder="134"><navLabel><text>Unit-Like Structs</text></navLabel><content src="ch09.xhtml#unit-like-structs"/></navPoint>
+<navPoint id="struct-layout" playOrder="135"><navLabel><text>Struct Layout</text></navLabel><content src="ch09.xhtml#struct-layout"/></navPoint>
+<navPoint id="defining-methods-with-impl" playOrder="136"><navLabel><text>Defining Methods with impl</text></navLabel><content src="ch09.xhtml#defining-methods-with-impl"/></navPoint>
+<navPoint id="generic-structs" playOrder="137"><navLabel><text>Generic Structs</text></navLabel><content src="ch09.xhtml#generic-structs"/></navPoint>
+<navPoint id="structs-with-lifetime-parameters" playOrder="138"><navLabel><text>Structs with Lifetime Parameters</text></navLabel><content src="ch09.xhtml#structs-with-lifetime-parameters"/></navPoint>
+<navPoint id="deriving-common-traits-for-struct-types" playOrder="139"><navLabel><text>Deriving Common Traits for Struct Types</text></navLabel><content src="ch09.xhtml#deriving-common-traits-for-struct-types"/></navPoint>
+<navPoint id="interior-mutability" playOrder="140"><navLabel><text>Interior Mutability</text></navLabel><content src="ch09.xhtml#interior-mutability"/></navPoint>
+</navPoint>
+<navPoint id="enums-and-patterns" playOrder="141"><navLabel><text>10. Enums and Patterns</text></navLabel><content src="ch10.xhtml#enums-and-patterns"/><navPoint id="enums" playOrder="142"><navLabel><text>Enums</text></navLabel><content src="ch10.xhtml#enums"/><navPoint id="enums-with-data" playOrder="143"><navLabel><text>Enums with Data</text></navLabel><content src="ch10.xhtml#enums-with-data"/></navPoint>
+<navPoint id="enums-in-memory" playOrder="144"><navLabel><text>Enums in Memory</text></navLabel><content src="ch10.xhtml#enums-in-memory"/></navPoint>
+<navPoint id="rich-data-structures-using-enums" playOrder="145"><navLabel><text>Rich Data Structures Using Enums</text></navLabel><content src="ch10.xhtml#rich-data-structures-using-enums"/></navPoint>
+<navPoint id="generic-enums" playOrder="146"><navLabel><text>Generic Enums</text></navLabel><content src="ch10.xhtml#generic-enums"/></navPoint>
+</navPoint>
+<navPoint id="patterns" playOrder="147"><navLabel><text>Patterns</text></navLabel><content src="ch10.xhtml#patterns"/><navPoint id="literals-variables-and-wildcards-in-patterns" playOrder="148"><navLabel><text>Literals, Variables, and Wildcards in Patterns</text></navLabel><content src="ch10.xhtml#literals-variables-and-wildcards-in-patterns"/></navPoint>
+<navPoint id="tuple-and-struct-patterns" playOrder="149"><navLabel><text>Tuple and Struct Patterns</text></navLabel><content src="ch10.xhtml#tuple-and-struct-patterns"/></navPoint>
+<navPoint id="reference-patterns" playOrder="150"><navLabel><text>Reference Patterns</text></navLabel><content src="ch10.xhtml#reference-patterns"/></navPoint>
+<navPoint id="matching-multiple-possibilities" playOrder="151"><navLabel><text>Matching Multiple Possibilities</text></navLabel><content src="ch10.xhtml#matching-multiple-possibilities"/></navPoint>
+<navPoint id="pattern-guards" playOrder="152"><navLabel><text>Pattern Guards</text></navLabel><content src="ch10.xhtml#pattern-guards"/></navPoint>
+<navPoint id="patterns-1" playOrder="153"><navLabel><text>@ patterns</text></navLabel><content src="ch10.xhtml#patterns-1"/></navPoint>
+<navPoint id="where-patterns-are-allowed" playOrder="154"><navLabel><text>Where Patterns Are Allowed</text></navLabel><content src="ch10.xhtml#where-patterns-are-allowed"/></navPoint>
+<navPoint id="populating-a-binary-tree" playOrder="155"><navLabel><text>Populating a Binary Tree</text></navLabel><content src="ch10.xhtml#populating-a-binary-tree"/></navPoint>
+</navPoint>
+<navPoint id="the-big-picture" playOrder="156"><navLabel><text>The Big Picture</text></navLabel><content src="ch10.xhtml#the-big-picture"/></navPoint>
+</navPoint>
+<navPoint id="traits-and-generics" playOrder="157"><navLabel><text>11. Traits and Generics</text></navLabel><content src="ch11.xhtml#traits-and-generics"/><navPoint id="using-traits" playOrder="158"><navLabel><text>Using Traits</text></navLabel><content src="ch11.xhtml#using-traits"/><navPoint id="trait-objects" playOrder="159"><navLabel><text>Trait Objects</text></navLabel><content src="ch11.xhtml#trait-objects"/></navPoint>
+<navPoint id="trait-object-layout" playOrder="160"><navLabel><text>Trait Object Layout</text></navLabel><content src="ch11.xhtml#trait-object-layout"/></navPoint>
+<navPoint id="generic-functions" playOrder="161"><navLabel><text>Generic Functions</text></navLabel><content src="ch11.xhtml#generic-functions"/></navPoint>
+<navPoint id="which-to-use" playOrder="162"><navLabel><text>Which to Use</text></navLabel><content src="ch11.xhtml#which-to-use"/></navPoint>
+</navPoint>
+<navPoint id="defining-and-implementing-traits" playOrder="163"><navLabel><text>Defining and Implementing Traits</text></navLabel><content src="ch11.xhtml#defining-and-implementing-traits"/><navPoint id="default-methods" playOrder="164"><navLabel><text>Default Methods</text></navLabel><content src="ch11.xhtml#default-methods"/></navPoint>
+<navPoint id="traits-and-other-peoples-types" playOrder="165"><navLabel><text>Traits and Other People’s Types</text></navLabel><content src="ch11.xhtml#traits-and-other-peoples-types"/></navPoint>
+<navPoint id="self-in-traits" playOrder="166"><navLabel><text>Self in Traits</text></navLabel><content src="ch11.xhtml#self-in-traits"/></navPoint>
+<navPoint id="subtraits" playOrder="167"><navLabel><text>Subtraits</text></navLabel><content src="ch11.xhtml#subtraits"/></navPoint>
+<navPoint id="traits-with-static-methods" playOrder="168"><navLabel><text>Static Methods</text></navLabel><content src="ch11.xhtml#traits-with-static-methods"/></navPoint>
+</navPoint>
+<navPoint id="fully-qualified-method-calls" playOrder="169"><navLabel><text>Fully Qualified Method Calls</text></navLabel><content src="ch11.xhtml#fully-qualified-method-calls"/></navPoint>
+<navPoint id="traits-that-define-relationships-between-types" playOrder="170"><navLabel><text>Traits That Define Relationships Between Types</text></navLabel><content src="ch11.xhtml#traits-that-define-relationships-between-types"/><navPoint id="associated-types-or-how-iterators-work" playOrder="171"><navLabel><text>Associated Types (or How Iterators Work)</text></navLabel><content src="ch11.xhtml#associated-types-or-how-iterators-work"/></navPoint>
+<navPoint id="generic-traits-or-how-operator-overloading-works" playOrder="172"><navLabel><text>Generic Traits (or How Operator Overloading Works)</text></navLabel><content src="ch11.xhtml#generic-traits-or-how-operator-overloading-works"/></navPoint>
+<navPoint id="buddy-traits-or-how-randrandom-works" playOrder="173"><navLabel><text>Buddy Traits (or How rand::random() Works)</text></navLabel><content src="ch11.xhtml#buddy-traits-or-how-randrandom-works"/></navPoint>
+</navPoint>
+<navPoint id="reverse-engineering-bounds" playOrder="174"><navLabel><text>Reverse-Engineering Bounds</text></navLabel><content src="ch11.xhtml#reverse-engineering-bounds"/></navPoint>
+<navPoint id="conclusion" playOrder="175"><navLabel><text>Conclusion</text></navLabel><content src="ch11.xhtml#conclusion"/></navPoint>
+</navPoint>
+<navPoint id="operator-overloading" playOrder="176"><navLabel><text>12. Operator Overloading</text></navLabel><content src="ch12.xhtml#operator-overloading"/><navPoint id="arithmetic-traits" playOrder="177"><navLabel><text>Arithmetic and Bitwise Operators</text></navLabel><content src="ch12.xhtml#arithmetic-traits"/><navPoint id="unary-operators" playOrder="178"><navLabel><text>Unary Operators</text></navLabel><content src="ch12.xhtml#unary-operators"/></navPoint>
+<navPoint id="binary-operators" playOrder="179"><navLabel><text>Binary Operators</text></navLabel><content src="ch12.xhtml#binary-operators"/></navPoint>
+<navPoint id="compound-assignment-operators" playOrder="180"><navLabel><text>Compound Assignment Operators</text></navLabel><content src="ch12.xhtml#compound-assignment-operators"/></navPoint>
+</navPoint>
+<navPoint id="eq" playOrder="181"><navLabel><text>Equality Tests</text></navLabel><content src="ch12.xhtml#eq"/></navPoint>
+<navPoint id="ord" playOrder="182"><navLabel><text>Ordered Comparisons</text></navLabel><content src="ch12.xhtml#ord"/></navPoint>
+<navPoint id="index-and-indexmut" playOrder="183"><navLabel><text>Index and IndexMut</text></navLabel><content src="ch12.xhtml#index-and-indexmut"/></navPoint>
+<navPoint id="other-operators" playOrder="184"><navLabel><text>Other Operators</text></navLabel><content src="ch12.xhtml#other-operators"/></navPoint>
+</navPoint>
+<navPoint id="utility-traits" playOrder="185"><navLabel><text>13. Utility Traits</text></navLabel><content src="ch13.xhtml#utility-traits"/><navPoint id="drop" playOrder="186"><navLabel><text>Drop</text></navLabel><content src="ch13.xhtml#drop"/></navPoint>
+<navPoint id="sized" playOrder="187"><navLabel><text>Sized</text></navLabel><content src="ch13.xhtml#sized"/></navPoint>
+<navPoint id="clone" playOrder="188"><navLabel><text>Clone</text></navLabel><content src="ch13.xhtml#clone"/></navPoint>
+<navPoint id="copy" playOrder="189"><navLabel><text>Copy</text></navLabel><content src="ch13.xhtml#copy"/></navPoint>
+<navPoint id="deref-and-derefmut" playOrder="190"><navLabel><text>Deref and DerefMut</text></navLabel><content src="ch13.xhtml#deref-and-derefmut"/></navPoint>
+<navPoint id="default" playOrder="191"><navLabel><text>Default</text></navLabel><content src="ch13.xhtml#default"/></navPoint>
+<navPoint id="asref-and-asmut" playOrder="192"><navLabel><text>AsRef and AsMut</text></navLabel><content src="ch13.xhtml#asref-and-asmut"/></navPoint>
+<navPoint id="borrow-and-borrowmut" playOrder="193"><navLabel><text>Borrow and BorrowMut</text></navLabel><content src="ch13.xhtml#borrow-and-borrowmut"/></navPoint>
+<navPoint id="from-and-into" playOrder="194"><navLabel><text>From and Into</text></navLabel><content src="ch13.xhtml#from-and-into"/></navPoint>
+<navPoint id="toowned" playOrder="195"><navLabel><text>ToOwned</text></navLabel><content src="ch13.xhtml#toowned"/></navPoint>
+<navPoint id="borrow-and-toowned-at-work-the-humble-cow" playOrder="196"><navLabel><text>Borrow and ToOwned at Work: The Humble Cow</text></navLabel><content src="ch13.xhtml#borrow-and-toowned-at-work-the-humble-cow"/></navPoint>
+</navPoint>
+<navPoint id="closures" playOrder="197"><navLabel><text>14. Closures</text></navLabel><content src="ch14.xhtml#closures"/><navPoint id="capturing-variables" playOrder="198"><navLabel><text>Capturing Variables</text></navLabel><content src="ch14.xhtml#capturing-variables"/><navPoint id="closures-that-borrow" playOrder="199"><navLabel><text>Closures That Borrow</text></navLabel><content src="ch14.xhtml#closures-that-borrow"/></navPoint>
+<navPoint id="closures-that-steal" playOrder="200"><navLabel><text>Closures That Steal</text></navLabel><content src="ch14.xhtml#closures-that-steal"/></navPoint>
+</navPoint>
+<navPoint id="function-and-closure-types" playOrder="201"><navLabel><text>Function and Closure Types</text></navLabel><content src="ch14.xhtml#function-and-closure-types"/></navPoint>
+<navPoint id="closure-performance" playOrder="202"><navLabel><text>Closure Performance</text></navLabel><content src="ch14.xhtml#closure-performance"/></navPoint>
+<navPoint id="closures-and-safety" playOrder="203"><navLabel><text>Closures and Safety</text></navLabel><content src="ch14.xhtml#closures-and-safety"/><navPoint id="closures-that-kill" playOrder="204"><navLabel><text>Closures That Kill</text></navLabel><content src="ch14.xhtml#closures-that-kill"/></navPoint>
+<navPoint id="fnonce" playOrder="205"><navLabel><text>FnOnce</text></navLabel><content src="ch14.xhtml#fnonce"/></navPoint>
+<navPoint id="fnmut" playOrder="206"><navLabel><text>FnMut</text></navLabel><content src="ch14.xhtml#fnmut"/></navPoint>
+</navPoint>
+<navPoint id="callbacks" playOrder="207"><navLabel><text>Callbacks</text></navLabel><content src="ch14.xhtml#callbacks"/></navPoint>
+<navPoint id="using-closures-effectively" playOrder="208"><navLabel><text>Using Closures Effectively</text></navLabel><content src="ch14.xhtml#using-closures-effectively"/></navPoint>
+</navPoint>
+<navPoint id="iterators" playOrder="209"><navLabel><text>15. Iterators</text></navLabel><content src="ch15.xhtml#iterators"/><navPoint id="the-iterator-and-intoiterator-traits" playOrder="210"><navLabel><text>The Iterator and IntoIterator Traits</text></navLabel><content src="ch15.xhtml#the-iterator-and-intoiterator-traits"/></navPoint>
+<navPoint id="creating-iterators" playOrder="211"><navLabel><text>Creating Iterators</text></navLabel><content src="ch15.xhtml#creating-iterators"/><navPoint id="iter-and-iter_mut-methods" playOrder="212"><navLabel><text>iter and iter_mut Methods</text></navLabel><content src="ch15.xhtml#iter-and-iter_mut-methods"/></navPoint>
+<navPoint id="intoiterator-implementations" playOrder="213"><navLabel><text>IntoIterator Implementations</text></navLabel><content src="ch15.xhtml#intoiterator-implementations"/></navPoint>
+<navPoint id="drain-methods" playOrder="214"><navLabel><text>drain Methods</text></navLabel><content src="ch15.xhtml#drain-methods"/></navPoint>
+<navPoint id="other-iterator-sources" playOrder="215"><navLabel><text>Other Iterator Sources</text></navLabel><content src="ch15.xhtml#other-iterator-sources"/></navPoint>
+</navPoint>
+<navPoint id="iterator-adapters" playOrder="216"><navLabel><text>Iterator Adapters</text></navLabel><content src="ch15.xhtml#iterator-adapters"/><navPoint id="map-and-filter" playOrder="217"><navLabel><text>map and filter</text></navLabel><content src="ch15.xhtml#map-and-filter"/></navPoint>
+<navPoint id="filter_map-and-flat_map" playOrder="218"><navLabel><text>filter_map and flat_map</text></navLabel><content src="ch15.xhtml#filter_map-and-flat_map"/></navPoint>
+<navPoint id="scan" playOrder="219"><navLabel><text>scan</text></navLabel><content src="ch15.xhtml#scan"/></navPoint>
+<navPoint id="take-and-take_while" playOrder="220"><navLabel><text>take and take_while</text></navLabel><content src="ch15.xhtml#take-and-take_while"/></navPoint>
+<navPoint id="skip-and-skip_while" playOrder="221"><navLabel><text>skip and skip_while</text></navLabel><content src="ch15.xhtml#skip-and-skip_while"/></navPoint>
+<navPoint id="peekable" playOrder="222"><navLabel><text>peekable</text></navLabel><content src="ch15.xhtml#peekable"/></navPoint>
+<navPoint id="fuse" playOrder="223"><navLabel><text>fuse</text></navLabel><content src="ch15.xhtml#fuse"/></navPoint>
+<navPoint id="reversible-iterators-and-rev" playOrder="224"><navLabel><text>Reversible Iterators and rev</text></navLabel><content src="ch15.xhtml#reversible-iterators-and-rev"/></navPoint>
+<navPoint id="inspect" playOrder="225"><navLabel><text>inspect</text></navLabel><content src="ch15.xhtml#inspect"/></navPoint>
+<navPoint id="chain" playOrder="226"><navLabel><text>chain</text></navLabel><content src="ch15.xhtml#chain"/></navPoint>
+<navPoint id="enumerate" playOrder="227"><navLabel><text>enumerate</text></navLabel><content src="ch15.xhtml#enumerate"/></navPoint>
+<navPoint id="zip" playOrder="228"><navLabel><text>zip</text></navLabel><content src="ch15.xhtml#zip"/></navPoint>
+<navPoint id="by_ref" playOrder="229"><navLabel><text>by_ref</text></navLabel><content src="ch15.xhtml#by_ref"/></navPoint>
+<navPoint id="cloned" playOrder="230"><navLabel><text>cloned</text></navLabel><content src="ch15.xhtml#cloned"/></navPoint>
+<navPoint id="cycle" playOrder="231"><navLabel><text>cycle</text></navLabel><content src="ch15.xhtml#cycle"/></navPoint>
+</navPoint>
+<navPoint id="consuming-iterators" playOrder="232"><navLabel><text>Consuming Iterators</text></navLabel><content src="ch15.xhtml#consuming-iterators"/><navPoint id="simple-accumulation-count-sum-product" playOrder="233"><navLabel><text>Simple Accumulation: count, sum, product</text></navLabel><content src="ch15.xhtml#simple-accumulation-count-sum-product"/></navPoint>
+<navPoint id="max-min" playOrder="234"><navLabel><text>max, min</text></navLabel><content src="ch15.xhtml#max-min"/></navPoint>
+<navPoint id="max_by-min_by" playOrder="235"><navLabel><text>max_by, min_by</text></navLabel><content src="ch15.xhtml#max_by-min_by"/></navPoint>
+<navPoint id="max_by_key-min_by_key" playOrder="236"><navLabel><text>max_by_key, min_by_key</text></navLabel><content src="ch15.xhtml#max_by_key-min_by_key"/></navPoint>
+<navPoint id="comparing-item-sequences" playOrder="237"><navLabel><text>Comparing Item Sequences</text></navLabel><content src="ch15.xhtml#comparing-item-sequences"/></navPoint>
+<navPoint id="any-and-all" playOrder="238"><navLabel><text>any and all</text></navLabel><content src="ch15.xhtml#any-and-all"/></navPoint>
+<navPoint id="position-rposition-and-exactsizeiterator" playOrder="239"><navLabel><text>position, rposition, and ExactSizeIterator</text></navLabel><content src="ch15.xhtml#position-rposition-and-exactsizeiterator"/></navPoint>
+<navPoint id="fold" playOrder="240"><navLabel><text>fold</text></navLabel><content src="ch15.xhtml#fold"/></navPoint>
+<navPoint id="nth" playOrder="241"><navLabel><text>nth</text></navLabel><content src="ch15.xhtml#nth"/></navPoint>
+<navPoint id="last" playOrder="242"><navLabel><text>last</text></navLabel><content src="ch15.xhtml#last"/></navPoint>
+<navPoint id="find" playOrder="243"><navLabel><text>find</text></navLabel><content src="ch15.xhtml#find"/></navPoint>
+<navPoint id="building-collections-collect-and-fromiterator" playOrder="244"><navLabel><text>Building Collections: collect and FromIterator</text></navLabel><content src="ch15.xhtml#building-collections-collect-and-fromiterator"/></navPoint>
+<navPoint id="the-extend-trait" playOrder="245"><navLabel><text>The Extend Trait</text></navLabel><content src="ch15.xhtml#the-extend-trait"/></navPoint>
+<navPoint id="partition" playOrder="246"><navLabel><text>partition</text></navLabel><content src="ch15.xhtml#partition"/></navPoint>
+</navPoint>
+<navPoint id="implementing-your-own-iterators" playOrder="247"><navLabel><text>Implementing Your Own Iterators</text></navLabel><content src="ch15.xhtml#implementing-your-own-iterators"/></navPoint>
+</navPoint>
+<navPoint id="collections" playOrder="248"><navLabel><text>16. Collections</text></navLabel><content src="ch16.xhtml#collections"/><navPoint id="overview" playOrder="249"><navLabel><text>Overview</text></navLabel><content src="ch16.xhtml#overview"/></navPoint>
+<navPoint id="vect" playOrder="250"><navLabel><text>Vec&lt;T&gt;</text></navLabel><content src="ch16.xhtml#vect"/><navPoint id="accessing-elements" playOrder="251"><navLabel><text>Accessing Elements</text></navLabel><content src="ch16.xhtml#accessing-elements"/></navPoint>
+<navPoint id="slice-iteration" playOrder="252"><navLabel><text>Iteration</text></navLabel><content src="ch16.xhtml#slice-iteration"/></navPoint>
+<navPoint id="growing-and-shrinking-vectors" playOrder="253"><navLabel><text>Growing and Shrinking Vectors</text></navLabel><content src="ch16.xhtml#growing-and-shrinking-vectors"/></navPoint>
+<navPoint id="joining" playOrder="254"><navLabel><text>Joining</text></navLabel><content src="ch16.xhtml#joining"/></navPoint>
+<navPoint id="splitting" playOrder="255"><navLabel><text>Splitting</text></navLabel><content src="ch16.xhtml#splitting"/></navPoint>
+<navPoint id="swapping" playOrder="256"><navLabel><text>Swapping</text></navLabel><content src="ch16.xhtml#swapping"/></navPoint>
+<navPoint id="sorting-and-searching" playOrder="257"><navLabel><text>Sorting and Searching</text></navLabel><content src="ch16.xhtml#sorting-and-searching"/></navPoint>
+<navPoint id="comparing-slices" playOrder="258"><navLabel><text>Comparing Slices</text></navLabel><content src="ch16.xhtml#comparing-slices"/></navPoint>
+<navPoint id="random-elements" playOrder="259"><navLabel><text>Random Elements</text></navLabel><content src="ch16.xhtml#random-elements"/></navPoint>
+<navPoint id="rust-rules-out-invalidation-errors" playOrder="260"><navLabel><text>Rust Rules Out Invalidation Errors</text></navLabel><content src="ch16.xhtml#rust-rules-out-invalidation-errors"/></navPoint>
+</navPoint>
+<navPoint id="vecdequet" playOrder="261"><navLabel><text>VecDeque&lt;T&gt;</text></navLabel><content src="ch16.xhtml#vecdequet"/></navPoint>
+<navPoint id="linkedlistt" playOrder="262"><navLabel><text>LinkedList&lt;T&gt;</text></navLabel><content src="ch16.xhtml#linkedlistt"/></navPoint>
+<navPoint id="binaryheapt" playOrder="263"><navLabel><text>BinaryHeap&lt;T&gt;</text></navLabel><content src="ch16.xhtml#binaryheapt"/></navPoint>
+<navPoint id="hashmapk-v-and-btreemapk-v" playOrder="264"><navLabel><text>HashMap&lt;K, V&gt; and BTreeMap&lt;K, V&gt;</text></navLabel><content src="ch16.xhtml#hashmapk-v-and-btreemapk-v"/><navPoint id="entries" playOrder="265"><navLabel><text>Entries</text></navLabel><content src="ch16.xhtml#entries"/></navPoint>
+<navPoint id="map-iteration" playOrder="266"><navLabel><text>Map Iteration</text></navLabel><content src="ch16.xhtml#map-iteration"/></navPoint>
+</navPoint>
+<navPoint id="hashsett-and-btreesett" playOrder="267"><navLabel><text>HashSet&lt;T&gt; and BTreeSet&lt;T&gt;</text></navLabel><content src="ch16.xhtml#hashsett-and-btreesett"/><navPoint id="set-iteration" playOrder="268"><navLabel><text>Set Iteration</text></navLabel><content src="ch16.xhtml#set-iteration"/></navPoint>
+<navPoint id="when-equal-values-are-different" playOrder="269"><navLabel><text>When Equal Values Are Different</text></navLabel><content src="ch16.xhtml#when-equal-values-are-different"/></navPoint>
+<navPoint id="whole-set-operations" playOrder="270"><navLabel><text>Whole-Set Operations</text></navLabel><content src="ch16.xhtml#whole-set-operations"/></navPoint>
+</navPoint>
+<navPoint id="hashing" playOrder="271"><navLabel><text>Hashing</text></navLabel><content src="ch16.xhtml#hashing"/><navPoint id="using-a-custom-hashing-algorithm" playOrder="272"><navLabel><text>Using a Custom Hashing Algorithm</text></navLabel><content src="ch16.xhtml#using-a-custom-hashing-algorithm"/></navPoint>
+</navPoint>
+<navPoint id="beyond-the-standard-collections" playOrder="273"><navLabel><text>Beyond the Standard Collections</text></navLabel><content src="ch16.xhtml#beyond-the-standard-collections"/></navPoint>
+</navPoint>
+<navPoint id="strings-and-text" playOrder="274"><navLabel><text>17. Strings and Text</text></navLabel><content src="ch17.xhtml#strings-and-text"/><navPoint id="some-unicode-background" playOrder="275"><navLabel><text>Some Unicode Background</text></navLabel><content src="ch17.xhtml#some-unicode-background"/><navPoint id="ascii-latin-1-and-unicode" playOrder="276"><navLabel><text>ASCII, Latin-1, and Unicode</text></navLabel><content src="ch17.xhtml#ascii-latin-1-and-unicode"/></navPoint>
+<navPoint id="utf-8" playOrder="277"><navLabel><text>UTF-8</text></navLabel><content src="ch17.xhtml#utf-8"/></navPoint>
+<navPoint id="text-directionality" playOrder="278"><navLabel><text>Text Directionality</text></navLabel><content src="ch17.xhtml#text-directionality"/></navPoint>
+</navPoint>
+<navPoint id="characters-char" playOrder="279"><navLabel><text>Characters (char)</text></navLabel><content src="ch17.xhtml#characters-char"/><navPoint id="classifying-characters" playOrder="280"><navLabel><text>Classifying Characters</text></navLabel><content src="ch17.xhtml#classifying-characters"/></navPoint>
+<navPoint id="handling-digits" playOrder="281"><navLabel><text>Handling Digits</text></navLabel><content src="ch17.xhtml#handling-digits"/></navPoint>
+<navPoint id="case-conversion-for-characters" playOrder="282"><navLabel><text>Case Conversion for Characters</text></navLabel><content src="ch17.xhtml#case-conversion-for-characters"/></navPoint>
+<navPoint id="conversions-to-and-from-integers" playOrder="283"><navLabel><text>Conversions to and from Integers</text></navLabel><content src="ch17.xhtml#conversions-to-and-from-integers"/></navPoint>
+</navPoint>
+<navPoint id="string-and-str" playOrder="284"><navLabel><text>String and str</text></navLabel><content src="ch17.xhtml#string-and-str"/><navPoint id="creating-string-values" playOrder="285"><navLabel><text>Creating String Values</text></navLabel><content src="ch17.xhtml#creating-string-values"/></navPoint>
+<navPoint id="simple-inspection" playOrder="286"><navLabel><text>Simple Inspection</text></navLabel><content src="ch17.xhtml#simple-inspection"/></navPoint>
+<navPoint id="appending-and-inserting-text" playOrder="287"><navLabel><text>Appending and Inserting Text</text></navLabel><content src="ch17.xhtml#appending-and-inserting-text"/></navPoint>
+<navPoint id="removing-text" playOrder="288"><navLabel><text>Removing Text</text></navLabel><content src="ch17.xhtml#removing-text"/></navPoint>
+<navPoint id="conventions-for-searching-and-iterating" playOrder="289"><navLabel><text>Conventions for Searching and Iterating</text></navLabel><content src="ch17.xhtml#conventions-for-searching-and-iterating"/></navPoint>
+<navPoint id="patterns-for-searching-text" playOrder="290"><navLabel><text>Patterns for Searching Text</text></navLabel><content src="ch17.xhtml#patterns-for-searching-text"/></navPoint>
+<navPoint id="searching-and-replacing" playOrder="291"><navLabel><text>Searching and Replacing</text></navLabel><content src="ch17.xhtml#searching-and-replacing"/></navPoint>
+<navPoint id="iterating-over-text" playOrder="292"><navLabel><text>Iterating over Text</text></navLabel><content src="ch17.xhtml#iterating-over-text"/></navPoint>
+<navPoint id="trimming" playOrder="293"><navLabel><text>Trimming</text></navLabel><content src="ch17.xhtml#trimming"/></navPoint>
+<navPoint id="case-conversion-for-strings" playOrder="294"><navLabel><text>Case Conversion for Strings</text></navLabel><content src="ch17.xhtml#case-conversion-for-strings"/></navPoint>
+<navPoint id="parsing-other-types-from-strings" playOrder="295"><navLabel><text>Parsing Other Types from Strings</text></navLabel><content src="ch17.xhtml#parsing-other-types-from-strings"/></navPoint>
+<navPoint id="converting-other-types-to-strings" playOrder="296"><navLabel><text>Converting Other Types to Strings</text></navLabel><content src="ch17.xhtml#converting-other-types-to-strings"/></navPoint>
+<navPoint id="borrowing-as-other-text-like-types" playOrder="297"><navLabel><text>Borrowing as Other Text-Like Types</text></navLabel><content src="ch17.xhtml#borrowing-as-other-text-like-types"/></navPoint>
+<navPoint id="accessing-text-as-utf-8" playOrder="298"><navLabel><text>Accessing Text as UTF-8</text></navLabel><content src="ch17.xhtml#accessing-text-as-utf-8"/></navPoint>
+<navPoint id="producing-text-from-utf-8-data" playOrder="299"><navLabel><text>Producing Text from UTF-8 Data</text></navLabel><content src="ch17.xhtml#producing-text-from-utf-8-data"/></navPoint>
+<navPoint id="putting-off-allocation" playOrder="300"><navLabel><text>Putting Off Allocation</text></navLabel><content src="ch17.xhtml#putting-off-allocation"/></navPoint>
+<navPoint id="strings-as-generic-collections" playOrder="301"><navLabel><text>Strings as Generic Collections</text></navLabel><content src="ch17.xhtml#strings-as-generic-collections"/></navPoint>
+</navPoint>
+<navPoint id="formatting-values" playOrder="302"><navLabel><text>Formatting Values</text></navLabel><content src="ch17.xhtml#formatting-values"/><navPoint id="formatting-text-values" playOrder="303"><navLabel><text>Formatting Text Values</text></navLabel><content src="ch17.xhtml#formatting-text-values"/></navPoint>
+<navPoint id="formatting-numbers" playOrder="304"><navLabel><text>Formatting Numbers</text></navLabel><content src="ch17.xhtml#formatting-numbers"/></navPoint>
+<navPoint id="formatting-other-types" playOrder="305"><navLabel><text>Formatting Other Types</text></navLabel><content src="ch17.xhtml#formatting-other-types"/></navPoint>
+<navPoint id="formatting-values-for-debugging" playOrder="306"><navLabel><text>Formatting Values for Debugging</text></navLabel><content src="ch17.xhtml#formatting-values-for-debugging"/></navPoint>
+<navPoint id="formatting-pointers-for-debugging" playOrder="307"><navLabel><text>Formatting Pointers for Debugging</text></navLabel><content src="ch17.xhtml#formatting-pointers-for-debugging"/></navPoint>
+<navPoint id="referring-to-arguments-by-index-or-name" playOrder="308"><navLabel><text>Referring to Arguments by Index or Name</text></navLabel><content src="ch17.xhtml#referring-to-arguments-by-index-or-name"/></navPoint>
+<navPoint id="dynamic-widths-and-precisions" playOrder="309"><navLabel><text>Dynamic Widths and Precisions</text></navLabel><content src="ch17.xhtml#dynamic-widths-and-precisions"/></navPoint>
+<navPoint id="formatting-your-own-types" playOrder="310"><navLabel><text>Formatting Your Own Types</text></navLabel><content src="ch17.xhtml#formatting-your-own-types"/></navPoint>
+<navPoint id="using-the-formatting-language-in-your-own-code" playOrder="311"><navLabel><text>Using the Formatting Language in Your Own Code</text></navLabel><content src="ch17.xhtml#using-the-formatting-language-in-your-own-code"/></navPoint>
+</navPoint>
+<navPoint id="regular-expressions" playOrder="312"><navLabel><text>Regular Expressions</text></navLabel><content src="ch17.xhtml#regular-expressions"/><navPoint id="basic-regex-use" playOrder="313"><navLabel><text>Basic Regex Use</text></navLabel><content src="ch17.xhtml#basic-regex-use"/></navPoint>
+<navPoint id="building-regex-values-lazily" playOrder="314"><navLabel><text>Building Regex Values Lazily</text></navLabel><content src="ch17.xhtml#building-regex-values-lazily"/></navPoint>
+</navPoint>
+<navPoint id="normalization" playOrder="315"><navLabel><text>Normalization</text></navLabel><content src="ch17.xhtml#normalization"/><navPoint id="normalization-forms" playOrder="316"><navLabel><text>Normalization Forms</text></navLabel><content src="ch17.xhtml#normalization-forms"/></navPoint>
+<navPoint id="the-unicode-normalization-crate" playOrder="317"><navLabel><text>The unicode-normalization Crate</text></navLabel><content src="ch17.xhtml#the-unicode-normalization-crate"/></navPoint>
+</navPoint>
+</navPoint>
+<navPoint id="input-and-output" playOrder="318"><navLabel><text>18. Input and Output</text></navLabel><content src="ch18.xhtml#input-and-output"/><navPoint id="readers-and-writers" playOrder="319"><navLabel><text>Readers and Writers</text></navLabel><content src="ch18.xhtml#readers-and-writers"/><navPoint id="readers" playOrder="320"><navLabel><text>Readers</text></navLabel><content src="ch18.xhtml#readers"/></navPoint>
+<navPoint id="buffered-readers" playOrder="321"><navLabel><text>Buffered Readers</text></navLabel><content src="ch18.xhtml#buffered-readers"/></navPoint>
+<navPoint id="reading-lines" playOrder="322"><navLabel><text>Reading Lines</text></navLabel><content src="ch18.xhtml#reading-lines"/></navPoint>
+<navPoint id="collecting-lines" playOrder="323"><navLabel><text>Collecting Lines</text></navLabel><content src="ch18.xhtml#collecting-lines"/></navPoint>
+<navPoint id="writers" playOrder="324"><navLabel><text>Writers</text></navLabel><content src="ch18.xhtml#writers"/></navPoint>
+<navPoint id="files" playOrder="325"><navLabel><text>Files</text></navLabel><content src="ch18.xhtml#files"/></navPoint>
+<navPoint id="seeking" playOrder="326"><navLabel><text>Seeking</text></navLabel><content src="ch18.xhtml#seeking"/></navPoint>
+<navPoint id="other-reader-and-writer-types" playOrder="327"><navLabel><text>Other Reader and Writer Types</text></navLabel><content src="ch18.xhtml#other-reader-and-writer-types"/></navPoint>
+<navPoint id="binary-data-compression-and-serialization" playOrder="328"><navLabel><text>Binary Data, Compression, and Serialization</text></navLabel><content src="ch18.xhtml#binary-data-compression-and-serialization"/></navPoint>
+</navPoint>
+<navPoint id="files-and-directories" playOrder="329"><navLabel><text>Files and Directories</text></navLabel><content src="ch18.xhtml#files-and-directories"/><navPoint id="osstr-and-path" playOrder="330"><navLabel><text>OsStr and Path</text></navLabel><content src="ch18.xhtml#osstr-and-path"/></navPoint>
+<navPoint id="path-and-pathbuf-methods" playOrder="331"><navLabel><text>Path and PathBuf Methods</text></navLabel><content src="ch18.xhtml#path-and-pathbuf-methods"/></navPoint>
+<navPoint id="filesystem-access-functions" playOrder="332"><navLabel><text>Filesystem Access Functions</text></navLabel><content src="ch18.xhtml#filesystem-access-functions"/></navPoint>
+<navPoint id="reading-directories" playOrder="333"><navLabel><text>Reading Directories</text></navLabel><content src="ch18.xhtml#reading-directories"/></navPoint>
+<navPoint id="platform-specific-features" playOrder="334"><navLabel><text>Platform-Specific Features</text></navLabel><content src="ch18.xhtml#platform-specific-features"/></navPoint>
+</navPoint>
+<navPoint id="networking" playOrder="335"><navLabel><text>Networking</text></navLabel><content src="ch18.xhtml#networking"/></navPoint>
+</navPoint>
+<navPoint id="concurrency" playOrder="336"><navLabel><text>19. Concurrency</text></navLabel><content src="ch19.xhtml#concurrency"/><navPoint id="fork-join-parallelism" playOrder="337"><navLabel><text>Fork-Join Parallelism</text></navLabel><content src="ch19.xhtml#fork-join-parallelism"/><navPoint id="spawn-and-join" playOrder="338"><navLabel><text>spawn and join</text></navLabel><content src="ch19.xhtml#spawn-and-join"/></navPoint>
+<navPoint id="error-handling-across-threads" playOrder="339"><navLabel><text>Error Handling Across Threads</text></navLabel><content src="ch19.xhtml#error-handling-across-threads"/></navPoint>
+<navPoint id="sharing-immutable-data-across-threads" playOrder="340"><navLabel><text>Sharing Immutable Data Across Threads</text></navLabel><content src="ch19.xhtml#sharing-immutable-data-across-threads"/></navPoint>
+<navPoint id="rayon" playOrder="341"><navLabel><text>Rayon</text></navLabel><content src="ch19.xhtml#rayon"/></navPoint>
+<navPoint id="revisiting-the-mandelbrot-set" playOrder="342"><navLabel><text>Revisiting the Mandelbrot Set</text></navLabel><content src="ch19.xhtml#revisiting-the-mandelbrot-set"/></navPoint>
+</navPoint>
+<navPoint id="channels" playOrder="343"><navLabel><text>Channels</text></navLabel><content src="ch19.xhtml#channels"/><navPoint id="sending-values" playOrder="344"><navLabel><text>Sending Values</text></navLabel><content src="ch19.xhtml#sending-values"/></navPoint>
+<navPoint id="receiving-values" playOrder="345"><navLabel><text>Receiving Values</text></navLabel><content src="ch19.xhtml#receiving-values"/></navPoint>
+<navPoint id="running-the-pipeline" playOrder="346"><navLabel><text>Running the Pipeline</text></navLabel><content src="ch19.xhtml#running-the-pipeline"/></navPoint>
+<navPoint id="channel-features-and-performance" playOrder="347"><navLabel><text>Channel Features and Performance</text></navLabel><content src="ch19.xhtml#channel-features-and-performance"/></navPoint>
+<navPoint id="thread-safety-send-and-sync" playOrder="348"><navLabel><text>Thread Safety: Send and Sync</text></navLabel><content src="ch19.xhtml#thread-safety-send-and-sync"/></navPoint>
+<navPoint id="piping-almost-any-iterator-to-a-channel" playOrder="349"><navLabel><text>Piping Almost Any Iterator to a Channel</text></navLabel><content src="ch19.xhtml#piping-almost-any-iterator-to-a-channel"/></navPoint>
+<navPoint id="beyond-pipelines" playOrder="350"><navLabel><text>Beyond Pipelines</text></navLabel><content src="ch19.xhtml#beyond-pipelines"/></navPoint>
+</navPoint>
+<navPoint id="shared-mutable-state" playOrder="351"><navLabel><text>Shared Mutable State</text></navLabel><content src="ch19.xhtml#shared-mutable-state"/><navPoint id="what-is-a-mutex" playOrder="352"><navLabel><text>What Is a Mutex?</text></navLabel><content src="ch19.xhtml#what-is-a-mutex"/></navPoint>
+<navPoint id="mutex-in-rust" playOrder="353"><navLabel><text>Mutex&lt;T&gt;</text></navLabel><content src="ch19.xhtml#mutex-in-rust"/></navPoint>
+<navPoint id="mut-and-mutex" playOrder="354"><navLabel><text>mut and Mutex</text></navLabel><content src="ch19.xhtml#mut-and-mutex"/></navPoint>
+<navPoint id="why-mutexes-are-not-always-a-good-idea" playOrder="355"><navLabel><text>Why Mutexes Are Not Always a Good Idea</text></navLabel><content src="ch19.xhtml#why-mutexes-are-not-always-a-good-idea"/></navPoint>
+<navPoint id="deadlock" playOrder="356"><navLabel><text>Deadlock</text></navLabel><content src="ch19.xhtml#deadlock"/></navPoint>
+<navPoint id="poisoned-mutexes" playOrder="357"><navLabel><text>Poisoned Mutexes</text></navLabel><content src="ch19.xhtml#poisoned-mutexes"/></navPoint>
+<navPoint id="multi-producer-channels-using-mutex" playOrder="358"><navLabel><text>Multi-Consumer Channels Using Mutexes</text></navLabel><content src="ch19.xhtml#multi-producer-channels-using-mutex"/></navPoint>
+<navPoint id="read-write-locks-rwlock" playOrder="359"><navLabel><text>Read/Write Locks (RwLock&lt;T&gt;)</text></navLabel><content src="ch19.xhtml#read-write-locks-rwlock"/></navPoint>
+<navPoint id="condition-variables-condvar" playOrder="360"><navLabel><text>Condition Variables (Condvar)</text></navLabel><content src="ch19.xhtml#condition-variables-condvar"/></navPoint>
+<navPoint id="atomics" playOrder="361"><navLabel><text>Atomics</text></navLabel><content src="ch19.xhtml#atomics"/></navPoint>
+<navPoint id="global-variables" playOrder="362"><navLabel><text>Global Variables</text></navLabel><content src="ch19.xhtml#global-variables"/></navPoint>
+</navPoint>
+<navPoint id="what-hacking-concurrent-code-in-rust-is-like" playOrder="363"><navLabel><text>What Hacking Concurrent Code in Rust Is Like</text></navLabel><content src="ch19.xhtml#what-hacking-concurrent-code-in-rust-is-like"/></navPoint>
+</navPoint>
+<navPoint id="macros" playOrder="364"><navLabel><text>20. Macros</text></navLabel><content src="ch20.xhtml#macros"/><navPoint id="macro-basics" playOrder="365"><navLabel><text>Macro Basics</text></navLabel><content src="ch20.xhtml#macro-basics"/><navPoint id="basics-of-macro-expansion" playOrder="366"><navLabel><text>Basics of Macro Expansion</text></navLabel><content src="ch20.xhtml#basics-of-macro-expansion"/></navPoint>
+<navPoint id="unintended-consequences" playOrder="367"><navLabel><text>Unintended Consequences</text></navLabel><content src="ch20.xhtml#unintended-consequences"/></navPoint>
+<navPoint id="repetition" playOrder="368"><navLabel><text>Repetition</text></navLabel><content src="ch20.xhtml#repetition"/></navPoint>
+</navPoint>
+<navPoint id="built-in-macros" playOrder="369"><navLabel><text>Built-In Macros</text></navLabel><content src="ch20.xhtml#built-in-macros"/></navPoint>
+<navPoint id="debugging-macros" playOrder="370"><navLabel><text>Debugging Macros</text></navLabel><content src="ch20.xhtml#debugging-macros"/></navPoint>
+<navPoint id="the-json-macro" playOrder="371"><navLabel><text>The json! Macro</text></navLabel><content src="ch20.xhtml#the-json-macro"/><navPoint id="fragment-types" playOrder="372"><navLabel><text>Fragment Types</text></navLabel><content src="ch20.xhtml#fragment-types"/></navPoint>
+<navPoint id="recursion-in-macros" playOrder="373"><navLabel><text>Recursion in Macros</text></navLabel><content src="ch20.xhtml#recursion-in-macros"/></navPoint>
+<navPoint id="using-traits-with-macros" playOrder="374"><navLabel><text>Using Traits with Macros</text></navLabel><content src="ch20.xhtml#using-traits-with-macros"/></navPoint>
+<navPoint id="scoping-and-hygiene" playOrder="375"><navLabel><text>Scoping and Hygiene</text></navLabel><content src="ch20.xhtml#scoping-and-hygiene"/></navPoint>
+<navPoint id="importing-and-exporting-macros" playOrder="376"><navLabel><text>Importing and Exporting Macros</text></navLabel><content src="ch20.xhtml#importing-and-exporting-macros"/></navPoint>
+</navPoint>
+<navPoint id="avoiding-syntax-errors-during-matching" playOrder="377"><navLabel><text>Avoiding Syntax Errors During Matching</text></navLabel><content src="ch20.xhtml#avoiding-syntax-errors-during-matching"/></navPoint>
+<navPoint id="beyond-macro_rules" playOrder="378"><navLabel><text>Beyond macro_rules!</text></navLabel><content src="ch20.xhtml#beyond-macro_rules"/></navPoint>
+</navPoint>
+<navPoint id="unsafe-code" playOrder="379"><navLabel><text>21. Unsafe Code</text></navLabel><content src="ch21.xhtml#unsafe-code"/><navPoint id="unsafe-from-what" playOrder="380"><navLabel><text>Unsafe from What?</text></navLabel><content src="ch21.xhtml#unsafe-from-what"/></navPoint>
+<navPoint id="unsafe-blocks" playOrder="381"><navLabel><text>Unsafe Blocks</text></navLabel><content src="ch21.xhtml#unsafe-blocks"/><navPoint id="example-an-efficient-ascii-string-type" playOrder="382"><navLabel><text>Example: An Efficient ASCII String Type</text></navLabel><content src="ch21.xhtml#example-an-efficient-ascii-string-type"/></navPoint>
+</navPoint>
+<navPoint id="unsafe-functions" playOrder="383"><navLabel><text>Unsafe Functions</text></navLabel><content src="ch21.xhtml#unsafe-functions"/></navPoint>
+<navPoint id="unsafe-block-or-unsafe-function" playOrder="384"><navLabel><text>Unsafe Block or Unsafe Function?</text></navLabel><content src="ch21.xhtml#unsafe-block-or-unsafe-function"/></navPoint>
+<navPoint id="undefined-behavior" playOrder="385"><navLabel><text>Undefined Behavior</text></navLabel><content src="ch21.xhtml#undefined-behavior"/></navPoint>
+<navPoint id="unsafe-traits" playOrder="386"><navLabel><text>Unsafe Traits</text></navLabel><content src="ch21.xhtml#unsafe-traits"/></navPoint>
+<navPoint id="unsafe-code-raw-pointers" playOrder="387"><navLabel><text>Raw Pointers</text></navLabel><content src="ch21.xhtml#unsafe-code-raw-pointers"/><navPoint id="dereferencing-raw-pointers-safely" playOrder="388"><navLabel><text>Dereferencing Raw Pointers Safely</text></navLabel><content src="ch21.xhtml#dereferencing-raw-pointers-safely"/></navPoint>
+<navPoint id="example-refwithflag" playOrder="389"><navLabel><text>Example: RefWithFlag</text></navLabel><content src="ch21.xhtml#example-refwithflag"/></navPoint>
+<navPoint id="nullable-pointers" playOrder="390"><navLabel><text>Nullable Pointers</text></navLabel><content src="ch21.xhtml#nullable-pointers"/></navPoint>
+<navPoint id="type-sizes-and-alignments" playOrder="391"><navLabel><text>Type Sizes and Alignments</text></navLabel><content src="ch21.xhtml#type-sizes-and-alignments"/></navPoint>
+<navPoint id="pointer-arithmetic" playOrder="392"><navLabel><text>Pointer Arithmetic</text></navLabel><content src="ch21.xhtml#pointer-arithmetic"/></navPoint>
+<navPoint id="moving-into-and-out-of-memory" playOrder="393"><navLabel><text>Moving into and out of Memory</text></navLabel><content src="ch21.xhtml#moving-into-and-out-of-memory"/></navPoint>
+<navPoint id="example-gapbuffer" playOrder="394"><navLabel><text>Example: GapBuffer</text></navLabel><content src="ch21.xhtml#example-gapbuffer"/></navPoint>
+<navPoint id="panic-safety-in-unsafe-code" playOrder="395"><navLabel><text>Panic Safety in Unsafe Code</text></navLabel><content src="ch21.xhtml#panic-safety-in-unsafe-code"/></navPoint>
+</navPoint>
+<navPoint id="foreign-functions-calling-c-and-c-from-rust" playOrder="396"><navLabel><text>Foreign Functions: Calling C and C++ from Rust</text></navLabel><content src="ch21.xhtml#foreign-functions-calling-c-and-c-from-rust"/><navPoint id="finding-common-data-representations" playOrder="397"><navLabel><text>Finding Common Data Representations</text></navLabel><content src="ch21.xhtml#finding-common-data-representations"/></navPoint>
+<navPoint id="declaring-foreign-functions-and-variables" playOrder="398"><navLabel><text>Declaring Foreign Functions and Variables</text></navLabel><content src="ch21.xhtml#declaring-foreign-functions-and-variables"/></navPoint>
+<navPoint id="using-functions-from-libraries" playOrder="399"><navLabel><text>Using Functions from Libraries</text></navLabel><content src="ch21.xhtml#using-functions-from-libraries"/></navPoint>
+<navPoint id="a-raw-interface-to-libgit2" playOrder="400"><navLabel><text>A Raw Interface to libgit2</text></navLabel><content src="ch21.xhtml#a-raw-interface-to-libgit2"/></navPoint>
+<navPoint id="a-safe-interface-to-libgit2" playOrder="401"><navLabel><text>A Safe Interface to libgit2</text></navLabel><content src="ch21.xhtml#a-safe-interface-to-libgit2"/></navPoint>
+</navPoint>
+<navPoint id="conclusion21" playOrder="402"><navLabel><text>Conclusion</text></navLabel><content src="ch21.xhtml#conclusion21"/></navPoint>
+</navPoint>
+<navPoint id="idm45251555627160" playOrder="403"><navLabel><text>Index</text></navLabel><content src="ix01.xhtml#idm45251555627160"/></navPoint>
+</navMap>
+</ncx>

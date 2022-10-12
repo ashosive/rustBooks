@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style00.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style01.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Reading a file</h1>
+                </header>
+            
+            <article>
+                
+<p>The <kbd>File</kbd> struct from <kbd>std::fs</kbd> represents a file that has been opened (it wraps a file descriptor), and gives read and/or write access to the underlying file.</p>
+<p>Since many things can go wrong when doing file I/O, explicit and proactive handling of all possible errors is certainly needed. This can be done with pattern matching, because all the <kbd>File</kbd> methods return the <kbd>std::io::Result&lt;T&gt;</kbd> type, which is an alias for <kbd>Result&lt;T, io::Error&gt;</kbd>.</p>
+<p>To open a file in read-only mode, use the static <kbd>File::open</kbd> method with a reference to its path, and match the file handler or a possible error like this:</p>
+<pre>// code from Chapter 11/code/read_file.rs: 
+use std::path::Path; 
+<strong>use std::fs::File;</strong> 
+use std::io::prelude::*; 
+use std::error::Error; 
+ 
+fn main() { 
+    let path = Path::new("hello.txt"); 
+    let display = path.display();  
+ 
+<strong>    let mut file = match File::open(&amp;path) {</strong> 
+        Ok(file) =&gt; file, 
+<strong>        Err(why) =&gt; panic!("couldn't open {}: {}", </strong><strong>display, </strong><strong>Error::description(&amp;why))</strong> 
+    }; 
+} </pre>
+<p>In the case of a failing open method (because the file does not exist or the program has no access) this prints out:</p>
+<pre><strong>thread '&lt;main&gt;' panicked at 'couldn't open hello999.txt: os error', F:\Rust\Rust book\Chapter 11 - Working with files\code\read_file.rs:11</strong></pre>
+<p>Explicitly closing files is not necessary in Rust; the <kbd>file</kbd> handle goes out of scope at the end of main or the surrounding block, causing the file to automatically close.</p>
+<p>We can read in the file in a <kbd>content</kbd> string by using the <kbd>read_to_string()</kbd> method, which again returns a <kbd>Result</kbd> value, necessitating a pattern match. In order to be able to use this, we need to do the import <kbd>use std::io::prelude::*</kbd>:</p>
+<pre> let mut content = String::new(); 
+<strong>    match file.read_to_string(&amp;mut content) {</strong> 
+        Err(why) =&gt; panic!("couldn't read {}: {}",  
+display, Error::description(&amp;why)), 
+        Ok(_) =&gt; print!("{} contains:\n{}", display, content), 
+    } </pre>
+<p>This prints out:</p>
+<pre><strong>hello.txt contains:</strong><br/><strong>"Hello Rust World!"</strong></pre>
+<p><kbd>std::io::prelude</kbd> imports common I/O traits in our code, such as <kbd>Read</kbd>, <kbd>Write</kbd>, <kbd>BufRead</kbd>, and <kbd>Seek</kbd>.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

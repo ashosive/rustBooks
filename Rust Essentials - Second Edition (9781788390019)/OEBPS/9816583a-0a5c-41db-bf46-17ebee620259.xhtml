@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style00.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style01.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Functions</h1>
+                </header>
+            
+            <article>
+                
+<p>The starting point of every Rust program is itself a function <kbd>fn</kbd> called the <kbd>main()</kbd> function, which can be further subdivided into separate functions for reuse of code or better code organization. Rust doesn't care in which order these functions are defined, but it is nice to put the function <kbd>main()</kbd> at the start of the code to get a better overview. Rust has incorporated many features of traditional functional languages; we will see examples of that in <a href="680a0457-8a2d-4196-9ef4-ddc2476dd715.xhtml"><span class="ChapterrefPACKT">Chapter 5</span></a>, <em>Higher Order Functions and Error-Handling</em>.</p>
+<p>Let's start with a basic function example:</p>
+<pre>// from Chapter 3/code/functions.rs 
+fn main() { 
+  let hero1 = "Pac Man"; 
+  let hero2 = "Riddick"; 
+  greet(hero2); 
+  greet_both(hero1, hero2); 
+} 
+ 
+fn greet(name: &amp;str) { 
+  println!("Hi mighty {}, what brings you here?", name); 
+} 
+ 
+fn greet_both(name1: &amp;str, name2: &amp;str) { 
+  greet(name1); 
+  greet(name2); 
+} </pre>
+<p>This prints out the following output:</p>
+<pre><strong>Hi mighty Riddick, what brings you here?</strong><strong>Hi mighty Pac Man, what brings you here?</strong><strong>Hi mighty Riddick, what brings you here?</strong></pre>
+<p>Like variables, functions have variable <kbd>snake_case</kbd> names that must be unique, and their parameters (which have to be typed) are separated by commas, as in this example:</p>
+<pre>name1: &amp;str, name2: &amp;str </pre>
+<p>It looks like a binding, but without the <kbd>let</kbd> binding. Forcing a type to the parameters was an excellent design decision as it documents the function for use by its caller code and allows type inference inside the function. The type here is <kbd>&amp;str</kbd> because strings are stored on the heap (see section <em>The stack and the heap</em> in <a href="4e1f4309-1ce5-4eb2-9860-99a814bdd2ea.xhtml"><span class="ChapterrefPACKT">Chapter 2</span></a>, <em>Using Variables and Types</em>).</p>
+<p>The functions above don't return anything useful (in fact, they return the unit value <kbd>()</kbd>), but, if we want a function to actually return a value, its type must be specified after an arrow <kbd>-&gt;</kbd>, as in this example:</p>
+<pre>fn increment_power(power: i32) -&gt; i32 { 
+  println!("My power is going to increase:"); 
+  power + 1 
+} 
+ 
+fn main() { 
+let power = increment_power(1); // function is called 
+println!(" I am now at power level: {}", power);} </pre>
+<p>When executed, it prints an output like the following:</p>
+<pre>    <strong>My power is going to increase:</strong>
+    <strong>I am now at power level: 2</strong></pre>
+<p>The return value of a function is the value of its last expression. Note that in order to return a value, the final expression must not end with a semicolon. What happens when you do end it with a semicolon? Try it out: in this case the unit value <kbd>()</kbd> is returned, and the compiler gives you the following error:</p>
+<pre>    <strong>error: not all control paths return a value</strong>  </pre>
+<p>We could have written the statement <kbd>return power + 1</kbd> as the last line, but that is not idiomatic code. If we wanted to return a value from the function before the last code line, we would have to write <kbd>return value;</kbd> as in the following:</p>
+<pre>if power &lt; 100 { return 999 } </pre>
+<p>If this was the last line in the function, you would write it as follows:</p>
+<pre>if power &lt; 100 { 999 } </pre>
+<p>A function can return only one value, but this isn't much of a limitation. If we have for example, three values, <kbd>a</kbd>, <kbd>b</kbd>, and <kbd>c,</kbd> to return, make one tuple <kbd>(a, b, c)</kbd> with them and return that. We will examine tuples in more detail in the next chapter.</p>
+<p>A function that never returns is called a diverging function and it has return type <kbd>!</kbd>.</p>
+<p>For example:</p>
+<pre>fn diverges() -&gt; ! { 
+    panic!("This function never returns!"); 
+} </pre>
+<p>It can be used as any type, for example to isolate exception handling, like in this example.</p>
+<p>A function can be recursive; that means that the function calls itself, like in the following example:</p>
+<pre>// from Chapter 3/code/fib_procedural.rs 
+fn main() { 
+  let ans = fib(10); 
+  println!("{}", ans); 
+} 
+ 
+fn fib(x: i64) -&gt; i64 { 
+     if x == 0 || x == 1 { return x; } 
+     fib(x - 1) + fib(x - 2) 
+} </pre>
+<p>Make sure that the recursion stops by including a base case, in this example when the function is called for <kbd>x</kbd> equal to <kbd>1</kbd> and <kbd>0</kbd>.</p>
+<p>Functions have a type, for example, the type of the function <kbd>increment_power</kbd> from the previous code snippet like:</p>
+<pre>Fn(i32) -&gt; i32 </pre>
+<p>The <kbd>fn</kbd> <span>function</span> in general denotes a function type.</p>
+<p>In Rust, you can also write a function inside another function (called a nested function), contrary to C or Java. This should only be used for small helper functions needed locally.</p>
+<p>As an exercise, try the following:</p>
+<p>Knowing that <kbd>if</kbd> can be an expression, simplify the following function:</p>
+<p> </p>
+<pre>fn verbose(x: i32) -&gt; &amp;'static str { 
+  let result: &amp;'static str; 
+  if x &lt; 10 { 
+    result = "less than 10"; 
+  } else { 
+    result = "10 or more"; 
+  } 
+  return result; 
+} </pre>
+<p>See code in <kbd>Chapter 3\exercises\ifreturn.rs</kbd>.</p>
+<p>The <kbd>static in</kbd> and <kbd>static str</kbd> variables are a so-called lifetime indication, needed here to indicate how long the function's return value will exist. The static lifetime is the longest possible lifetime, such an object stays alive throughout the entire application, and so it is available in all of its code. We'll discuss this in detail in the section <em>Lifetimes</em> in <a href="4e1f4309-1ce5-4eb2-9860-99a814bdd2ea.xhtml"><span class="ChapterrefPACKT">Chapter 6</span></a>, <em>Using Variables and Types</em>.</p>
+<p>What is wrong with this function that returns the absolute of a given number in the variable <kbd>x</kbd>?</p>
+<p> </p>
+<pre>fn abs(x: i32) -&gt; u32 { 
+   if x &gt; 0 { 
+         x 
+   } else { 
+         -x 
+   } <br/>}</pre>
+<p>Correct and test it (see the code in <kbd>Chapter 3/exercises/absolute.rs</kbd>).</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

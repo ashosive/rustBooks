@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">The interesting part</h1>
+                </header>
+            
+            <article>
+                
+<p>Let's create a default cargo project and confirm that we can emit the appropriate assembly for our machines. Doing this will be one of the important pillars of this book. Now, choose a directory on disk to place the default project and navigate there. This example will use <kbd>~/projects</kbd>, but the exact path doesn't matter. Then, generate the default project:</p>
+<pre><strong>~projects &gt; cargo new --bin hello_world
+     Created binary (application) `hello_world` project</strong></pre>
+<p>Go ahead and reward yourself with some x86 assembler:</p>
+<pre><strong>hello_world &gt; RUSTFLAGS="--emit asm" cargo build --target=x86_64-unknown-linux-gnu
+   Compiling hello_world v0.1.0 (file:///home/blt/projects/hello_world)
+       Finished dev [unoptimized + debuginfo] target(s) in 0.33 secs
+hello_world &gt; file target/x86_64-unknown-linux-gnu/debug/deps/hello_world-6000abe15b385411.s
+target/x86_64-unknown-linux-gnu/debug/deps/hello_world-6000abe15b385411.s: assembler source, ASCII text</strong></pre>
+<p>Please be aware that if your compilation of a Rust binary on OS X x86 will not run on Linux x86, and vice versa. This is due to the differences in the interfaces of the operating systems themselves. You're better off compiling on your x86 Linux machine or your x86 OS X machine and running the binaries there. That's the approach I take with the material presented in this book.</p>
+<p>That said, reward yourself with some ARMv7 assembler:</p>
+<pre><strong>hello_world &gt; RUSTFLAGS="--emit asm" cargo build --target=armv7-unknown-linux-gnueabihf
+   Compiling hello_world v0.1.0 (file:///home/blt/projects/hello_world)
+       Finished dev [unoptimized + debuginfo] target(s) in 0.45 secs
+hello_world &gt; file target/armv7-unknown-linux-gnueabihf/debug/deps/hello_world-6000abe15b385411.s
+target/armv7-unknown-linux-gnueabihf/debug/deps/hello_world-6000abe15b385411.s: assembler source, ASCII text</strong></pre>
+<p>Of course, if you want to build release versions, you need only to give <kbd>cargo</kbd> the <kbd>--release</kbd> flag:</p>
+<pre><strong>hello_world &gt; RUSTFLAGS="--emit asm" cargo build --target=armv7-unknown-linux-gnueabihf --release
+Compiling hello_world v0.1.0 (file:///home/blt/projects/hello_world)
+Finished release [optimized] target(s) in 0.45 secs
+hello_world &gt; wc -l target/armv7-unknown-linux-gnueabihf/
+debug/   release/
+hello_world &gt; wc -l target/armv7-unknown-linux-gnueabihf/*/deps/hello_world*.s
+ 1448 target/armv7-unknown-linux-gnueabihf/debug/deps/hello_world-6000abe15b385411.s
+  101 target/armv7-unknown-linux-gnueabihf/release/deps/hello_world-dd65a12bd347f015.s
+ 1549 total</strong></pre>
+<p>It's interesting—and instructive!—to compare the differences in the generated code. Notably, the release compilation will strip debugging entirely. Speaking of which, let's talk debuggers.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

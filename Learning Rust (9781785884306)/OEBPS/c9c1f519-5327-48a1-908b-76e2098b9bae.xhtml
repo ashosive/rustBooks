@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style00.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style01.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Ownership – from the beginning</h1>
+                </header>
+            
+            <article>
+                
+<p>Let's start by considering a very simple piece of code to help you understand how this works. We have seen the likes of the following plenty of times up to this point:</p>
+<pre>fn my_function() 
+{ 
+    let mypi = 3.14f32; 
+} </pre>
+<p>When <kbd>my_function</kbd> is called (it comes into scope), Rust will allocate memory on the stack to store this value. When the function ends (it goes out of scope), Rust will do an automatic cleanup to deallocate any memory used by <kbd>mypi</kbd>.</p>
+<p>A vector, or anything else that uses the heap, works in a similar way:</p>
+<pre>fn my_second_function() 
+{ 
+    let myvec = vec![1.1f32, 2.2f32, 3.14f32]; 
+} </pre>
+<p>If you recall from <a href="8fe31315-5c12-4aaa-ab08-e4c18c3919f9.xhtml"><span class="ChapterrefPACKT">Chapter 5</span></a>, <em>Remember, Remember</em>, the vector requires memory both on the heap and on the stack and can be thought of like this:</p>
+<table class="MsoTableGrid">
+<tbody>
+<tr>
+<td>
+<p>Function name</p>
+</td>
+<td>
+<p>Address</p>
+</td>
+<td>
+<p>Variable name</p>
+</td>
+<td>
+<p>Value</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><kbd>heap</kbd></p>
+</td>
+<td>
+<p><kbd>heap_posn - 1</kbd></p>
+</td>
+<td/>
+<td>
+<p><kbd>base_of_vecs</kbd></p>
+</td>
+</tr>
+<tr>
+<td/>
+<td>
+<p><kbd>heap_posn - 2</kbd></p>
+</td>
+<td/>
+<td>
+<p><kbd>Vec[1]</kbd></p>
+</td>
+</tr>
+<tr>
+<td>
+<p><kbd>my_second_function</kbd></p>
+</td>
+<td>
+<p><kbd>0</kbd></p>
+</td>
+<td>
+<p><kbd>myvec</kbd></p>
+</td>
+<td>
+<p><kbd>heap_posn - 1</kbd></p>
+</td>
+</tr>
+</tbody>
+</table>
+<p> </p>
+<p>This time, when <kbd>my_second_function</kbd> goes out of scope, not only is the position on the stack cleared, but also the contiguous locations pointed to by <kbd>myvec</kbd> on the heap.</p>
+<p>I've given two examples of variables here for a good reason—the handling is different; a vector takes a generic parameter and these are handled differently to a standard variable type.</p>
+<p>It's not quite as simple as this though, and to really understand how things work with ownership, we will really need to consider things on a basic level.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

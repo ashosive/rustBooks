@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style00.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style01.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">An epoch-based Treiber stack</h1>
+                </header>
+            
+            <article>
+                
+<p>We inspected reference counting and hazard-pointer-based Treiber stacks earlier in this chapter and will follow this approach in this section as well. Fortunately, crossbeam also ships with a Treiber stack implementation, in the crossbeam-rs/crossbeam project, which we'll examine at SHA <kbd>89bd6857cd701bff54f7a8bf47ccaa38d5022bfb</kbd>, which is the source for <kbd>crossbeam::sync::TreiberStack</kbd> is in <kbd>src/sync/treiber_stack.rs</kbd>. The preamble is almost immediately interesting:</p>
+<pre style="padding-left: 30px">use std::sync::atomic::Ordering::{Acquire, Relaxed, Release};
+use std::ptr;
+
+use epoch::{self, Atomic, Owned};</pre>
+<p>What, for instance, are <kbd>epoch::Atomic</kbd> and <kbd>epoch::Owned</kbd>? Well, we'll explore these here. Unlike the section on hazard pointers, which explored the implementation of conc in a depth-first fashion, we'll take a breadth-first approach here, more or less. The reason being, crossbeam-epoch is intricate—it's easy to get lost. Setting aside the somewhat unknown nature of <kbd>epoch::Atomic</kbd>, the <kbd>TreiberStack</kbd> and <kbd>Node</kbd> structs are similar to what we've seen in other implementations:</p>
+<pre style="padding-left: 30px">#[derive(Debug)]
+pub struct TreiberStack&lt;T&gt; {
+    head: Atomic&lt;Node&lt;T&gt;&gt;,
+}
+
+#[derive(Debug)]
+struct Node&lt;T&gt; {
+    data: T,
+    next: Atomic&lt;Node&lt;T&gt;&gt;,
+}</pre>
+<p>As is the creation of a new stack:</p>
+<pre style="padding-left: 30px">impl&lt;T&gt; TreiberStack&lt;T&gt; {
+    /// Create a new, empty stack.
+    pub fn new() -&gt; TreiberStack&lt;T&gt; {
+        TreiberStack {
+            head: Atomic::null(),
+        }
+    }</pre>
+<p>Pushing a new element also looks familiar:</p>
+<pre>    pub fn push(&amp;self, t: T) {
+        let mut n = Owned::new(Node {
+            data: t,
+            next: Atomic::null(),
+        });
+        let guard = epoch::pin();
+        loop {
+            let head = self.head.load(Relaxed, &amp;guard);
+            n.next.store(head, Relaxed);
+            match self.head.compare_and_set(head, n, Release, &amp;guard) {
+                Ok(_) =&gt; break,
+                Err(e) =&gt; n = e.new,
+            }
+        }
+    }</pre>
+<p>Except, what is <kbd>epoch::pin()</kbd>? This function <kbd>pins</kbd> the current thread, returning a <kbd>crossbeam_epoch::Guard</kbd>. Much like previous guards we've seen throughout the book, crossbeam_epoch's <kbd>Guard</kbd> protects a resource. In this case, the guard protects the pinned nature of the thread. Once the guard drops, the thread is no longer pinned. Okay, great, so what does it mean for a thread to be pinned? Recall that epoch-based reclamation works by a thread entering an epoch, doing some stuff with memory, and then potentially increasing the epoch after finishing up fiddling with memory. This process is observed in crossbeam by pinning. <kbd>Guard</kbd> in hand—implying a safe epoch has been entered—the thread is able to take a heap allocation and get a stack reference to it. Just any old heap allocation and stack reference would be unsafe, however. There's no magic here. That's where <kbd>Atomic</kbd> and <kbd>Owned</kbd> come in. They're analogs to <kbd>AtomicPtr</kbd> and <kbd>Box</kbd> from the standard library, except that the operations done on them require a reference to <kbd>crossbeam_epoch::Guard</kbd>. We saw this technique in <a href="5a332d94-37e4-4748-8920-1679b07e2880.xhtml" target="_blank">Chapter 4</a>, <em>Sync and Send<span> </span>–<span> </span>the Foundation of Rust Concurrency</em>, when discussing hopper, using the type-system to ensure that potentially thread-unsafe operations are done safely by requiring the caller to pass in a guard of some sort. Programmer error can creep in by using <kbd>AtomicPtr</kbd>, <kbd>Box</kbd>, or any non-epoch unprotected memory accesses, but these will tend to stand out.</p>
+<p>Let's look at popping an element off the stack, where we know marking memory as safe to delete will have to happen:</p>
+<pre>    pub fn try_pop(&amp;self) -&gt; Option&lt;T&gt; {
+        let guard = epoch::pin();
+        loop {
+            let head_shared = self.head.load(Acquire, &amp;guard);
+            match unsafe { head_shared.as_ref() } {
+                Some(head) =&gt; {
+                    let next = head.next.load(Relaxed, &amp;guard);
+                    if self.head
+                        .compare_and_set(head_shared, next, Release, <br/>                         &amp;guard)
+                        .is_ok()
+                    {
+                        unsafe {
+                            guard.defer(move || <br/>                            head_shared.into_owned());
+                            return Some(ptr::read(&amp;(*head).data));
+                        }
+                    }
+                }
+                None =&gt; return None,
+            }
+        }
+    }</pre>
+<p>The key things to note are the creation of <kbd>head_shared</kbd> by performing a load on an Atomic, the usual compare and set operation, and then this:</p>
+<pre>    guard.defer(move || head_shared.into_owned());
+    return Some(ptr::read(&amp;(*head).data));</pre>
+<p><kbd>head_shared</kbd> is moved into a closure, converted, and that closure is then passed into the as-yet unexamined defer function of <kbd>Guard</kbd>. But, head is dereferenced and the data from it is read out and returned. Absent some special trick, that's dangerous. We need to know more.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

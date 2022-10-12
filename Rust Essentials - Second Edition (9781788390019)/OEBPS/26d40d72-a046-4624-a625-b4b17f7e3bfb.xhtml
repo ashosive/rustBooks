@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style00.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style01.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Paths</h1>
+                </header>
+            
+            <article>
+                
+<p>File paths from the underlying file system are represented by the <kbd>Path</kbd> struct, which is created from a string slice containing the full path with <kbd>Path::new</kbd>. Suppose <kbd>hello.txt</kbd> is an existing file in the current directory; let's write some code to explore it:</p>
+<pre>// code from Chapter 11/code/paths.rs:use std::path::Path; 
+ 
+fn main() { 
+<strong>    let path = Path::new("hello.txt");</strong> 
+ let display = path.display(); 
+     
+    // test whether path exists: 
+<strong>    if path.exists() {</strong> 
+        println!("{} exists", display); 
+    } 
+    else { 
+        panic!("This path or file does not exist!"); 
+    } 
+ 
+<strong>    let file = path.file_name().unwrap();</strong><strong>    <br/>let extension = path.extension().unwrap();</strong><strong>    <br/>let parent_dir = path.parent().unwrap();</strong> 
+    println!("This is file {:?} with extension {:?} in folder {:?}", file, extension, parent_dir); 
+ 
+    // Check if the path is a file: 
+<strong>    if path.is_file() { println!("{} is a file", display);  }</strong> 
+    // Check if the path is a directory: 
+<strong>    if path.is_dir() { println!("{} is a directory", display); }</strong> 
+} </pre>
+<p>This code performs the following:</p>
+<ul>
+<li>Prints: <kbd>This is file "hello.txt" with extension "txt" in folder ""</kbd>.</li>
+<li>The <kbd>Path::new("e.txt").unwrap_or_else()</kbd> method creates the file <kbd>e.txt</kbd> or panics with an error.</li>
+<li>Tests whether a path is valid. Use the <kbd>exists()</kbd> method.</li>
+<li>Uses the <kbd>create_dir()</kbd> method to make folders.</li>
+<li>The <kbd>file_name()</kbd>, <kbd>extension()</kbd> and <kbd>parent()</kbd> methods return an Option value, so use <kbd>unwrap()</kbd> to get the value. The <kbd>is_file()</kbd> and <kbd>is_dir()</kbd> methods test respectively whether a path refers to a filename or to a directory.</li>
+<li>The <kbd>join()</kbd> method can be used to build paths, and it automatically uses the operating system-specific separator:</li>
+</ul>
+<pre>let new_path = path.join("abc").join("def"); 
+ 
+// Convert the path into a string slice 
+match new_path.to_str() { 
+        None =&gt; panic!("new path is not a valid UTF-8 sequence"), 
+        Some(s) =&gt; println!("new path is {}", s), 
+      } </pre>
+<ul>
+<li class="packt_nosymbol">This prints out the following on a Windows system:</li>
+</ul>
+<pre><strong> new path is hello.txt\abc\def</strong></pre>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

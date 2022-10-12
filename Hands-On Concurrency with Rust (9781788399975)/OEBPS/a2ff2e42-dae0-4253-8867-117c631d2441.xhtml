@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">The problem</h1>
+                </header>
+            
+            <article>
+                
+<p>Recall back to the last chapter, where the role-threads in telem communicated with one another over MPSC channels. Recall also that telem was a quick version of the cernan (<a href="https://crates.io/crates/cernan">https://crates.io/crates/cernan</a>) project, which fulfills basically the same role but over many more ingress protocols, egress protocols, and with the sharp edges worn down. One of the key design goals of cernan is that if it receives your data, it will deliver it downstream at least once. This implies that, for supporting ingress protocols, cernan must know, along the full length of the configured routing topology, that there is sufficient space to accept a new event, whether it's a piece of telemetry, a raw byte buffer, or a log line. Now, that's possible by using <kbd>SyncSender</kbd>, as we've seen. The trick comes in combination with a second design goal of cernan—very low, configurable resource consumption. Your author has seen cernan deployed to high-availability clusters with a single machine dedicated to running a cernan, as well as cernan running shotgun with an application server or as a part of a daemonset in a k8s cluster. In the first case, cernan can be configured to consume all of the machine's resources. In the later two, some thought has to be taken to giving cernan just enough resources to do its duties, relative to the expected input of the telemetered systems.</p>
+<p>On modern systems, there's often an abundance of disk space and limited—relatively speaking—RAM. The use of <kbd>SyncSender</kbd> would require either a relatively low number of ingestible events or a high possible consumption of memory by cernan. These cases usually hit when an egress protocol is failing, possibly because the far-system is down. If cernan were to exacerbate a partial system failure by crowding out an application server because of a fault in a loosely-coupled system, well, that'd be pretty crummy.</p>
+<p>For many users, it's also not acceptable to go totally blind during such a partial outage. Tricky constraints for <kbd>SyncSender</kbd>. Tricky enough, in fact, that we decided to write our own MPSC, called hopper (<a href="https://crates.io/crates/hopper">https://crates.io/crates/hopper</a>). Hopper allows endusers to configure the total in-memory consumption of the queue, in bytes. That's not far off <kbd>SyncSender</kbd>, with a bit of calculation. What's special about hopper is that it can page to disk.</p>
+<p>Hopper shines where memory constraints are very tight but you do not want to shed events. Or, you want to push shedding events off as far as possible. Similarly to the in-memory queue, hopper allows endusers to configure the maximum number of bytes to be consumed ondisk. A single hopper queue will hold <kbd>in_memory_bytes + on_disk_bytes</kbd> maximally before it's forced to shed events; we'll see the exact mechanism here directly. All of this is programmed with an eye toward maximal throughput and blocking threads that have no work, to save CPU time.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

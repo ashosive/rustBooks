@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Semaphore</h1>
+                </header>
+            
+            <article>
+                
+<p>We discussed semaphores in passing in <a href="e2de1ba7-c291-494e-82da-37fee7323c1d.xhtml" target="_blank">Chapter 5</a>, <span> </span><span class="cdp-chapters-widget-post-title"><em>Locks – Mutex, Condvar, Barriers, and RWLock</em>, </span>especially with regard to the concurrency puzzles from <em>The Little Semaphore</em>. It's now, as promised, time to implement a semaphore. What <em>exactly</em> is a semaphore? Similar to our analysis of mutex as an <em>atomic object</em>, let's consider it:</p>
+<ul>
+<li>Semaphore supports two operations, <kbd>wait</kbd> and <kbd>signal</kbd>.</li>
+<li>A semaphore has an isize <kbd>value</kbd> that is used to track the available resource capacity of the semaphore. This value is only manipulable by <kbd>wait</kbd> and <kbd>signal</kbd>.</li>
+<li>The operation <kbd>wait</kbd> decrements <kbd>value</kbd>. If the value is less than zero, 'wait' blocks the calling thread until such time as a value becomes available. If the value is not less than zero, the thread does not block.</li>
+<li>The operation <kbd>signal</kbd> increments <kbd>value</kbd>. After increment, if the value is less than or equal to zero then there are one or more waiting threads. One of these threads is woken up. If the value is greater than zero after increment, there are no waiting threads.</li>
+<li>All loads and stores that occur after and before a wait in program order must not be moved prior to or after the wait.</li>
+<li>All loads and stores that occur before an signal in program order must not be moved to after the signal.</li>
+</ul>
+<p>If this seems familiar, there's a good reason for that. Viewed a certain way, a mutex is a semaphore with only one resource available; a locking mutex maps to wait and signaling maps to unwait. We have specified the behaviour of loads and stores around the waiting and signaling of the semaphore to avoid the same deadlock behaviour identified previously in the mutex analysis.</p>
+<p>There are some subtleties not captured in the preceding breakdown that don't affect the analysis of the semaphore but do affect the programming model. We'll be building a semaphore with fixed resources. That is, when the semaphore is created, the programmer is responsible for setting the maximum total resources available in the semaphore <em>and</em> ensuring that the semaphore starts with these resources available. Some semaphore implementations allow for the resource capacity to shift over time. These are commonly called <em>counting semaphores</em>. Our variant is called a <em>bounded semaphore;</em> the subvariant of this sort with only a single resource is called a <em>binary semaphore</em>. Behavior around the signaling of waiting threads may vary. We will signal our threads on a first-come, first-serve basis.</p>
+<p>Let's dig in. Our semaphore implementation is in <kbd>src/semaphore.rs</kbd> and it's very short:</p>
+<pre style="padding-left: 30px">use crossbeam::sync::MsQueue;
+
+unsafe impl Send for Semaphore {}
+unsafe impl Sync for Semaphore {}
+
+pub struct Semaphore {
+    capacity: MsQueue&lt;()&gt;,
+}
+
+impl Semaphore {
+    pub fn new(capacity: usize) -&gt; Self {
+        let q = MsQueue::new();
+        for _ in 0..capacity {
+            q.push(());
+        }
+        Semaphore { capacity: q }
+    }
+
+    pub fn wait(&amp;self) -&gt; () {
+        self.capacity.pop();
+    }
+
+    pub fn signal(&amp;self) -&gt; () {
+        self.capacity.push(());
+    }
+}</pre>
+<p>Well! Crossbeam's <kbd>MsQueue</kbd> has the correct ordering semantics when <kbd>MsQueue::push</kbd> and then <kbd>MsQueue::pop</kbd> are done in that sequence by the same thread, where pop has the added bonus of blocking until such a time where the queue is empty. So, our semaphore is an <kbd>MsQueue</kbd> filled with the capacity total <kbd>()</kbd>. The operation <kbd>wait</kbd> decreases the <kbd>value</kbd>—the total number of <kbd>()</kbd> in the queue—and does so with <kbd>Acquire</kbd>/<kbd>Release</kbd> ordering. The operation signal increases the <em>value</em> of the semaphore by pushing an additional <kbd>()</kbd> onto the queue with <kbd>Release</kbd> semantics. It is possible for a programming error to result in <kbd>wait</kbd>/<kbd>signal</kbd> invocations that are not one-to-one, and we can resolve this with the same <kbd>Guard</kbd> approach taken by Mutex and <kbd>SwapMutex</kbd>. The underlying queue linearizes <kbd>Guard</kbd><span>—</span>see the next chapter for that discussion—and so our semaphore does so also. Let's try this thing out. We've got a program in-project to demonstrate the use of <kbd>Semaphore</kbd>, <kbd>src/bin/status_demo.rs</kbd>:</p>
+<pre style="padding-left: 30px">extern crate synchro;
+
+use std::sync::Arc;
+use synchro::Semaphore;
+use std::{thread, time};
+
+const THRS: usize = 4;
+static mut COUNTS: &amp;'static mut [u64] = &amp;mut [0; THRS];
+static mut STATUS: &amp;'static mut [bool] = &amp;mut [false; THRS];
+
+fn worker(id: usize, gate: Arc&lt;Semaphore&gt;) -&gt; () {
+    unsafe {
+        loop {
+            gate.wait();
+            STATUS[id] = true;
+            COUNTS[id] += 1;
+            STATUS[id] = false;
+            gate.signal();
+        }
+    }
+}
+
+fn main() {
+    let semaphore = Arc::new(Semaphore::new(1));
+
+    for i in 0..THRS {
+        let semaphore = Arc::clone(&amp;semaphore);
+        thread::spawn(move || worker(i, semaphore));
+    }
+
+    let mut counts: [u64; THRS] = [0; THRS];
+    loop {
+        unsafe {
+            thread::sleep(time::Duration::from_millis(1_000));
+            print!("|");
+            for i in 0..THRS {
+                print!(" {:&gt;5}; {:010}/sec |", STATUS[i], <br/>                       COUNTS[i] - counts[i]);
+                counts[i] = COUNTS[i];
+            }
+            println!();
+        }
+    }
+}</pre>
+<p>We make <kbd>THRS</kbd> total worker threads, whose responsibilities are to wait on the semaphore, flip their <kbd>STATUS</kbd> to true, add one to their <kbd>COUNT</kbd>, and flip their <kbd>STATUS</kbd> to false before signaling the semaphore. Mutable static arrays is kind of a goofy setup for any program, but it's a neat trick and causes no harm here, except for interacting oddly with the optimizer. If you compile this program under release mode, you may find that the optimizer determines worker to be a no-op. The <kbd>main</kbd> function creates a semaphore with a capacity of two, carefully offsets the workers, and then spins, forever printing out the contents of <kbd>STATUS</kbd> and <kbd>COUNT</kbd>. A run on my x86 test article looks like the following:</p>
+<pre><strong>&gt; ./target/release/status_demo
+| false; 0000170580/sec |  true; 0000170889/sec |  true; 0000169847/sec | false; 0000169220/sec |
+| false; 0000170262/sec | false; 0000170560/sec |  true; 0000169077/sec |  true; 0000169699/sec |
+| false; 0000169109/sec | false; 0000169333/sec | false; 0000168422/sec | false; 0000168790/sec |</strong></pre>
+<pre><strong>| false; 0000170266/sec |  true; 0000170653/sec | false; 0000168184/sec |  true; 0000169570/sec |
+| false; 0000170907/sec | false; 0000171324/sec |  true; 0000170137/sec | false; 0000169227/sec |
+...</strong></pre>
+<p>And from my ARMv7 machine:</p>
+<pre><strong>&gt; ./target/release/status_demo
+| false; 0000068840/sec |  true; 0000063798/sec | false; 0000063918/sec | false; 0000063652/sec |
+| false; 0000074723/sec | false; 0000074253/sec |  true; 0000074392/sec |  true; 0000074485/sec |
+|  true; 0000075138/sec | false; 0000074842/sec | false; 0000074791/sec |  true; 0000074698/sec |
+| false; 0000075099/sec | false; 0000074117/sec | false; 0000074648/sec | false; 0000075083/sec |
+| false; 0000075070/sec |  true; 0000074509/sec | false; 0000076196/sec |  true; 0000074577/sec |
+|  true; 0000075257/sec |  true; 0000075682/sec | false; 0000074870/sec | false; 0000075887/sec |
+...</strong></pre>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

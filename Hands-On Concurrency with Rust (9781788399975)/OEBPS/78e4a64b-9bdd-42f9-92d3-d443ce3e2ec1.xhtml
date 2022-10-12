@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style00.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style01.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">crossbeam_epoch::Local::pin</h1>
+                </header>
+            
+            <article>
+                
+<p>Recall that <kbd>crossbeam_epoch::pin</kbd> calls <kbd>Handle::pin</kbd>, which in turn calls <kbd>pin</kbd> on its <kbd>Local</kbd>. What happens during the execution of <kbd>Local::pin</kbd>? A lot:</p>
+<pre>    pub fn pin(&amp;self) -&gt; Guard {
+        let guard = Guard { local: self };
+
+        let guard_count = self.guard_count.get();
+        self.guard_count.set(guard_count.checked_add(1).unwrap());</pre>
+<p>The <kbd>Local</kbd> guard count is increased, which is done amusingly by creating a <kbd>Guard</kbd> with <kbd>self</kbd>. If the guard count was previously zero:</p>
+<pre>        if guard_count == 0 {
+            let global_epoch = <br/>         self.global().epoch.load(Ordering::Relaxed);
+            let new_epoch = global_epoch.pinned();</pre>
+<p>This means that there are no other active participants in <kbd>Local</kbd>, and <kbd>Local</kbd> needs to query for the global epoch. The global epoch is loaded as the <kbd>Local</kbd> epoch:</p>
+<pre>              self.epoch.store(new_epoch, Ordering::Relaxed);
+              atomic::fence(Ordering::SeqCst);</pre>
+<p>Sequential consistency is used here to ensure that ordering is maintained with regard to future and past atomic operations. Finally, the <kbd>Local</kbd>'s <kbd>pin_count</kbd> is increased and this kicks off, potentially, <kbd>Global::collect</kbd>:</p>
+<pre>            let count = self.pin_count.get();
+            self.pin_count.set(count + Wrapping(1));
+
+            // After every `PINNINGS_BETWEEN_COLLECT` try advancing the <br/>            // epoch and collecting some garbage.
+            if count.0 % Self::PINNINGS_BETWEEN_COLLECT == 0 {
+                self.global().collect(&amp;guard);
+            }
+        }
+
+        guard
+    }</pre>
+<p>It is possible for <kbd>Local</kbd> to be pinned and unpinned repeatedly, which is where <kbd>pin_count</kbd> comes into play. This mechanism doesn't find use in our discussion here, but the reader is referred to <kbd>Guard::repin</kbd> and <kbd>Guard::repin_after</kbd>. The latter function is especially useful when mixing network calls with atomic data structures as, if you'll recall, garbage cannot be collected until epochs advance and the epoch is only advanced by unpinning, usually. <kbd>Global::collect</kbd> is brief:</p>
+<pre>    pub fn collect(&amp;self, guard: &amp;Guard) {
+        let global_epoch = self.try_advance(guard);</pre>
+<p>The global epoch is potentially advanced by <kbd>Global::try_advance</kbd>, the advancement only happening if every <kbd>Local</kbd> in the global list of <kbd>Local</kbd> is not in another epoch <em>or</em> the list of locals is not modified during examination. The detection of concurrent modification is an especially neat trick, being part of crossbeam-epoch's private <kbd>List</kbd> iteration. The tagged pointer plays a part in this iteration and the reader is warmly encouraged to read and understand the <kbd>List</kbd> implementation crossbeam-epoch uses:</p>
+<pre>        let condition = |item: &amp;(Epoch, Bag)| {
+            // A pinned participant can witness at most one epoch <br/>            advancement. Therefore, any bag
+            // that is within one epoch of the current one cannot be <br/>            destroyed yet.
+            global_epoch.wrapping_sub(item.0) &gt;= 2
+        };
+
+        let steps = if cfg!(feature = "sanitize") {
+            usize::max_value()
+        } else {
+            Self::COLLECT_STEPS
+        };<br/><br/>        for _ in 0..steps {<br/>            match self.queue.try_pop_if(&amp;condition, guard) {<br/>                None =&gt; break,<br/>                Some(bag) =&gt; drop(bag),<br/>            }<br/>        }<br/>    }</pre>
+<p>The condition will be passed into the Global's <kbd>Queue::try_pop_if</kbd>, which only pops an element from the queue that matches the conditional. We can see the algorithm at play again here. Recall <kbd>self.queue :: Queue&lt;(Epoch, Bag)&gt;</kbd>? Bags of garbage will only be pulled from the queue if they are greater than two epochs away from the current epoch, otherwise there may still be live and dangerous references to them. The steps control how much garbage will end up being collected, doing a tradeoff for time versus memory use. Recall that every newly pinned thread is participating in this process, deallocating some of the global garbage.</p>
+<p>To summarize, when the programmer calls for their thread to be pinned, this creates a <kbd>Local</kbd> for storing thread-local garbage that is linked into a list of all <kbd>Local</kbd>s in a <kbd>Global</kbd> context. The thread will attempt to collect <kbd>Global</kbd> garbage, potentially pushing the epoch forward in the process. Any garbage the programmer defers during execution is preferentially pushed into the <kbd>Local</kbd> bag of garbage or, if that's full, causes some garbage to shift into the <kbd>Global</kbd> bag. Any garbage in the <kbd>Local</kbd> bag is shifted onto the <kbd>Global</kbd> bag when the <kbd>Local</kbd> is unpinned. Every atomic operation, by reason of requiring a reference to <kbd>Guard</kbd>, is implicitly associated with some <kbd>Local</kbd>, some epoch, and can be safely reclaimed by the method outlined in the preceding algorithm.</p>
+<p>Phew!</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

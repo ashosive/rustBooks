@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Reading a file</h1>
+                </header>
+            
+            <article>
+                
+<p>As with a standard file, we first have to open the file and create a reader:</p>
+<pre>let file = File::open("my_xmlfile.xml").unwrap();<br/>let reader =BufferedReader::new(file);</pre>
+<p>Next, we start the reading. Unlike a normal reader, we use <kbd>EventReader</kbd>. This provides a number of events (such as <kbd>StartElement</kbd>, <kbd>EndElement,</kbd> and <kbd>Error</kbd>), which are required for reading in from the differing nodes:</p>
+<pre>let mut xml_parser = EventReader::new(reader); </pre>
+<p>Next, we iterate through the file, as follows:</p>
+<pre>for e in xml_parser.events() { 
+     match e { 
+         StartElement { name, .. } =&gt; { 
+              println!("{}", name); 
+         } 
+         EndElement {name} =&gt; { 
+             println!("{}", name); 
+         } 
+         Error(e) =&gt; { 
+             println!("Error in file: {}", e); 
+      } 
+      _ =&gt; {} 
+   } 
+} </pre>
+<p>In the preceding snippet, <kbd>_ =&gt; {}</kbd> essentially means that you don't care what is left, do something with it (in this case, the something is nothing). You will see the symbol <kbd>_</kbd> quite a bit in Rust. Commonly, it is used in loops where the variable being acted on is never used, for example:</p>
+<pre>for _ in something() {...} </pre>
+<p>We aren't going to use the iterator; we just need something to enable the iteration to go to the next value.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

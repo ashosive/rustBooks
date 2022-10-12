@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Vec</h1>
+                </header>
+            
+            <article>
+                
+<p>As our last subject in this chapter, let's consider <kbd>Vec&lt;T&gt;</kbd>. The Rust vector is a growable array, that is, an area of contiguous, homogeneous storage that can be grown through reallocation as the need arises, or it cane be shrunk. The advantage compared to array is in not needing to know ahead of time exactly what size of storage you need, plus all the benefits of a slicable structure and additional functions in the type API. <kbd>Vec&lt;T&gt;</kbd> is an extremely common Rust structure, so much so that its actual name is <kbd>std::vec::Vec&lt;T&gt;</kbd> but Rust imports the type by default. Rust programs are full of vectors and it stands to reason we'd do well to understand how it interacts with the memory it holds.</p>
+<p><kbd>Vec&lt;T&gt;</kbd> is defined in <kbd>src/liballoc/vec.rs</kbd> and is defined as follows:</p>
+<pre style="padding-left: 30px">pub struct Vec&lt;T&gt; {
+    buf: RawVec&lt;T&gt;,
+    len: usize,
+}</pre>
+<p>The Rust documentation declares that a <kbd>Vec&lt;T&gt;</kbd> will be laid out as a pointer, a capacity of <kbd>usize</kbd>, and a length of <kbd>usize.</kbd> The order of these fields is completely unspecified. As we've already discussed, Rust will reorder fields as it sees fit. Moreover, the pointer is guaranteed to be non-null, allowing for a null-pointer optimization. Previously, we saw the usual trick of Rust: define a higher-level structure in terms of a lower-level—or raw – structure, or even in terms of a fully unsafe structure. We see the length <kbd>usize</kbd> already, called <kbd>len</kbd>. This means there's a distinct difference between capacity and length, the distinction of which we'll come back to as we dig into <kbd>RawVec&lt;T&gt;</kbd>. Let's take a peek at <kbd>RawVec&lt;T&gt;</kbd>, defined in <kbd>src/liballoc/raw_vec.rs</kbd>:</p>
+<pre style="padding-left: 30px">pub struct RawVec&lt;T, A: Alloc = Heap&gt; {
+    ptr: Unique&lt;T&gt;,
+    cap: usize,
+    a: A,
+}</pre>
+<p>What we have is a pointer to a <kbd>Unique&lt;T&gt;</kbd>, a <kbd>*mut T</kbd> with added guarantees that the <kbd>RawVec&lt;T&gt;</kbd> is the only possessor of the allocation and that the pointer is not null. The <kbd>cap</kbd> is the capacity of the raw vector. <kbd>a: A</kbd> is the allocator, <kbd>Heap</kbd> by default. Rust does allow for allocators to be swapped, so long as the implementation obeys—as of writing this book—the <kbd>std::heap::Alloc</kbd> trait. Swapping allocators is an unstable feature of Rust, available only in the nightly channel, but one that is stable enough to see common use in the embedded Rust community's libraries. In this book, we won't use anything other than the default allocator, but the reader is warmly encouraged to explore the topic in more detail. Allocator aside, there's the pointers, length, and capacity that the Rust documentation promised. Let's pop back to <kbd>Vec&lt;T&gt;</kbd> and take a look at <kbd>new</kbd>:</p>
+<pre>    pub fn new() -&gt; Vec&lt;T&gt; {
+        Vec {
+            buf: RawVec::new(),
+            len: 0,
+        }
+    }</pre>
+<p>Now, the new of raw <kbd>vec</kbd>:</p>
+<pre>    pub fn new() -&gt; Self {
+        Self::new_in(Heap)
+    }</pre>
+<p>This defers creation to <kbd>new_in</kbd>, a function on the same <kbd>trait</kbd>:</p>
+<pre>    pub fn new_in(a: A) -&gt; Self {
+        // !0 is usize::MAX. This branch should be stripped <br/>        // at compile time.
+        let cap = if mem::size_of::&lt;T&gt;() == 0 { !0 } else { 0 };
+
+        // Unique::empty() doubles as "unallocated" and "zero-sized<br/>        // allocation"
+        RawVec {
+            ptr: Unique::empty(),
+            cap,
+            a,
+        }
+    }</pre>
+<p>The <kbd>cap</kbd> computation is interesting. It's possible to store a <kbd>T</kbd> in <kbd>Vec&lt;T&gt;</kbd>—and by extension <kbd>RawVec&lt;T&gt;</kbd>—that has zero size. The implementers knew this and came up with a fun solution: if the size of the type is zero, set the capacity to <kbd>usize::MAX</kbd>, else 0. It's not possible to cram <kbd>usize::MAX</kbd> elements into a vector since we'd run out of memory one allocation prior to hitting the cap and it's now possible to discriminate the case of zero-sized types without having to introduce an enumeration or a flag variable. Tidy trick. If we bounce back to vector and inspect <kbd>with_capacity</kbd>, we'll find that defers to <kbd>RawVec::with_capacity</kbd>, which defers to <kbd>RawVec::allocate_in</kbd>:</p>
+<pre>    fn allocate_in(cap: usize, zeroed: bool, mut a: A) -&gt; Self {
+        unsafe {
+            let elem_size = mem::size_of::&lt;T&gt;();
+
+            let alloc_size = <br/>            cap.checked_mul(elem_size).expect("capacity overflow");
+            alloc_guard(alloc_size);
+
+            // handles ZSTs and `cap = 0` alike
+            let ptr = if alloc_size == 0 {
+                mem::align_of::&lt;T&gt;() as *mut u8
+            } else {
+                let align = mem::align_of::&lt;T&gt;();
+                let result = if zeroed {
+                    a.alloc_zeroed(Layout::from_size_align(<br/>                        alloc_size, align).unwrap())
+                } else {
+                    a.alloc(Layout::from_size_align(<br/>                        alloc_size, align).unwrap())
+                };
+                match result {
+                    Ok(ptr) =&gt; ptr,
+                    Err(err) =&gt; a.oom(err),
+                }
+            };
+
+            RawVec {
+                ptr: Unique::new_unchecked(ptr as *mut _),
+                cap,
+                a,
+            }
+        }
+    }</pre>
+<p>There's a lot going on here, but it's important, so let's break it into small pieces. Firstly, see the following:</p>
+<pre>            let elem_size = mem::size_of::&lt;T&gt;();
+
+            let alloc_size = <br/>            cap.checked_mul(elem_size).expect("capacity overflow");
+            alloc_guard(alloc_size);</pre>
+<p>At the head of the function, the size of the element is computed and the total allocation requested by the caller is confirmed to be no more than the available system memory. Note that <kbd>checked_mul</kbd> ensures we don't overflow usize and accidentally allocate too little memory. Finally, a function called <kbd>alloc_guard</kbd> is called. That is as follows:</p>
+<pre>fn alloc_guard(alloc_size: usize) {
+    if mem::size_of::&lt;usize&gt;() &lt; 8 {
+        assert!(
+            alloc_size &lt;= ::core::isize::MAX as usize,
+            "capacity overflow"
+        );
+    }
+}</pre>
+<p>This is a guarantee check. Remember that usize and isize are the signed and unsigned size of the system pointer. To understand this guard, we must understand the answer to two questions:</p>
+<ol type="1">
+<li>On a given machine, how much memory can I allocate?</li>
+<li>On a given machine, how much memory can I address?</li>
+</ol>
+<p>It's possible to allocate usize bytes from the operating system but here, Rust is checking that the allocation size is less than the maximum isize. The Rust reference (<a href="https://doc.rust-lang.org/stable/reference/types.html#machine-dependent-integer-types">https://doc.rust-lang.org/stable/reference/types.html#machine-dependent-integer-types</a>) explains why:</p>
+<div class="packt_quote">
+<p>"The isize type is a signed integer type with the same number of bits as the platform's pointer type. The theoretical upper bound on object and array size is the maximum isize value. This ensures that isize can be used to calculate differences between pointers into an object or array and can address every byte within an object along with one byte past the end."</p>
+</div>
+<p>Combined with the capacity check from <kbd>checked_mul</kbd>, we know that the allocation is properly sized and that it's addressable along the whole of itself:</p>
+<pre>            let ptr = if alloc_size == 0 {
+                mem::align_of::&lt;T&gt;() as *mut u8
+            } else {</pre>
+<p>In the event that the desired capacity is zero <em>or</em> the size of <kbd>T</kbd> is zero, the implementation coerces the minimum alignment of <kbd>T</kbd> into a pointer to bytes, the <kbd>*mut u8</kbd>. This pointer is, well, it points nowhere useful but the implementation has avoided an allocation when there is nothing that could be allocated, whether there will never be anything to allocate because of zero-sized types or not. This is good, and all the implementation will have to do is be aware that when the capacity is zero, or if the type size is zero, the pointer cannot be dereferenced. Right:</p>
+<pre>            } else {
+                let align = mem::align_of::&lt;T&gt;();
+                let result = if zeroed {
+                    a.alloc_zeroed(Layout::from_size_align(alloc_size, <br/>                        align).unwrap())
+                } else {
+                    a.alloc(Layout::from_size_align(alloc_size, <br/>                        align).unwrap())
+                };
+                match result {
+                    Ok(ptr) =&gt; ptr,
+                    Err(err) =&gt; a.oom(err),
+                }
+            };</pre>
+<p>This branch is hit when there's memory to be allocated. Notably, two sub-possibilities, controlled by the <kbd>zeroed</kbd> argument: either memory is zeroed or it is left uninitialized. <kbd>Vec&lt;T&gt;</kbd> does not expose this option to the end user but we know from inspection that memory starts off uninitialized, an optimization for non-trivial allocations:</p>
+<pre>            RawVec {
+                ptr: Unique::new_unchecked(ptr as *mut _),
+                cap,
+                a,
+            }
+        }
+    }</pre>
+<p>The lack of an initialization flag is kind of tricky in some cases. Consider <kbd>std::io::Read::read_exact</kbd>. This function takes a <kbd>&amp;mut [u8]</kbd> and it's common enough to create this slice from a specially created vec. This code will <em>not</em> read 1024 bytes:</p>
+<pre style="padding-left: 30px">use std::io;
+use std::io::prelude::*;
+use std::fs::File;
+
+let mut f = File::open("foo.txt")?;
+let mut buffer = Vec:with_capacity(1024);
+
+f.read_exact(&amp;mut buffer)?;</pre>
+<p>Why? The slice that we pass in is actually of zero length! Rust dereferences are allowed on a type by two traits: <kbd>std::ops::Deref</kbd> and <kbd>std::ops::DerefMut</kbd>, depending on your desire for an immutable or mutable slide. The <kbd>Deref</kbd>  trait is defined as follows:</p>
+<pre style="padding-left: 30px">pub trait Deref {
+    type Target: ?Sized;
+    fn deref(&amp;self) -&gt; &amp;Self::Target;
+}</pre>
+<p>And the mutable version analogously. When we slice our vector as in the preceding code block, we're calling this <kbd>DerefMut::deref</kbd>:</p>
+<pre style="padding-left: 30px">impl&lt;T&gt; ops::DerefMut for Vec&lt;T&gt; {
+    fn deref_mut(&amp;mut self) -&gt; &amp;mut [T] {
+        unsafe {
+            let ptr = self.buf.ptr();
+            assume(!ptr.is_null());
+            slice::from_raw_parts_mut(ptr, self.len)
+        }
+    }
+}</pre>
+<p>This is the very important part: <kbd>slice::from_raw_parts_mut(ptr, self.len)</kbd>. Vector slices are built by length, not capacity. The capacity of a vector serves to distinguish how much memory has been allocated versus how much memory has been initialized, either to zeros or some other inserted values. This is an important difference. It's possible to initialize memory ourselves:</p>
+<pre style="padding-left: 30px">let mut buffer: Vec&lt;u8&gt; = Vec::with_capacity(1024);
+for _ in 0..1024 {
+  buffer.push(0);
+}
+assert_eq!(1024, buffer.len());</pre>
+<p>Or to rely on the <kbd>Vec</kbd> API to convert from a fixed-size array:</p>
+<pre style="padding-left: 30px">let buffer = [0; 1024];
+let buffer = &amp;mut buffer.to_vec();
+assert_eq!(1024, buffer.len());
+}</pre>
+<p>Either will work. Which you choose depends on if you know the size of the buffer ahead of time or not.</p>
+<p>Befitting such an important type, there are a good many API functions on <kbd>Vec&lt;T&gt;</kbd>. In the remainder of this chapter, we'll occupy ourselves with two mutations: <kbd>push</kbd> and <kbd>insert</kbd>. The <kbd>push</kbd> function is a constant operation, modulo any reallocations necessary to cope with the case of our capacity limit being reached. Here's the <kbd>push</kbd> function:</p>
+<pre>    pub fn push(&amp;mut self, value: T) {
+        // This will panic or abort if we would allocate &gt; isize::MAX bytes
+        // or if the length increment would overflow for zero-sized types.
+        if self.len == self.buf.cap() {
+            self.buf.double();
+        }
+        unsafe {
+            let end = self.as_mut_ptr().offset(self.len as isize);
+            ptr::write(end, value);
+            self.len += 1;
+        }
+    }</pre>
+<p>If you'll recall, <kbd>self.buf</kbd> is the underlying <kbd>RawVec&lt;T&gt;</kbd>. The documentation for <kbd>Vec&lt;T&gt;</kbd> notes that when reallocation is required, the underlying memory will be doubled, which, it turns out, is handled by <kbd>RawVec&lt;T&gt;::double</kbd>. That function is fairly long and, as you might suspect, is a bunch of arithmetic to compute the new, doubled size matched with a realloc when there's an existing allocation, else when there's a new allocation. That is worth listing:</p>
+<pre>                None =&gt; {
+                    // skip to 4 because tiny Vec's are dumb; <br/>                    // but not if that would cause overflow
+                    let new_cap = if elem_size &gt; (!0) / 8 { <br/>                                      1 <br/>                                  } else { <br/>                                      4 <br/>                                  };
+                    match self.a.alloc_array::&lt;T&gt;(new_cap) {
+                        Ok(ptr) =&gt; (new_cap, ptr),
+                        Err(e) =&gt; self.a.oom(e),
+                    }
+                }</pre>
+<p><kbd>Alloc::alloc_array</kbd> allocates space for contiguous memory, which is suitable to hold <kbd>new_cap</kbd> number of elements the size of <kbd>T</kbd>, returning the pointer to the first address of this newly allocated space. Here then, is the contiguous memory promised in the documentation of <kbd>Vec&lt;T&gt;</kbd>! Back in <kbd>Vec&lt;T&gt;</kbd>, now that the capacity is twice that of what it was, at least, the value <kbd>T</kbd> can be inserted:</p>
+<pre>        unsafe {
+            let end = self.as_mut_ptr().offset(self.len as isize);
+            ptr::write(end, value);
+            self.len += 1;
+        }</pre>
+<p>Rust pointers are handy in that their offset function takes into account the size of <kbd>T</kbd>; there's no need to do additional multiplication as the caller. The implementation is determining the first of the unused <kbd>T</kbd> sized spaces in the contiguous allocation—denoted end—and then writes the moved <kbd>T</kbd> onto that address. The fact that the space is unused is important<em>, </em><kbd>std::ptr::write</kbd> does not deallocate any memory that may have originally existed at the written-to pointer. If you <kbd>ptr::write</kbd> over the top of a live reference, wacky things will happen.</p>
+<p>Finally, <kbd>insert</kbd>. The <kbd>insert</kbd> function of <kbd>Vec&lt;T&gt;</kbd> allows for the insertion of <kbd>T</kbd> at any valid index in the vector. If the insertion is to the end of the vector, the method is functionally equivalent to pushing, though mechanically different, as we'll see shortly. If, however, insertion occurs somewhere inside of the vector, all elements to the right of the insertion index are shifted over once, a non-trivial operation depending on the size of the allocation. Here's the full listing of <kbd>insert</kbd>:</p>
+<pre>    pub fn insert(&amp;mut self, index: usize, element: T) {
+        let len = self.len();
+        assert!(index &lt;= len);
+
+        // space for the new element
+        if len == self.buf.cap() {
+            self.buf.double();
+        }
+
+        unsafe {
+            // infallible
+            // The spot to put the new value
+            {
+                let p = self.as_mut_ptr().offset(index as isize);
+                // Shift everything over to make space. (Duplicating the
+                // `index`th element into two consecutive places.)
+                ptr::copy(p, p.offset(1), len - index);
+                // Write it in, overwriting the first copy of the `index`th
+                // element.
+                ptr::write(p, element);
+            }
+            self.set_len(len + 1);
+        }
+    }</pre>
+<p>The index checking and potential buffering is straightforward at this point in the chapter. In the unsafe block, <kbd>p</kbd> is the proper offset for insertion. The two important lines are:</p>
+<pre style="padding-left: 60px">ptr::copy(p, p.offset(1), len - index);
+ptr::write(p, element);</pre>
+<p>When a value is inserted into a vector, no matter the location, all the memory starting from <kbd>p</kbd> to the end of the list is copied over the top of the memory, starting at <kbd>p+1</kbd>. Once this is done, the inserted value is written over the top of <kbd>p</kbd>. This is a non-trivial operation and can become incredibly slow, especially if the allocation to be shifted is fairly large. Performance-focused Rust will use <kbd>Vec::insert</kbd> sparingly, if at all. <kbd>Vec&lt;T&gt;</kbd> will almost surely make an appearance.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

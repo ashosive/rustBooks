@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style00.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style01.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Installing Rust</h1>
+                </header>
+            
+            <article>
+                
+<p>You can install the Rust toolchain on every platform that Rust supports by using the <kbd>rustup</kbd> installer tool, which you can find at <a href="http://www.rust-lang.org/install.html"><span class="URLPACKT">http://www.rust-lang.org/install.html</span></a>.</p>
+<p>On Windows, double-click on the <kbd>rustup-init.exe</kbd> file to install the Rust binaries and dependencies. Rust's installation directory (which by default is <kbd>C:\Users\username\.cargo\bin</kbd>) is automatically added to the search path for executables. Additionally you may need the C++ build tools for Visual Studio 2013 or later, which you can download from <a href="http://landinghub.visualstudio.com/visual-cpp-build-tools"><span class="URLPACKT">http://landinghub.visualstudio.com/visual-cpp-build-tools</span></a>.</p>
+<p>On Linux and OS X, run the following command in your shell:</p>
+<pre><strong>curl https://sh.rustup.rs -sSf | sh</strong></pre>
+<p>This installs the Rust toolchain in <kbd>/home/username/.cargo/bin</kbd> by default.</p>
+<p>Verify the correctness of the installation by showing Rust's version by typing <kbd>rustc -V</kbd> or <kbd>rustc - -version</kbd> in a console, which produces output like the following:</p>
+<div class="packt_figure CDPAlignCenter CDPAlign"><img height="35" width="277" class=" image-border" src="Images/1a3eb32c-db56-4795-a4c1-f54c93e09f01.png"/></div>
+<p>Rust can be uninstalled by running the following command:</p>
+<pre><strong>rustup self uninstall</strong>  </pre>
+<p>The rustup tool enables you to easily switch between stable, beta, and nightly compilers and keep them updated. Moreover, it makes cross-compiling simpler with binary builds of the Standard Library for common platforms.</p>
+<p>At <a href="https://forge.rust-lang.org/platform-support.html"><span class="URLPACKT">https://forge.rust-lang.org/platform-support.html</span></a> is a list of all the platforms on which Rust can run.</p>
+<p>A bare metal stack called <kbd>zinc</kbd> for running Rust in embedded environments can be found at <a href="http://zinc.rs/"><span class="URLPACKT">http://zinc.rs/</span></a>; at this moment only the ARM architecture is supported.</p>
+<p>The source code resides on GitHub (see <a href="https://github.com/rust-lang/rust/"><span class="URLPACKT">https://github.com/rust-lang/rust/</span></a>) and, if you want to build Rust from source, we refer you to <a href="https://github.com/rust-lang/rust#building-from-source"><span class="URLPACKT">https://github.com/rust-lang/rust#building-from-source</span></a>.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

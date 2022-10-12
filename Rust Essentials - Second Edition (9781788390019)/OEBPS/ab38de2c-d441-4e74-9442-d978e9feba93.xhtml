@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style00.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style01.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Using Sublime Text</h1>
+                </header>
+            
+            <article>
+                
+<p>The plugins for the popular Sublime Text editor (<a href="http://www.sublimetext.com/3"><span class="URLPACKT">http://www.sublimetext.com/3</span></a>) are particularly pleasant to work with and don't get in your way. After having installed Sublime Text (you might want to get a registered version if you start using it regularly), also install the Package Control package (for instructions on how to do that visit <a href="https://packagecontrol.io/installation"><span class="URLPACKT">https://packagecontrol.io/installation</span></a>).</p>
+<p>Then, to install the Sublime Text Rust plugin, open the command palette in Sublime Text (<em><span class="KeyPACKT">Ctrl</span></em>+<em><span class="KeyPACKT">Shift</span></em>+<em><span class="KeyPACKT">P</span></em> <span class="KeyPACKT">on Windows</span> or <span class="KeyPACKT">cmd</span>+<em><span class="KeyPACKT">Shift</span></em>+<em><span class="KeyPACKT">P</span></em> on OS X) and select <span class="packt_screen">Package Control |</span> <span class="packt_screen">Install Package</span> and then select <span class="packt_screen">Rust</span><span class="packt_screen">Enhanced</span> from the list.</p>
+<div class="packt_figure CDPAlignCenter CDPAlign"><img height="328" width="419" class=" image-border" src="Images/fb31e24b-cacc-4e53-925c-84e48366029c.png"/></div>
+<p>Sublime Text is a very complete text editor, including color schemes. The Rust plugin provides syntax highlighting and auto-completion; type one or more letters, choose an option from the list that appears with an arrow key and then press <em><span class="KeyPACKT">Tab</span></em> to insert the code snippet, or simply select a list option through a mouse click.</p>
+<p>When working with Rust code, select <span class="packt_screen">Tools | Build System</span> and <span class="packt_screen">RustEnhanced</span>.</p>
+<p>Then, you can run and compile a source file with <em><span class="KeyPACKT">Ctrl</span></em>+<em><span class="KeyPACKT">B</span></em>. Warnings or errors appear in the lower panel; if everything is OK the output of the program appears together with a message like the following:</p>
+<pre>    <strong>[Finished in 0.6s]</strong></pre>
+<p>If you want to do the two steps separately, do <em><span class="KeyPACKT">Ctrl</span></em>+<em><span class="KeyPACKT">Shift</span></em>+<em><span class="KeyPACKT">B</span></em>. A pop-up menu appears, click on <span class="packt_screen">RustEnhanced</span> if you only want to compile, click on <span class="packt_screen">RustEnhanced |</span> <span class="packt_screen">Run</span> if you want to execute the program. A <kbd>SublimeLinter</kbd> plugin exists that provides an interface to <kbd>rustc</kbd>, called <kbd>SublimeLinter-contrib-rustc</kbd>. It does additional checks on your code for stylistic or programming errors. You can install it as indicated above through Package Control and then use it from the menu <span class="packt_screen">Tools |</span> <span class="packt_screen">SublimeLinter</span> (for more details consult <a href="https://github.com/oschwald/SublimeLinter-contrib-rustc"><span class="URLPACKT">https://github.com/oschwald/SublimeLinter-contrib-rustc</span></a>).</p>
+<p>There are also plugins for IDEs like:</p>
+<ul>
+<li>For Eclipse, called <strong>RustDT</strong>: <a href="https://github.com/RustDT/RustDT"><span class="URLPACKT">https://github.com/RustDT/RustDT</span></a></li>
+<li>For IntelliJ called <strong>intellij-rust</strong>: <a href="https://github.com/intellij-rust/intellij-rust">https://github.com/intellij-rust/intellij-rust</a></li>
+<li>For NetBeans called <strong>rust-netbeans</strong>: <a href="https://github.com/drrb/rust-netbeans">https://github.com/drrb/rust-netbeans</a></li>
+<li>For Visual Studio called <strong>VisualRust</strong>: <a href="https://github.com/PistonDevelopers/VisualRust">https://github.com/PistonDevelopers/VisualRust</a></li>
+</ul>
+<p>You can test out Rust code even without local installation with the Rust Playground at <a href="http://play.rust-lang.org/"><span class="URLPACKT">http://play.rust-lang.org/</span></a>, which allows you to edit or paste your code and evaluate it.</p>
+<p>The interactive shell rusti or <strong>Read-Evaluate-Print-Loop</strong> (<strong>REPL</strong>) is in development for Rust, which is common for dynamic languages, but remarkable for a statically compiled language. You can find it at <a href="https://github.com/murarth/rusti"><span class="URLPACKT">https://github.com/murarth/rusti</span></a>.</p>
+<p>An online environment that combines both is <kbd>repl.it</kbd>. Refer the following link for more details <a href="https://repl.it/languages/rust"><span class="URLPACKT">https://repl.it/languages/rust</span></a>.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

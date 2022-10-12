@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Hex encoding</h1>
+                </header>
+            
+            <article>
+                
+<p>Let's look at an example from the stdsimd crate. We won't dig in too deeply here; we're only out to get a sense of the structure of this kind of programming. We've pulled stdsimd at <kbd>2f86c75a2479cf051b92fc98273daaf7f151e7a1</kbd>. The file we'll examine is <kbd>examples/hex.rs</kbd>. The program's purpose is to <kbd>hex</kbd> encode stdin. For example:</p>
+<pre><strong>&gt; echo hope | cargo +nightly run --release --example hex -p stdsimd
+    Finished release [optimized + debuginfo] target(s) in 0.52s
+     Running `target/release/examples/hex`
+686f70650a</strong></pre>
+<p>Note that this requires a nightly channel, and not a stable one, we've used so far in this book. I tested this on nightly, 2018-05-10. The details of the implementation are shifting so rapidly and rely on such unstable compiler features that you should make sure that you use the specific nightly channel that is listed, otherwise the example code may not compile.</p>
+<p>The preamble to <kbd>examples/hex.rs</kbd> contains a good deal of information we've not seen in the book so far. Let's take it in two chunks and tease out the unknowns:</p>
+<pre style="padding-left: 30px">#![feature(stdsimd)]
+#![cfg_attr(test, feature(test))]
+#![cfg_attr(feature = "cargo-clippy",
+            allow(result_unwrap_used, print_stdout, option_unwrap_used,
+                  shadow_reuse, cast_possible_wrap, cast_sign_loss,
+                  missing_docs_in_private_items))]
+
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
+#[macro_use]
+extern crate stdsimd;
+
+#[cfg(not(any(target_arch = "x86", target_arch = "x86_64")))]
+extern crate stdsimd;</pre>
+<p>Because we've stuck to stable Rust, we've not seen anything like <kbd>#![feature(stdsimd)]</kbd> before. What is this? Rust allows the adventurous user to enable in-progress features that are present in rustc, but that are not yet exposed in the nightly variant of the language. I say adventurous because an in-progress feature may maintain a stable API through its development, or it may change every few days, requiring updates on the consumer side. Now, what is <kbd>cfg_attr</kbd>? This is a conditional compilation attribute, turning on features selectively. You can read all about it in <em>The Rust Reference</em>, linked in the <em>Further reading</em> section. There are many details, but the idea is simple—turn bits of code on or off depending on user directives—such as testing—or the running environment.</p>
+<p>This later is what <kbd>#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]</kbd> means. On either x86 or x86_64, stdsimd will be externed with macros enabled and without them enabled when on any other platform. Now, hopefully, the rest of the preamble is self-explanatory:</p>
+<pre>#[cfg(test)]
+#[macro_use]
+extern crate quickcheck;
+
+use std::io::{self, Read};
+use std::str;
+
+#[cfg(target_arch = "x86")]
+use stdsimd::arch::x86::*;
+#[cfg(target_arch = "x86_64")]
+use stdsimd::arch::x86_64::*;</pre>
+<p>The <kbd>main</kbd> function of this program is quite brief:</p>
+<pre>fn main() {
+    let mut input = Vec::new();
+    io::stdin().read_to_end(&amp;mut input).unwrap();
+    let mut dst = vec![0; 2 * input.len()];
+    let s = hex_encode(&amp;input, &amp;mut dst).unwrap();
+    println!("{}", s);
+}</pre>
+<p>The whole of stdin is read into the input and a <span>brief </span><span>vector to hold the hash, called <kbd>dst</kbd>. <kbd>hex_encode</kbd>, is also used. The first portion performs input validation:</span></p>
+<pre>fn hex_encode&lt;'a&gt;(src: &amp;[u8], dst: &amp;'a mut [u8]) -&gt; Result&lt;&amp;'a str, usize&gt; {
+    let len = src.len().checked_mul(2).unwrap();
+    if dst.len() &lt; len {
+        return Err(len);
+    }</pre>
+<p>Note the return—a <kbd>&amp;str</kbd> on success and a <kbd>usize</kbd>—the faulty length—on failure. The rest of the function is a touch more complicated:</p>
+<pre>    #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
+    {
+        if is_x86_feature_detected!("avx2") {
+            return unsafe { hex_encode_avx2(src, dst) };
+        }
+        if is_x86_feature_detected!("sse4.1") {
+            return unsafe { hex_encode_sse41(src, dst) };
+        }
+    }
+
+    hex_encode_fallback(src, dst)
+}</pre>
+<p>This introduces conditional compilation, which we saw previously, and contains a new thing too—<kbd>is_x86_feature_detected!</kbd>. This macro is new to the SIMD feature, and tests at runtime whether the given CPU feature is available at runtime via libcpuid. If it is, the feature is used. On an ARM processor, for instance, <kbd>hex_encode_fallback</kbd> will be executed. On an x86 processor, one or the other avx2 or sse4.1, implementations will be followed, depending on the chip's exact capabilities. Which implementation is called is determined at runtime. Let's look into the implementation of <kbd>hex_encode_fallback</kbd> first:</p>
+<pre>fn hex_encode_fallback&lt;'a&gt;(
+    src: &amp;[u8], dst: &amp;'a mut [u8]
+) -&gt; Result&lt;&amp;'a str, usize&gt; {
+    fn hex(byte: u8) -&gt; u8 {
+        static TABLE: &amp;[u8] = b"0123456789abcdef";
+        TABLE[byte as usize]
+    }
+
+    for (byte, slots) in src.iter().zip(dst.chunks_mut(2)) {
+        slots[0] = hex((*byte &gt;&gt; 4) &amp; 0xf);
+        slots[1] = hex(*byte &amp; 0xf);
+    }
+
+    unsafe { Ok(str::from_utf8_unchecked(&amp;dst[..src.len() * 2])) }
+}</pre>
+<p>The interior function <kbd>hex</kbd> acts as a static lookup table, and the for loop zips together the bytes from the <kbd>src</kbd> and a two-chunk pull from <kbd>dst</kbd>, updating <kbd>dst</kbd> as the loop proceeds. Finally, <kbd>dst</kbd> is converted into a <kbd>&amp;str</kbd> and returned. It's safe to use <kbd>from_utf8_unchecked</kbd> here as we can verify that no non-utf8 characters are possible in <kbd>dst</kbd>, saving us a check.</p>
+<p>Okay, now that's the fallback. How do the SIMD variants read? We'll look at <kbd>hex_encode_avx2</kbd>, leaving the sse4.1 variant to the ambitious reader. First, we see the reappearance of conditional compilation and the familiar function types:</p>
+<pre>#[target_feature(enable = "avx2")]
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
+unsafe fn hex_encode_avx2&lt;'a&gt;(
+    mut src: &amp;[u8], dst: &amp;'a mut [u8]
+) -&gt; Result&lt;&amp;'a str, usize&gt; {</pre>
+<p>So far, so good. Now, look at the following:</p>
+<pre>    let ascii_zero = _mm256_set1_epi8(b'0' as i8);
+    let nines = _mm256_set1_epi8(9);
+    let ascii_a = _mm256_set1_epi8((b'a' - 9 - 1) as i8);
+    let and4bits = _mm256_set1_epi8(0xf);</pre>
+<p>Well, the function <kbd>_mm256_set1_epi8</kbd> is certainly new! The documentation (<a href="https://rust-lang-nursery.github.io/stdsimd/x86_64/stdsimd/arch/x86_64/fn._mm256_set1_epi8.html">https://rust-lang-nursery.github.io/stdsimd/x86_64/stdsimd/arch/x86_64/fn._mm256_set1_epi8.html</a>) states the following:</p>
+<div class="packt_quote">
+<p>"Broadcast 8-bit integer a to all elements of returned vector."</p>
+</div>
+<p>Okay. What vector? Many SIMD instructions are carried out in terms of vectors with implicit sizes, the size being defined by the CPU architecture. For instance, the function that we have been looking at returns an <kbd>stdsimd::arch::x86_64::__m256i</kbd>, a 256-bit-wide vector. So, <kbd>ascii_zero</kbd> is 256-bits-worth of zeros, <kbd>ascii_a</kbd> 256-bits-worth of <kbd>a</kbd>, and so forth. Each of these functions and types, incidentally, follows Intel's naming scheme. It's my understanding that the LLVM uses their own naming scheme, but Rust—in an effort to reduce developer confusion—maintains a mapping from the architecture names to LLVM's names. By keeping the architecture names, Rust makes it real easy to look up details about each intrinsic. You can see this in the <em>Intel Intrinsics Guide</em> at <kbd>mm256_set1_epi8</kbd> (<a href="https://software.intel.com/sites/landingpage/IntrinsicsGuide/#text=_mm256_set1_epi8&amp;expand=4676">https://software.intel.com/sites/landingpage/IntrinsicsGuide/#text=_mm256_set1_epi8&amp;expand=4676</a>).</p>
+<p>The implementation then enters a loop, processing <kbd>src</kbd> in 256-bit-wide chunks until there are only 32 or fewer bits left:</p>
+<pre>    let mut i = 0_isize;
+    while src.len() &gt;= 32 {
+        let invec = _mm256_loadu_si256(src.as_ptr() as *const _);</pre>
+<p>The variable <kbd>invec</kbd> is now 256 bits of <kbd>src</kbd>, with <kbd>_mm256_loadu_si256</kbd> being responsible for performing a load. SIMD instructions have to operate on their native types, you see. In the actual reality of the machine, there is no type, but specialized registers. What comes next is complex, but we can reason through it:</p>
+<pre>        let masked1 = _mm256_and_si256(invec, and4bits);
+        let masked2 = _mm256_and_si256(<br/>            _mm256_srli_epi64(invec, 4),<br/>            and4bits<br/>        );</pre>
+<p>Okay, <kbd>_mm256_and_si256</kbd> performs a bitwise boolean-and of two <kbd>__m256i</kbd>, returning the result. <kbd>masked1</kbd> is the bitwise boolean-and of <kbd>invec</kbd> and <kbd>and4bits</kbd>. The same is true for <kbd>masked2</kbd>, except we need to determine what <kbd>_mm256_srli_epi64</kbd> does. The Intel document state the following:</p>
+<div class="packt_quote">
+<p>"Shift packed 64-bit integers in a right by imm8 while shifting in zeros, and store the results in dst."</p>
+</div>
+<p><kbd>invec</kbd> is subdivided into four 64-bit integers, and these are shifted right by four bits. That is then boolean-and'ed with <kbd>and4bits</kbd>, and <kbd>masked2</kbd> pops out. If you refer back to <kbd>hex_encode_fallback</kbd> and squint a little, you can start to see the relationship to <kbd>(*byte &gt;&gt; 4) &amp; 0xf</kbd>. Next up, two comparison masks are put together:</p>
+<pre>        let cmpmask1 = _mm256_cmpgt_epi8(masked1, nines);
+        let cmpmask2 = _mm256_cmpgt_epi8(masked2, nines);</pre>
+<p><kbd>_mm256_cmpgt_epi8</kbd> greater-than compares 8-bit chunks of the 256-bit vector, returning the larger byte. The comparison masks are then used to control the blending of <kbd>ascii_zero</kbd> and <kbd>ascii_a</kbd>, and the result of that is added to <kbd>masked1</kbd>:</p>
+<pre>        let masked1 = _mm256_add_epi8(
+            masked1,
+            _mm256_blendv_epi8(ascii_zero, ascii_a, cmpmask1),
+        );
+        let masked2 = _mm256_add_epi8(
+            masked2,
+            _mm256_blendv_epi8(ascii_zero, ascii_a, cmpmask2),
+        );</pre>
+<p>Blending is done bytewise, with the high bit in each byte determining whether to move a byte from the first vector in the <kbd>arg</kbd> list or the second. The computed masks are then interleaved, choosing high and low halves:</p>
+<pre>        let res1 = _mm256_unpacklo_epi8(masked2, masked1);
+        let res2 = _mm256_unpackhi_epi8(masked2, masked1);</pre>
+<p>In the high half of the interleaved masks, the destination's first 128 bits are filled with the top 128 bits from the source, the remainder being filled in with zeros. In the lower half of the interleaved masks, the destination's first 128 bits are filled from the bottom 128 bits from the source, the remainder being zeros. Then, at long last, a pointer is computed into <kbd>dst</kbd> at 64-bit strides and further subdivided into 16-bit chunks, and the <kbd>res1</kbd> and <kbd>res2</kbd> are stored there:</p>
+<pre>        let base = dst.as_mut_ptr().offset(i * 2);
+        let base1 = base.offset(0) as *mut _;
+        let base2 = base.offset(16) as *mut _;
+        let base3 = base.offset(32) as *mut _;
+        let base4 = base.offset(48) as *mut _;
+        _mm256_storeu2_m128i(base3, base1, res1);
+        _mm256_storeu2_m128i(base4, base2, res2);
+        src = &amp;src[32..];
+        i += 32;
+    }</pre>
+<p>When the <kbd>src</kbd> is less than 32 bytes, <kbd>hex_encode_sse4</kbd> is called on it, but we'll leave the details of that to the adventurous reader:</p>
+<pre>    let i = i as usize;
+    let _ = hex_encode_sse41(src, &amp;mut dst[i * 2..]);
+
+    Ok(str::from_utf8_unchecked(
+        &amp;dst[..src.len() * 2 + i * 2],
+    ))
+}</pre>
+<p>That was tough! If our aim here was to do more than get a flavor of the SIMD style of programming, then we'd probably need to work out by hand how these instructions work on a bit level. Is it worth it? This example comes from RFC 2325 (<a href="https://github.com/rust-lang/rfcs/blob/master/text/2325-stable-simd.md">https://github.com/rust-lang/rfcs/blob/master/text/2325-stable-simd.md</a>), <em>Stable SIMD</em>. Their benchmarking demonstrates that the fallback implementation we looked at first hashes at around 600 megabytes per second. The avx2 implementation hashes at 15,000 MB/s, a 60% performance bump. Not too shabby. And keep in mind that each CPU core comes equipped with SIMD capability. You could split such computations up among threads, too.</p>
+<p>Like atomic programming, SIMD is not a panacea or even especially easy. If you need the speed, though, it's worth the work.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

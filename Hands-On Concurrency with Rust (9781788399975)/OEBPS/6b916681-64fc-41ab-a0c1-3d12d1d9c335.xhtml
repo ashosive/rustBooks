@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style00.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style01.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Exercising the epoch-based Treiber stack</h1>
+                </header>
+            
+            <article>
+                
+<p>Let's put the crossbeam-epoch Treiber stack through the wringer to get an idea of the performance of this approach. Key areas of interest for us will be:</p>
+<ul>
+<li>Push/pop cycles per second</li>
+<li>Memory behavior, high-water mark, and what not</li>
+<li>cache behavior</li>
+</ul>
+<p>We'll run our programs on x86 and ARM, like we did in previous chapters. Our exercise program, similar to the hazard pointer program from the previous section:</p>
+<pre style="padding-left: 30px">extern crate crossbeam;
+#[macro_use]
+extern crate lazy_static;
+extern crate num_cpus;
+extern crate quantiles;
+
+use crossbeam::sync::TreiberStack;
+use quantiles::ckms::CKMS;
+use std::sync::Arc;
+use std::sync::atomic::{AtomicUsize, Ordering};
+use std::{thread, time};
+
+lazy_static! {
+    static ref WORKERS: AtomicUsize = AtomicUsize::new(0);
+    static ref COUNT: AtomicUsize = AtomicUsize::new(0);
+}
+static MAX_I: u32 = 67_108_864; // 2 ** 26
+
+fn main() {
+    let stk: Arc&lt;TreiberStack&lt;(u64, u64, u64)&gt;&gt; = Arc::new(TreiberStack::new());
+
+    let mut jhs = Vec::new();
+
+    let cpus = num_cpus::get();
+    WORKERS.store(cpus, Ordering::Release);
+
+    for _ in 0..cpus {
+        let stk = Arc::clone(&amp;stk);
+        jhs.push(thread::spawn(move || {
+            for i in 0..MAX_I {
+                stk.push((i as u64, i as u64, i as u64));
+                stk.pop();
+                COUNT.fetch_add(1, Ordering::Relaxed);
+            }
+            WORKERS.fetch_sub(1, Ordering::Relaxed)
+        }))
+    }
+
+    let one_second = time::Duration::from_millis(1_000);
+    let mut iter = 0;
+    let mut cycles: CKMS&lt;u32&gt; = CKMS::new(0.001);
+    while WORKERS.load(Ordering::Relaxed) != 0 {
+        let count = COUNT.swap(0, Ordering::Relaxed);
+        cycles.insert((count / cpus) as u32);
+        println!(
+            "CYCLES PER SECOND({}):\n  25th: \<br/>             {}\n  50th: {}\n  75th: \<br/>             {}\n  90th: {}\n  max:  {}\n",
+            iter,
+            cycles.query(0.25).unwrap().1,
+            cycles.query(0.50).unwrap().1,
+            cycles.query(0.75).unwrap().1,
+            cycles.query(0.90).unwrap().1,
+            cycles.query(1.0).unwrap().1
+        );
+        thread::sleep(one_second);
+        iter += 1;
+    }
+
+    for jh in jhs {
+        jh.join().unwrap();
+    }
+}</pre>
+<p>We have a number of worker threads equal to the total number of CPUs in the target machine, each doing one push and then an immediate pop on the stack. A <kbd>COUNT</kbd> is kept and the main thread swaps that value for 0 every second or so, tossing the value into a quantile estimate structure—discussed in more detail in <a href="5a332d94-37e4-4748-8920-1679b07e2880.xhtml" target="_blank">Chapter 4</a>, <em>Sync and Send<span> </span>–<span> </span>the Foundation of Rust Concurrency</em>—and printing out a summary of the recorded cycles per second, scaled to the number of CPUs. The worker threads cycle up through to <kbd>MAX_I</kbd>, which is arbitrarily set to the smallish value of <kbd>2**26</kbd>. When the worker is finished cycling, it decreases <kbd>WORKERS</kbd> and exits. Once <kbd>WORKERS</kbd> hits zero, the main loop also exits.</p>
+<p>On my x86 machine, it takes approximately 38 seconds for this program to exit, with this output:</p>
+<pre><strong>CYCLES PER SECOND(0):
+  25th: 0
+  50th: 0
+  75th: 0
+  90th: 0
+  max:  0
+
+CYCLES PER SECOND(1):
+  25th: 0
+  50th: 0
+  75th: 1739270
+  90th: 1739270
+  max:  1739270
+
+...
+
+CYCLES PER SECOND(37):
+  25th: 1738976
+  50th: 1739528
+  75th: 1740474
+  90th: 1757650
+  max:  1759459
+
+CYCLES PER SECOND(38):
+  25th: 1738868
+  50th: 1739528
+  75th: 1740452
+  90th: 1757650
+  max:  1759459</strong></pre>
+<p>Compare this to the x86 hazard implementation, which takes 58 total seconds. The x86 perf run is as follows:</p>
+<pre><strong>&gt; perf stat --event task-clock,context-switches,page-faults,cycles,instructions,branches,branch-misses,cache-references,cache-misses target/release/epoch_stack &gt; /dev/null
+
+ Performance counter stats for 'target/release/epoch_stack':
+
+     148830.337380      task-clock (msec)         #    3.916 CPUs utilized
+             1,043      context-switches          #    0.007 K/sec
+             1,039      page-faults               #    0.007 K/sec
+   429,969,505,981      cycles                    #    2.889 GHz
+   161,901,052,886      instructions              #    0.38  insn per cycle
+    27,531,697,676      branches                  #  184.987 M/sec
+       627,050,474      branch-misses             #    2.28% branches
+    11,885,394,803      cache-references          #   79.859 M/sec
+         1,772,308      cache-misses              #    0.015 % cache refs
+
+      38.004548310 seconds time elapsed</strong></pre>
+<p>The total number of executed instructions is much, much lower in the epoch-based approach, which squares well with the analysis in the opening discussion of this section. Even with a single hazardous pointer, epoch-based approaches do less work. On my ARM machine, it takes approximately 72 seconds for the program to run to completion, with this output:</p>
+<pre><strong>CYCLES PER SECOND(0):
+  25th: 0
+  50th: 0
+  75th: 0
+  90th: 0
+  max:  0
+
+CYCLES PER SECOND(1):
+  25th: 0
+  50th: 0
+  75th: 921743
+  90th: 921743
+  max:  921743
+
+...
+
+CYCLES PER SECOND(71):
+  25th: 921908
+  50th: 922326
+  75th: 922737
+  90th: 923235
+  max:  924084
+
+CYCLES PER SECOND(72):
+  25th: 921908
+  50th: 922333
+  75th: 922751
+  90th: 923235
+  max:  924084</strong></pre>
+<p>Compared to the ARM hazard implementation, which takes 463 total seconds! The ARM perf run is as follows:</p>
+<pre><strong>&gt; perf stat --event task-clock,context-switches,page-faults,cycles,instructions,branches,branch-misses,cache-references,cache-misses target/release/epoch_stack &gt; /dev/null
+
+ Performance counter stats for 'target/release/epoch_stack':
+
+     304880.898057      task-clock (msec)         #    3.959 CPUs utilized
+                 0      context-switches          #    0.000 K/sec
+               248      page-faults               #    0.001 K/sec
+   364,139,169,537      cycles                    #    1.194 GHz
+   215,754,991,724      instructions              #    0.59  insn per cycle
+    28,019,208,815      branches                  #   91.902 M/sec
+     3,525,977,068      branch-misses             #   12.58% branches
+   105,165,886,677      cache-references          #  344.941 M/sec
+     1,450,538,471      cache-misses              #    1.379 % cache refs
+
+      77.014340901 seconds time elapsed</strong></pre>
+<p>Again, drastically fewer instructions are executed compared to the hazard-pointer implementation on the same processor architecture. In passing, it's worth noting that the memory use of both the x86 and ARM versions' <kbd>epoch_stack</kbd> were lower than the hazard pointer stack implementations, though neither were memory hogs, consuming only a few kilobytes each. Had one of our epoch threads slept for a long while—say, a second or so—before leaving its epoch, memory use would have grown during execution. The reader is encouraged to wreak havoc on their own system.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

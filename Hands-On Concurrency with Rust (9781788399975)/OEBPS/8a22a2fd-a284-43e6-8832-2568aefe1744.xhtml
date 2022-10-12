@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">The Sender</h1>
+                </header>
+            
+            <article>
+                
+<p>Now that we've covered the <kbd>Receiver</kbd>, all that remains is the <kbd>Sender.</kbd> It's defined in <kbd>src/sender.rs</kbd>. The most important function in the <kbd>Sender</kbd> is <kbd>send.</kbd> The <kbd>Sender</kbd> follows the same disk/memory mode idea that <kbd>Receiver</kbd> uses but is more complicated in its operation. Let's dig in:</p>
+<pre>        let mut back_guard = self.mem_buffer.lock_back();
+        if (*back_guard).inner.total_disk_writes == 0 {
+            // in-memory mode
+            let placed_event = private::Placement::Memory(event);
+            match self.mem_buffer.push_back(placed_event, &amp;mut <br/>            back_guard) {
+                Ok(must_wake_receiver) =&gt; {
+                    if must_wake_receiver {
+                        let front_guard = self.mem_buffer.lock_front();
+                        self.mem_buffer.notify_not_empty(&amp;front_guard);
+                        drop(front_guard);
+                    }
+                }
+                Err(deque::Error::Full(placed_event)) =&gt; {
+                    self.write_to_disk(placed_event.extract().unwrap(), <br/>                    &amp;mut back_guard)?;
+                    (*back_guard).inner.total_disk_writes += 1;
+                }
+            }</pre>
+<p>Recall that the deque allows the holder of the back guard to smuggle state for coordination through it. We're seeing that pay off here. The <kbd>Sender</kbd>'s internal state is called <kbd>SenderSync</kbd> and is defined as follows:</p>
+<pre style="padding-left: 30px">pub struct SenderSync {
+    pub sender_fp: Option&lt;BufWriter&lt;fs::File&gt;&gt;,
+    pub bytes_written: usize,
+    pub sender_seq_num: usize,
+    pub total_disk_writes: usize,
+    pub path: PathBuf, // active fp filename
+}</pre>
+<p>Every sender thread has to be able to write to the current disk queue file, which <kbd>sender_fp</kbd> points to. Likewise, <kbd>bytes_written</kbd> tracks how many bytes have been, well, written to disk. The <kbd>Sender</kbd> must keep track of this value in order to correctly roll queue files over when they grow too large. <kbd>sender_seq_num</kbd> defines the name of the current writable queue file, being as they are named sequentially from zero on up. The key field for us is <kbd>total_disk_writes</kbd>. Notice that a memory write—<kbd>self.mem_buffer.push_back(placed_event, &amp;mut back_guard)</kbd>—might fail with a <kbd>Full</kbd> error. In that case, <kbd>self.write_to_disk</kbd> is called to write the <kbd>T</kbd> to disk, increasing the total number of disk writes. This write mode was prefixed with a check into the cross-thread <kbd>SenderSync</kbd> to determine if there were outstanding disk writes. Remember, at this point, the <kbd>Receiver</kbd> has no way to determine that there has been an additional write go to disk; the sole communication channel with the <kbd>Receiver</kbd> is through the in-memory deque. To that end, the next <kbd>Sender</kbd> thread will flip into a different write mode:</p>
+<pre>        } else {
+            // disk mode
+            self.write_to_disk(event, &amp;mut back_guard)?;
+            (*back_guard).inner.total_disk_writes += 1;
+            assert!((*back_guard).inner.sender_fp.is_some());
+            if let Some(ref mut fp) = (*back_guard).inner.sender_fp {
+                fp.flush().expect("unable to flush");
+            } else {
+                unreachable!()
+            }
+            if let Ok(must_wake_receiver) = self.mem_buffer.push_back(
+                private::Placement::Disk(<br/>                    (*back_guard).inner.total_disk_writes<br/>                ),
+                &amp;mut back_guard,
+            ) {
+                (*back_guard).inner.total_disk_writes = 0;
+                if must_wake_receiver {
+                    let front_guard = self.mem_buffer.lock_front();
+                    self.mem_buffer.notify_not_empty(&amp;front_guard);
+                    drop(front_guard);
+                }
+            }
+        }</pre>
+<p>Once there's a single write to disk, the <kbd>Sender</kbd> flips into disk preferential write mode. At the start of this branch the <kbd>T</kbd> goes to disk, is flushed. Then, the <kbd>Sender</kbd> attempts to push a <kbd>Placement::Disk</kbd> onto the in-memory deque, which may fail if the <kbd>Receiver</kbd> is slow or unlucky in its scheduling assignment. Should it succeed, however, the <kbd>total_disk_writes</kbd> is set to zero—there are no longer any outstanding disk writes—and the <kbd>Receiver</kbd> is woken if need be to read its new events. The next time a <kbd>Sender</kbd> thread rolls through it may or may not have space in the in-memory deque to perform a memory placement but that's the next thread's concern.</p>
+<p>That's the heart of <kbd>Sender</kbd>. While there is another large function in-module, <kbd>write_to_disk</kbd>, we won't list it here. The implementation is primarily book-keeping inside a mutex, a topic that has been covered in detail in this and the previous chapter, plus filesystem manipulation. That said, the curious reader is warmly encouraged to read through the code.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

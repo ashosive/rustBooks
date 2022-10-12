@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">The unsafe directive</h1>
+                </header>
+            
+            <article>
+                
+<p>We have seen many times so far the lengths to which the Rust compiler will go to ensure the code you have written will not only compile, but is also not going to do something stupid (such as exceed the bounds of an array, use the wrong type, or plain use a variable that has not been given a value first).</p>
+<p>This is known as <em>safe</em> code. That's not to say that all safe code is good code—you can still end up with memory leaks, integer overflows, or threading deadlocks which you don't want, but aren't actually defined as unsafe.</p>
+<p>In Rust, <kbd>unsafe</kbd> surrounding code means exactly that—you're telling the compiler that you know what you're writing is to be ignored by the inbuilt protection.</p>
+<p>Using <kbd>unsafe</kbd> should only be done with care. We will come across <kbd>unsafe</kbd> later.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Using where</h1>
+                </header>
+            
+            <article>
+                
+<p>If you're used to programming using generics in C#, this should be familiar to you.</p>
+<p>Rust contains an implementation of <kbd>where</kbd>, so we are able to define what <kbd>where</kbd> is. This means that, as we had in an earlier example for this chapter, the construct <kbd>&lt;T: Mul&lt;Output = T&gt;&gt;</kbd> can be used in a modified way:</p>
+<pre class="mce-root">impl&lt;T&gt; Calculate&lt;T&gt; for Shape&lt;T&gt; where T: Mul&lt;Output = T&gt;</pre>
+<p>This does, though, give rise to a number of other issues. Two simple ones are that we multiply by <kbd>2</kbd>—however, that value isn't clear if it's <kbd>2u8</kbd> or <kbd>2i32</kbd>. We also try to add values together, but as with multiplying <kbd>T</kbd> together, there is no guarantee you can add by <kbd>T</kbd>.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

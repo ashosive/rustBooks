@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Making a channel</h1>
+                </header>
+            
+            <article>
+                
+<p>An elegant code pattern is shown in the following code snippet, where the channel is created in the <kbd>make_chan()</kbd> function, which returns the receiving endpoint for the calling code:</p>
+<pre>// code from Chapter 9/code/make_channel.rs: 
+use std::sync::mpsc::channel; 
+use std::sync::mpsc::Receiver; 
+<strong>fn make_chan() -&gt; Receiver&lt;i32&gt; {</strong><strong>    let (tx, rx) = channel();</strong><strong>    tx.send(7).unwrap();</strong><strong>    rx</strong><strong>}</strong> 
+fn main() { 
+    let rx = make_chan(); 
+<strong>    if let Some(msg) = rx.recv().ok() {</strong> 
+      println!("received message {}", msg); 
+    }; 
+} </pre>
+<p>This prints out the following:</p>
+<pre><strong>received message 7</strong></pre>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

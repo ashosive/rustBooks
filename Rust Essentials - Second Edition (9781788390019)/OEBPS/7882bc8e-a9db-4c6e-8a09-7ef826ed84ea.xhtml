@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Using std::mem</h1>
+                </header>
+            
+            <article>
+                
+<p>In <kbd>unsafe</kbd> code, the use of the modules <kbd>std::mem</kbd> (which contains functions to work with memory at a low level) and <kbd>std::ptr</kbd> (which contains functions to work with raw pointers) is common, as we saw with <kbd>std::mem::transmute</kbd>.</p>
+<p>Here are some more examples.</p>
+<p>To swap two variables by explicitly using pointers, use <kbd>std::mem::swap</kbd> like this:</p>
+<pre>   // code from Chapter 10/code/swap.rs: 
+use std::mem; 
+ 
+fn main() { 
+   let mut n = 0; 
+   let mut m = 1;  
+   mem::swap(&amp;mut n, &amp;mut m); 
+   println!("n: {} m: {}", n, m); 
+} </pre>
+<p>This prints out the following:</p>
+<pre><strong>n: 1 m: 0</strong></pre>
+<p>As another example, the <kbd>mem::size_of_val()</kbd> function from the <kbd>mem</kbd> module takes a reference to a value and returns the number of bytes it occupies in memory. <kbd>mem::size_</kbd> of returns the size of the given type in bytes as a <kbd>u8</kbd>. For an example of its use, see the following code:</p>
+<pre>// code from Chapter 10/code/size_of_val.rs:                         use std::mem; 
+fn main() { 
+    let arr = ["Rust", "Go", "Swift"]; 
+    println!("array arr occupies {} bytes", mem::size_of_val(&amp;arr)); 
+println!("The size of an isize: {} bytes", mem::size_of::&lt;isize&gt;()); 
+} </pre>
+<p>This prints out the following:</p>
+<pre><strong>array arr occupies 48 bytes
+The size of an isize: 8 bytes</strong></pre>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

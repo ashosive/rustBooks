@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Mutability, Ownership, and Pure Functions</h1>
+                </header>
+            
+            <article>
+                
+<div class="page">
+<div class="layoutArea">
+<div class="column">
+<ol>
+<li>What does <kbd>Rc</kbd> stand for?</li>
+</ol>
+<p style="padding-left: 60px"><kbd>Rc</kbd> stands for Reference Counted.</p>
+<ol start="2">
+<li>What does <kbd>Arc</kbd> stand for?</li>
+</ol>
+<p style="padding-left: 60px"><kbd>Arc</kbd> stands for Atomically Reference Counted.</p>
+<ol start="3">
+<li>What is a weak reference?</li>
+</ol>
+<p style="padding-left: 60px">A weak reference is a reference that is not reference counted or otherwise managed.</p>
+<ol start="4">
+<li>Which superpowers are enabled in unsafe blocks?</li>
+</ol>
+<p style="padding-left: 60px">In an unsafe block, you can dereference a raw pointer, call an unsafe function or method, access or modify a mutable static variable, or implement and unsafe trait.</p>
+<ol start="5">
+<li>When will an object be dropped?</li>
+</ol>
+<p style="padding-left: 60px">An object will be dropped when its owner is dropped or goes out of scope.</p>
+<ol start="6">
+<li>What is the difference between lifetimes and ownership?</li>
+</ol>
+<p style="padding-left: 60px">Lifetimes are a compile-time check. Ownership is a compile-time as well as runtime concept. Both concepts describe the tracking of variables, values, and whether and who uses them.</p>
+<ol start="7">
+<li>How can you be sure that a function is safe?</li>
+</ol>
+<p style="padding-left: 60px">In Rust, there is no way to declare the absence of unsafe behavior in functions.</p>
+<ol start="8">
+<li>What is memory corruption and how would it affect a program?</li>
+</ol>
+<p style="padding-left: 60px">There are two types of memory corruption—physical memory corruption and software memory corruption. If your physical memory is corrupted, then you need to replace your hardware. Software memory corruption refers to anything the program has done to destroy the semantic structure of its own program. When memory is corrupted, everything goes wrong; this is one of the hardest classes of bugs to diagnose and treat.</p>
+</div>
+</div>
+</div>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

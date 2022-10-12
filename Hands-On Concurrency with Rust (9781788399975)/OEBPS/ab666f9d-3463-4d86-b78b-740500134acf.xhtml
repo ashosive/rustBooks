@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">The flaw of the Ring</h1>
+                </header>
+            
+            <article>
+                
+<p>Let's explore what's going wrong here. Our ring is laid out in memory as a contiguous block and we have a few control variables hung off the side. Here's a diagram of the system before any reads or writes happen:</p>
+<pre style="padding-left: 30px">size: 0
+capacity: 5
+
+ rdr
+ |
+|0: None |1: None |2: None |3: None |4: None |
+ |
+ wrt</pre>
+<p>Here's a diagram of the system just after the writer has written its first value:</p>
+<pre style="padding-left: 30px">size: 0
+capacity: 5
+
+ rdr
+ |
+|0: Some(0) |1: None |2: None |3: None |4: None |
+             |
+             wrt</pre>
+<p>To do this, the writer has performed a load of both size and capacity, performed a comparison between then, written to its offset inside the block, and incremented size. None of these operations are guaranteed to be ordered as they are in the program, either due to speculative execution or compiler reordering. As we've seen in the previous run example, the writer has stomped its own writes and raced well ahead. How? Consider what happens when the execution of the reader and writer are interleaved in this setup:</p>
+<pre style="padding-left: 30px">size: 5
+capacity: 5
+
+ rdr
+ |
+|0: Some(5) |1: Some(6) |2: Some(7) |3: Some(8) |4: Some(9) |
+ |
+ wrt</pre>
+<p>The writer thread has looped through the ring twice and is poised at the start of the ring to write <kbd>10</kbd>. The reader has been through the ring once and is expecting to see <kbd>5</kbd>. Consider what happens if the reader's decrement of size makes it into main memory before the <kbd>mem::replace</kbd> happens. Imagine if, then, the writer is woken up just as its size and capacity is checked. Imagine if, in addition to that, the writer writes its new <kbd>cur</kbd> to the main memory before the reader wakes back up. You'll get this situation:</p>
+<pre style="padding-left: 30px">size: 5
+capacity: 5
+
+ rdr
+ |
+|0: Some(10) |1: Some(6) |2: Some(7) |3: Some(8) |4: Some(9) |
+              |
+              wrt</pre>
+<p>That's what we see in practice. Sometimes. Here's the trick with concurrent programming at the metal of the machine: you're dealing with probabilities. It's entirely possible for our program to run successfully or, worse, run successfully on one CPU architecture and not on another. Randomized testing and introspection of programs like this are <em>vital</em>. In fact, back in <a href="5f3aec9d-fd53-48ff-9ba8-43ce13e91cff.xhtml" target="_blank">Chapter 1</a>, <em>Preliminaries – Machine Architecture and Getting Started with Rust</em>, we discussed a <kbd>valgrind</kbd> suite tool called <kbd>helgrind</kbd>, but didn't have a real use for it then. We do now. What does <kbd>helgrind</kbd> have to say about our intentionally racey program?</p>
+<p>We'll run <kbd>helgrind</kbd> like so:</p>
+<pre><strong>&gt; valgrind --tool=helgrind --history-level=full --log-file="results.txt" ./data_race00</strong></pre>
+<p>This will print the full history of the program but place the results in a file on disk for easier inspection. Here's some of the output:</p>
+<pre><strong>==19795== ----------------------------------------------------------------
+==19795==
+==19795== Possible data race during write of size 4 at 0x621A050 by thread #3
+==19795== Locks held: none
+==19795==    at 0x10F8E2: data_race00::writer::h4524c5c44483b66e (in /home/blt/projects/us/troutwine/concurrency_in_rust/external_projects/data_races/data_race00)
+==19795==    by 0x10FE75: _ZN3std10sys_common9backtrace28__rust_begin_short_backtrace17ha5ca0c09855dd05fE.llvm.5C463C64 (in /home/blt/projects/us/troutwine/concurrency_in_rust/external_projects/data_races/data_race00)
+==19795==    by 0x12668E: __rust_maybe_catch_panic (lib.rs:102)
+==19795==    by 0x110A42: _$LT$F$u20$as$u20$alloc..boxed..FnBox$LT$A$GT$$GT$::call_box::h6b5d5a2a83058684 (in /home/blt/projects/us/troutwine/concurrency_in_rust/external_projects/data_races/data_race00)
+==19795==    by 0x1191A7: call_once&lt;(),()&gt; (boxed.rs:798)
+==19795==    by 0x1191A7: std::sys_common::thread::start_thread::hdc3a308e21d56a9c (thread.rs:24)
+==19795==    by 0x112408: std::sys::unix::thread::Thread::new::thread_start::h555aed63620dece9 (thread.rs:90)
+==19795==    by 0x4C32D06: mythread_wrapper (hg_intercepts.c:389)
+==19795==    by 0x5251493: start_thread (pthread_create.c:333)
+==19795==    by 0x5766AFE: clone (clone.S:97)
+==19795==
+==19795== This conflicts with a previous write of size 8 by thread #2
+==19795== Locks held: none
+==19795==    at 0x10F968: data_race00::reader::h87e804792f6b43da (in /home/blt/projects/us/troutwine/concurrency_in_rust/external_projects/data_races/data_race00)
+==19795==    by 0x12668E: __rust_maybe_catch_panic (lib.rs:102)
+==19795==    by 0x110892: _$LT$F$u20$as$u20$alloc..boxed..FnBox$LT$A$GT$$GT$::call_box::h4b5b7e5f469a419a (in /home/blt/projects/us/troutwine/concurrency_in_rust/external_projects/data_races/data_race00)
+==19795==    by 0x1191A7: call_once&lt;(),()&gt; (boxed.rs:798)
+==19795==    by 0x1191A7: std::sys_common::thread::start_thread::hdc3a308e21d56a9c (thread.rs:24)
+==19795==    by 0x112408: std::sys::unix::thread::Thread::new::thread_start::h555aed63620dece9 (thread.rs:90)
+==19795==    by 0x4C32D06: mythread_wrapper (hg_intercepts.c:389)
+==19795==    by 0x5251493: start_thread (pthread_create.c:333)
+==19795==    by 0x5766AFE: clone (clone.S:97)
+==19795==  Address 0x621a050 is in a rw- anonymous segment
+==19795==
+==19795== ----------------------------------------------------------------</strong></pre>
+<p>The output is less clear than it might be, but helgrind is warning us about the data stomping that we're already aware of. The reader is encouraged to run helgrind for themselves and inspect the whole history.</p>
+<p>Let's improve this situation. Clearly, we have a problem with racing reads and writes, but we also have a problem in terms of the behavior of the writer. It stomps its own writes and is entirely unaware of it. With an adjustment to the writer, we can stop absent-mindedly stomping on writes as follows:</p>
+<pre>fn writer(mut ring: Ring) -&gt; () {
+    let mut offset: isize = 0;
+    let mut cur: u32 = 0;
+    loop {
+        unsafe {
+            if (*ring).size != ((*ring).capacity as usize) {
+                assert!(mem::replace(&amp;mut *(*ring).data.offset(offset), <br/>                Some(cur)).is_none());
+                (*ring).size += 1;
+                cur = cur.wrapping_add(1);
+                offset += 1;
+                offset %= (*ring).capacity;
+            } else {
+                thread::yield_now();
+            }
+        }
+    }
+}</pre>
+<p>Afterwards, we run the program a few times and find the following:</p>
+<pre><strong>&gt; ./data_race01
+thread '&lt;unnamed&gt;thread '' panicked at '&lt;unnamed&gt;assertion failed: mem::replace(&amp;mut *(*ring).data.offset(offset), Some(cur)).is_none()' panicked at '', assertion failed: `(left == right)`
+  left: `20`,
+   right: `10`data_race01.rs', :data_race01.rs65::8517:
+   17note: Run with `RUST_BACKTRACE=1` for a backtrace.
+
+thread 'main' panicked at 'called `Result::unwrap()` on an `Err` value: Any', libcore/result.rs:945:5</strong></pre>
+<p>That's fun! Both threads have crashed for the same reason. The writer has inappropriately stomped a write and the reader has read it.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

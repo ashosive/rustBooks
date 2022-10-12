@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style00.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style01.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Structs</h1>
+                </header>
+            
+            <article>
+                
+<p>Often you need to keep several values of possibly different types together in your program, for example, the scores of the players. Let us say that the <kbd>score</kbd> contains numbers indicating the <kbd>health</kbd> of the players and the level at which they are playing. The first thing you can do to clarify your code is to give these tuples a common name, like:</p>
+<pre>struct Score; </pre>
+<p>Or better still, indicate the types of the values:</p>
+<pre>struct Score(i32, u8); </pre>
+<p>And we can make a score like this:</p>
+<pre>// from Chapter 4/code/structs.rs 
+let score1 = Score(73, 2); </pre>
+<p>These are called <strong>tuple structs</strong> because they resemble tuples very much.The values contained in them can be extracted like this:</p>
+<pre>let Score(h, l) = score1; // destructure the tuple 
+println!("Health {} - Level {}", h, l); </pre>
+<p>This prints the following output:</p>
+<pre>    <strong>Health 73 - Level 2</strong>  </pre>
+<p>A tuple struct with only one field (called a <strong>newtype)</strong> gives us the possibility to create a new type based on an old one, so that both have the same memory representation. Here is an example:</p>
+<pre>struct Kilograms(u32); 
+let weight = Kilograms(250); 
+let Kilograms(kgm) = weight; // extracting kgm 
+println!("weight is {} kilograms", kgm); </pre>
+<p>This prints the following output:</p>
+<pre>    <strong>weight is 250 kilograms</strong>  </pre>
+<p>But with these structs we still have to remember what these numbers mean, and to which player they belong. We can make coding much simpler by defining a struct with <strong>named fields</strong>:</p>
+<pre>struct Player { 
+    nname: &amp;'static str, // nickname 
+    health: i32, 
+    level: u8 
+} </pre>
+<p>This could be defined inside <kbd>main()</kbd> or outside of it, which is the preferred way.</p>
+<p>Now we can make <kbd>Player</kbd> instances or objects like this:</p>
+<pre>let mut pl1 = Player{nname: "Dzenan", health: 73, level: 2}; </pre>
+<p>Note the <kbd>{ }</kbd> (curly braces) around the object, and the key value syntax. The field <kbd>nname</kbd> is a constant string, and Rust requires that we indicate its lifetime, that is how long this string will be needed in the program. We used the global scope.</p>
+<p>We can access the fields of the instance with the dot notation:</p>
+<pre>println!("Player {} is at level {}", pl1.nname, pl1.level); </pre>
+<p>This produces the following output:</p>
+<pre>    <strong>Player 1 Dzenan is at level 2</strong> </pre>
+<p>The variable ;<kbd>struct</kbd> has to be declared as mutable if the field values can change, for example, when the player enters a new level:</p>
+<pre>pl1.level = 3; </pre>
+<p>By convention the name of a <kbd>struct</kbd> always starts with a capital letter and follows <em>CamelCase</em>. It also defines a type of its own, composed of the types of its items.</p>
+<p>You can define a new instance <kbd>struct</kbd> starting from an existing one like this:</p>
+<pre>let pl2 = Player{ nname: "Ivo", ..pl1 }; 
+println!("Player 2 {} is at level {}", pl2.nname, pl2.level); </pre>
+<p>This produces the following output:</p>
+<pre>    <strong>Player 2 Ivo is at level 3</strong>  </pre>
+<p>Like tuples, structs can also be destructured in a <kbd>let</kbd> binding, for example:</p>
+<pre>let Player{health: ht, nname: nn, ..} = pl1; 
+println!("Player {} has health {}", nn, ht); </pre>
+<p>This prints out the following output:</p>
+<pre>    <strong>Player Dzenan has health 73</strong> </pre>
+<p>This shows that you can rename fields, reorder them if you want, or leave fields out with pointers indicated with <kbd>&amp;</kbd>, and do automatic dereferencing when accessing data structure elements, like here:</p>
+<pre>let ps = &amp;Player{ nname: "John", health: 95, level: 1 }; 
+println!("{} == {}", ps.nname, (*ps).nname); </pre>
+<p>This prints out the following output:</p>
+<pre>    <strong>John == John</strong>  </pre>
+<p>The structs are quite similar to records, or structs in C or even classes in other languages. In <a href="2535f67f-e1a7-4ef7-af15-dcebffd38149.xhtml"><span class="ChapterrefPACKT">Chapter 6</span></a>, <em>Using Traits and OOP in Rust</em>, we will see how we can define methods on structs, in particular how to define a constructor <kbd>new</kbd> like in object-oriented languages.</p>
+<div class="packt_infobox"><span class="packt_screen">Exercise</span>:<span class="packt_screen"><br/></span>(see code in <kbd>Chapter 4/exercises/monster.rs</kbd>)<br/>
+Define a struct <kbd>Monster</kbd> with fields <kbd>health</kbd> and <kbd>damage</kbd>. Make a <kbd>Monster</kbd> and show its condition.</div>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

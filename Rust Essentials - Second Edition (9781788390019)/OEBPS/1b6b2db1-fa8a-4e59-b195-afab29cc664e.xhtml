@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Static and dynamic dispatch</h1>
+                </header>
+            
+            <article>
+                
+<p>Our function <kbd>sqroot</kbd> from the previous section is generic and works for any <kbd>Float</kbd> type. The compiler creates a different executable <kbd>sqroot</kbd> method for any type it is supposed to work with, in this case the <kbd>f32</kbd> and <kbd>f64</kbd> type. Rust applies this mechanism when a function call is <strong>polymorphic</strong>, that is when a function can accept arguments of different type. This is called static dispatch (also called compile-time polymorphism) and there is no runtime overhead involved. This is in contrast to how Java interfaces work, where the dispatching is done dynamically in runtime by the JVM. However Rust also has a form of dynamic dispatch (also called runtime polymorphism), using so called <strong>trait objects</strong>.</p>
+<p>For an example of static and dynamic dispatch, see the following code snippet:</p>
+<pre>// see code in Chapter 6/code/dispatch.rs 
+struct Circle; 
+struct Triangle; 
+ 
+trait Figure { 
+    fn print(&amp;self); 
+} 
+ 
+impl Figure for Circle { 
+    fn print(&amp;self) { 
+        println!("Circle"); 
+    } 
+} 
+ 
+impl Figure for Triangle { 
+    fn print(&amp;self) { 
+        println!("Triangle"); 
+    } 
+} 
+ 
+// static dispatch with trait bounds 
+fn log&lt;T: Figure&gt;(figure: &amp;T) { 
+    figure.print(); 
+} 
+ 
+// dynamic dispatch: function takes a trait object 
+fn logd(figure: &amp;Figure) { 
+    figure.print(); 
+} 
+ 
+fn main() { 
+// static dispatch 
+    let circle   = Circle; 
+    let triangle = Triangle; 
+     
+    log(&amp;circle); 
+    log(&amp;triangle); 
+ 
+// dynamic dispatch:  
+    let mut figures: Vec*Box*Figure** = Vec::new(); 
+    figures.push(Box::new(Circle)); 
+    figures.push(Box::new(Triangle)); 
+     
+    // the precise type of figure can only be known at runtime: 
+    for figure in figures { 
+        logd(&amp;*figure); 
+    } 
+} </pre>
+<p>This produces the following output:</p>
+<pre>    <strong>Circle</strong>
+    <strong>Triangle</strong>
+    <strong>Circle</strong>
+    <strong>Triangle</strong>  </pre>
+<p>With static dispatch, there is a compiled version for each specific type for which the function is called. These calls can be inlined, which guarantees the best performance. On the other hand the binary code size is increased. Dynamic dispatch is used when the precise type on which a function is called can only be known at runtime. In our example the trait object is a reference to an instance implementing the <kbd>Figure</kbd> trait. Because calls are resolved at runtime, dynamic dispatch is not so performant as its static variant, but sometimes there is no other option.</p>
+<div class="packt_infobox">More detailed info can be found at <a href="https://doc.rust-lang.org/1.0.0-beta/book/static-and-dynamic-dispatch.html"><span class="URLPACKT">https://doc.rust-lang.org/1.0.0-beta/book/static-and-dynamic-dispatch.html</span></a>.</div>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

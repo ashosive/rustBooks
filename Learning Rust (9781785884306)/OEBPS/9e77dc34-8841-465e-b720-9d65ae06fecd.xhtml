@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">What is the move parameter?</h1>
+                </header>
+            
+            <article>
+                
+<p>The <kbd>move</kbd> parameter forces the closure to take ownership of whatever is contained within. Let's look at that a bit closer:</p>
+<pre>let myNum = 10; 
+let myMove = move |x: i32| x + myNum; </pre>
+<p>Here, <kbd>myMove</kbd> takes ownership of <kbd>myNum</kbd>. The value of <kbd>myNum</kbd> implements <kbd>Copy</kbd>, which is assigned to the binding. This is the same as the operation of any variable, so there has to be something to differentiate <kbd>move</kbd> from anything else.</p>
+<p>Let's look at a slightly different example and see if we can see what is actually going on:</p>
+<pre>let mut myMutNum = 10; 
+{ 
+    let mut subNum = |x: i32| num -= x; 
+    subNum(3);  
+} </pre>
+<p>We've seen this before, so it should not be too hard to understand. This would give the answer <kbd>7</kbd>. If we used <kbd>move</kbd>, however, the answer may not be as expected:</p>
+<pre>fn main()  
+{ 
+    let mut my_mut_num = 10; 
+    { 
+        let mut sub_num = move |x: i32| my_mut_num -= x; 
+        sub_num(3);  
+    } 
+    println!("{}", my_mut_num); 
+} </pre>
+<div class="packt_infobox">The code for this example is in <kbd>Chapter 11/move_closure_one</kbd>.</div>
+<p>When compiled, you may expect the answer <kbd>7</kbd>, but instead you get:</p>
+<div class="CDPAlignCenter CDPAlign"><img class=" image-border" src="Images/3d13f16b-ae7c-48f5-b290-81653f46f377.png" width="1146" height="146"/></div>
+<div class="CDPAlignCenter CDPAlign packt_figref">Figure 12</div>
+<p>How can we have a value of <kbd>10</kbd>?</p>
+<p>In the nonmove version, we borrow the value of the mutable. With <kbd>move</kbd>, we take ownership of a copy. In practical terms, we have created a completely new stack frame for the closure. The <kbd>sub_num()</kbd> call is still being executed, but when it is called, the value returned is not the expected one, but the ownership of the copy of the original value (<kbd>10</kbd>).</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

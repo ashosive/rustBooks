@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Using enumerate</h1>
+                </header>
+            
+            <article>
+                
+<p>A <kbd>loop</kbd> condition can also be more complex, using multiple conditions and variables. For example, the <kbd>for</kbd> loop can be tracked using <kbd>enumerate</kbd>. This will keep track of how many times the loop has executed, as shown here:</p>
+<pre>for(i, j) in (10..20).enumerate() 
+{ 
+     println!("loop has executed {} times. j = {}", i, j); 
+} </pre>
+<p>The following is the output:</p>
+<div class="packt_figure CDPAlignCenter CDPAlign"><img class=" image-border" src="Images/b5d7aca4-5e98-4388-b14d-47e74146d2ee.png" width="1170" height="368"/></div>
+<p>Say we have an array that we need to iterate over to obtain the values. Here, the <kbd>enumerate</kbd> method can be used to obtain the value of the array members. The value returned in the condition will be a reference, so a code such as the one shown in the following example will fail to execute (<kbd>line</kbd> is a <kbd>&amp;</kbd> reference whereas an <kbd>i32</kbd> is expected):</p>
+<pre>// 04/enumerate/src/main.rs<br/>fn main()  
+{ 
+    let my_array: [i32; 7] = [1i32,3,5,7,9,11,13]; 
+    let mut value = 0i32; 
+    for(_, line) in my_array.iter().enumerate() 
+    { 
+       value += line; 
+    } 
+    println!("{}", value); 
+} </pre>
+<p>This can be simply converted back from the reference value, as follows:</p>
+<pre>for(_, line) in my_array.iter().enumerate() 
+    { 
+       value += *line; 
+    } </pre>
+<p>The <kbd>iter().enumerate()</kbd> method can equally be used with the <kbd>Vec</kbd> type (or any other type that implements the iterator trait), as shown in the following code:</p>
+<pre>// 04/arrayloop/src/main.rs<br/>fn main()  
+{ 
+    let my_array = vec![1i32,3,5,7,9,11,13]; 
+    let mut value = 0i32; 
+ 
+    for(_,line) in my_array.iter().enumerate() 
+    { 
+       value += *line; 
+    } 
+    println!("{}", value); 
+} 
+ </pre>
+<p>In both cases, the value given at the end will be <kbd>49</kbd>, as shown in the following screenshot:</p>
+<div class="packt_figure CDPAlignCenter CDPAlign"><img class=" image-border" src="Images/2f3f235c-34f6-4f1d-b8a2-d75db450f5da.png" width="1140" height="190"/></div>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">OOP in Rust</h1>
+                </header>
+            
+            <article>
+                
+<p>While there is no unique definition of what object-orientation in a programming language is, it is clear by now that in Rust you can express several important OO-concepts.</p>
+<ul>
+<li>Objects with data (their state) and methods (their behavior):
+<ul>
+<li class="packt_nosymbol">Rust has these--structs (and other types such as enums) have data and <kbd>impl</kbd> blocks provide methods on them. The definitions of structure and behavior are separate.</li>
+</ul>
+</li>
+<li>Encapsulation of data and implementation:
+<ul>
+<li class="packt_nosymbol">In other words--external code can only change or interact with an object through its public methods. In Rust by default everything is private, so not accessible from the outside. You can decide which types, functions, methods and modules are public by adding a <kbd>pub</kbd> keyword before their definition. For more detail, see <a href="d271499e-5fd5-48a4-8395-e5efedc8a482.xhtml"><span class="ChapterrefPACKT">Chapter 8</span></a>, <em>Organizing Code and Macros</em> in the section, <em>Visibility of items</em>.</li>
+</ul>
+</li>
+<li>Inheritance to promote code reuse and use polymorphism:
+<ul>
+<li class="packt_nosymbol">In Rust, inheritance, strictly speaking, does not exist: a struct cannot inherit its fields or methods from another struct. But the implementation of traits by structs can almost provide the same benefits. Indeed traits can inherit from other traits; see the next section <em>Inheritance with traits</em>.</li>
+</ul>
+</li>
+</ul>
+<p>Code reuse among structs can be obtained by letting them implement the same trait(s), because then they share the methods with default code from these trait(s). Polymorphism means objects of a different type can be treated as of one type, because they inherit from the same supertype or implement the same interface. As we saw in the section on <em>Static and Dynamic Dispatch</em>, Rust has trait objects to work with values of any type, as long as these values implement a particular trait.</p>
+<p>We can conclude that, although the concept of a class and inheritance between classes is not present in Rust, nevertheless Rust enables the most important object-oriented concepts, more than in many other languages.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

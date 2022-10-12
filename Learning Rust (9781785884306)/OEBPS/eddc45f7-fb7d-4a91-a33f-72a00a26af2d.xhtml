@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">The for loop</h1>
+                </header>
+            
+            <article>
+                
+<p>The <kbd>for</kbd> loops are slightly different from the same construct in C-like languages. In C, the <kbd>for</kbd> loops consist of three things: an initialization, a stopping condition, and a stepping instruction. Rust <kbd>for</kbd> loops are a bit higher-level though: they are for iterating through sequences.</p>
+<p>Let's take a simple example to start with—a loop that goes from 0 to 10 and outputs the value:</p>
+<pre>for x in 0..10 
+{ 
+    println!("{},", x); 
+} </pre>
+<p>We create a variable <kbd>x</kbd> that takes an element from the range (<kbd>0..10</kbd>), one by one, and does something with it. In Rust terminology, <kbd>0..10</kbd> is not only a variable but also an <strong>iterator</strong>, as it gives back a value from a series of elements.</p>
+<p>This is obviously a very simple example. We can also define the iterator to work in the opposite direction. In C, you will expect something akin to <kbd>for (i = 10; i &gt; 0; --i)</kbd>. In Rust, we use the <kbd>rev()</kbd> method to reverse the iterator, as follows:</p>
+<pre>for x in (0..10).rev() 
+{ 
+    println!("{},", x); 
+}  </pre>
+<p>It is worth noting that the range excludes the last number. So, for the previous example, the values outputted are <kbd>9</kbd> to <kbd>0</kbd>; essentially, the program generates the output values from 0 to 10 and then outputs them in reverse.</p>
+<p>The general syntax for the <kbd>for</kbd> loops is as follows:</p>
+<pre><span>for var in sequence<br/></span>{ 
+    // do something 
+}   </pre>
+<p>The C# equivalent for the preceding code is as follows:</p>
+<pre>foreach(var t in conditionsequence) 
+     // do something  </pre>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style00.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style01.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">crossbeam_epoch::Atomic</h1>
+                </header>
+            
+            <article>
+                
+<p>Let's dig in with the holder of our data, <kbd>Atomic</kbd>. This structure is from the crossbeam_epoch library and its implementation is in <kbd>src/atomic.rs</kbd>:</p>
+<pre style="padding-left: 30px">pub struct Atomic&lt;T&gt; {
+    data: AtomicUsize,
+    _marker: PhantomData&lt;*mut T&gt;,
+}
+
+unsafe impl&lt;T: Send + Sync&gt; Send for Atomic&lt;T&gt; {}
+unsafe impl&lt;T: Send + Sync&gt; Sync for Atomic&lt;T&gt; {}</pre>
+<p>The representation is a little odd: why not <kbd>data: *mut T</kbd>? Crossbeam's developers have done something neat here. On modern machines, there's a fair bit of space inside of pointer to store information, in the least significant bits. Consider that if we point only to aligned data, the address of a bit of memory will be multiples of 4 on a 32-bit system, or multiples of 8 on a 64-bit system. This leaves either two zero bits at the end of a pointer on 32-bit systems or three zero bits on a 64-bit system. Those bits can store information, called a tag. The fact that <kbd>Atomic</kbd> can be tagged will come into play. But, Rust doesn't allow us to manipulate pointers in the fashion of other systems programming languages. To that end, and because <kbd>usize</kbd> is the size of the machine word, crossbeam stores its <kbd>*mut T</kbd> as a <kbd>usize</kbd>, allowing for tagging of the pointer. Null <kbd>Atomics</kbd> are equivalent to tagged pointers to zero:</p>
+<pre>    pub fn null() -&gt; Atomic&lt;T&gt; {
+        Self {
+            data: ATOMIC_USIZE_INIT,
+            _marker: PhantomData,
+        }
+    }</pre>
+<p>New <kbd>Atomic</kbd>s are created by passing <kbd>T</kbd> down through <kbd>Owned</kbd>—which we saw previously—and then converting from that <kbd>Owned</kbd>:</p>
+<pre>    pub fn new(value: T) -&gt; Atomic&lt;T&gt; {
+        Self::from(Owned::new(value))
+    }</pre>
+<p><kbd>Owned</kbd> boxes <kbd>T</kbd>, performing a heap allocation:</p>
+<pre style="padding-left: 30px">impl&lt;T&gt; Owned&lt;T&gt; {
+    pub fn new(value: T) -&gt; Owned&lt;T&gt; {
+        Self::from(Box::new(value))
+    }</pre>
+<p>And subsequently converts that box into <kbd>*mut T</kbd>:</p>
+<pre style="padding-left: 30px">impl&lt;T&gt; From&lt;Box&lt;T&gt;&gt; for Owned&lt;T&gt; {
+    fn from(b: Box&lt;T&gt;) -&gt; Self {
+        unsafe { Self::from_raw(Box::into_raw(b)) }
+    }
+}</pre>
+<p>And converts that into a tagged pointer:</p>
+<pre style="padding-left: 30px">pub unsafe fn from_raw(raw: *mut T) -&gt; Owned&lt;T&gt; {
+    ensure_aligned(raw);
+    Self::from_data(raw as usize)
+}</pre>
+<p>That's a bit of a trek, but what that tells us is that <kbd>Atomic</kbd> is no different in terms of data representation compared to <kbd>AtomicPtr</kbd>, except that the pointer itself is tagged.</p>
+<p>Now, what about the usual operations on an atomic pointer, loading and the like? How do those differ in <kbd>Atomic</kbd>? Well, for one, we know that an epoch <kbd>Guard</kbd> has to be passed in to each call, but there are other important differences. Here's <kbd>Atomic::load</kbd>:</p>
+<pre>    pub fn load&lt;'g&gt;(&amp;self, ord: Ordering, _: &amp;'g Guard) <br/>        -&gt; Shared&lt;'g, T&gt; <br/>    {
+        unsafe { Shared::from_data(self.data.load(ord)) }
+    }</pre>
+<p>We can see <kbd>self.data.load(ord)</kbd>, so the underlying atomic load is performed as expected. But, what is <kbd>Shared</kbd>?</p>
+<pre style="padding-left: 30px">pub struct Shared&lt;'g, T: 'g&gt; {
+    data: usize,
+    _marker: PhantomData&lt;(&amp;'g (), *const T)&gt;,
+}</pre>
+<p>It's a reference to <kbd>Atomic</kbd> with an embedded reference to <kbd>Guard</kbd>. So long as <kbd>Shared</kbd> exists, the <kbd>Guard</kbd> that makes memory operations on it safe will also exist and cannot, importantly, cease to exist until <kbd>Shared</kbd> has been dropped. <kbd>Atomic::compare_and_set</kbd> introduces a few more traits:</p>
+<pre>    pub fn compare_and_set&lt;'g, O, P&gt;(
+        &amp;self,
+        current: Shared&lt;T&gt;,
+        new: P,
+        ord: O,
+        _: &amp;'g Guard,
+    ) -&gt; Result&lt;Shared&lt;'g, T&gt;, CompareAndSetError&lt;'g, T, P&gt;&gt;
+    where
+        O: CompareAndSetOrdering,
+        P: Pointer&lt;T&gt;,
+    {
+        let new = new.into_data();
+        self.data
+            .compare_exchange(current.into_data(), new,<br/>                              ord.success(), ord.failure())
+            .map(|_| unsafe { Shared::from_data(new) })
+            .map_err(|current| unsafe {
+                CompareAndSetError {
+                    current: Shared::from_data(current),
+                    new: P::from_data(new),
+                }
+            })
+    }</pre>
+<p>Notice that <kbd>compare_and_set</kbd> is defined in terms of <kbd>compare_exchange</kbd>. This CAS primitive is equivalent to a comparative exchange, but that exchange allows failure to be given more relaxed semantics, offering a performance boost on some platforms. Implementation of compare-and-set, then, requires understanding of which success <kbd>Ordering</kbd> matches with which failure <kbd>Ordering</kbd>, from which need comes <kbd>CompareAndSetOrdering</kbd>:</p>
+<pre style="padding-left: 30px">pub trait CompareAndSetOrdering {
+    /// The ordering of the operation when it succeeds.
+    fn success(&amp;self) -&gt; Ordering;
+
+    /// The ordering of the operation when it fails.
+    ///
+    /// The failure ordering can't be `Release` or `AcqRel` and must be <br/>    /// equivalent or weaker than the success ordering.
+    fn failure(&amp;self) -&gt; Ordering;
+}
+
+impl CompareAndSetOrdering for Ordering {
+    #[inline]
+    fn success(&amp;self) -&gt; Ordering {
+        *self
+    }
+
+    #[inline]
+    fn failure(&amp;self) -&gt; Ordering {
+        strongest_failure_ordering(*self)
+    }
+}</pre>
+<p>Where <kbd>strongest_failure_ordering</kbd> is:</p>
+<pre style="padding-left: 30px">fn strongest_failure_ordering(ord: Ordering) -&gt; Ordering {
+    use self::Ordering::*;
+    match ord {
+        Relaxed | Release =&gt; Relaxed,
+        Acquire | AcqRel =&gt; Acquire,
+        _ =&gt; SeqCst,
+    }
+}</pre>
+<p>The final new trait is <kbd>Pointer</kbd>, a little utility trait to provide functions over both <kbd>Owned</kbd> and <kbd>Shared</kbd>:</p>
+<pre style="padding-left: 30px">pub trait Pointer&lt;T&gt; {
+    /// Returns the machine representation of the pointer.
+    fn into_data(self) -&gt; usize;
+
+    /// Returns a new pointer pointing to the tagged pointer `data`.
+    unsafe fn from_data(data: usize) -&gt; Self;
+}</pre>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

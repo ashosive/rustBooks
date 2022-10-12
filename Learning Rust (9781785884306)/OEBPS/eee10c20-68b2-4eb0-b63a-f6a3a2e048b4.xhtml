@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style00.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style01.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Let's create a sample test setup</h1>
+                </header>
+            
+            <article>
+                
+<div>
+<p>The test code is very simple. We have a trait with a function that returns a<span> </span><kbd>String</kbd>. We then have a couple of implementations and a parameter bound function that will display the result from the implementations:</p>
+<pre class="mce-root">trait StaticObject <br/>{ <br/>  fn static_method(&amp;self) -&gt; String; <br/>}<br/><br/>impl StaticObject for u8 <br/>{<br/>  fn static_method(&amp;self) -&gt; String {format!("u8 : {}, ", *self)} <br/>} <br/><br/>impl StaticObject for String <br/>{ <br/>  fn static_method(&amp;self) -&gt; String {format!("string : {}", *self)} <br/>} <br/><br/>fn display_code&lt;T: StaticObject&gt;(data : T) <br/>{<br/>  println!("{}", data.static_method()); <br/>} <br/><br/>fn main() <br/>{<br/>  let test_one = 8u8;<br/>  let test_two = "Some text".to_string();<br/>  display_code(test_one);<br/>  display_code(test_two); <br/>}</pre></div>
+<div class="packt_infobox">The code for this part can be found in <kbd>09/trait_object_static</kbd>.</div>
+<p>When compiled and executed, we get the following:</p>
+<div class="CDPAlignCenter CDPAlign"><img src="Images/f0028c32-c07e-4638-bd22-4bc8f8a3a3f9.png"/></div>
+<p>From the previous explanation, we know that the compiler will generate the various types that <kbd>T</kbd> can be.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

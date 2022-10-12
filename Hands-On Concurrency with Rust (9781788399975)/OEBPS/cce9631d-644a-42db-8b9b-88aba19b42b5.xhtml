@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style00.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style01.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Summary</h1>
+                </header>
+            
+            <article>
+                
+<p>In this chapter, we set the lower-level details of concurrency in Rust as a foundation. We discussed thread pools, which, it turns out, we had all the pieces in-hand from previous chapters, to understand a fairly sophisticated one. Then we looked into rayon and discovered that we could also understand an <em>extremely</em> sophisticated threadpool, hidden behind the type system to enable data parallelism in the programming model. We discussed architectural concerns with the thread-per-connection model and the challenges of splitting small datasets up into data parallel iterators. Finally, we did a walkthrough of a rayon and multi-processing-based genetics algorithm project. The <kbd>std::process</kbd> interface is lean compared to that exposed by some operating systems, but well-thought-out and quite useful, as demonstrated in the feruscore project that closed out the chapter. We'll pick up feruscore in the next chapter when we integrate C code into it, in lieu of calling out to a process.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

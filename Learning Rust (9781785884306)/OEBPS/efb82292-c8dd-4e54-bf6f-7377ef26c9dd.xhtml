@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style00.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style01.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Accessing enumeration members</h1>
+                </header>
+            
+            <article>
+                
+<p>Given the possibility of the contents of a Rust <kbd>enum</kbd>, you may be thinking that accessing one of the members within the enumeration may not be the simplest of tasks. Thankfully, it is, as an <kbd>enum</kbd> variable is sometimes referred to as a <em>scopable</em> variable. For example, if we wanted to access members, we could use the following:</p>
+<pre>enum MyFirstEnum 
+{ 
+    TupleType(f32, i8, String), 
+    StuctType {varone: i32, vartwo: f64}, 
+    NewTypeTuple(i32), 
+    SomeVarName 
+} 
+ 
+enum MySecondEnum 
+{ 
+    TupleType(f32, i8, String), 
+    StuctType {varone: i32, vartwo: f64}, 
+    NewTypeTuple(i32), 
+} 
+ 
+fn main()  
+{ 
+    let mut text1 = "".to_owned(); // text1: String 
+    let mut text2 = "".to_owned(); // text2: String 
+    let mut num1 = 0f32; 
+     
+    let value = MyFirstEnum::TupleType(3.14, 1, "Hello".to_owned()); 
+    let value2 = MySecondEnum::TupleType(6.28, 0, "World".to_owned()); 
+     
+    if let MyFirstEnum::TupleType(f,i,s)  = value 
+    { 
+        text1 = s; 
+        num1 = f; 
+    } 
+     
+    if let MySecondEnum::TupleType(f,i,s) = value2 
+    { 
+        text2 = s; 
+    } 
+     
+    println!("{} {} from the {} man", text1, text2, num1) 
+} </pre>
+<div class="packt_infobox">The code for this section is in the <kbd>07/enumscope</kbd> folder, present in the supporting code bundle provided for this book.</div>
+<p>The variables, <kbd>value1</kbd> and <kbd>value2</kbd>, are scoped (uses <kbd>::</kbd>) to <kbd>MyFirstEnum</kbd> and <kbd>MySecondEnum</kbd> respectively. When compiled, we will see the following output:</p>
+<div class="packt_figure CDPAlignCenter CDPAlign"><img class=" image-border" src="Images/172ea6f2-07a6-4deb-873b-d04cc3a60e27.png"/></div>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://www.idpf.org/2007/opf" unique-identifier="bookid" version="2.0" >
+<metadata xmlns:dc="http://purl.org/dc/elements/1.1/"  xmlns:opf="http://www.idpf.org/2007/opf">
+<dc:title>Programming Rust, 2nd Edition</dc:title>
+<dc:creator opf:file-as="Jim Blandy" opf:role="aut">Jim Blandy</dc:creator>
+<dc:creator opf:file-as="Jason Orendorff" opf:role="aut">Jason Orendorff</dc:creator>
+<dc:creator opf:file-as="Leonora F.S. Tindall" opf:role="aut">Leonora F.S. Tindall</dc:creator>
+<dc:description>&lt;span&gt;&lt;div&gt;&lt;p&gt;The Rust programming language offers the rare and valuable combination of statically verified memory safety and low-level control. Imagine C++ but without dangling pointers, null pointer dereferences, or buffer overruns, and with a deep library of freely reusable libraries. This practical guide gives systems and application programmers alike a solid understanding of Rust’s rules, and shows how to put them to work ensuring their programs are not only efficient, but free of broad classes of common errors.&lt;/p&gt;&lt;p&gt;Rust brings the benefits of an expressive modern type system to systems programming. Authors Jim Blandy, Jason Orendorff, and Leonora F.S. Tindall demonstrate how Rust’s features put programmers in control over memory consumption and processor use, combining predictable performance with memory safety and trustworthy concurrency.&lt;/p&gt;&lt;p&gt;You’ll learn:&lt;/p&gt;&lt;ul&gt;&lt;li&gt;How to write fast, safe, concurrent programs in Rust&lt;/li&gt;&lt;li&gt;Rust’s rules for managing memory efficiently, including ownership, borrowing, moves, and lifetimes&lt;/li&gt;&lt;li&gt;How to design interfaces that fit well into the Rust ecosystem&lt;/li&gt;&lt;li&gt;Cargo, Rust’s all-purpose tool for building, testing, and managing Rust packages&lt;/li&gt;&lt;li&gt;High-level features like traits, generics, closures, and iterators that make Rust productive and flexible&lt;/li&gt;&lt;/ul&gt;&lt;/div&gt;&lt;/span&gt;</dc:description>
+<dc:publisher>O&#x27;Reilly Media, Inc.</dc:publisher>
+<dc:rights>Copyright © 2021 Jim Blandy,  Leonora F.S. Tindall, Jason Orendorff</dc:rights>
+<dc:language>en-US</dc:language>
+<dc:date>2021-06-25</dc:date>
+<dc:identifier id="bookid">9781492052593</dc:identifier>
+<meta name="cover" content="Images/cover.png"/>
+</metadata>
+<manifest>
+<item id="ncx" href="toc.ncx" media-type="application/x-dtbncx+xml" />
+<item id="cover" href="cover.xhtml" media-type="application/xhtml+xml" />
+<item id="titlepage01" href="titlepage01.xhtml" media-type="application/xhtml+xml" />
+<item id="copyright-page01" href="copyright-page01.xhtml" media-type="application/xhtml+xml" />
+<item id="ch01" href="ch01.xhtml" media-type="application/xhtml+xml" />
+<item id="ch02" href="ch02.xhtml" media-type="application/xhtml+xml" />
+<item id="ch03" href="ch03.xhtml" media-type="application/xhtml+xml" />
+<item id="ch04" href="ch04.xhtml" media-type="application/xhtml+xml" />
+<item id="ch05" href="ch05.xhtml" media-type="application/xhtml+xml" />
+<item id="ch06" href="ch06.xhtml" media-type="application/xhtml+xml" />
+<item id="ch07" href="ch07.xhtml" media-type="application/xhtml+xml" />
+<item id="ch08" href="ch08.xhtml" media-type="application/xhtml+xml" />
+<item id="ch09" href="ch09.xhtml" media-type="application/xhtml+xml" />
+<item id="ch10" href="ch10.xhtml" media-type="application/xhtml+xml" />
+<item id="colophon01" href="colophon01.xhtml" media-type="application/xhtml+xml" />
+<item id="colophon02" href="colophon02.xhtml" media-type="application/xhtml+xml" />
+<item id="toc01" href="toc01.xhtml" media-type="application/xhtml+xml" />
+<item id="img_rust_04in13" href="Images/rust_04in13.png" media-type="image/png" />
+<item id="img_rust_04in05" href="Images/rust_04in05.png" media-type="image/png" />
+<item id="img_rust_1102" href="Images/rust_1102.png" media-type="image/png" />
+<item id="img_rust_04in01" href="Images/rust_04in01.png" media-type="image/png" />
+<item id="img_rust_05in03" href="Images/rust_05in03.png" media-type="image/png" />
+<item id="img_rust_1103" href="Images/rust_1103.png" media-type="image/png" />
+<item id="img_rust_0301" href="Images/rust_0301.png" media-type="image/png" />
+<item id="img_rust_03in01" href="Images/rust_03in01.png" media-type="image/png" />
+<item id="img_rust_05in08" href="Images/rust_05in08.png" media-type="image/png" />
+<item id="img_rust_10in02" href="Images/rust_10in02.png" media-type="image/png" />
+<item id="img_rust_1001" href="Images/rust_1001.png" media-type="image/png" />
+<item id="img_rust_04in03" href="Images/rust_04in03.png" media-type="image/png" />
+<item id="img_rust_05in09" href="Images/rust_05in09.png" media-type="image/png" />
+<item id="img_rust_0803" href="Images/rust_0803.png" media-type="image/png" />
+<item id="img_rust_04in06" href="Images/rust_04in06.png" media-type="image/png" />
+<item id="img_rust_0302" href="Images/rust_0302.png" media-type="image/png" />
+<item id="img_rust_10in03" href="Images/rust_10in03.png" media-type="image/png" />
+<item id="img_rust_05in01" href="Images/rust_05in01.png" media-type="image/png" />
+<item id="img_rust_1101" href="Images/rust_1101.png" media-type="image/png" />
+<item id="img_rust_0801" href="Images/rust_0801.png" media-type="image/png" />
+<item id="img_rust_05in06" href="Images/rust_05in06.png" media-type="image/png" />
+<item id="img_rust_04in04" href="Images/rust_04in04.png" media-type="image/png" />
+<item id="img_rust_04in07" href="Images/rust_04in07.png" media-type="image/png" />
+<item id="img_rust_04in12" href="Images/rust_04in12.png" media-type="image/png" />
+<item id="img_rust_0502" href="Images/rust_0502.png" media-type="image/png" />
+<item id="img_cover" href="Images/cover.png" media-type="image/png" />
+<item id="img_rust_0802" href="Images/rust_0802.png" media-type="image/png" />
+<item id="img_rust_05in05" href="Images/rust_05in05.png" media-type="image/png" />
+<item id="img_rust_1002" href="Images/rust_1002.png" media-type="image/png" />
+<item id="img_rust_04in09" href="Images/rust_04in09.png" media-type="image/png" />
+<item id="img_rust_05in02" href="Images/rust_05in02.png" media-type="image/png" />
+<item id="img_rust_10in01" href="Images/rust_10in01.png" media-type="image/png" />
+<item id="img_rust_1003" href="Images/rust_1003.png" media-type="image/png" />
+<item id="img_rust_10in04" href="Images/rust_10in04.png" media-type="image/png" />
+<item id="img_rust_05in04" href="Images/rust_05in04.png" media-type="image/png" />
+<item id="img_rust_04in02" href="Images/rust_04in02.png" media-type="image/png" />
+<item id="img_rust_04in10" href="Images/rust_04in10.png" media-type="image/png" />
+<item id="img_rust_0501" href="Images/rust_0501.png" media-type="image/png" />
+<item id="img_rust_09in01" href="Images/rust_09in01.png" media-type="image/png" />
+<item id="img_rust_04in08" href="Images/rust_04in08.png" media-type="image/png" />
+<item id="img_rust_04in11" href="Images/rust_04in11.png" media-type="image/png" />
+<item id="img_rust_05in07" href="Images/rust_05in07.png" media-type="image/png" />
+<item id="style_00" href="Styles/Style00.css" media-type="text/css" />
+<item id="style_01" href="Styles/Style01.css" media-type="text/css" />
+</manifest>
+<spine toc="ncx">
+<itemref idref="cover"/>
+<itemref idref="titlepage01"/>
+<itemref idref="copyright-page01"/>
+<itemref idref="ch01"/>
+<itemref idref="ch02"/>
+<itemref idref="ch03"/>
+<itemref idref="ch04"/>
+<itemref idref="ch05"/>
+<itemref idref="ch06"/>
+<itemref idref="ch07"/>
+<itemref idref="ch08"/>
+<itemref idref="ch09"/>
+<itemref idref="ch10"/>
+<itemref idref="colophon01"/>
+<itemref idref="colophon02"/>
+<itemref idref="toc01"/></spine>
+<guide><reference href="cover.xhtml" title="Cover" type="cover" /></guide>
+</package>

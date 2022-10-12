@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Importing external crates</h1>
+                </header>
+            
+            <article>
+                
+<p>In <a href="2535f67f-e1a7-4ef7-af15-dcebffd38149.xhtml"><span class="ChapterrefPACKT">Chapter 6</span></a>, <em>Using Traits and OOP in Rust</em>, in the <em>Traits</em> section, we developed in <kbd>traits.rs</kbd> structs for <kbd>Alien</kbd>, <kbd>Zombie</kbd>, and <kbd>Predator</kbd> characters that implemented a trait, <kbd>Monster</kbd>. The code file contained a <kbd>main()</kbd> function to make it executable. We will now incorporate this code (without the <kbd>main()</kbd> part) in a library project called <kbd>monsters</kbd>, and see how we can call this code.</p>
+<p>Create the library project with <kbd>cargo new monsters</kbd>, creating a folder structure and a <kbd>monsters/src/lib.rs</kbd> file with template code:</p>
+<pre>#[test] 
+fn it_works() { 
+} </pre>
+<p>Remove this code and replace it with the code from <kbd>Chapter 6/code/traits.rs</kbd>, but omit the <kbd>main()</kbd> function. We also add a simple <kbd>print_from_monsters()</kbd> function to test calling it from the library:</p>
+<pre>// from Chapter 8/code/monsters/src/lib.rs: 
+fn print_from_monsters() { 
+    println!("Printing from crate monsters!"); 
+} </pre>
+<p>Then compile the library with <kbd>cargo build</kbd>, producing a library file, <kbd>libmonsters.rlib</kbd>, in the <kbd>target/debug</kbd> folder.</p>
+<p>Now we create a <kbd>main.rs</kbd> in the <kbd>src</kbd> folder, to make an executable that can call into our <kbd>monsters</kbd> library, and copy the original <kbd>main()</kbd> code from <kbd>traits.rs</kbd> into it, adding a call to <kbd>print_from_monsters()</kbd>:</p>
+<pre>// from Chapter 8/code/monsters/src/main.rs: 
+fn main() { 
+    print_from_monsters(); 
+    let zmb1 = Zombie {health: 75, damage: 15}; 
+    println!("Oh no, I hear: {}", zmb1.noise()); 
+    zmb1.attack(); 
+    println!("{:?}", zmb1); 
+} </pre>
+<div class="packt_infobox">This is a common design pattern: a library project containing an executable program that can be used to demonstrate or test the library.</div>
+<p><kbd>cargo build</kbd> will now compile both projects if there are no problems.</p>
+<p>However, the code does not yet compile, and the compiler says <kbd>error: unresolved name `print_from_monsters`</kbd>; clearly the code for the function is not found.</p>
+<p>The first thing we have to do is make the library code available to our main program, which is done with the following statement placed at the start:</p>
+<pre>extern crate monsters; </pre>
+<p>This statement will import all the (public) items contained in the monsters crate under a module with the same name. But this is not enough; we must also indicate that the <kbd>print_from_monsters</kbd> function is to be found in the module <kbd>monsters</kbd>. Indeed, the <kbd>monsters</kbd> crate creates an implicit module with the same name. So, we have to call our function as follows:</p>
+<pre>monsters::print_from_monsters(); </pre>
+<p>Now we get <kbd>error: function `print_from_monsters` is private</kbd>, which tells us that the function is found, but is inaccessible in the library crate. This is easy; in the <em>Visibility of items</em> section we have seen how to remedy this: we prefix the function header with <kbd>pub</kbd>, like this:</p>
+<pre>pub fn print_from_monsters() { ... } </pre>
+<p>Now this part of our code works! Open a terminal, go (<kbd>cd</kbd>) to the <kbd>target/debug</kbd> folder, and start the <kbd>monsters</kbd> executable. This prints out the following:</p>
+<pre><strong>Printing from crate monsters!</strong>  </pre>
+<p>You will see that <kbd>extern crate abc</kbd> (with <kbd>abc</kbd> being a crate name) is often used in code, but you will never see <kbd>extern crate std</kbd>; why is this? The reason is that <kbd>std</kbd> is imported by default in every other crate. For the same reason, the contents of the <kbd>prelude</kbd> module are imported by default in every module.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

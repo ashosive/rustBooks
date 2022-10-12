@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Adding external crates to a project</h1>
+                </header>
+            
+            <article>
+                
+<p>How should we use libraries written by others (choosing from the multitude of libraries available at <a href="https://crates.io"><span class="URLPACKT">https://crates.io</span></a>) in our project? Cargo makes this very easy.</p>
+<p>Suppose we want to use both the <kbd>log</kbd> and the <kbd>mac</kbd> library in the <kbd>monsters</kbd> project. <kbd>log</kbd> is a simple logging framework that gives us a number of macros such as <kbd>info!</kbd>, <kbd>warn!</kbd>, and <kbd>trace!</kbd> to log information messages. <kbd>mac</kbd> is a collection of useful macros, maintained by Jonathan Reem.</p>
+<p>To get these libraries, we edit our <kbd>Cargo.toml</kbd> configuration file and add a <kbd>[dependencies]</kbd> section when it isn't already present. Beneath it, we specify the versions of the libraries we want to use:</p>
+<pre>[dependencies] 
+log = "0.3" 
+mac = "*" </pre>
+<p>A <kbd>*</kbd> denotes that any version is OK, and the most recent version will be installed.</p>
+<p>If the library is not available at the <kbd><span class="URLPACKT">crates.io</span></kbd> repository, but only at GitHub, add a <kbd>[dependencies.libname]</kbd> section and refer to it with its complete URL for the Git property. For example, if your library depends on the <kbd>gtk</kbd> crate available at GitHub, add this to your <kbd>Cargo.toml</kbd>:</p>
+<pre>[dependencies.gtk] 
+git = "https://github.com/rust-gnome/gtk" </pre>
+<p>You can also refer to an <kbd>abc</kbd> library that still sits on your machine by including its path:</p>
+<pre>[dependencies.abc] 
+path = "path/to/abc" </pre>
+<p>The string value in the [dependencies] section (here <kbd>"0.3"</kbd>) follows the rules of semantic versioning, which are quite versatile (see <a href="https://en.wikipedia.org/wiki/Software_versioning"><span class="URLPACKT">https://en.wikipedia.org/wiki/Software_versioning</span></a>); some examples include these:</p>
+<pre>1.* means all versions &gt;= 1.0.0 but &lt; 2.0.0<br/>1.2.* means all versions &gt;= 1.2.0 but &lt; 1.3.0<br/>= 1.2.3 means exactly that version<br/>&gt;= 1.2.3 means bigger than or equal to that version<br/>&gt;1.2.3 means bigger than that version<br/>^1.2.3 means all versions starting from 1.2.3 but &lt; 2.0.0<br/>^0 means all versions starting from 0.0.0 but &lt; 1.0.0<br/>~1.2.3 means all versions starting from 1.2.3 but &lt; 1.3.0</pre>
+<p>For other details, see <a href="http://doc.crates.io/crates-io.html"><span class="URLPACKT">http://doc.crates.io/crates-io.html</span></a>.</p>
+<p>Save the file and, in the <kbd>monsters</kbd> folder, issue this command:</p>
+<pre><strong>cargo build</strong></pre>
+<p>Cargo will take care of locally installing and compiling the libraries:</p>
+<div class="CDPAlignCenter CDPAlign"><img height="105" width="588" src="Images/f3c217a3-0bc8-4d14-b3fc-c63e38d4777b.png"/></div>
+<p class="packt_figure">It will also automatically update the <kbd>Cargo.lock</kbd> file to register the installed versions of the libraries, so that subsequent project builds will always use the same versions (here <kbd>log v0.3.1</kbd> and <kbd>mac v0.0.1</kbd>). If you later want to update to the most recent version of a library, for example, for the <kbd>log</kbd> library, do a <kbd>cargo update</kbd> <kbd>-p log</kbd>, or a <kbd>cargo update</kbd> to update all libraries. This will download the latest crate versions for those crates indicated with version <kbd>*</kbd>. If you want a higher version for a crate, change its version number in <kbd>Cargo.toml</kbd>.</p>
+<p>The <kbd>cargo check</kbd> command can also be useful; your project's code is checked by the compiler, but no executable code is generated.</p>
+<p>Start using the libraries by importing their crates in the code:</p>
+<pre>#[macro_use] 
+extern crate log; 
+extern crate mac; </pre>
+<p>The <kbd>#[macro_use]</kbd> attribute allows the use of macros defined in the external crate (see the next section). Then we can, for example, use the <kbd>info!</kbd> macro from the <kbd>log</kbd> crate as follows:</p>
+<pre>info!("Gathering information from monster {:?}", zmb1); </pre>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

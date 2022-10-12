@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style00.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style01.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">rustdoc versus Cargo</h1>
+                </header>
+            
+            <article>
+                
+<p>As with the other operations provided by Cargo, when documentation is created, it acts as a wrapper for rustdoc. The only difference is that with rustdoc you have to specify the directory that the source file sits in. Cargo acts dumb in this case, and creates the documentation for all source files.</p>
+<p>In its simplest form, the rustdoc command is used as follows:</p>
+<pre><strong>cargo doc</strong>
+<strong>rustdoc src/main.rs</strong>  </pre>
+<p>Cargo does have the advantage of creating the doc structure within the <kbd>root</kbd> folder, whereas rustdoc creates the structure within the target (which is removed with <kbd>cargo clean</kbd>).</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

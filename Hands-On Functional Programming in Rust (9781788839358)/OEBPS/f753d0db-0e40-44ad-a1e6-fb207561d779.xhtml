@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Writing the elevator_drivers.rs module</h1>
+                </header>
+            
+            <article>
+                
+<p>The elevator drivers module should interface with the static libraries provided and additionally provide a common interface to all elevator drivers. The code looks like the following:</p>
+<pre style="padding-left: 30px" class="p1"><span class="s1">use libc::c_int;<br/><br/></span><span class="s1">#[link(name = "elevator1")]<br/></span><span class="s1">extern {<br/></span><span class="s1">   pub fn elevator1_poll_floor_request() -&gt; c_int;<br/></span><span class="s1">}<br/><br/></span><span class="s1">#[link(name = "elevator2")]<br/></span><span class="s1">extern {<br/></span><span class="s1">   pub fn elevator2_poll_floor_request() -&gt; c_int;<br/></span><span class="s1">}<br/><br/></span><span class="s1">#[link(name = "elevator3")]<br/></span><span class="s1">extern {<br/></span><span class="s1">   pub fn elevator3_poll_floor_request() -&gt; c_int;<br/></span><span class="s1">}<br/><br/></span><span class="s1">pub trait ElevatorDriver<br/></span><span class="s1">{<br/></span><span class="s1">   fn poll_floor_request(&amp;self) -&gt; Option&lt;u64&gt;;<br/></span><span class="s1">}<br/><br/></span><span class="s1">pub struct ElevatorDriver1;<br/></span><span class="s1">impl ElevatorDriver for ElevatorDriver1<br/></span><span class="s1">{<br/></span><span class="s1">   fn poll_floor_request(&amp;self) -&gt; Option&lt;u64&gt;<br/></span><span class="s1">   {<br/></span><span class="s1">      unsafe {<br/></span><span class="s1">         let req = elevator1_poll_floor_request();<br/></span><span class="s1">         if req &gt; 0 {<br/></span><span class="s1">            Some(req as u64)<br/></span><span class="s1">         } else {<br/></span><span class="s1">            None<br/></span><span class="s1">         }<br/></span><span class="s1">      }<br/></span><span class="s1">   }<br/></span><span class="s1">}<br/><br/></span><span class="s1">//Elevator Driver 2<br/><br/></span>//Elevator Driver 3</pre>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

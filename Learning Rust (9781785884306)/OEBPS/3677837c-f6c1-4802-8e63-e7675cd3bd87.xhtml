@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style00.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style01.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">std::fs</h1>
+                </header>
+            
+            <article>
+                
+<p>This module is used when using the filesystem and manipulating files.</p>
+<div class="packt_infobox"><span>This module provides a set of cross-platform methods to manipulate the filesystem the application is sitting on. If at all possible, avoid using the </span><kbd>remove_dir_all</kbd><span> function.</span></div>
+<p><span>Structs, Traits, and Enums</span></p>
+<ul>
+<li><strong>Structs</strong>: <kbd>DirBuilder</kbd> (used to create directories), <kbd>DirEntry</kbd> (returned by the <kbd>ReadDir</kbd> iterator), File (opens a file on the filesystem), <kbd>FileType</kbd> (represents a type of file with accessors to each file type), <kbd>Metadata</kbd> (information about the file), <kbd>OpenOptions</kbd> (options and flags used to configure how a file is opened), <kbd>Permissions</kbd> (file permissions on a file), and <kbd>ReadDir</kbd> (an iterator over the entries in a directory).</li>
+<li><strong>Functions</strong>: <kbd>canonicalize</kbd> (returns the canonical form of a path), <kbd>copy</kbd> (copies files), <kbd>create_dir</kbd>, <kbd>create_dir_all</kbd> (recursively creates a directory and all parent components if missing), <kbd>hard_link</kbd> (creates a hard link on the file system), <kbd>metadata</kbd> (gets the metadata for a given path and file), <kbd>read_dir</kbd> (returns an iterator over the entries within a directory), <kbd>read_link</kbd> (reads a symbolic link returning the file it points to), <kbd>remove_dir</kbd> (removes an empty directory), <kbd>remove_dir_all</kbd> (removes a directory on a path recursively—on some operating systems this can completely delete your hard drive, so be careful!), <kbd>remove_file</kbd> (deletes a file), <kbd>rename</kbd> (renames a given file or directory), <kbd>set_permissions</kbd> (sets permissions on a given file or directory), and <kbd>symlink_metadata</kbd> (queries the metadata for a file without following any symlinks).</li>
+</ul>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

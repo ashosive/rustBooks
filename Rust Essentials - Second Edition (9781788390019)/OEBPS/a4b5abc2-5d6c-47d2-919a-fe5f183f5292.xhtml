@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Defining a module</h1>
+                </header>
+            
+            <article>
+                
+<p>Crates are the compiled entities that get distributed on machines to execute. All the code of a crate is contained in an implicit root module. This code can then be split up by the developer into code units called <strong>modules</strong>, which in fact form a hierarchy of sub-modules under the root module. That way the organization of our code can be greatly improved. An evident candidate for a module is the tests code, which we discussed in <a href="59b7261a-67fa-4a7e-9928-27ae01a25ceb.xhtml"><span class="ChapterrefPACKT">Chapter 3</span></a>, <em>Using Functions and Control Structures</em> in the <em>The tests module</em> section.</p>
+<p>Modules can also be defined inside other modules, as so-called <strong>nested modules</strong>. Modules do not get compiled individually; only crates get compiled. All module code is inserted into the crate source file before compilation starts.</p>
+<p>In previous chapters, we used built-in modules from the <kbd>std</kbd> crate, such as <kbd>io</kbd>, <kbd>str</kbd>, and <kbd>vec</kbd>. The <kbd>std</kbd> crate contains many modules and functions that are used in real projects; the most common types, traits, functions, and macros (such as <kbd>println!</kbd>) are declared in the <kbd>prelude</kbd> module.</p>
+<p>A module typically contains a collection of code items such as traits, structs, methods, other functions, and even nested modules. The module's name defines a <em>namespace</em> for all objects it contains. We define a module with the <kbd>mod</kbd> keyword and a lowercase name (like <kbd>game1</kbd>) as follows:</p>
+<pre>mod game1 { 
+   // all of the module's code items go in here 
+} </pre>
+<p>Similar to Java, each file is a module, and for every code file the compiler defines an implicit module, even when it does not contain the <kbd>mod</kbd> keyword. As we will see in the <em>Importing modules and file hierarchy</em> section, such a code file can be imported in the current code file with <kbd>mod filename;</kbd>.</p>
+<p>Suppose <kbd>game1</kbd> is the name of a module that contains a function, <kbd>func2</kbd>. If you want to use this function in code external to this module, you would address it as <kbd>game1::func2</kbd>. But whether this is possible depends on the visibility of <kbd>func2</kbd>.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

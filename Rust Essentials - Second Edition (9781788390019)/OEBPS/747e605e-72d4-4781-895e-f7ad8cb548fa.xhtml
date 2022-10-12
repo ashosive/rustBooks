@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Built-in traits and operator overloading</h1>
+                </header>
+            
+            <article>
+                
+<p>The Rust standard library is packed with traits, which are used all over the place. For example, there are traits for which the compiler is capable of providing a basic implementation with a <kbd>#[derive]</kbd> attribute, as we saw in the section on <em>Traits</em>:</p>
+<ul>
+<li><strong>Comparing instances</strong>: The <kbd>Eq</kbd> and <kbd>PartialEq</kbd> trait</li>
+<li><strong>Ordering instances</strong>: The <kbd>Ord</kbd> and <kbd>PartialOrd</kbd> trait</li>
+<li><strong>Creating an empty instance</strong>: The <kbd>Default</kbd> trait</li>
+<li><strong>To create a zero instance of a numeric data type</strong>: The <kbd>Zero</kbd> trait</li>
+</ul>
+<p>The next chapter shows an example of how to implement the following three traits:</p>
+<ul>
+<li><strong>Formatting a value using {</strong><kbd>:?</kbd><strong>}</strong>: The <kbd>Debug</kbd> trait, defining an <kbd>fmt</kbd> method</li>
+<li><strong>Copy an instance</strong>: The <kbd>Copy</kbd> trait</li>
+<li><strong>Create a duplicate instance</strong>: The <kbd>Clone</kbd> trait</li>
+<li><strong>Computing a hash</strong>: The <kbd>Hash</kbd> trait</li>
+<li><strong>Adding instances</strong>: The <kbd>Add</kbd> trait, defining an <kbd>add</kbd> method. The <kbd>+</kbd> operator is just a nice way to use <kbd>add: n + m</kbd> is the same as <kbd>n.add(m)</kbd>. So if we implement the <kbd>Add</kbd> trait, we can use the <kbd>+</kbd> operator, this is called <strong>operator overloading</strong>.
+<ul>
+<li>The <kbd>Add</kbd> trait has the following signature:</li>
+</ul>
+</li>
+</ul>
+<pre>      pub trait Add&lt;RHS = Self&gt; { 
+           type Output; 
+  
+            fn add(self, rhs: RHS) -&gt; Self::Output; 
+      }</pre>
+<p>So the <kbd>add</kbd> method and the trait item <kbd>Output</kbd> must both be implemented. The code <kbd>impl_add.rs</kbd> shows an implementation of the <kbd>Add</kbd> trait:</p>
+<pre>struct AType { 
+    value: i32, 
+} 
+ 
+impl AType { 
+    fn new(value: i32) -&gt; AType { 
+        AType { value: value } 
+    } 
+} 
+ 
+impl Add for AType { 
+    type Output = AType; 
+ 
+    fn add(self, other: AType) -&gt; AType { 
+        AType { value: self.value + other.value } 
+    } 
+} 
+ 
+fn main() { 
+    let at1 = AType{ value: 7 }; 
+    let at2 = AType{ value: 42 }; 
+    let at3 = at1.add(at2); 
+    println!("{:?}", at3); 
+    let at4 = AType{ value: 2 }; 
+    let at5 = AType{ value: 108 }; 
+    let at6 = at4 + at5; 
+    println!("{:?}", at6); 
+} </pre>
+<ul>
+<li class="packt_nosymbol">This prints the following output:</li>
+</ul>
+<pre>    <strong>AType { value: 49 }</strong>
+    <strong>AType { value: 110 }</strong>  </pre>
+<div class="packt_tip">Note that we can use it as a <kbd>+</kbd> <span>operator or an</span> <kbd>add</kbd> <span>method. A lot of other traits can also be used to overload operators, such as <kbd>Sub(-), Mul(*), Deref (*v), Index([]),</kbd> and so on.</span></div>
+<ul>
+<li><strong>Freeing resources of an object (when it goes out of scope)</strong>: The <kbd>Drop</kbd> trait, in other words the object has a destructor. Freeing resources is taken care of automatically by the compiler, but by implementing <kbd>Drop</kbd> you can do additional things.</li>
+</ul>
+<p>In the section <em>Iterators</em> we described how an iterator works and used it on ranges and arrays. In fact an iterator is also defined as a trait in Rust in <kbd>std::iter::Iterator</kbd>. From the docs for iterator (see <a href="http://doc.rust-lang.org/std/iter/trait.Iterator.html"><span class="URLPACKT">http://doc.rust-lang.org/std/iter/trait.Iterator.html</span></a>) we see that we only need to define the <kbd>next()</kbd> method, which advances the iterator to return the next value as an <kbd>Option</kbd> type. When the <kbd>next()</kbd> method is implemented for the type of your object, we can then use a <kbd>for in</kbd> loop to iterate over the object.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Panics</h1>
+                </header>
+            
+            <article>
+                
+<p>A situation could occur that is so bad (like when dividing by zero) that it is no longer useful to continue running the program: we cannot recover from the error. In the case of such an error, we can invoke the <kbd>panic!("message")</kbd> macro, which will release all resources owned by the thread, report the message, and then make the program exit. We could improve the previous code, like this:</p>
+<pre>// see code in Chapter 5/code/errors.rs 
+if (y == 0) { panic!("Division by 0 occurred, exiting"); } 
+println!("{}", div(x, y)); </pre>
+<p>The function <kbd>div</kbd> in the preceding code contains the following:</p>
+<pre>fn div(x: i32, y: i32) -&gt; f32 { 
+    (x / y) as f32 
+} </pre>
+<p>A number of other macros, like the <kbd>assert!</kbd> family, can also be used to signal such unwanted conditions:</p>
+<pre>assert!(x == 5); //thread &lt;main&gt; panicked at assertion failed: x == 5 
+assert!( x == 5, "x is not equal to 5!"); 
+// thread &lt;main&gt; panicked at "x is not equal to 5!" 
+assert_eq!(x, 5); // thread '&lt;main&gt;' panicked at 'assertion failed: (left: `3`, right: `5`)', </pre>
+<p>When the condition is not true, they result in a panic situation and exit. The error message given as the second parameter of <kbd>assert!</kbd> will be printed out, if it is present. Otherwise, the general message <kbd>assertion failed</kbd> is given. The <kbd>assert!</kbd> macro is mostly useful to test for pre and post conditions in and around functions.</p>
+<p>Portions of code that normally would not be executed can contain the <kbd>unreachable!</kbd> macro, which will panic when it is executed:</p>
+<pre>unreachable!(); 
+// thread '&lt;main&gt;' panicked at 'internal error: entered         // 
+unreachable code' </pre>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

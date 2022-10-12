@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Let's add some code</h1>
+                </header>
+            
+            <article>
+                
+<p>We now have the structure in place and our basic framework; we can start adding some code to the library. In this case, it will be the <kbd>Conversions::Temperature</kbd> part. We have already seen the function for Fahrenheit to Celcius, so let's add the other functions:</p>
+<pre>// Temperature.rs 
+mod Temperature 
+{ 
+    fn fahrenheit_to_celcius(f: f32) -&gt; f32 
+    { 
+        (f - 32f32) * 5f32/9f32 
+    }  
+    fn celcius_to_fahrenheit(f: f32) -&gt; f32 
+    { 
+        (c * (9f32/5f32)) + 32f32 
+    }  
+    fn celcius_to_kelvin(c: f32) -&gt; f32 
+    { 
+        c + 273.15 
+    }  
+    fn kelvin_to_celcius(k: f32) -&gt; f32 
+    { 
+        k - 273.15; 
+    }  
+    fn fahrenheit_to_kelvin(f: f32) -&gt; f32 
+    { 
+        (f + 459.67) * 5f32 / 9f32 
+    }  
+    fn kelvin_to_fahrenheit(k: f32) -&gt; f32 
+    { 
+        (k * (9f32 / 5f32)) - 459.67 
+    } 
+} </pre>
+<p>There is nothing earth-shattering about this code, but we do have to stop for a second to think about this. The Kelvin scale goes from 0 to <em>n</em>; it never goes below zero. It's entirely possible for the user to want to use <kbd>celcius_to_kelvin</kbd> and pass -274 instead. This would mean that the answer from the function would be mathematically correct but physically incorrect.</p>
+<div class="packt_infobox"><span>The code for this section is in </span><kbd>Chapter10/MathsLib</kbd>.</div>
+<p>We could return <kbd>-1</kbd> but then, for some of the functions, that answer is fine.</p>
+<p>What we need to return here is a tuple with the first parameter being a Boolean, signifying whether the calculation is valid or not (<kbd>true</kbd> = valid). If it's <kbd>true</kbd>, the answer is in the second parameter; otherwise, pass back the original value passed in.</p>
+<p>As a quick test, the following code can be run:</p>
+<div class="packt_infobox">See <kbd>Chapter10/QuickTest</kbd> for the source.</div>
+<pre>fn kelvin_to_celcius(k: f32) -&gt; (bool, f32) 
+{ 
+    if k &lt; 0f32 
+    { 
+        return (false, k); 
+    } 
+    else 
+    { 
+        return (true, k - 273.15); 
+    } 
+} 
+ 
+fn main()  
+{ 
+    let mut calc = kelvin_to_celcius(14.5); 
+    match calc.0 
+    { 
+        true =&gt; println!("14.5K = {}C", calc.1), 
+        _ =&gt; println!("equation was invalid"), 
+    } 
+     
+    calc = kelvin_to_celcius(-4f32); 
+    match calc.0 
+    { 
+        true =&gt; println!("-4K = {}C", calc.1), 
+        _ =&gt; println!("invalid K"), 
+    } 
+} </pre>
+<p>It is convenient here to use the indexed form of the tuple rather than destructuring it into two variables.</p>
+<p>When compiled, we get the following output:</p>
+<div class="CDPAlignCenter CDPAlign"><img src="Images/4b2c21c7-3168-465e-a00f-d0a640db8bf6.png" width="1143" height="302"/></div>
+<div class="CDPAlignCenter CDPAlign packt_figref">Figure 4</div>
+<p>This is exactly what was expected. It does also show a need for a set of unit tests to be added into the library to determine the validity (or not) of the data being fed in.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

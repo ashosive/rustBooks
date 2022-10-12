@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Memory ordering – happens-before and synchronizes-with</h1>
+                </header>
+            
+            <article>
+                
+<p>Each CPU architecture treats memory ordering—the dependency relationships between loads and stores—differently. We discussed this in detail in <a href="5f3aec9d-fd53-48ff-9ba8-43ce13e91cff.xhtml" target="_blank">Chapter 1</a>, <em>Preliminaries – Machine Architecture and Getting Started with Rust</em>. Suffice it to say here in summary, x86 is a <em>strongly-ordered</em> architecture; stores by some thread will be seen by all other threads in the order they were performed. ARM, meanwhile, is a weakly-ordered architecture with data-dependency; loads and stores may be re-ordered in any fashion excepting those that would violate the behavior of a single, isolated thread, and<em>,</em> if a load depends on the results of a previous load, you are guaranteed that the previous load will occur rather than be cached. Rust exposes its own model of memory ordering to the programmer, abstracting away these details. Our programs must, then, be correct according to Rust's model<em>,</em> and we must trust <kbd>rustc</kbd> to interpret this correctly for our target CPU. If we mess up in Rust's model, we might see <kbd>rustc</kbd> come and re-order instructions to break linearizability, even if the guarantees of our target CPU would otherwise have helped us skate by.</p>
+<p>We discussed Rust's memory model in detail in <a href="605ce307-29ed-4b5a-961e-8d327467b84f.xhtml" target="_blank">Chapter 3</a>, <em>The Rust Memory Model – Ownership, References and Manipulation</em>, noting that its low-level details are inherited near whole-cloth from LLVM (and thus C/C++). We did, however, defer a discussion of dependency relationships in the model until this chapter. The topic is tricky enough in its own right, as you'll see directly. We will not go into the full details here, owing to the major difficulty in doing so; see LLVM's <em>Memory Model for Concurrent Operations</em> (<a href="http://llvm.org/docs/LangRef.html#memory-model-for-concurrent-operations">http://llvm.org/docs/LangRef.html#memory-model-for-concurrent-operations</a>) and its link tree for the full, challenging read. We will instead note that, outside of writing optimizers or especially challenging low-level code for which you do need to study up on the LLVM memory model reference, it's sufficient to understand that when we talk about ordering in Rust we're talking about a particular kind of causality—<em>happens-before</em>/<em>synchronizes-with</em>. So long as we structure our operations according to this causality and can demonstrate linearizability, we'll be in good shape.</p>
+<p>What is the happens-before/synchronizes-with causality? Each of these refers to a particular kind of ordering relationship. Say we have three operations <kbd>A</kbd>, <kbd>B</kbd>, and <kbd>C</kbd>. We say that <kbd>A</kbd> <em>happens-before</em> <kbd>B</kbd> if:</p>
+<ul>
+<li><kbd>A</kbd> and <kbd>B</kbd> are performed on the same thread and <kbd>A</kbd> is executed and then <kbd>B</kbd> is executed according to program order</li>
+<li><kbd>A</kbd> happens-before <kbd>C</kbd> and <kbd>C</kbd> happens-before <kbd>B</kbd> </li>
+<li><kbd>A</kbd> <em>synchronizes-with</em> <kbd>B</kbd></li>
+</ul>
+<p>Note that the first point refers to single-thread program order. Rust makes no guarantees about multi-threaded program order but does assert that single-threaded code will run in its apparent textual order, even if, in actuality, both the optimized Rust is re-ordered and the underlying hardware is re-ordering as well. We can say that <kbd>A</kbd> <em>synchronizes-with</em> <kbd>B</kbd> if all of the following are true:</p>
+<ul>
+<li><kbd>B</kbd> is a load from some atomic variable <kbd>var</kbd> with <kbd>Acquire</kbd> or <kbd>SeqCst</kbd> ordering</li>
+<li><kbd>A</kbd> is a store to the same atomic variable <kbd>var</kbd> with <kbd>Release</kbd> or <kbd>SeqCst</kbd> ordering</li>
+<li><kbd>B</kbd> reads the value from <kbd>var</kbd></li>
+</ul>
+<p>The last point exists to ensure that compilers or hardware won't optimize away the load in the first point. But, did some additional information get stuck in there? Yep! More on that in a minute.</p>
+<p>How does linearizability link up to the causal ordering we've just described? It's important to understand this. A structure in Rust can obey the causal ordering but still not linearize under examination. Take, for instance, the discussion of Ring in previous chapters, where, even though the causal ordering was protected by a mutex, writes were stomped due to an offset bug. That implementation was not linearizable but it was causally ordered. In that sense, then, getting the causality of your program is a necessary but not sufficient condition for writing a fit-for-purpose concurrent data structure. Linearizability is an analysis done in terms of the operations on a structure, while happens-before/synchronizes-with is an ordering that happens inside of and between operations.</p>
+<p>Now, we mentioned <kbd>Acquire</kbd>, <kbd>SeqCst</kbd>, and <kbd>Release</kbd>; what were they? Rust's memory ordering model allows for different atomic orderings to be applied to loads and stores. These orderings control the underlying CPU and the <kbd>rustc</kbd> optimizer's take on which instructions to shuffle around and when to stall pipelines waiting for results from a load. The orderings are defined in an enumeration called <kbd>std::sync::atomic::Ordering</kbd>. We'll go through them one by one.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

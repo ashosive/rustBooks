@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Further reading</h1>
+                </header>
+            
+            <article>
+                
+<p>Safe concurrent programming is, unsurprisingly, a very broad topic and the recommendations for further reading here reflect that. The careful reader will note that these references span time and approach, reflecting the broad changes in machines and languages over time.</p>
+<ul>
+<li><em>The Art of Multiprocessor Programming,</em> Maurice Herlihy and Nir Shavit. This book is an excellent introduction to multiprocessor algorithms. Application to systems languages is made a touch difficult by the fact that the authors assume a Java environment—garbage collection is a huge win for implementing reclamation in that, well, you don't have to do it.</li>
+<li><em>C++ Concurrency in Action: Practical Multithreading</em>, Anthony Williams. This book is an excellent pair to TAoMP, being focused on implementation of similar structures in C++. While there is a translation step needed between C++ and Rust, it's not so great a jump as from Java to Rust.</li>
+<li><em>LVars: Lattice-based Data Structures for Deterministic Parallelism</em>, Lindsey Kuper and Ryan Newton. This book presents a certain kind of parallel construction, one influenced by current machines. It is possible, however, that our current models are overly complicated and will someday be seen as archaic, even without having to sacrifice raw performance as we've done in the move to VM-based languages. This paper presents a construction alternative, influenced by the work done on distributed algorithms in recent years. It may or may not be the future but the reader is encouraged to keep a look out.</li>
+<li><em>ffwd: delegation is (much) faster than you think</em>, Sepideh Roghanchi, Jakob Eriksson, and Nilanjana Basu. Modern machines are odd beasts. Conceptually, the fastest data structure is one that minimizes the wait time of working threads, speeding through instructions to work completion. This is… not entirely the case, as this paper demonstrates. The authors, by carefully maintaining cache locality, are able to outpace more complicated structures that might, theoretically, be much faster due to more aggressive sharing between threads with fine-grained locks.</li>
+<li><em>Flat Combining and the Synchronization-Parallelism Tradeoff</em>, Danny Hendler, Itai Incze, and Nir Shavit. Along the same lines as ffwd, the authors present a flat combining approach to constructing concurrent structures, which relies on coarse exclusive locking between threads with a periodic combination of logs of operations. The interaction with cache makes flat combining <em>faster</em> than more complicated lock-free/wait-free alternatives, which do not interact with the cache as gracefully.</li>
+<li><em>New Rustacean, e022: Send and Sync</em>, available at <a href="http://www.newrustacean.com/show_notes/e022/struct.Script.html">http://www.newrustacean.com/show_notes/e022/struct.Script.html</a>. The New Rustacean is an excellent podcast for Rust developers of all levels. This episode dovetails nicely with the material discussed in the current chapter. Warmly recommended.</li>
+<li><em>Effective Computation of Biased Quantiles Over Data Streams</em>, Graham Cormode, Flip Korn, S. Muthukrishnan, and Divesh Srivastava. This paper underpins the CKMS structure used in telem. It's instructive to examine the difference between the implementation outlined in the paper—based on linked-lists—and the implementation found in the library, a variant of a skip-list. This difference is wholly due to cache locality concerns.</li>
+<li><em>The Cernan Project</em>, various developers, available at <a href="https://github.com/postmates/cernan">https://github.com/postmates/cernan</a> under the MIT license. Cernan is an event multiplexing server, the production version of the toy telem discussed in this chapter. As of writing this book, it is 17,000 lines of code contributed by 14 people. Careful attention has been taken to maintain low resource consumption and high levels of performance. I am the primary author of this project and the techniques discussed in this book are applied in cernan.</li>
+</ul>
+<p class="mce-root"/>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

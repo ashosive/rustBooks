@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Generic data structures and functions</h1>
+                </header>
+            
+            <article>
+                
+<p>Genericity is the capacity to write code once, with types not or partly specified, so that the code can be used for many different types. Rust has this capacity in abundance, applying it for both data structures and functions.</p>
+<p>A composite data structure is generic if the type of its items can be of a general type <kbd>&lt;T&gt;</kbd>. The type <kbd>T</kbd> can for example be an <kbd>i32</kbd> value, an <kbd>f64</kbd>, a <kbd>String</kbd>, but also a <kbd>struct</kbd> type like <kbd>Person</kbd> that we have coded ourselves. So, we can have a vector <kbd>Vec&lt;f64&gt;</kbd>, but also a vector <kbd>Vec&lt;Person&gt;</kbd>. If you make <kbd>T</kbd> a concrete type, then you must substitute the type <kbd>T</kbd> with that type everywhere <kbd>T</kbd> appears in the definition of the data structure.</p>
+<p>Our data structure can be parametrized with a generic type <kbd>&lt;T&gt;</kbd>, and so has multiple concrete definitions--it is polymorphic. Rust makes extensive use of this concept, which we encountered already in <a href="397a1a97-368f-4af7-a7fb-f44ad8c5aab9.xhtml"><span class="ChapterrefPACKT">Chapter 4</span></a>, <em>Structuring Data and Matching Patterns</em> when we talked about arrays, vectors, slices and the <kbd>Result</kbd> and <kbd>Option</kbd> types.</p>
+<p>Suppose you want to define a <kbd>struct</kbd> with two fields, <kbd>first</kbd> and <kbd>second</kbd>, but you want to keep the type of these fields generic. We can define it as follows:</p>
+<pre>// see code in Chapter 5/code/generics.rs 
+struct Pair&lt;T&gt; { 
+    first: T, 
+    second: T, 
+} </pre>
+<p>We can now define a <kbd>Pair</kbd> of magic numbers, or a <kbd>Pair</kbd> of <kbd>magicians</kbd>, or whatever we want, like this:</p>
+<pre>let magic_pair: Pair&lt;u32&gt; = Pair { first: 7, second: 42 }; 
+let pair_of_magicians: Pair&lt;&amp;str&gt; = Pair { first: "Gandalf", second: "Sauron" }; </pre>
+<p>What if we wanted to write functions that work with generic data structures? They would also have to be generic, right? As a simple example, how would we write a function that returns the second item of a <kbd>Pair</kbd>? We can do it like this:</p>
+<pre>fn second&lt;T&gt;(pair: Pair&lt;T&gt;) { 
+  pair.second; 
+} </pre>
+<p>We could also call the <kbd>second</kbd> function as follows:</p>
+<pre>let a = second(magic_pair); </pre>
+<p>This produces the following output:</p>
+<pre>    <strong>42</strong>  </pre>
+<div class="packt_infobox">Note the type <kbd>&lt;T&gt;</kbd> right after the function name <kbd>second</kbd>; this is how generic functions are declared.</div>
+<p>Let's now investigate why <kbd>Option</kbd> and <kbd>Result</kbd> types are so powerful. Here is the definition of the <kbd>Option</kbd> type again:</p>
+<pre>enum Option&lt;T&gt; { 
+    Some(T), 
+ None 
+} </pre>
+<p>From this, we can define multiple concrete types, as follows:</p>
+<pre>let x: Option&lt;i8&gt; = Some(5); 
+let pi: Option&lt;f64&gt; = Some(3.14159265359); 
+let none: Option&lt;f64&gt; = None; 
+let none2 = None::&lt;f64&gt;; 
+let name: Option&lt;&amp;str&gt; = Some("Joyce"); </pre>
+<p>When the type does not correspond with the value, a mismatched types error occurs, as in the following code:</p>
+<pre>let magic: Option&lt;f32&gt; = Some(42) </pre>
+<p>We can define a <kbd>struct</kbd> <kbd>Person</kbd> as follows:</p>
+<pre>struct Person { 
+  name: &amp;'static str, 
+  id:   i32 
+} </pre>
+<p>Then, we can add a few <kbd>Person</kbd> objects using <kbd>let</kbd> binding:</p>
+<pre>let p1 = Person{name: "James Bond", id: 7}; 
+let p2 = Person{name: "Vin Diesel", id: 12}; 
+let p3 = Person{name: "Robin Hood", id: 42}; </pre>
+<p>Then, we can make an <kbd>Option</kbd> type value or a vector for the struct <kbd>Person</kbd> as the following:</p>
+<pre>let op1: Option&lt;Person&gt; = Some(p1); 
+let pvec: Vec&lt;Person&gt; = vec![p2, p3]; </pre>
+<p>You would use the <kbd>Option</kbd> type in a situation where you expect to get a value, but when there is always a possibility that no value will be given. A typical scenario would be user input.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

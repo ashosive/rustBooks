@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Allocating and deallocating memory</h1>
+                </header>
+            
+            <article>
+                
+<p>Deallocation happens in one of two ways, depending on whether the type is allocated on the stack or the heap. If it's on the stack, the type is deallocated when the stack frame itself ceases to exist. Each Rust stack frame comes into the world fully allocated but uninitialized and exits the world when its associated function exits. Heap allocated types are deallocated when the last valid binding moves out of scope, either through the natural flow of the program or by an explicit <kbd>std::mem::drop</kbd> being called by the programmer. The implementation of <kbd>drop</kbd> is as follows:</p>
+<pre style="padding-left: 30px">fn drop&lt;T&gt;(_x: T) { }</pre>
+<p>The value <kbd>_x</kbd> is moved into <kbd>drop</kbd> —meaning there are no other borrows of <kbd>_x</kbd>—and then immediately falls out of scope when <kbd>drop</kbd> exits. An explicit <kbd>drop</kbd> is not able to remove items from scope, however, so subtle interactions with structures where the Rust compiler is not able to prove non-overlapping aliases and the like will happen. The <kbd>drop</kbd> documentation discusses several cases and it is worth reviewing that material.</p>
+<p>Any Rust type that can be deallocated—meaning it is not <kbd>Copy</kbd>—will implement the <kbd>Drop</kbd> trait, a trait whose sole function is <kbd>drop(&amp;mut self)</kbd>. <kbd>Drop::drop</kbd> cannot be called explicitly and is called when the type goes out of scope or is invocable by <kbd>std::mem::drop</kbd>, as discussed  previously.</p>
+<p>So far in this chapter, we've discussed the layout of types in memory and allocation on the heap but without fully discussing how allocation itself works in the Rust memory model. The simplest way of forcing a heap allocation is with <kbd>std::boxed::Box</kbd>. In fact, the Rust documentation for <kbd>Box</kbd>—which is also just called box—describes it as the simplest form of heap allocation in Rust. That is, a <kbd>Box&lt;T&gt;</kbd> allocates enough space on the heap for a type <kbd>T</kbd> and acts as the owner of that allocation. When the box is dropped, the drop of <kbd>T</kbd> occurs. Here's the definition of <kbd>Box&lt;T&gt;</kbd> straight from the standard library, in the file <kbd>src/liballoc/boxed.rs</kbd>:</p>
+<pre style="padding-left: 30px">pub struct Box&lt;T: ?Sized&gt;(Unique&lt;T&gt;);</pre>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

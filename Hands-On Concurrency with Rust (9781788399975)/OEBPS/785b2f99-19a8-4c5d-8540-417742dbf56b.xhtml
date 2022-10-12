@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style00.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style01.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Tradeoffs</h1>
+                </header>
+            
+            <article>
+                
+<p>Assuming that conc was brought up to speed with modern Rust, where would you want to apply it? Well, let's compare it to reference counting. In a reference-counting data structure, every read and modification requires manipulating atomic values, implying some level of synchronization between threads with an impact on performance. A similar situation exists with hazard pointers, though to a lesser degree. As we've seen, the hazard requires synchronization, but reading anything apart from the hazard, through it, is going to be at machine speed. That's a significant improvement over reference counting. Furthermore, we know that the hazard pointer approach does accumulate garbage—and the implementation of conc is done via an especially neat trick—but this garbage is bounded in size, no matter the frequency of updates to the hazardous structure. The cost of garbage collection is placed on one thread, incurring potentially high latency spikes for some operations while benefiting from bulk-operation calls to the deallocator. This is distinct from reference counting approaches where every thread is responsible for deallocating dead memory as soon as it is dead, keeping operation cost overheads similar but higher than baseline, and incurred on each operation without the benefit of bulk accumulation of deallocations. The hazard pointer approach struggles as the number of threads increase: recall that the number of hazards needed grows linearly with the number of threads, but also consider that an increase in thread count increases the traversal cost of any structure. Furthermore, while many structures have easily identifiable hazards, this is not universally true. Where do you put the hazard pointers for a b-tree?</p>
+<p>In summary—hazard pointers are an excellent choice when you have relatively few hazardous memory references to make and need bounded garbage, no matter the load on your structure. Hazard-based memory reclamation does not have the raw speed of epoch-based reclamation, but bounded memory use in all cases is hard to pass up.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

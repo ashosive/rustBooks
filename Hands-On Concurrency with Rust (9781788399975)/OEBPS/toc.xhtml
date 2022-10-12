@@ -1,0 +1,967 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style00.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style01.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+            <header>
+                <h1>Table of Contents</h1>
+            </header>
+
+            <article>
+                <nav epub:type="toc" id="toc">
+                    <ol><li style="list-style-type:none" hidden="hidden" class="front-matter miscellaneous ">
+            <a href="a90fc885-2dad-4d75-8b26-cd982bad0814.xhtml" class="front-matter miscellaneous ">Title Page</a>
+    
+    
+</li>
+<li style="list-style-type:none" hidden="hidden" class="front-matter miscellaneous ">
+            <a href="677a54bc-19bc-4857-800e-744acc6bd23b.xhtml" class="front-matter miscellaneous ">Copyright and Credits</a>
+    
+    <ol><li style="list-style-type:none" hidden="hidden" class="">
+            <a href="a31e68e0-8839-4777-a1ae-f059e8a82b8b.xhtml" class="">Hands-On Concurrency with Rust</a>
+    
+    
+</li>
+</ol>
+</li>
+<li style="list-style-type:none" hidden="hidden" class="front-matter miscellaneous ">
+            <a href="8382eac4-54f6-4bb4-ab2c-4c9402c28400.xhtml" class="front-matter miscellaneous ">Dedication</a>
+    
+    
+</li>
+<li style="list-style-type:none" hidden="hidden" class="front-matter miscellaneous ">
+            <a href="700be2f5-a842-44f4-878a-336958569ce0.xhtml" class="front-matter miscellaneous ">Packt Upsell</a>
+    
+    <ol><li style="list-style-type:none" hidden="hidden" class="">
+            <a href="e44bedd7-ec39-418f-a051-de680227f99b.xhtml" class="">Why subscribe?</a>
+    
+    
+</li>
+<li style="list-style-type:none" hidden="hidden" class="">
+            <a href="dfd3e688-dd44-46ca-acd4-fea6a65163da.xhtml" class="">PacktPub.com</a>
+    
+    
+</li>
+</ol>
+</li>
+<li style="list-style-type:none" hidden="hidden" class="front-matter miscellaneous ">
+            <a href="83dbf181-7624-449b-b670-6edc81f3a3d4.xhtml" class="front-matter miscellaneous ">Contributors</a>
+    
+    <ol><li style="list-style-type:none" hidden="hidden" class="">
+            <a href="19719b11-083b-49be-bbb1-ab1cba103fb7.xhtml" class="">About the author</a>
+    
+    
+</li>
+<li style="list-style-type:none" hidden="hidden" class="">
+            <a href="29e7fdf9-11a7-4c70-a416-0dbef0d003e9.xhtml" class="">About the reviewer</a>
+    
+    
+</li>
+<li style="list-style-type:none" hidden="hidden" class="">
+            <a href="344d6cc3-cf9d-4f25-a4f7-9c2fc6700c2b.xhtml" class="">Packt is searching for authors like you</a>
+    
+    
+</li>
+</ol>
+</li>
+<li style="list-style-type:none" class="front-matter preface ">
+            <a href="b06ff493-7866-4671-8240-7f1019a0f6c2.xhtml" class="front-matter preface ">Preface</a>
+    
+    <ol><li style="list-style-type:none" class="">
+            <a href="bf5cc69c-5149-4a33-b128-de3852ffcbeb.xhtml" class="">Who this book is for</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="ba972921-ce8d-4d8f-9543-938b740ca144.xhtml" class="">What this book covers</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="7b788413-bfad-476a-8ed7-7f75b1268a34.xhtml" class="">To get the most out of this book</a>
+    
+    <ol><li style="list-style-type:none" class="">
+            <a href="1a51c248-1b8c-4929-a438-6f0f35d0f51d.xhtml" class="">Download the example code files</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="685f6280-f1bf-4105-aa45-f3f19909016b.xhtml" class="">Conventions used</a>
+    
+    
+</li>
+</ol>
+</li>
+<li style="list-style-type:none" class="">
+            <a href="38ea15d8-b53e-4fc5-a288-1927ec140368.xhtml" class="">Get in touch</a>
+    
+    <ol><li style="list-style-type:none" class="">
+            <a href="99b95329-ae65-4ba5-8488-f12a202933a1.xhtml" class="">Reviews</a>
+    
+    
+</li>
+</ol>
+</li>
+</ol>
+</li>
+<li style="list-style-type:decimal" value="1" class="chapter chapter ">
+            <a href="5f3aec9d-fd53-48ff-9ba8-43ce13e91cff.xhtml" class="chapter chapter ">Preliminaries &amp;#x2013; Machine Architecture and Getting Started with Rust</a>
+    
+    <ol><li style="list-style-type:none" class="">
+            <a href="b7f51452-4d75-4a5c-a376-18f2a015df96.xhtml" class="">Technical requirements</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="5337e0f3-8ebf-4802-b58d-6b0c88852a47.xhtml" class="">The machine</a>
+    
+    <ol><li style="list-style-type:none" class="">
+            <a href="34c86231-af6d-41a2-b547-ec0cf3bedc64.xhtml" class="">The CPU</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="c4ed6b0e-5d92-4a68-ae0e-74794c68e9ed.xhtml" class="">Memory and caches</a>
+    
+    <ol><li style="list-style-type:none" class="">
+            <a href="2cf1c809-5bad-409a-afcb-7e8a1c8c7df1.xhtml" class="">Memory model</a>
+    
+    
+</li>
+</ol>
+</li>
+</ol>
+</li>
+<li style="list-style-type:none" class="">
+            <a href="d4321e01-36be-47b6-9774-6e3afe83a70e.xhtml" class="">Getting set up</a>
+    
+    <ol><li style="list-style-type:none" class="">
+            <a href="48dd252f-5c69-434b-b707-5370b8091d66.xhtml" class="">The interesting part</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="f0306dec-3646-4360-95b7-af367531535d.xhtml" class="">Debugging Rust programs</a>
+    
+    
+</li>
+</ol>
+</li>
+<li style="list-style-type:none" class="">
+            <a href="5c49c5bc-b0e1-418b-8d48-394ffcc40906.xhtml" class="">Summary</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="9be606d0-1af3-4dd9-b1a4-0a72f305800e.xhtml" class="">Further reading</a>
+    
+    
+</li>
+</ol>
+</li>
+<li style="list-style-type:decimal" value="2" class="chapter chapter ">
+            <a href="8c61da2f-08c8-40be-89d4-d8afa8510850.xhtml" class="chapter chapter ">Sequential Rust Performance and Testing</a>
+    
+    <ol><li style="list-style-type:none" class="">
+            <a href="1900e7e3-e44c-47fb-bc61-43da5eb500f9.xhtml" class="">Technical requirements</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="3634bbf9-067f-4b8a-870c-eb43860564c4.xhtml" class="">Diminishing returns</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="f92f44d4-fd4b-42a8-9377-9ec5ab36ff4c.xhtml" class="">Performance</a>
+    
+    <ol><li style="list-style-type:none" class="">
+            <a href="1a5856fd-d34c-479d-bd1f-14452bc5e98a.xhtml" class="">Standard library HashMap</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="41b8e9be-131e-46bc-bb3c-cb66ad68ff05.xhtml" class="">Naive HashMap</a>
+    
+    <ol><li style="list-style-type:none" class="">
+            <a href="6a4447d0-cebb-4c0a-9367-bb92329c4fd9.xhtml" class="">Testing with QuickCheck</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="9200f48f-4c0b-4d3b-9013-43aaea075abb.xhtml" class="">Testing with American Fuzzy Lop</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="41d337ed-2f1b-47f2-b088-870685252828.xhtml" class="">Performance testing with Criterion</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="425b1d06-4a7b-4bf4-b484-ab331bf56bab.xhtml" class="">Inspecting with the Valgrind Suite</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="c5502fc0-8aca-40d5-a442-9cf8ef2c0f19.xhtml" class="">Inspecting with Linux perf</a>
+    
+    
+</li>
+</ol>
+</li>
+<li style="list-style-type:none" class="">
+            <a href="affb4152-7334-4b91-b9c1-d61a833d08db.xhtml" class="">A better naive HashMap</a>
+    
+    
+</li>
+</ol>
+</li>
+<li style="list-style-type:none" class="">
+            <a href="03b114f5-3e40-4c3a-bed3-a7303b18985c.xhtml" class="">Summary</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="a30b0017-398e-4bc4-bbe8-372e41656dc8.xhtml" class="">Further reading</a>
+    
+    
+</li>
+</ol>
+</li>
+<li style="list-style-type:decimal" value="3" class="chapter chapter ">
+            <a href="605ce307-29ed-4b5a-961e-8d327467b84f.xhtml" class="chapter chapter ">The Rust Memory Model &amp;#x2013; Ownership, References and Manipulation</a>
+    
+    <ol><li style="list-style-type:none" class="">
+            <a href="de2b5409-e825-46f3-a99c-644357a4e5f8.xhtml" class="">Technical requirements</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="cbe68730-8c93-46cd-b667-7f7c3c63d528.xhtml" class="">Memory layout</a>
+    
+    <ol><li style="list-style-type:none" class="">
+            <a href="b530f871-8f37-46c2-8725-37cbd691a702.xhtml" class="">Pointers to memory</a>
+    
+    <ol><li style="list-style-type:none" class="">
+            <a href="673baa6d-fe9b-4b8f-920e-d591b7cd7f3b.xhtml" class="">Allocating and deallocating memory</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="88def9f3-0953-4827-bbfd-46771b49dc27.xhtml" class="">The size of a type</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="6d232490-cae2-4d54-b1ae-5f392703902f.xhtml" class="">Static and dynamic dispatch</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="2d521d8c-7277-46c0-946d-2ecc154b6cf5.xhtml" class="">Zero sized types</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="5e8d01dd-9f91-4517-b336-6f74bad71b69.xhtml" class="">Boxed types</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="b1f1c5cf-9032-457e-8d27-9f572c11b10d.xhtml" class="">Custom allocators</a>
+    
+    
+</li>
+</ol>
+</li>
+</ol>
+</li>
+<li style="list-style-type:none" class="">
+            <a href="d719b96f-d31e-4b40-b48f-985c29bf0636.xhtml" class="">Implementations</a>
+    
+    <ol><li style="list-style-type:none" class="">
+            <a href="d9ae7853-9fed-4e92-830d-0751e8e8def8.xhtml" class="">Option</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="8d2195ad-5333-47ab-9b3e-c5ea92969158.xhtml" class="">Cell and RefCell</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="cd63053c-8da2-4512-b467-e88b8539bb5a.xhtml" class="">Rc</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="8c4fe7a3-8a50-4fc4-aa5b-bd1f38956d71.xhtml" class="">Vec</a>
+    
+    
+</li>
+</ol>
+</li>
+<li style="list-style-type:none" class="">
+            <a href="74f95a81-b802-4b6b-9c91-448e4ac11a94.xhtml" class="">Summary</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="8c13d11a-8d75-4e02-8836-2732be9d8632.xhtml" class="">Further reading</a>
+    
+    
+</li>
+</ol>
+</li>
+<li style="list-style-type:decimal" value="4" class="chapter chapter ">
+            <a href="5a332d94-37e4-4748-8920-1679b07e2880.xhtml" class="chapter chapter ">Sync and Send &amp;#x2013; the Foundation of Rust Concurrency</a>
+    
+    <ol><li style="list-style-type:none" class="">
+            <a href="17368668-4c11-4cff-859f-286171ef5d37.xhtml" class="">Technical requirements</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="7a735439-7ff9-4f08-845f-1b58becf3d18.xhtml" class="">Sync and Send</a>
+    
+    <ol><li style="list-style-type:none" class="">
+            <a href="7c92ac99-cfa6-45d4-ae2c-1f448b356b1b.xhtml" class="">Racing threads</a>
+    
+    <ol><li style="list-style-type:none" class="">
+            <a href="ab666f9d-3463-4d86-b78b-740500134acf.xhtml" class="">The flaw of the Ring</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="a5d72ebc-ecd8-4953-96d7-c07893ec7cb2.xhtml" class="">Getting back to safety</a>
+    
+    <ol><li style="list-style-type:none" class="">
+            <a href="eec5a557-cb04-4dbc-80d1-0a94031488b9.xhtml" class="">Safety by exclusion</a>
+    
+    
+</li>
+</ol>
+</li>
+<li style="list-style-type:none" class="">
+            <a href="4f1789df-266d-4718-b805-b7d8842a2d66.xhtml" class="">Using MPSC</a>
+    
+    <ol><li style="list-style-type:none" class="">
+            <a href="c86f3152-c170-4704-be08-9808fb9059f4.xhtml" class="">A telemetry server</a>
+    
+    
+</li>
+</ol>
+</li>
+</ol>
+</li>
+</ol>
+</li>
+<li style="list-style-type:none" class="">
+            <a href="c183acd6-8e5f-4e3d-9543-885ff1180174.xhtml" class="">Summary</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="997f32ea-a658-4b31-afc9-b36c58242960.xhtml" class="">Further reading</a>
+    
+    
+</li>
+</ol>
+</li>
+<li style="list-style-type:decimal" value="5" class="chapter chapter ">
+            <a href="e2de1ba7-c291-494e-82da-37fee7323c1d.xhtml" class="chapter chapter ">Locks &amp;#x2013; Mutex, Condvar, Barriers and RWLock</a>
+    
+    <ol><li style="list-style-type:none" class="">
+            <a href="ea0f0b14-7275-4a7e-aa0a-250764db6829.xhtml" class="">Technical requirements</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="d4ecec56-0d1b-4b15-9c29-d60c77297dad.xhtml" class="">Read many, write exclusive locks &amp;#x2013;&amp;#xA0;RwLock</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="5f1f4be6-b219-435a-813c-84c2eea9ba05.xhtml" class="">Blocking until conditions change &amp;#x2013;&amp;#xA0;condvar</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="708f1aa5-5239-436b-bad9-134fff8ca377.xhtml" class="">Blocking until the gang's all here - barrier</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="f1a1b50f-1ae7-4e04-8bec-a1e27cbb5b04.xhtml" class="">More mutexes, condvars, and friends in action</a>
+    
+    <ol><li style="list-style-type:none" class="">
+            <a href="dd25eb45-c0f0-4870-a137-c6e02837726c.xhtml" class="">The rocket preparation problem</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="b34aea18-13d9-4b4c-a65b-a09e2a426484.xhtml" class="">The rope bridge problem</a>
+    
+    
+</li>
+</ol>
+</li>
+<li style="list-style-type:none" class="">
+            <a href="94af81b3-12bd-4780-82bd-fb616c64cd5c.xhtml" class="">Hopper&amp;#x2014;an MPSC specialization</a>
+    
+    <ol><li style="list-style-type:none" class="">
+            <a href="a2ff2e42-dae0-4253-8867-117c631d2441.xhtml" class="">The problem</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="b94dc1ed-1f29-432d-8fb1-3c067281edc6.xhtml" class="">Hopper in use</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="ee315201-1ca8-4af4-bc84-da35d2f8d1e2.xhtml" class="">A conceptual view of hopper</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="b274baf9-bd1a-47fd-8079-58af3053c54d.xhtml" class="">The deque</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="0aa7f43a-2cbd-4dba-b26a-f91c4d9b78da.xhtml" class="">The Receiver</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="8a22a2fd-a284-43e6-8832-2568aefe1744.xhtml" class="">The Sender</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="1b584cfa-4eeb-4551-9687-de8dd3a82868.xhtml" class="">Testing concurrent data structures</a>
+    
+    <ol><li style="list-style-type:none" class="">
+            <a href="90babc07-7e61-4691-8933-869d14ad6863.xhtml" class="">QuickCheck and loops</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="077bc459-0743-417e-8e10-ce018c2fd3b0.xhtml" class="">Searching for crashes with AFL</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="e480ade4-34e0-4b78-89f3-0fd7ca9111e1.xhtml" class="">Benchmarking</a>
+    
+    
+</li>
+</ol>
+</li>
+</ol>
+</li>
+<li style="list-style-type:none" class="">
+            <a href="377d0070-cd60-493e-af1e-6aecc693e4de.xhtml" class="">Summary</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="e002e0cc-1eb9-4ef8-b519-b633a6307ee5.xhtml" class="">Further reading</a>
+    
+    
+</li>
+</ol>
+</li>
+<li style="list-style-type:decimal" value="6" class="chapter chapter ">
+            <a href="d42acb0b-a05e-4068-894f-81365d147bf4.xhtml" class="chapter chapter ">Atomics &amp;#x2013; the Primitives of Synchronization</a>
+    
+    <ol><li style="list-style-type:none" class="">
+            <a href="9bfa1270-64e8-414d-9bf5-7d37ec256d1a.xhtml" class="">Technical requirements</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="ec999590-3998-4967-8fba-e4dfc7ac9128.xhtml" class="">Linearizability</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="c4cb600e-d1a0-4a34-b665-24e5e35a6e25.xhtml" class="">Memory ordering &amp;#x2013;&amp;#xA0;happens-before and synchronizes-with</a>
+    
+    <ol><li style="list-style-type:none" class="">
+            <a href="1e75fab5-a3e9-465b-8ab5-c12a16756f74.xhtml" class="">Ordering::Relaxed</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="1ad74095-e380-4d8e-800a-ddb6fac9c54f.xhtml" class="">Ordering::Acquire</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="eab1d299-2c38-4a96-914b-4b864db146ee.xhtml" class="">Ordering::Release</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="af722eb9-e0bc-4a9b-a344-66e992e00bf8.xhtml" class="">Ordering::AcqRel</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="6eec0b9c-ea9b-4230-8175-2541a32aa95e.xhtml" class="">Ordering::SeqCst</a>
+    
+    
+</li>
+</ol>
+</li>
+<li style="list-style-type:none" class="">
+            <a href="00fcaf0f-9545-4d3a-beca-03d355cafe75.xhtml" class="">Building synchronization</a>
+    
+    <ol><li style="list-style-type:none" class="">
+            <a href="68137fcb-41bf-4558-b81f-84832a848d3f.xhtml" class="">Mutexes</a>
+    
+    <ol><li style="list-style-type:none" class="">
+            <a href="1ceda4dc-f0bd-4bb3-b99d-584e94e78a2d.xhtml" class="">Compare and set mutex</a>
+    
+    
+</li>
+</ol>
+</li>
+<li style="list-style-type:none" class="">
+            <a href="2f003122-abce-41ac-81fe-60e40b6d7713.xhtml" class="">An incorrect atomic queue</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="5e74ca4e-a2e3-4826-9a02-a488459369db.xhtml" class="">Options to correct the incorrect queue</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="0afc8fea-78e5-45a5-bf3f-9ad617826421.xhtml" class="">Semaphore</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="d1eb8d9f-5975-42f2-8cec-826231703759.xhtml" class="">Binary semaphore, or, a less wasteful mutex</a>
+    
+    
+</li>
+</ol>
+</li>
+<li style="list-style-type:none" class="">
+            <a href="9244f186-6c76-4374-a2c9-0a6569643928.xhtml" class="">Summary</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="4721ec64-6f9f-4dea-bcd4-393081b1f65e.xhtml" class="">Further reading</a>
+    
+    
+</li>
+</ol>
+</li>
+<li style="list-style-type:decimal" value="7" class="chapter chapter ">
+            <a href="2099e79d-45cd-46cb-bf58-fc27b27b84ec.xhtml" class="chapter chapter ">Atomics &amp;#x2013; Safely Reclaiming Memory</a>
+    
+    <ol><li style="list-style-type:none" class="">
+            <a href="2e6391fb-2557-47ed-ab7b-2a1729a6e09f.xhtml" class="">Technical requirements</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="1092dfe9-66ca-47b9-ba7d-835e550c2d12.xhtml" class="">Approaches to memory reclamation</a>
+    
+    <ol><li style="list-style-type:none" class="">
+            <a href="c81bd03b-e990-4723-a2bb-9f68e778bd6a.xhtml" class="">Reference counting</a>
+    
+    <ol><li style="list-style-type:none" class="">
+            <a href="333adee4-9530-4012-9f65-5fb51d4039af.xhtml" class="">Tradeoffs</a>
+    
+    
+</li>
+</ol>
+</li>
+<li style="list-style-type:none" class="">
+            <a href="2c5f290d-f1c0-45b4-bb78-66ca9170de4f.xhtml" class="">Hazard pointers</a>
+    
+    <ol><li style="list-style-type:none" class="">
+            <a href="0b5f8732-8183-427e-8a0c-9597d2104fff.xhtml" class="">A hazard-pointer Treiber stack</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="ae65494b-5a27-4e70-ab23-be559b28b75b.xhtml" class="">The hazard of Nightly</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="6f3d6ab6-901a-47cc-904b-f1f2e66fb916.xhtml" class="">Exercizing the hazard-pointer Treiber stack</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="785b2f99-19a8-4c5d-8540-417742dbf56b.xhtml" class="">Tradeoffs</a>
+    
+    
+</li>
+</ol>
+</li>
+<li style="list-style-type:none" class="">
+            <a href="f14e9c6e-a74c-47d0-bbb3-57c4f911b167.xhtml" class="">Epoch-based reclamation</a>
+    
+    <ol><li style="list-style-type:none" class="">
+            <a href="8b6b8eac-bf6b-4b46-99dd-cd4f5a5f8b3e.xhtml" class="">An epoch-based Treiber stack</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="e34f8e7b-3717-40fa-9ef9-7ddb64a55389.xhtml" class="">crossbeam_epoch::Atomic</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="da32de6c-9076-4f71-90c9-be5509a45947.xhtml" class="">crossbeam_epoch::Guard::defer</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="78e4a64b-9bdd-42f9-92d3-d443ce3e2ec1.xhtml" class="">crossbeam_epoch::Local::pin</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="6b916681-64fc-41ab-a0c1-3d12d1d9c335.xhtml" class="">Exercising the epoch-based Treiber stack</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="8db817e0-6d8e-4db7-89e6-ccf39f1dda7d.xhtml" class="">Tradeoffs</a>
+    
+    
+</li>
+</ol>
+</li>
+</ol>
+</li>
+<li style="list-style-type:none" class="">
+            <a href="388719fc-5a39-4e7e-ae88-92b696fba401.xhtml" class="">Summary</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="34d01984-7336-40be-92c5-7b76b935b4d8.xhtml" class="">Further reading</a>
+    
+    
+</li>
+</ol>
+</li>
+<li style="list-style-type:decimal" value="8" class="chapter chapter ">
+            <a href="d4802512-564b-4037-9407-b6035bd38f31.xhtml" class="chapter chapter ">High-Level Parallelism &amp;#x2013; Threadpools, Parallel Iterators and Processes</a>
+    
+    <ol><li style="list-style-type:none" class="">
+            <a href="c1b4bff1-bb58-4ebd-9425-13515fe2a2d2.xhtml" class="">Technical requirements</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="99b22f2e-3800-42db-9c89-1bc8cd9f4983.xhtml" class="">Thread pooling</a>
+    
+    <ol><li style="list-style-type:none" class="">
+            <a href="215b4ed5-e2fe-44c9-afd4-0f9fb10983c3.xhtml" class="">Slowloris&amp;#xA0;&amp;#x2013; attacking thread-per-connection servers</a>
+    
+    <ol><li style="list-style-type:none" class="">
+            <a href="c281b37a-2eee-4aee-b79a-e7b4e8322cee.xhtml" class="">The server</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="3a5583f7-6af3-42b6-899a-7d4fe6439ef2.xhtml" class="">The client</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="0f5dd176-9f0d-4c77-a8d5-010730795b2d.xhtml" class="">A thread-pooling server</a>
+    
+    
+</li>
+</ol>
+</li>
+<li style="list-style-type:none" class="">
+            <a href="2353b879-eb0f-4618-9efd-6d947458dc24.xhtml" class="">Looking into thread pool</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="cb2758ec-1e3c-42c0-90a9-95fc6c69b1dd.xhtml" class="">The Ethernet sniffer</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="2c5ef4b5-b1d4-47cb-987b-19fcaeb0e42c.xhtml" class="">Iterators</a>
+    
+    <ol><li style="list-style-type:none" class="">
+            <a href="3d7c1ed1-f44f-4f91-b3e8-c17df16e9b8f.xhtml" class="">Smallcheck iteration</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="999a235d-4737-4b4c-a3bc-38f23455d6ff.xhtml" class="">rayon&amp;#xA0;&amp;#x2013; parallel&amp;#xA0;iterators</a>
+    
+    
+</li>
+</ol>
+</li>
+<li style="list-style-type:none" class="">
+            <a href="b23d2558-ffc9-4cf0-aed7-87ac0660d1f5.xhtml" class="">Data parallelism and OS processes&amp;#xA0;&amp;#x2013;&amp;#xA0;evolving corewars players</a>
+    
+    <ol><li style="list-style-type:none" class="">
+            <a href="450e3e3e-209d-4fcc-97ed-325485fabe90.xhtml" class="">Corewars</a>
+    
+    
+</li>
+</ol>
+</li>
+<li style="list-style-type:none" class="">
+            <a href="715cdacc-2ec2-41e3-b643-ba7ac68fa30f.xhtml" class="">Feruscore&amp;#xA0;&amp;#x2013;&amp;#xA0;a Corewars evolver</a>
+    
+    <ol><li style="list-style-type:none" class="">
+            <a href="2b67465f-f40c-4f2a-910b-2ad23a88e733.xhtml" class="">Representing the domain</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="112b6f03-196e-4649-9709-f73d286fba43.xhtml" class="">Exploring the source</a>
+    
+    <ol><li style="list-style-type:none" class="">
+            <a href="da0e5b68-b0a8-43b4-a02b-31994c8d444e.xhtml" class="">Instructions</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="8d3c7078-0edd-4855-857c-a849e6d34ae9.xhtml" class="">Individuals</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="2b389615-e4a3-411f-9986-82a996fb434d.xhtml" class="">Mutation and reproduction</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="5bfb3e1c-dc9e-419f-9924-4e8c0eaee332.xhtml" class="">Competition&amp;#xA0;&amp;#x2013;&amp;#xA0;calling out to pMARS</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="68e15ed8-d24e-4bc8-a9ef-d64edfba3789.xhtml" class="">Main</a>
+    
+    
+</li>
+</ol>
+</li>
+<li style="list-style-type:none" class="">
+            <a href="b2b08bdf-bb16-448e-839f-0a549197912c.xhtml" class="">Running feruscore</a>
+    
+    
+</li>
+</ol>
+</li>
+</ol>
+</li>
+<li style="list-style-type:none" class="">
+            <a href="cce9631d-644a-42db-8b9b-88aba19b42b5.xhtml" class="">Summary</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="2ee50784-212e-4cc1-a9c8-cb6546485bd6.xhtml" class="">Further reading</a>
+    
+    
+</li>
+</ol>
+</li>
+<li style="list-style-type:decimal" value="9" class="chapter chapter ">
+            <a href="48d410d6-8ff7-40ec-9548-6007b789bd17.xhtml" class="chapter chapter ">FFI and Embedding &amp;#x2013; Combining Rust and Other Languages</a>
+    
+    <ol><li style="list-style-type:none" class="">
+            <a href="475247d9-8542-4170-8efa-ef917c89a869.xhtml" class="">Embedding C into Rust &amp;#x2013;&amp;#xA0;feruscore without processes</a>
+    
+    <ol><li style="list-style-type:none" class="">
+            <a href="12c2f69e-4bb4-495d-b376-886663fc6b8c.xhtml" class="">The MARS C interface</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="672184b6-f75d-4698-854e-f657b7b603b1.xhtml" class="">Creating C-structs from Rust</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="b57599a8-2d6e-4770-8e06-9f11005fedb8.xhtml" class="">Calling C functions</a>
+    
+    <ol><li style="list-style-type:none" class="">
+            <a href="04fbd9b9-4005-424d-925c-a5ebbdea036b.xhtml" class="">Managing cross-language ownership</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="e2917941-a732-486a-9f98-3d832ea68023.xhtml" class="">Running the simulation</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="b73ce71e-aa08-4706-8ed1-90e5f3572328.xhtml" class="">Fuzzing the simulation</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="0686d509-200a-477c-b4dc-bb95fc119403.xhtml" class="">The feruscore executable</a>
+    
+    
+</li>
+</ol>
+</li>
+</ol>
+</li>
+<li style="list-style-type:none" class="">
+            <a href="1a93a982-b4bd-4081-8449-fbafd9a970e9.xhtml" class="">Embedding Lua into Rust</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="ac4aaea1-985c-4928-94f1-7955f729e886.xhtml" class="">Embedding Rust</a>
+    
+    <ol><li style="list-style-type:none" class="">
+            <a href="d404b63d-340e-49fc-9745-e5d70ae30772.xhtml" class="">Into C</a>
+    
+    <ol><li style="list-style-type:none" class="">
+            <a href="1def2cdd-f297-48fb-92d7-2ac555a9b737.xhtml" class="">The Rust side</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="96810785-a039-42db-886c-d6f2a01de844.xhtml" class="">The C side</a>
+    
+    
+</li>
+</ol>
+</li>
+<li style="list-style-type:none" class="">
+            <a href="20a3cc26-a00c-4899-83ec-f8ab6e64c0ad.xhtml" class="">Into Python</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="ac1ef85f-7b9a-43c4-aef3-48215998f6cf.xhtml" class="">Into Erlang/Elixir</a>
+    
+    
+</li>
+</ol>
+</li>
+<li style="list-style-type:none" class="">
+            <a href="11db8e5c-f1c4-4e47-a613-6aa0c5467bc1.xhtml" class="">Summary</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="14df7161-78f3-4729-a846-61ab3b9c07ee.xhtml" class="">Further reading</a>
+    
+    
+</li>
+</ol>
+</li>
+<li style="list-style-type:decimal" value="10" class="chapter chapter ">
+            <a href="2dc30216-c606-471f-a94a-dc4891a0cb1b.xhtml" class="chapter chapter ">Futurism &amp;#x2013; Near-Term Rust</a>
+    
+    <ol><li style="list-style-type:none" class="">
+            <a href="cf58cb52-caa6-4f0e-8af1-568ce00ea2e2.xhtml" class="">Technical requirements</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="9eee5a82-3b77-4d3e-811a-e9dfc4e0d9b1.xhtml" class="">Near-term improvements</a>
+    
+    <ol><li style="list-style-type:none" class="">
+            <a href="cdd12cae-deff-4cf2-954c-2dfddc771c0e.xhtml" class="">SIMD</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="cb93f3b2-8c6e-4b34-9e02-354f9104bc68.xhtml" class="">Hex encoding</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="51520065-9ddb-4c20-8def-f97a426b5d4c.xhtml" class="">Futures and async/await</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="22907952-7faa-4660-b181-e58ed773c0eb.xhtml" class="">Specialization</a>
+    
+    
+</li>
+</ol>
+</li>
+<li style="list-style-type:none" class="">
+            <a href="9a8315f5-0dd3-47b3-abed-507f89beefa8.xhtml" class="">Interesting projects</a>
+    
+    <ol><li style="list-style-type:none" class="">
+            <a href="d28fe75a-baa0-42fe-ae8d-6e62998888c3.xhtml" class="">Fuzzing</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="e732167f-e073-4eb5-a55a-9a2fa7dba466.xhtml" class="">Seer, a symbolic execution engine for Rust</a>
+    
+    
+</li>
+</ol>
+</li>
+<li style="list-style-type:none" class="">
+            <a href="06da0a1e-0f83-4692-82a5-00e8bd123abc.xhtml" class="">The community</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="819528ac-0678-4f46-9a37-15608a752a47.xhtml" class="">Should I use unsafe?</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="ac445bc8-fd42-4408-bbc7-088226a11ba2.xhtml" class="">Summary</a>
+    
+    
+</li>
+<li style="list-style-type:none" class="">
+            <a href="f1d54c27-adbf-443e-bae1-62c6d60cde9e.xhtml" class="">Further reading</a>
+    
+    
+</li>
+</ol>
+</li>
+<li style="list-style-type:none" class="back-matter miscellaneous ">
+            <a href="17571a5f-ad7f-445f-958a-4eac28a5559b.xhtml" class="back-matter miscellaneous ">Other Books You May Enjoy</a>
+    
+    <ol><li style="list-style-type:none" class="">
+            <a href="dc4072b4-3eb4-4a66-a748-fbabe290ed63.xhtml" class="">Leave a review - let other readers know what you think</a>
+    
+    
+</li>
+</ol>
+</li>
+</ol>
+                </nav>
+            </article>
+
+            <footer style="margin-top: 5em;"/>
+        </section>
+    </div></body>
+</html>

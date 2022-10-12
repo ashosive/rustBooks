@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">The Ethernet sniffer</h1>
+                </header>
+            
+            <article>
+                
+<p>Of equal importance to understanding a technique in-depth is understanding when not to apply it. Let's consider another thread-per-unit-of-work system, but this time we'll be echoing Ethernet packets rather than lines received over a TCP socket. Our project's <kbd>Cargo.toml</kbd>:</p>
+<pre>[package]
+name = "sniffer"
+version = "0.1.0"
+authors = ["Brian L. Troutwine &lt;brian@troutwine.us&gt;"]
+
+[dependencies]
+pnet = "0.21"
+
+[[bin]]
+name = "sniffer"
+
+[[bin]]
+name = "poor_threading"</pre>
+<p>Like the TCP example, we'll create two binaries, one that is susceptible to thread overload–<kbd>poor_threading</kbd><span>–</span>and another–<kbd>sniffer</kbd>–that is not. The premise here is that we want to sniff a network interface for Ethernet packets, reverse the source and destination headers on that packet, and send the modified packet back to the original source. Simultaneously, we'll collect summary statistics of the packets we collect. On a saturated network, our little programs will be very busy and there will have to be trade-offs made somewhere in terms of packet loss and receipt.</p>
+<p>The only dependency we're pulling in here is <a href="https://github.com/libpnet/libpnet">pnet</a>. libpnet is a low-level packet manipulation library, useful for building network utilities or for prototyping transport protocols. I think it's pretty fun to fuzz-test transport implementations with libpnet on commodity network devices. Mostly, though, the reward is a crashed home router, but I find that amusing. Anyhow, let's look into <kbd>poor_threading</kbd>. It's preamble is fairly ho-hum:</p>
+<pre>extern crate pnet;
+
+use pnet::datalink::Channel::Ethernet;
+use pnet::datalink::{self, DataLinkReceiver, DataLinkSender, <br/>                     MacAddr, NetworkInterface};
+use pnet::packet::ethernet::{EtherType, EthernetPacket, <br/>                             MutableEthernetPacket};
+use pnet::packet::{MutablePacket, Packet};
+use std::collections::HashMap;
+use std::sync::mpsc;
+use std::{env, thread};</pre>
+<p>We pull in a fair bit of pnet's facilities, which we'll discuss in due time. We don't pull in clap or similar argument-parsing libraries, instead requiring that the user pass in the interface name as the first argument to the program:</p>
+<pre>fn main() {
+    let interface_name = env::args().nth(1).unwrap();
+    let interface_names_match = |iface: &amp;NetworkInterface| {<br/>        iface.name == interface_name<br/>    };
+
+    // Find the network interface with the provided name
+    let interfaces: Vec&lt;NetworkInterface&gt; = datalink::interfaces();
+    let interface = interfaces
+        .into_iter()
+        .filter(interface_names_match)
+        .next()
+        .unwrap();</pre>
+<p>The user-supplied interface name is checked against the interfaces pnet is able to find, via its <kbd>datalink::interfaces()</kbd> function. We haven't done much yet in this book with iterators, though they've been omnipresent and assumed knowledge, at least minimally. We'll discuss iteration in Rust in detail after this. Note here, though, that <kbd>filter(interface_names_match)</kbd> is applying a boolean function, <kbd>interface_names_match(&amp;NetworkInterface) -&gt; bool</kbd>, to each member of the determined interfaces.</p>
+<p>If the function returns true, the member passes through the filter, otherwise it doesn't. The call to <kbd>next().unwrap()</kbd> cranks the filtered iterator forward one item, crashing if there are no items in the filtered iterator. This is a somewhat user-hostile way to determine whether the passed interface is, in fact, an interface that pnet could discover. That's alright here in our demonstration program.</p>
+<p>Next, we establish a communication channel for the concurrent actors of this program:</p>
+<pre>    let (snd, rcv) = mpsc::sync_channel(10);
+
+    let _ = thread::spawn(|| gather(rcv));
+    let timer_snd = snd.clone();
+    let _ = thread::spawn(move || timer(timer_snd));</pre>
+<p>The <kbd>timer</kbd> function pushes a time pulse through the channel we just established at regular intervals, as similarly is done in cernan, discussed previously in this book. The function is small:</p>
+<pre>fn timer(snd: mpsc::SyncSender&lt;Payload&gt;) -&gt; () {
+    use std::{thread, time};
+    let one_second = time::Duration::from_millis(1000);
+
+    let mut pulses = 0;
+    loop {
+        thread::sleep(one_second);
+        snd.send(Payload::Pulse(pulses)).unwrap();
+        pulses += 1;
+    }
+}</pre>
+<p>The <kbd>Payload</kbd> type is an enum with only two variants:</p>
+<pre>enum Payload {
+    Packet {
+        source: MacAddr,
+        destination: MacAddr,
+        kind: EtherType,
+    },
+    Pulse(u64),
+}</pre>
+<p>The <kbd>Pulse(u64)</kbd> variant is the timer pulse, sent periodically by the <kbd>timer</kbd> thread. It's very useful to divorce time in a concurrent system from the actual wall-clock, especially with regard to testing individual components of the system. It's also helpful for the program structure to unify different message variants in a union. At the time of writing, Rust's MPSC implementation does not have a stable select capability, and so you'll have to manually implement that with <kbd>mpsc::Receiver::recv_timeout</kbd> and careful multiplexing. It's much better to unify it into one union type. Additionally, this gets the type system on your side, confirming that all incoming variants are handled in a single match, which likely optimizes better, too. This last benefit should be measured.</p>
+<p>Let's look at <kbd>gather</kbd> now:</p>
+<pre>fn gather(rcv: mpsc::Receiver&lt;Payload&gt;) -&gt; () {
+    let mut sources: HashMap&lt;MacAddr, u64&gt; = HashMap::new();
+    let mut destinations: HashMap&lt;MacAddr, u64&gt; = HashMap::new();
+    let mut ethertypes: HashMap&lt;EtherType, u64&gt; = HashMap::new();
+
+    while let Ok(payload) = rcv.recv() {
+        match payload {
+            Payload::Pulse(id) =&gt; {
+                println!("REPORT {}", id);
+                println!("    SOURCES:");
+                for (k, v) in sources.iter() {
+                    println!("        {}: {}", k, v);
+                }
+                println!("    DESTINATIONS:");
+                for (k, v) in destinations.iter() {
+                    println!("        {}: {}", k, v);
+                }
+                println!("    ETHERTYPES:");
+                for (k, v) in ethertypes.iter() {
+                    println!("        {}: {}", k, v);
+                }
+            }
+            Payload::Packet {
+                source: src,
+                destination: dst,
+                kind: etype,
+            } =&gt; {
+                let mut destination = destinations.entry(dst).or_insert(0);
+                *destination += 1;
+
+                let mut source = sources.entry(src).or_insert(0);
+                *source += 1;
+
+                let mut ethertype = ethertypes.entry(etype).or_insert(0);
+                *ethertype += 1;
+            }
+        }
+    }
+}</pre>
+<p>Straightforward receiver loop, pulling off <kbd>Payload</kbd> enums. The <kbd>Payload::Packet</kbd> variant is deconstructed and its contents stored into three <kbd>HashMap</kbd>s, mapping MAC addresses to a counter or an EtherType to a counter. MAC addresses are the unique identifiers of network interfaces—or, ideally unique, as there have been goofs—and get used at the data-link layer of the OSI model. (This is not a book about networking but it is, I promise, a really fun domain.) EtherType maps to the two octet fields at the start of every Ethernet packet, defining the packet's, well, type. There's a standard list of types, which pnet helpfully encodes for us. When <kbd>gather</kbd> prints the EtherType, there's no special work needed to get human-readable output.</p>
+<p>Now that we know how <kbd>gather</kbd> and <kbd>timer</kbd> work, we can wrap up the <kbd>main</kbd> function:</p>
+<pre>    let iface_handler = match datalink::channel(&amp;interface, <br/>                                                Default::default()) {
+        Ok(Ethernet(tx, rx)) =&gt; {
+            let snd = snd.clone();
+            thread::spawn(|| watch_interface(tx, rx, snd))
+        }
+        Ok(_) =&gt; panic!("Unhandled channel type"),
+        Err(e) =&gt; panic!(
+            "An error occurred when creating the datalink channel: {}",
+            e
+        ),
+    };
+
+    iface_handler.join().unwrap();
+}</pre>
+<p>The <kbd>datalink::channel</kbd> function establishes an MPSC-like channel for bi-directional packet reading and writing on the given interface. We only care about Ethernet packets here and match only on that variant. We spawn a new thread for <kbd>watch_interface,</kbd> which receives both read/write sides of the channel and the MPSC we made for <kbd>Payload.</kbd> In this way, we have one thread reading Ethernet packets from the network, stripping them into a normalized <kbd>Payload::Packet</kbd> and pushing them to the <kbd>gather</kbd> thread. Meanwhile, we have another <kbd>timer</kbd> thread pushing <kbd>Payload::Pulse</kbd> at regular intervals to the <kbd>gather</kbd> thread to force user reporting.</p>
+<p>The sharp-eyed reader will have noticed that our <kbd>Payload</kbd> channel is actually <kbd>sync_channel(10)</kbd>, meaning that this program is not meant to store much transient information in memory. On a busy Ethernet network, this will mean it's entirely possible that <kbd>watch_interface</kbd> will be unable to push a normalized Ethernet packet into the channel. Something will have to be done and it all depends on how willing we are to lose information.</p>
+<p>Let's look and see how this implementation goes about addressing this problem:</p>
+<pre>fn watch_interface(
+    mut tx: Box&lt;DataLinkSender&gt;,
+    mut rx: Box&lt;DataLinkReceiver&gt;,
+    snd: mpsc::SyncSender&lt;Payload&gt;,
+) {
+    loop {
+        match rx.next() {
+            Ok(packet) =&gt; {
+                let packet = EthernetPacket::new(packet).unwrap();</pre>
+<p>So far, so good. We see the sides of <kbd>datalink::Channel</kbd> that we discussed earlier, plus our internal MPSC. The infinite loop reads <kbd>&amp;[u8]</kbd> off the receive side of the channel and our implementation has to convert this into a proper EthernetPacket. If we were being very thorough, we'd guard against malformed Ethernet packets but, since we aren't, the creation is unwrapped. Now, how about that normalization into <kbd>Payload::Packet</kbd> and transmission to <kbd>gather</kbd>:</p>
+<pre>                {
+                    let payload: Payload = Payload::Packet {
+                        source: packet.get_source(),
+                        destination: packet.get_destination(),
+                        kind: packet.get_ethertype(),
+                    };
+                    let thr_snd = snd.clone();
+                    thread::spawn(move || {
+                        thr_snd.send(payload).unwrap();
+                    });
+                }</pre>
+<p>Uh oh. The EthernetPacket has normalized into <kbd>Payload::Packet</kbd> just fine, but when we send the packet down the channel to <kbd>gather</kbd> we do so by spawning a thread. The decision being made here is that no incoming packet should be lost—implying we have to read them off the network interface as quickly as possible—and if the channel blocks, we'll need to store that packet in some pool, somewhere.</p>
+<p>The <em>pool</em> is, in fact, a thread stack. Or, a bunch of them. Even if we were to drop the thread's stack size to a sensible low size on a saturated network, we're still going to overwhelm the operating system at some point. If we absolutely could not stand to lose packets, we could use something such as hopper (<a href="https://github.com/postmates/hopper">https://github.com/postmates/hopper</a>), discussed in detail in <a href="e2de1ba7-c291-494e-82da-37fee7323c1d.xhtml" target="_blank">Chapter 5</a>, <em>Locks<span> </span>–<span> </span>Mutex, Condvar, Barriers and RWLock</em>, which was designed for just this use case. Or, we could defer these sends to threadpool, allow it to queue the jobs, and run them on a finite number of threads. Anyway, let's set this aside for just a second and wrap up <kbd>watch_interface</kbd>:</p>
+<pre>                tx.build_and_send(1, packet.packet().len(), <br/>                                  &amp;mut |new_packet| <br/>                {
+                    let mut new_packet = <br/>                        MutableEthernetPacket::new(new_packet).unwrap();
+
+                    // Create a clone of the original packet
+                    new_packet.clone_from(&amp;packet);
+
+                    // Switch the source and destination
+                    new_packet.set_source(packet.get_destination());
+                    new_packet.set_destination(packet.get_source());
+                });
+            }
+            Err(e) =&gt; {
+                panic!("An error occurred while reading: {}", e);
+            }
+        }
+    }
+}</pre>
+<p>The implementation takes the newly created EthernetPacket, swaps the source and destination of the original in a new EthernetPacket, and sends it back across the network at the original source. Now, let's ask ourselves, is it <em>really</em> important that we tally every Ethernet packet we can pull off the network? We could speed up the <kbd>HashMap</kbd>s in the <kbd>gather</kbd> thread in the fashion described in <a href="8c61da2f-08c8-40be-89d4-d8afa8510850.xhtml">Chapter 02</a>, <em>Sequential Rust Performance and Testing</em>, by inserting a faster hasher. Or, we could buffer in the <kbd>watch_interface</kbd> thread when the synchronous channel is full, in addition to using threadpool or hopper. Only speeding up <kbd>gather</kbd> and using hopper don't potentially incur unbounded storage requirements. But hopper will require a filesystem and may still not be able to accept all incoming packets, only making it less likely that there won't be sufficient storage.</p>
+<p>It's a tough problem. Given the nature of the network at layer 2, you might as well just shed the packets. The network card itself is going to be shedding packets. With that in mind, the implementation of <kbd>watch_interface</kbd> in the other binary in this project—<kbd>sniffer</kbd>—differs only marginally:</p>
+<pre>fn watch_interface(
+    mut tx: Box&lt;DataLinkSender&gt;,
+    mut rx: Box&lt;DataLinkReceiver&gt;,
+    snd: mpsc::SyncSender&lt;Payload&gt;,
+) {
+    loop {
+        match rx.next() {
+            Ok(packet) =&gt; {
+                let packet = EthernetPacket::new(packet).unwrap();
+
+                let payload: Payload = Payload::Packet {
+                    source: packet.get_source(),
+                    destination: packet.get_destination(),
+                    kind: packet.get_ethertype(),
+                };
+                if snd.try_send(payload).is_err() {
+                    SKIPPED_PACKETS.fetch_add(1, Ordering::Relaxed);
+                }</pre>
+<p><kbd>Payload::Packet</kbd> is created and rather than calling <kbd>snd.send</kbd>, this implementation calls <kbd>snd.try_send</kbd>, ticking up a <kbd>SKIPPED_PACKETS</kbd> static <kbd>AtomicUsize</kbd> in the event a packet has to be shed. The gather implementation is likewise only slightly adjusted to report on this new <kbd>SKIPPED_PACKETS</kbd>:</p>
+<pre>fn gather(rcv: mpsc::Receiver&lt;Payload&gt;) -&gt; () {
+    let mut sources: HashMap&lt;MacAddr, u64&gt; = HashMap::new();
+    let mut destinations: HashMap&lt;MacAddr, u64&gt; = HashMap::new();
+    let mut ethertypes: HashMap&lt;EtherType, u64&gt; = HashMap::new();
+
+    while let Ok(payload) = rcv.recv() {
+        match payload {
+            Payload::Pulse(id) =&gt; {
+                println!("REPORT {}", id);
+                println!(
+                    "    SKIPPED PACKETS: {}",
+                    SKIPPED_PACKETS.swap(0, Ordering::Relaxed)
+                );</pre>
+<p>This program will use a moderate amount of storage for the <kbd>Payload</kbd> channel, no matter how busy the network.</p>
+<p>In high-traffic domains or long-lived deployments, the <kbd>HashMap</kbd>s in the <kbd>gather</kbd> thread are going to be a concern, but this is a detail the intrepid reader is invited to address.</p>
+<p>When you run <kbd>sniffer</kbd>, you should be rewarded with output very much like this:</p>
+<pre><strong>REPORT 6
+    SKIPPED PACKETS: 75
+    SOURCES:
+        ff:ff:ff:ff:ff:ff: 1453
+        00:23:6a:00:51:6e: 2422
+        5c:f9:38:8b:4a:b6: 1034
+    DESTINATIONS:
+        33:33:ff:0b:62:e8: 1
+        33:33:ff:a1:90:82: 1
+        33:33:00:00:00:01: 1
+        00:23:6a:00:51:6e: 2414
+        5c:f9:38:8b:4a:b6: 1032
+        ff:ff:ff:ff:ff:ff: 1460
+    ETHERTYPES:
+        Ipv6: 4
+        Ipv4: 1999
+        Arp: 2906</strong></pre>
+<p>This report came from the sixth second of my sniffer run and 75 packets were dropped for lack of storage. That's better than 75 threads.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Sending struct values over a channel</h1>
+                </header>
+            
+            <article>
+                
+<p>The following example shows how to use channels to send struct values:</p>
+<pre>// see code from Chapter 9/code/channel_struct.rs 
+use std::thread; 
+use std::sync::mpsc::channel; 
+ 
+struct Block { 
+    value: i32 
+} 
+ 
+fn main() { 
+    let (tx1, rx1) = channel::&lt;Block&gt;(); 
+    let (tx2, rx2) = channel::&lt;Block&gt;(); 
+     
+    thread::spawn(move|| { 
+        let mut block = rx1.recv().unwrap(); 
+        println!("Input: {:?}", block.value); 
+         
+        block.value += 1; 
+        tx2.send(block).unwrap(); 
+    }); 
+     
+    let input = Block{ value: 1 }; 
+    tx1.send(input).unwrap(); 
+     
+    let output = rx2.recv().unwrap(); 
+    println!("Output: {:?}", output.value); 
+} </pre>
+<p>This produces the following output:</p>
+<pre><strong>    Input: 1</strong>
+   <strong> Output: 2 </strong> </pre>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

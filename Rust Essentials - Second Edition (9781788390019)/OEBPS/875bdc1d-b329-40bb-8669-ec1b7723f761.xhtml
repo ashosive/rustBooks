@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Pointers</h1>
+                </header>
+            
+            <article>
+                
+<p>The variable <kbd>n</kbd> in the binding <kbd>let n = 42i32;</kbd> is stored on the stack. Values on the stack or on the heap can be accessed by pointers. A pointer is a variable that contains the memory address of some value. To access the value it points to, dereference the pointer with <kbd>*</kbd>. This happens automatically in simple cases like in <kbd>println!</kbd> macro or when a pointer is given as a parameter to a method. For example in the following code <kbd>m</kbd> is a pointer containing the address of <kbd>n</kbd>:</p>
+<pre>// see code in Chapter 7/code/references.rs: 
+let m = &amp;n; 
+println!("The address of n is {:p}", m); 
+println!("The value of n is {}", *m); 
+println!("The value of n is {}", m); </pre>
+<p>The preceding code prints out the following output. The address of the variable <kbd>n</kbd> differs with each program run:</p>
+<pre>    <strong>The address of n is 0x7078eff8bc</strong>
+    <strong>The value of n is 42</strong>
+    <strong>The value of n is 42</strong>  </pre>
+<p>Why do we need pointers? When we work with dynamically allocated values that can change in size like a string, the memory address of that value is not known at compile time. Because of this, the memory address needs to be calculated at runtime. So to be able to keep track of it, we need a pointer to it, whose value changes when the string's location in memory changes.</p>
+<p>The compiler automatically takes care of the memory allocation of pointers, and the freeing up of memory when their lifetime ends. You don't have to do this yourself like in C/C++, where you could screw up by freeing at the wrong moment, or freeing memory multiple times.</p>
+<p>This incorrect use of pointers in languages like C++ leads to all kinds of problems.</p>
+<p>However, Rust enforces a strong set of rules at compile time called the <em>borrow checker</em>, so we are protected against them. We have already seen them in action, but from here onwards we'll explain the logic behind its rules.</p>
+<p>Pointers can also be passed as arguments to functions, and can be returned from functions, but the compiler severely restricts their usage.</p>
+<p>When passing a pointer value to a function, it is always better to use the reference<em>-</em>dereference <kbd>&amp;*</kbd> mechanism, like in this example:</p>
+<pre>let q = &amp;42; 
+   println!("{}", square(q)); // 1764 
+ 
+fn square(k: &amp;i32) -&gt; i32 { 
+    *k * *k 
+}</pre>
+<p>This prints out the following output:</p>
+<pre><strong>The square is: 1764</strong></pre>
+<p>Rust has many kinds of pointers, which we will explore in this chapter. All pointers (except raw pointers, discussed in <a href="4b959ff8-fbf2-44e8-bb32-6055ef9fe740.xhtml"><span class="ChapterrefPACKT">Chapter 10</span></a>, <em>Programming at the Boundaries</em>) are guaranteed to be non-null (that is, they point to a valid location in memory) and are automatically cleaned up.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

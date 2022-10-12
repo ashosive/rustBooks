@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Benchmarking</h1>
+                </header>
+            
+            <article>
+                
+<p>Okay, by now we can be reasonably certain that hopper is fit for purpose, at least in terms of not crashing and producing the correct results. But, it also needs to be <em>fast</em>. To that end, hopper ships with the criterion (<a href="https://crates.io/crates/criterion">https://crates.io/crates/criterion</a>) benchmarks. As the time of writing, criterion is a rapidly evolving library that performs statistical analysis on bench run results that Rust's built-in, nightly-only benchmarking library does not. Also, criterion is available for use on the stable channel. The target to match is standard library's MPSC, and that sets the baseline for hopper. To that end, the benchmark suite performs a comparison, living in <kbd>benches/stdlib_comparison.rs</kbd> in the hopper repository.</p>
+<p>The preamble is typical:</p>
+<pre style="padding-left: 30px">#[macro_use]
+extern crate criterion;
+extern crate hopper;
+extern crate tempdir;
+
+use std::{mem, thread};
+use criterion::{Bencher, Criterion};
+use hopper::channel_with_explicit_capacity;
+use std::sync::mpsc::channel;</pre>
+<p>Note that we've pulled in both MPSC and hopper. The function for MPSC that we'll be benching is:</p>
+<pre style="padding-left: 30px">fn mpsc_tst(input: MpscInput) -&gt; () {
+    let (tx, rx) = channel();
+
+    let chunk_size = input.ith / input.total_senders;
+
+    let mut snd_jh = Vec::new();
+    for _ in 0..input.total_senders {
+        let tx = tx.clone();
+        let builder = thread::Builder::new();
+        if let Ok(handler) = builder.spawn(move || {
+            for i in 0..chunk_size {
+                tx.send(i).unwrap();
+            }
+        }) {
+            snd_jh.push(handler);
+        }
+    }
+
+    let total_senders = snd_jh.len();
+    let builder = thread::Builder::new();
+    match builder.spawn(move || {
+        let mut collected = 0;
+        while collected &lt; (chunk_size * total_senders) {
+            let _ = rx.recv().unwrap();
+            collected += 1;
+        }
+    }) {
+        Ok(rcv_jh) =&gt; {
+            for jh in snd_jh {
+                jh.join().expect("snd join failed");
+            }
+            rcv_jh.join().expect("rcv join failed");
+        }
+        _ =&gt; {
+            return;
+        }
+    }
+}</pre>
+<p>Some sender threads get made, and a receiver exists and pulls the values from MPSC as rapidly as possible. This is not a logic check in any sense and the collected materials are immediately discarded. Like with the fuzz testing, the input to the function is structured data. <kbd>MpscInput</kbd> is defined as follows:</p>
+<pre style="padding-left: 30px">#[derive(Debug, Clone, Copy)]
+struct MpscInput {
+    total_senders: usize,
+    ith: usize,
+}</pre>
+<p>The hopper version of this function is a little longer, as there are more error states to cope with, but it's nothing we haven't seen before:</p>
+<pre style="padding-left: 30px">fn hopper_tst(input: HopperInput) -&gt; () {
+    let sz = mem::size_of::&lt;u64&gt;();
+    let in_memory_bytes = sz * input.in_memory_total;
+    let max_disk_bytes = sz * input.max_disk_total;
+    if let Ok(dir) = tempdir::TempDir::new("hopper") {
+        if let Ok((snd, mut rcv)) = channel_with_explicit_capacity(
+            "tst",
+            dir.path(),
+            in_memory_bytes,
+            max_disk_bytes,
+            usize::max_value(),
+        ) {
+            let chunk_size = input.ith / input.total_senders;
+
+            let mut snd_jh = Vec::new();
+            for _ in 0..input.total_senders {
+                let mut thr_snd = snd.clone();
+                let builder = thread::Builder::new();
+                if let Ok(handler) = builder.spawn(move || {
+                    for i in 0..chunk_size {
+                        let _ = thr_snd.send(i);
+                    }
+                }) {
+                    snd_jh.push(handler);
+                }
+            }
+
+            let total_senders = snd_jh.len();
+            let builder = thread::Builder::new();
+            match builder.spawn(move || {
+                let mut collected = 0;
+                let mut rcv_iter = rcv.iter();
+                while collected &lt; (chunk_size * total_senders) {
+                    if rcv_iter.next().is_some() {
+                        collected += 1;
+                    }
+                }
+            }) {
+                Ok(rcv_jh) =&gt; {
+                    for jh in snd_jh {
+                        jh.join().expect("snd join failed");
+                    }
+                    rcv_jh.join().expect("rcv join failed");
+                }
+                _ =&gt; {
+                    return;
+                }
+            }
+        }
+    }
+}</pre>
+<p>The same is true of <kbd>HopperInput</kbd>:</p>
+<pre style="padding-left: 30px">#[derive(Debug, Clone, Copy)]
+struct HopperInput {
+    in_memory_total: usize,
+    max_disk_total: usize,
+    total_senders: usize,
+    ith: usize,
+}</pre>
+<p>Criterion has many options for running benchmarks, but we've chosen here to run over inputs. Here's the setup for MPSC:</p>
+<pre style="padding-left: 30px">fn mpsc_benchmark(c: &amp;mut Criterion) {
+    c.bench_function_over_inputs(
+        "mpsc_tst",
+        |b: &amp;mut Bencher, input: &amp;MpscInput| b.iter(|| <br/>         mpsc_tst(*input)),
+        vec![
+            MpscInput {
+                total_senders: 2 &lt;&lt; 1,
+                ith: 2 &lt;&lt; 12,
+            },
+        ],
+    );
+}</pre>
+<p>To explain, we've got a function, <kbd>mpsc_benchmark</kbd>, that takes the mutable criterion structure, which is opaque to use but in which criterion will store run data. This structure exposes <kbd>bench_function_over_inputs</kbd>, which consumes a closure that we can thread our <kbd>mpsc_test</kbd> through. The sole input is listed in a vector. The following is a setup that does the same thing, but for hopper:</p>
+<pre style="padding-left: 30px">fn hopper_benchmark(c: &amp;mut Criterion) {
+    c.bench_function_over_inputs(
+        "hopper_tst",
+        |b: &amp;mut Bencher, input: &amp;HopperInput| b.iter(|| <br/>         hopper_tst(*input)),
+        vec![
+            // all in-memory
+            HopperInput {
+                in_memory_total: 2 &lt;&lt; 11,
+                max_disk_total: 2 &lt;&lt; 14,
+                total_senders: 2 &lt;&lt; 1,
+                ith: 2 &lt;&lt; 11,
+            },
+            // swap to disk
+            HopperInput {
+                in_memory_total: 2 &lt;&lt; 11,
+                max_disk_total: 2 &lt;&lt; 14,
+                total_senders: 2 &lt;&lt; 1,
+                ith: 2 &lt;&lt; 12,
+            },
+        ],
+    );
+}</pre>
+<p>Notice now that we have two inputs, one guaranteed to be all in-memory and the other guaranteed to require disk paging. The disk paging input is sized appropriately to match the MSPC run. There'd be no harm in doing an in-memory comparison for both hopper and MPSC, but your author has a preference for pessimistic benchmarks, being an optimistic sort. The final bits needed by criterion are more or less stable across all the benchmarks we'll see in the rest of this book:</p>
+<pre style="padding-left: 30px">criterion_group!{
+    name = benches;
+    config = Criterion::default().without_plots();
+    targets = hopper_benchmark, mpsc_benchmark
+}
+criterion_main!(benches);</pre>
+<p>I encourage you to run the benchmarks yourself. We see times for hopper that are approximately three times faster for the systems we intended hopper for. That's more than fast enough.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

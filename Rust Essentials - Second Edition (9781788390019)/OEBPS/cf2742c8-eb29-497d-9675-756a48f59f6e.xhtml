@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Collections - using hashmaps and hashsets</h1>
+                </header>
+            
+            <article>
+                
+<p>Often, you need to collect a large number of data items of a given type in one data structure. Until now, we have only worked with the <kbd>Vec</kbd> datatype to do this, but the <kbd>std::collections</kbd> module contains other implementations of sequences (such as <kbd>LinkedList</kbd>), maps (such as <kbd>HashMap</kbd>), and sets (such as <kbd>HashSet</kbd>). In most cases, you will only need <kbd>Vec</kbd> and <kbd>HashMap</kbd>; let's examine how to work with the latter.</p>
+<p>A <kbd>HashMap &lt;K,V&gt;</kbd> is used when you want to store pairs consisting of a key of type <kbd>K</kbd> and a value of type <kbd>V</kbd>, both of generic type. <kbd>K</kbd> can be a Boolean, an integer, a string, or any other type that implements the <kbd>Eq</kbd> and <kbd>Hash</kbd> traits. A <kbd>HashMap</kbd> enables you to very quickly look up the value attached to a certain key using a hashing algorithm, and also because the data is cached. However, the keys of a <kbd>HashMap</kbd> are not sorted; if you need that, use a <kbd>BTreeMap</kbd>. <kbd>HashMap</kbd> is allocated on the heap, so it is dynamically resizable, just like a <kbd>Vec</kbd>.</p>
+<p>Let's store monster names together with the planets they originate from:</p>
+<pre>// code from Chapter 11/code/hashmaps.rs: 
+use std::collections::HashMap; 
+ 
+fn main() {  
+    let mut monsters = HashMap::new(); 
+ 
+    monsters.insert("Oron", "Uranus"); 
+    monsters.insert("Cyclops", "Venus"); 
+    monsters.insert("Rahav", "Neptune"); 
+    monsters.insert("Homo Sapiens", "Earth"); 
+ 
+    match monsters.get(&amp;"Rahav") { 
+        Some(&amp;planet) =&gt;  
+println!("Rahav originates from: {}", planet), 
+        _ =&gt; println!("Planet of Rahav unknown."), 
+    } 
+ 
+    monsters.remove(&amp;("Homo Sapiens"));  
+ 
+    // `HashMap::iter()` returns  
+    for (monster, planet) in monsters.iter() { 
+println!("Monster {} originates from planet {}", monster, planet);  
+    } 
+} </pre>
+<p>This program prints out:</p>
+<pre><strong>Rahav originates from: Neptune</strong><br/><strong>Monster Rahav originates from planet Neptune</strong><br/><strong>Monster Cyclops originates from planet Venus</strong><br/><strong>Monster Oron originates from planet Uranus</strong></pre>
+<p>A new <kbd>HashMap</kbd> with default capacity is created with <kbd>HashMap::new(). insert</kbd> is used to put data into it, one pair at a time. If the inserted value is new, it returns <kbd>None</kbd>, otherwise, it returns <kbd>Some(value)</kbd>. To retrieve a value (here the planet on which a monster comes from), use the <kbd>get</kbd> method. This takes a reference to a key value and returns <kbd>Option&lt;&amp;V&gt;</kbd>, so you have to use <kbd>match</kbd> to find the value. <kbd>remove</kbd> takes a key and removes the pair from the collection. The <kbd>iter()</kbd> method from <kbd>HashMap</kbd> returns an iterator that yields <kbd>(&amp;key, &amp;value)</kbd> pairs in arbitrary order.</p>
+<p>If your requirement is to store unique values, such as unique monster names, <kbd>HashSet</kbd> guarantees that; it is in fact <kbd>HashMap</kbd> without values:</p>
+<pre>// code from Chapter 11/code/hashsets.rs: 
+use std::collections::HashSet; 
+ 
+fn main() { 
+    let mut m1: HashSet&lt;&amp;str&gt; = vec!["Cyclops", "Raven", "Gilgamesh"].into_iter().collect(); 
+    let m2: HashSet&lt;&amp;str&gt; = vec!["Moron", "Keshiu", "Raven"].into_iter().collect(); 
+ 
+    m1.insert("Moron"); 
+    if m1.insert("Raven") { 
+        println!("New value added") 
+    } 
+    else { 
+        println!("This value is already present") 
+    } 
+     
+    println!("m1: {:?}", m1); 
+ 
+println!("Intersection: {:?}", m1.intersection(&amp;m2).collect::&lt;Vec&lt;_&gt;&gt;()); 
+    println!("Union: {:?}", m1.union(&amp;m2).collect::&lt;Vec&lt;_&gt;&gt;()); 
+ println!("Difference: {:?}", m1.difference(&amp;m2).collect::&lt;Vec&lt;_&gt;&gt;()); 
+    println!("Symmetric Difference: {:?}", 
+             m1.symmetric_difference(&amp;m2).collect::&lt;Vec&lt;_&gt;&gt;()); 
+} </pre>
+<p>This program prints out:</p>
+<pre><strong>    This value is already present
+    m1: {"Raven", "Cyclops", "Gilgamesh", "Moron"}
+    Intersection: ["Raven", "Moron"]
+    Union: ["Raven", "Cyclops", "Gilgamesh", "Moron", "Keshiu"]
+    Difference: ["Cyclops", "Gilgamesh"]
+    Symmetric Difference: ["Cyclops", "Gilgamesh", "Keshiu"] </strong></pre>
+<p>We can construct a <kbd>HashSet</kbd> from a <kbd>Vec</kbd> using <kbd>into_iter().collect()</kbd>. To add new values one by one, use <kbd>insert()</kbd>, which returns <kbd>true</kbd> if the value is new, or <kbd>false</kbd> if it is not. If the type of the set's elements implements the <kbd>Debug</kbd> trait, we can print them out with the <kbd>{:?}</kbd> format string. Methods for the intersection, union, difference, and symmetrical difference operations are also present.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

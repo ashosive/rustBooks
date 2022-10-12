@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">QuickCheck and loops</h1>
+                </header>
+            
+            <article>
+                
+<p>Previous chapters discussed QuickCheck at length and we'll not duplicate that here. Instead, let's dig into a test from <kbd>hopper</kbd>, defined in <kbd>src/lib.rs</kbd>:</p>
+<pre>    #[test]
+    fn multi_thread_concurrent_snd_and_rcv_round_trip() {
+        fn inner(
+            total_senders: usize,
+            in_memory_bytes: usize,
+            disk_bytes: usize,
+            max_disk_files: usize,
+            vals: Vec&lt;u64&gt;,
+        ) -&gt; TestResult {
+            let sz = mem::size_of::&lt;u64&gt;();
+            if total_senders == 0 || <br/>               total_senders &gt; 10 || <br/>               vals.len() == 0 ||
+               (vals.len() &lt; total_senders) || <br/>               (in_memory_bytes / sz) == 0 ||
+               (disk_bytes / sz) == 0
+            {
+                return TestResult::discard();
+            }
+            TestResult::from_bool(<br/>              multi_thread_concurrent_snd_and_rcv_round_trip_exp(
+                total_senders,
+                in_memory_bytes,
+                disk_bytes,
+                max_disk_files,
+                vals,
+            ))
+        }
+        QuickCheck::new()
+            .quickcheck(inner as fn(usize, usize, usize, usize, <br/>             Vec&lt;u64&gt;) -&gt; TestResult);
+    }</pre>
+<p>This test sets up a multiple sender, single receiver round trip environment, being careful to reject inputs that allow less space in the in-memory buffer than 64 bits, no senders, or the like. It defers to another function, <kbd>multi_thread_concurrent_snd_and_rcv_round_trip_exp</kbd>, to actually run the test.</p>
+<p>This setup is awkward, admittedly, but has the benefit of allowing <kbd>multi_thread_concurrent_snd_and_rcv_round_trip_exp</kbd> to be run over explicit inputs. That is, when a bug is found you can easily re-play that test by creating a manual—or <em>explicit</em>, in <kbd>hopper</kbd> testing terms—test. The inner test function is complicated and we'll consider it in parts:</p>
+<pre>    fn multi_thread_concurrent_snd_and_rcv_round_trip_exp(
+        total_senders: usize,
+        in_memory_bytes: usize,
+        disk_bytes: usize,
+        max_disk_files: usize,
+        vals: Vec&lt;u64&gt;,
+    ) -&gt; bool {
+        if let Ok(dir) = tempdir::TempDir::new("hopper") {
+            if let Ok((snd, mut rcv)) = <br/>              channel_with_explicit_capacity(
+                "tst",
+                dir.path(),
+                in_memory_bytes,
+                disk_bytes,
+                max_disk_files,
+            ) {</pre>
+<p>Much like our example usage of hopper at the start of this section, the inner test function uses tempdir (<a href="https://crates.io/crates/tempdir">https://crates.io/crates/tempdir</a>) to create a temporary path for passing into <kbd>channel_with_explicit_capacity</kbd>. Except, we're careful not to unwrap here. Because hopper makes use of the filesystem and because Rust QuickCheck is aggressively multi-threaded, it's possible that any individual test run will hit a temporary case of file-handler exhaustion. This throws QuickCheck off, with the test failure being totally unrelated to the inputs of this particular execution.</p>
+<p>The next piece is as follows:</p>
+<pre>                let chunk_size = vals.len() / total_senders;
+
+                let mut snd_jh = Vec::new();
+                let snd_vals = vals.clone();
+                for chunk in snd_vals.chunks(chunk_size) {
+                    let mut thr_snd = snd.clone();
+                    let chunk = chunk.to_vec();
+                    snd_jh.push(thread::spawn(move || {
+                        let mut queued = Vec::new();
+                        for mut ev in chunk {
+                            loop {
+                                match thr_snd.send(ev) {
+                                    Err(res) =&gt; {
+                                        ev = res.0;
+                                    }
+                                    Ok(()) =&gt; {
+                                        break;
+                                    }
+                                }
+                            }
+                            queued.push(ev);
+                        }
+                        let mut attempts = 0;
+                        loop {
+                            if thr_snd.flush().is_ok() {
+                                break;
+                            }
+                            thread::sleep(<br/>                              ::std::time::Duration::from_millis(100)<br/>                            );
+                            attempts += 1;
+                            assert!(attempts &lt; 10);
+                        }
+                        queued
+                    }))
+                }</pre>
+<p>Here we have the creation of the sender threads, each of which grabs an equal sized chunk of <kbd>vals</kbd>. Now, because of indeterminacy in thread scheduling, it's not possible for us to model the order in which elements of <kbd>vals</kbd> will be pushed into hopper. All we can do is confirm that there are no lost elements after transmission through hopper. They may, in fact, be garbled in terms of order:</p>
+<pre>                let expected_total_vals = vals.len();
+                let rcv_jh = thread::spawn(move || {
+                    let mut collected = Vec::new();
+                    let mut rcv_iter = rcv.iter();
+                    while collected.len() &lt; expected_total_vals {
+                        let mut attempts = 0;
+                        loop {
+                            match rcv_iter.next() {
+                                None =&gt; {
+                                    attempts += 1;
+                                    assert!(attempts &lt; 10_000);
+                                }
+                                Some(res) =&gt; {
+                                    collected.push(res);
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    collected
+                });
+
+                let mut snd_vals: Vec&lt;u64&gt; = Vec::new();
+                for jh in snd_jh {
+                    snd_vals.append(&amp;mut jh.join().expect("snd join <br/>                    failed"));
+                }
+                let mut rcv_vals = rcv_jh.join().expect("rcv join <br/>                failed");
+
+                rcv_vals.sort();
+                snd_vals.sort();
+
+                assert_eq!(rcv_vals, snd_vals);</pre>
+<p>Another test with a single sender, <kbd>single_sender_single_rcv_round_trip</kbd>, is able to check for correct ordering as well as no data loss:</p>
+<pre>    #[test]
+    fn single_sender_single_rcv_round_trip() {
+        // Similar to the multi sender test except now with a single <br/>        // sender we can guarantee order.
+        fn inner(
+            in_memory_bytes: usize,
+            disk_bytes: usize,
+            max_disk_files: usize,
+            total_vals: usize,
+        ) -&gt; TestResult {
+            let sz = mem::size_of::&lt;u64&gt;();
+            if total_vals == 0 || (in_memory_bytes / sz) == 0 || <br/>            (disk_bytes / sz) == 0 {
+                return TestResult::discard();
+            }
+            TestResult::from_bool(<br/>              single_sender_single_rcv_round_trip_exp(
+                in_memory_bytes,
+                disk_bytes,
+                max_disk_files,
+                total_vals,
+            ))
+        }
+        QuickCheck::new().quickcheck(inner as fn(usize, usize, <br/>                                     usize, usize) -&gt; TestResult);
+    }</pre>
+<p>Like it's multi-cousin, this QuickCheck test uses an inner function to perform the actual test:</p>
+<pre>    fn single_sender_single_rcv_round_trip_exp(
+        in_memory_bytes: usize,
+        disk_bytes: usize,
+        max_disk_files: usize,
+        total_vals: usize,
+    ) -&gt; bool {
+        if let Ok(dir) = tempdir::TempDir::new("hopper") {
+            if let Ok((mut snd, mut rcv)) = <br/>            channel_with_explicit_capacity(
+                "tst",
+                dir.path(),
+                in_memory_bytes,
+                disk_bytes,
+                max_disk_files,
+            ) {
+                let builder = thread::Builder::new();
+                if let Ok(snd_jh) = builder.spawn(move || {
+                    for i in 0..total_vals {
+                        loop {
+                            if snd.send(i).is_ok() {
+                                break;
+                            }
+                        }
+                    }
+                    let mut attempts = 0;
+                    loop {
+                        if snd.flush().is_ok() {
+                            break;
+                        }
+                        thread::sleep(<br/>                          ::std::time::Duration::from_millis(100)<br/>                        );
+                        attempts += 1;
+                        assert!(attempts &lt; 10);
+                    }
+                }) {
+                    let builder = thread::Builder::new();
+                    if let Ok(rcv_jh) = builder.spawn(move || {
+                        let mut rcv_iter = rcv.iter();
+                        let mut cur = 0;
+                        while cur != total_vals {
+                            let mut attempts = 0;
+                            loop {
+                                if let Some(rcvd) = rcv_iter.next() {
+                                    debug_assert_eq!(
+                                        cur, rcvd,
+                                    "FAILED TO GET ALL IN ORDER: {:?}",
+                                        rcvd,
+                                    );
+                                    cur += 1;
+                                    break;
+                                } else {
+                                    attempts += 1;
+                                    assert!(attempts &lt; 10_000);
+                                }
+                            }
+                        }
+                    }) {
+                        snd_jh.join().expect("snd join failed");
+                        rcv_jh.join().expect("rcv join failed");
+                    }
+                }
+            }
+        }
+        true
+    }</pre>
+<p>This, too, should appear familiar, except that the Receiver thread is now able to check order. Where previously a <kbd>Vec&lt;u64&gt;</kbd> was fed into the function, we now stream <kbd>0, 1, 2, .. total_vals</kbd> through the hopper queue, asserting that order and there are no gaps on the other side. Single runs on a single input will fail to trigger low-probability race issues reliably, but that's not the goal. We're searching for logic goofs. For instance, an earlier version of this library would happily allow an in-memory maximum amount of bytes less than the total bytes of an element <kbd>T</kbd>. Another could fit multiple instances of <kbd>T</kbd> into the buffer but if the <kbd>total_vals</kbd> were odd <em>and</em> the in-memory size were small enough to require disk-paging then the last element of the stream would never be kicked out. In fact, that's still an issue. It's a consequence of the lazy flip to disk mode in the sender; without another element to potentially trigger a disk placement to the in-memory buffer, the write will be flushed to disk but the receiver will never be aware of it. To that end, the sender does expose a <kbd>flush</kbd> function, which you see in use in the tests. In practice, in cernan, flushing is unnecessary. But, it's a corner of the design that the authors did not expect and may well have had a hard time noticing had this gone out into the wild.</p>
+<p>The inner test of our single-sender variant is also used for the repeat-loop variant of hopper testing:</p>
+<pre>    #[test]
+    fn explicit_single_sender_single_rcv_round_trip() {
+        let mut loops = 0;
+        loop {
+         assert!(single_sender_single_rcv_round_trip_exp(8, 8, 5, 10));
+            loops += 1;
+            if loops &gt; 2_500 {
+                break;
+            }
+            thread::sleep(::std::time::Duration::from_millis(1));
+        }
+    }</pre>
+<p>Notice that here the inner loop is only for 2,500 iterations. This is done in deference to the needs of the CI servers which, don't care to run high CPU load code for hours at a time. In development, that 2,500 will be adjusted up. But the core idea is apparent; check that a stream of ordered inputs returns through the hopper queue in order and intact over and over and over again. QuickCheck searches the dark corners of the state space and more traditional manual testing hammers the same spot to dig in to computer indeterminism.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

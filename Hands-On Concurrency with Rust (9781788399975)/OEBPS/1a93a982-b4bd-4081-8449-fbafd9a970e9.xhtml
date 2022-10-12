@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Embedding Lua into Rust</h1>
+                </header>
+            
+            <article>
+                
+<p>Many of the programs we've discussed in this book use a <em>report</em> thread to notify the user of the running behavior of the program. <span><span>E</span></span>ach of these report functions have been coded in Rust, an unchanging part of the executable. What if, however, we wanted end-users to be able to supply their own reporting routine? Or, consider the cernan project (<a href="https://crates.io/crates/cernan">https://crates.io/crates/cernan</a>), discussed previously in this book, which supports a <em>programmable filter</em>, an online data-stream filter that can be programmed by end-users without changing the cernan binary. How do you pull such a trick off?</p>
+<p>A common answer, not just in Rust but in many compiled languages, is to embed a Lua interpreter (<a href="https://www.lua.org/">https://www.lua.org/</a>) and read user programs in at startup. It's such a common answer, in fact, that there are many Lua embeddings to choose from in the crates ecosystem. We'll use rlua (<a href="https://crates.io/crates/rlua">https://crates.io/crates/rlua</a>) here as it's a safe choice and the project documentation is very good. Other Lua embeddings suit different ambitions. Cernan uses a different, not necessarily safe embedding, for example, because we need to allow end-users to define their own functions.</p>
+<p>In the previous chapter, we wrote a project called <kbd>sniffer</kbd> whose purpose was threefold—collect Ethernet packets on an interface, report about them, and echo the Ethernet packet back. Let's take that program and adapt it so that users can decide how to report with custom scripts. The <kbd>Cargo.toml</kbd> file of the project is a little different, including the rlua dependency and dropping the thread-hungry alternative executable:</p>
+<pre>[package]
+name = "sniffer"
+version = "0.2.0"
+authors = ["Brian L. Troutwine &lt;brian@troutwine.us&gt;"]
+
+[dependencies]
+pnet = "0.21"
+rlua = "0.13"
+
+[[bin]]
+name = "sniffer"</pre>
+<p>The preamble to the sniffer program, defined in <kbd>src/bin/sniffer.rs</kbd>, holds no surprises for us:</p>
+<pre style="padding-left: 30px">extern crate pnet;
+extern crate rlua;
+
+use pnet::datalink::Channel::Ethernet;
+use pnet::datalink::{self, DataLinkReceiver, MacAddr, <br/>                     NetworkInterface};
+use pnet::packet::ethernet::{EtherType, EthernetPacket};
+use rlua::{prelude, Function, Lua};
+use std::fs::File;
+use std::io::{prelude::*, BufReader};
+use std::path::Path;
+use std::sync::atomic::{AtomicUsize, Ordering};
+use std::sync::mpsc;
+use std::{env, thread};</pre>
+<p>We're importing <kbd>Function</kbd> and <kbd>Lua</kbd> from the rlua crate, but that's about all that is new. The <kbd>SKIPPED_PACKETS</kbd> and <kbd>Payload</kbd> details are unchanged:</p>
+<pre>static SKIPPED_PACKETS: AtomicUsize = AtomicUsize::new(0);
+
+#[derive(Debug)]
+enum Payload {
+    Packet {
+        source: MacAddr,
+        destination: MacAddr,
+        kind: EtherType,
+    },
+    Pulse(u64),
+}</pre>
+<p>I have removed the echoing of Ethernet packets in this example as it's not necessarily a kind thing to do on a busy Ethernet network. <kbd>watch_interface</kbd>, as a result, is a little more svelte than it used to be:</p>
+<pre>fn watch_interface(mut rx: Box&lt;DataLinkReceiver&gt;, snd: mpsc::SyncSender&lt;Payload&gt;) {
+    loop {
+        match rx.next() {
+            Ok(packet) =&gt; {
+                let packet = EthernetPacket::new(packet).unwrap();
+
+                let payload: Payload = Payload::Packet {
+                    source: packet.get_source(),
+                    destination: packet.get_destination(),
+                    kind: packet.get_ethertype(),
+                };
+                if snd.try_send(payload).is_err() {
+                    SKIPPED_PACKETS.fetch_add(1, Ordering::Relaxed);
+                }
+            }
+            Err(e) =&gt; {
+                panic!("An error occurred while reading: {}", e);
+            }
+        }
+    }
+}</pre>
+<p>The <kbd>timer</kbd> function is also unchanged:</p>
+<pre>fn timer(snd: mpsc::SyncSender&lt;Payload&gt;) -&gt; () {
+    use std::{thread, time};
+    let one_second = time::Duration::from_millis(1000);
+
+    let mut pulses = 0;
+    loop {
+        thread::sleep(one_second);
+        snd.send(Payload::Pulse(pulses)).unwrap();
+        pulses += 1;
+    }
+}</pre>
+<p>The <kbd>main</kbd> function now picks up an additional argument, intended to be the on-disk path of a Lua function:</p>
+<pre>fn main() {
+    let interface_name = env::args().nth(1).unwrap();
+    let pulse_fn_file_arg = env::args().nth(2).unwrap();
+    let pulse_fn_file = Path::new(&amp;pulse_fn_file_arg);
+    assert!(pulse_fn_file.exists());
+    let interface_names_match = |iface: &amp;NetworkInterface| {<br/>        iface.name == interface_name<br/>    };
+
+    // Find the network interface with the provided name
+    let interfaces = datalink::interfaces();
+    let interface = interfaces
+        .into_iter()
+        .filter(interface_names_match)
+        .next()
+        .unwrap();</pre>
+<p>The function is intended to handle the <kbd>Payload::Pulse</kbd> that comes in from the timer thread. The gather function from the previous chapter no longer exists. To actually do something with the user-supplied function, we'll have to create a new Lua VM via <kbd>rlua::Lua::new()</kbd> and then load the function into it, like so:</p>
+<pre>    let lua = Lua::new();
+    let pulse_fn = eval(&amp;lua, pulse_fn_file, Some("pulse")).unwrap();</pre>
+<p>The <kbd>eval</kbd> function is brief and mostly to do with reading from disk:</p>
+<pre>fn eval&lt;'a&gt;(lua: &amp;'a Lua, path: &amp;Path, name: Option&lt;&amp;str&gt;) <br/>    -&gt; prelude::LuaResult&lt;Function&lt;'a&gt;&gt; <br/>{
+    let f = File::open(path).unwrap();
+    let mut reader = BufReader::new(f);
+
+    let mut buf = Vec::new();
+    reader.read_to_end(&amp;mut buf).unwrap();
+    let s = ::std::str::from_utf8(&amp;buf).unwrap();
+
+    lua.eval(s, name)
+}</pre>
+<p>The lua-specific bit there is <kbd>lua.eval(s, name)</kbd>. This evaluates the Lua code read from disk and returns function, a Rust-callable bit of Lua. Any user-supplied name in the Lua source itself is ignored and the name exists to add context to error messages on the Rust side of things. rlua does not expose loadfile in its Rust API, though other Lua embeddings do.</p>
+<p>The next bit of the <kbd>main</kbd> function is mostly unchanged, though the packet buffer channel has been increased from 10 elements to <kbd>100</kbd>:</p>
+<pre>    let (snd, rcv) = mpsc::sync_channel(100);
+
+    let timer_snd = snd.clone();
+    let _ = thread::spawn(move || timer(timer_snd));
+
+    let _iface_handler = match datalink::channel(&amp;interface, <br/>                                                 Default::default()) <br/>    {
+        Ok(Ethernet(_tx, rx)) =&gt; {
+            let snd = snd.clone();
+            thread::spawn(|| watch_interface(rx, snd))
+        }
+        Ok(_) =&gt; panic!("Unhandled channel type"),
+        Err(e) =&gt; panic!(
+            "An error occurred when creating the datalink channel: {}",
+            e
+        ),
+    };</pre>
+<p>Now, things are going to change. First, we create three Lua tables for storing the components of the <kbd>Payload::Packet</kbd>:</p>
+<pre>    let destinations = lua.create_table().unwrap();
+    let sources = lua.create_table().unwrap();
+    let kinds = lua.create_table().unwrap();</pre>
+<p>In the previous chapter, we used three <kbd>HashMap</kbd>s but, now, we need something we can easily pass into Lua. The main thread is responsible for the role that gather used to play: collecting <kbd>Payload</kbd> instances. This saves a thread and means we don't have to carefully arrange for sending the Lua VM across thread boundaries:</p>
+<pre>    while let Ok(payload) = rcv.recv() {
+        match payload {
+            Payload::Packet {
+                source,
+                destination,
+                kind,
+            } =&gt; {
+                let d_cnt = destinations<br/>                                .get(destination.to_string())<br/>                                .unwrap_or(0);
+                destinations
+                    .set(destination.to_string(), d_cnt + 1)
+                    .unwrap();
+
+                let s_cnt = sources.get(source.to_string()).unwrap_or(0);
+                sources.set(source.to_string(), s_cnt + 1).unwrap();
+
+                let k_cnt = kinds.get(kind.to_string()).unwrap_or(0);
+                kinds.set(kind.to_string(), k_cnt + 1).unwrap();
+            }</pre>
+<p>Here, we've started pulling payloads from the receiver and have handled <kbd>Payload::Packets</kbd> coming across. Notice how the tables we created just before this loop are now being populated. The same basic aggregation is in play; keep a running tally of the <kbd>Packet</kbd> components coming in. A more adventurous reader might extend this program to allow for the Lua side to build its own aggregation. Now all that remains is to handle <kbd>Payload::Pulse</kbd>:</p>
+<pre>            Payload::Pulse(id) =&gt; {
+                let skipped_packets = SKIPPED_PACKETS<br/>                                      .swap(0, Ordering::Relaxed);
+                pulse_fn
+                    .call::&lt;_, ()&gt;((
+                        id,
+                        skipped_packets,
+                        destinations.clone(),
+                        sources.clone(),
+                        kinds.clone(),
+                    ))
+                    .unwrap()
+            }
+        }
+    }
+}</pre>
+<p>The <kbd>pulse_fn</kbd> created earlier is called with a four-tuple of arguments—the pulse ID, the <kbd>SKIPPED_PACKETS</kbd>, and the aggregation tables. We don't expect <kbd>pulse_fn</kbd> to have any kind of return value, hence the <kbd>&lt;_, ()&gt;</kbd> bit. This version of sniffer includes an example packet function, defined in <kbd>examples/pulse.lua</kbd>:</p>
+<pre style="padding-left: 30px">function (id, skipped_packets, dest_tbl, src_tbl, kind_tbl)
+   print("ID: ", id)
+   print("SKIPPED PACKETS: ", skipped_packets)
+   print("DESTINATIONS:")
+   for k,v in pairs(dest_tbl) do
+      print(k, v)
+   end
+   print("SOURCES:")
+   for k,v in pairs(src_tbl) do
+      print(k, v)
+   end
+   print("KINDS:")
+   for k,v in pairs(kind_tbl) do
+      print(k, v)
+   end
+end</pre>
+<p>The reader will note that it does basically the same work as the former gather function once did. Running sniffer works the same way as before. Be sure to <kbd>cargo build --release</kbd> and then:</p>
+<pre><strong>&gt; ./target/release/sniffer en0 examples/pulse.lua
+ID:     0
+SKIPPED PACKETS:    0
+DESTINATIONS:
+5c:f9:38:8b:4a:b6   11
+8c:59:73:1d:c8:73   16
+SOURCES:
+5c:f9:38:8b:4a:b6   16
+8c:59:73:1d:c8:73   11
+KINDS:
+Ipv4    27
+ID:     1
+SKIPPED PACKETS:    0
+DESTINATIONS:
+5c:f9:38:8b:4a:b6   14
+8c:59:73:1d:c8:73   20
+SOURCES:
+5c:f9:38:8b:4a:b6   20
+8c:59:73:1d:c8:73   14
+KINDS:
+Ipv4    34</strong></pre>
+<p>The allocation-conscious reader will have noticed there's a lot of cloning going on here. That's true. The primary compilation is interop with Lua's GC. A safe Rust interface must assume that data passed down to Lua will be garbage-collected. But, Lua does support a concept of user data, in which the programmer associates opaque blobs with Lua functions to manipulate it. Lua also supports light user data, which is very similar to user data except that the light variant is associated with a pointer to memory. The UserData type in RLua is quite well done and the ambitious reader might do well to build a <kbd>PacketAggregation</kbd> type that implements <kbd>UserData</kbd> to avoid all the cloning.</p>
+<p>Combining a high-level language into a systems language is often a game of trade-offs between memory management complexity, end-user burden, and initial programming difficulty. rlua does an excellent job of landing on the safer side of these trade-offs. Something like mond, in use in cernan, less so, but with more flexibility in use.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Sync and Send</h1>
+                </header>
+            
+            <article>
+                
+<p>There are two key traits that the parallel Rust programmer must understand—<kbd>Send</kbd> and <kbd>Sync</kbd>. The <kbd>Send</kbd> trait is applied to types that can be transferred across thread boundaries. That is, any type <kbd>T: Send</kbd> is safe to move from one thread to another. <kbd>Rc&lt;T&gt;: !Send</kbd> means that it is explicitly marked as being unsafe to move between threads. Why? Consider if it were marked <kbd>Send</kbd>; what would happen? We know from the previous chapter that <kbd>Rc&lt;T&gt;</kbd> is a boxed <kbd>T</kbd> with two counters in place for weak and strong references to <kbd>T</kbd>. These counters are the trick. Suppose we spread an <kbd>Rc&lt;T&gt;</kbd> across two threads—call them <kbd>A</kbd> and <kbd>B</kbd>—each of which created references, dropped them, and the like. What would happen if both <kbd>A</kbd> and <kbd>B</kbd> dropped the last reference to <kbd>Rc&lt;T&gt;</kbd> at the same time? We have a race between either thread to see which can deallocate <kbd>T</kbd> first and which will suffer a double-free for its troubles. Worse, suppose the taking of the strong reference counter in <kbd>Rc&lt;T&gt;</kbd> were spread across three pseudo-instructions:</p>
+<pre style="padding-left: 30px">LOAD counter            (tmp)
+ADD counter 1 INTO tmp  (tmp = tmp+1)
+STORE tmp INTO counter  (counter = tmp)</pre>
+<p>Likewise, suppose the dropping of a strong reference counter were spread across three pseudo-instructions:</p>
+<pre style="padding-left: 30px">LOAD counter            (tmp)
+SUB counter 1 INTO tmp  (tmp = tmp-1)
+STORE tmp INTO counter  (counter = tmp)</pre>
+<p>In a single-threaded context, this works well, but consider this result in a multi-threaded context. Let <kbd>counter</kbd>  be equal to 10 for all threads at the beginning of the following thought experiment:</p>
+<pre style="padding-left: 30px">[A]LOAD counter                        (tmp_a == 10)
+[B]LOAD counter                        (tmp_b == 10)
+[B]SUB counter 1 INTO tmp              (tmp_b = tmp_b-1)
+[A]ADD counter 1 INTO tmp              (tmp_a = tmp_a + 1)
+[A]STORE tmp INTO counter              (counter = tmp_a)    == 11
+[A]ADD counter 1 INTO tmp              (tmp_a = tmp_a + 1)
+[A]STORE tmp INTO counter              (counter = tmp_a)    == 12
+[A]ADD counter 1 INTO tmp              (tmp_a = tmp_a + 1)
+[A]STORE tmp INTO counter              (counter = tmp_a)    == 13
+[B]STORE tmp INTO counter              (counter == tmp_b)   == 9</pre>
+<p>By the end, we've lost three references to <kbd>Rc&lt;T&gt;</kbd>, meaning while <kbd>T</kbd> is not lost in memory, it is entirely possible that when we drop <kbd>T</kbd>, references will remain to its no longer valid memory out in the wild, the results of which are undefined but not likely to be great.</p>
+<p>The <kbd>Sync</kbd> trait is derived from <kbd>Send</kbd> and has to do with references: <kbd>T: Sync</kbd> if <kbd>&amp;T: Send</kbd>. That is, a <kbd>T</kbd> is <kbd>Sync</kbd> only if sharing a <kbd>&amp;T</kbd> <span>which </span>acts as if that <kbd>T</kbd> were sent into the thread. We know from the previous code that <kbd>Rc&lt;T&gt;: !Send</kbd> and so we also know that <kbd>Rc&lt;T&gt;: !Sync</kbd>. Rust types inherit their constituent parts' <kbd>Sync</kbd> and <kbd>Send</kbd> status. By convention, any type which is <kbd>Sync</kbd> + <kbd>Send</kbd> is called thread-safe. Any type we implement on top of <kbd>Rc&lt;T&gt;</kbd> will not be thread-safe. Now, for the most part, <kbd>Sync</kbd> and <kbd>Send</kbd> are automatically derived traits. <kbd>UnsafeCell</kbd> , discussed in <a href="605ce307-29ed-4b5a-961e-8d327467b84f.xhtml" target="_blank">Chapter 3</a>, <em>The Rust Memory Model – Ownership, References and Manipulation</em>,  is not thread-safe. Neither are raw pointers, to go with their lack of other safety guarantees. As you poke around Rust code bases, you'll find traits that would otherwise have been derived thread-safe but are marked as not. </p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

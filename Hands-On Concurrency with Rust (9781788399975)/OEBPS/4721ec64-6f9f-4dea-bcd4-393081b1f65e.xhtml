@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Further reading</h1>
+                </header>
+            
+            <article>
+                
+<ul>
+<li><em>Axioms for Concurrent Objects</em>, Maurice Herlihy and Jeannette Wing. This paper by Herlihy and Wing introduced the formal definition of linearizability and the formal analysis framework. Subsequent work has expanded or simplified on this paper, but the reader is warmly encouraged to digest the first half of the paper, at least.</li>
+<li><em>Distributed Algorithms</em>, Nancy Lynch. To my knowledge, Lynch's work was the first general overview of distributed algorithms in textbook form. It is incredibly accessible and Chapter 13 of Lynch's book is especially relevant to this discussion.</li>
+<li><em>In C++, are acquire-release memory order semantics transitive?</em>, available at <a href="https://softwareengineering.stackexchange.com/questions/253537/in-c-are-acquire-release-memory-order-semantics-transitive">https://softwareengineering.stackexchange.com/questions/253537/in-c-are-acquire-release-memory-order-semantics-transitive</a>. The consequences of memory orderings are not always clear. This question on <kbd>StackExchange</kbd>, which influenced the writing of this chapter, is about the consequence of splitting <kbd>Acquire</kbd> and <kbd>Release </kbd>across threads. The reader is encouraged to ponder the question before reading the answer.</li>
+<li><em>std::memory_order, CppReference</em>, available at <a href="http://en.cppreference.com/w/cpp/atomic/memory_order">http://en.cppreference.com/w/cpp/atomic/memory_order</a>. Rust's memory model is LLVM's, which is, in turn, influenced by the C++ memory model. This discussion of memory ordering is particularly excellent, as it has example code and a less language-lawyer approach to explaining orders.</li>
+<li><em>Peterson's lock with C++0x atomics</em>, available at <a href="https://www.justsoftwaresolutions.co.uk/threading/petersons_lock_with_C++0x_atomics.html">https://www.justsoftwaresolutions.co.uk/threading/petersons_lock_with_C++0x_atomics.html</a>. This post discusses Bartosz Milewski's implementation of Peterson's algorithm for Mutex, demonstrates how and why it is incorrect, and describes a functional alternative. Milewski is a well-known C++ expert. It just goes to show, atomic programming is difficult and easy to get subtly wrong.</li>
+<li><em>Algorithms for Mutual Exclusion</em>, Michael Raynal. This book by Raynal was written in 1986, well before the x86_64 architecture we've discussed was introduced and a mere year after ARMv1 was introduced. Raynal's book remains useful, both as a historical overview of mutual exclusion algorithms and for environments where synchronization primitives are not available, such as on file systems.</li>
+<li><em>Review of many Mutex implementations</em>, available at <a href="http://cbloomrants.blogspot.com/2011/07/07-15-11-review-of-many-mutex.html">http://cbloomrants.blogspot.com/2011/07/07-15-11-review-of-many-mutex.html</a>. As it says on the tin, this post is a review of many mutex implementations that are given a more modern context than Raynal's book. Some explanations rely on Microsoft Windows features, which may be welcome to the reader as this book is heavily invested in a Unix-like environment.</li>
+<li><em>Encheapening Cernan Metrics</em>, available at <a href="http://blog.troutwine.us/2017/08/31/encheapening-cernan-internal-metrics/">http://blog.troutwine.us/2017/08/31/encheapening-cernan-internal-metrics/</a>. In this chapter we have discussed atomics largely in terms of synchronization. There are many other use cases. This post discusses the application of atomics to providing cheap self-telemetry to a complicated software project.</li>
+<li><em>Roll Your Own Lightweight Mutex</em>, available at <a href="http://preshing.com/20120226/roll-your-own-lightweight-mutex/">http://preshing.com/20120226/roll-your-own-lightweight-mutex/</a>. Preshing On Programming has a run of excellent atomics material, focused on C++ and Microsoft environments. This particular post is to do with implementing mutexes—a topic dear to this chapter—and has an excellent follow-up conversation in the comments. The post discusses a variant of semaphores called benaphores.</li>
+<li><em>Simple, Fast, and Practical Non-Blocking and Blocking Concurrent Queue Algorithms</em>, Maged Michael and Michael Scott. This paper introduces the Michael and Scott Queue, discussed in this chapter, and that's what it's best known for. You may also recognize their queue with two locks from the previous chapter, adapted through the Erlang VM, of course.</li>
+<li><em>Lock-Free Data Structures. The Evolution of a Stack</em>, available at <a href="https://kukuruku.co/post/lock-free-data-structures-the-evolution-of-a-stack/">https://kukuruku.co/post/lock-free-data-structures-the-evolution-of-a-stack/</a>. This post discusses the <kbd>libcds</kbd> implementation of Trieber stacks, as well as making reference to other areas of the literature. Readers will note that previous <em>Further reading</em> have introduced some of the same literature; it's always good to seek alternate takes. Readers are especially encouraged to investigate the Hendler, Shavit, and Yerushalmi paper referenced in the post.</li>
+</ul>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Safety by exclusion</h1>
+                </header>
+            
+            <article>
+                
+<p>Let's talk about <kbd>Mutex.</kbd> Mutexes provide MUTual EXclusion among threads. Rust's <kbd>Mutex</kbd> works just as you'd expect coming from other programming languages. Any thread that calls a lock on a <kbd>Mutex</kbd> will acquire the lock or block until such a time as the thread that holds the mutex unlocks it. The type for lock is <kbd>lock(&amp;self) -&gt; LockResult&lt;MutexGuard&lt;T&gt;&gt;</kbd>. There's a neat trick happening here. <kbd>LockResult&lt;Guard&gt;</kbd> is <kbd>Result&lt;Guard&gt;</kbd>, <kbd>PoisonError&lt;Guard&gt;&gt;</kbd>. That is, the thread that acquires a mutex lock actually gets a result, which containers the <kbd>MutexGuard&lt;T&gt;</kbd> on success or a <em>poisoned</em> notification. Rust poisons its mutexes when the holder of the mutex crashes, a tactic that helps prevent the continued operation of a multi-threaded propagation that has crashed in only one thread. For this very reason, you'll find that many Rust programs do not inspect the return of a lock call and immediately unwrap it. The <kbd>MutexGuard&lt;T&gt;</kbd>, when dropped, unlocks the mutex. Once the mutex guard is unlocked, it's no longer possible to access the data ensconced inside and, so, there's  no way for one thread to interact poorly with another. A <kbd>Mutex</kbd> is both <kbd>Sync</kbd> and <kbd>Send</kbd>, which makes good sense. Why then do we wrap our <kbd>Mutex&lt;Ring&gt;</kbd> in an <kbd>Arc</kbd>? What even is an <kbd>Arc&lt;T&gt;</kbd>?</p>
+<p>The <kbd>Arc&lt;T&gt;</kbd> is an atomic reference counting pointer. As discussed previously, <kbd>Rc&lt;T&gt;</kbd> is not thread-safe because if it were marked as such there'd be a race on the inner strong/weak counters, much like in our intentionally racey programs. <kbd>Arc&lt;T&gt;</kbd> is built on top of atomic integers, which we'll go into more detail on in the next chapter. Suffice it to say for now, the <kbd>Arc&lt;T&gt;</kbd> is able to act as a reference counting pointer without introducing data races between threads. <kbd>Arc&lt;T&gt;</kbd> can be used everywhere <kbd>Rc&lt;T&gt;</kbd> can, except those atomic integers are not free. If you can use <kbd>Rc&lt;T&gt;</kbd>, do so. Anyway, more on this next chapter.</p>
+<p>Why <kbd>Arc&lt;Mutex&lt;Ring&gt;&gt;</kbd>? Well, <kbd>Mutex&lt;Ring&gt;</kbd> can be moved but it cannot be cloned. Let's take a look inside <kbd>Mutex</kbd>:</p>
+<pre style="padding-left: 30px">pub struct Mutex&lt;T: ?Sized&gt; {
+    // Note that this mutex is in a *box*, not inlined into<br/>    // the struct itself. Once a native mutex has been used <br/>    // once, its address can never change (it can't be <br/>    // moved). This mutex type can be safely moved at any time,<br/>    // so to ensure that the native mutex is used correctly we<br/>    // box the inner mutex to give it a constant address.
+    inner: Box&lt;sys::Mutex&gt;,
+    poison: poison::Flag,
+    data: UnsafeCell&lt;T&gt;,
+}</pre>
+<p>We can see that <kbd>T</kbd> may or may not be sized and that <kbd>T</kbd> is stored in an <kbd>UnsafeCell&lt;T&gt;</kbd> next to something called <kbd>sys::Mutex</kbd>. Each platform that Rust runs on will provide its own form of mutex, being that these are often tied into the operating system environment. If you <span><span>take a look at</span></span> the rustc code, you'll find that <kbd>sys::Mutex</kbd> is a wrapper around system-dependent mutex implementations. The <kbd>Unix</kbd> implementation is in <kbd>src/libstd/sys/unix/mutex.rs</kbd> and is an <kbd>UnsafeCell</kbd> around <kbd>pthread_mutex_t</kbd>, as you might expect:</p>
+<pre style="padding-left: 30px">pub struct Mutex { inner: UnsafeCell&lt;libc::pthread_mutex_t&gt; }</pre>
+<p>It's not strictly necessary for <kbd>Mutex</kbd> to be implemented on top of system-dependent foundations, as we'll see in the chapter on atomic primitives when we build our own locks. Generally speaking though, it's a good call to use what's available and well-tested unless there's a good reason not to (like pedagogy).</p>
+<p>Now, what would happen if we were to clone <kbd>Mutex&lt;T&gt;</kbd>? We would need a new allocation of the system mutex, for one, and possibly a new <kbd>UnsafeCell</kbd>, if <kbd>T</kbd> itself were even clonable. The new system mutex is the real problem—threads have to synchronize on the same structure in memory. Tossing <kbd>Mutex</kbd> inside of an <kbd>Arc</kbd> solves that problem. Cloning the <kbd>Arc</kbd>, like cloning an <kbd>Rc</kbd>, creates new strong references to the <kbd>Mutex</kbd>. These references are immutable, though. How does that work out? For one, the mutex inside the <kbd>Arc</kbd> is never changed. In the abstract model that Rust provides, the mutex itself has no internal state and there's nothing really being mutated by locking threads. Of course, that's not actually true, by inspection. The Rust <kbd>Mutex</kbd> only behaves that way because of the interior <kbd>UnsafeCell</kbd> surrounding system-dependent structures. Rust <kbd>Mutex</kbd> makes use of the interior mutability that <kbd>UnsafeCell</kbd> allows. The mutex itself stays immutable while the interior <kbd>T</kbd> is mutably referenced through the <kbd>MutexGuard</kbd>. This is safe in Rust's memory model as there's only one mutable reference to <kbd>T</kbd> at any given time on account of mutual exclusion:</p>
+<pre>fn main() {
+    let capacity = 10;
+    let read_limit = 1_000_000;
+    let ring = Arc::new(Mutex::new(Ring::with_capacity(capacity)));
+
+    let reader_ring = Arc::clone(&amp;ring);
+    let reader_jh = thread::spawn(move || {
+        reader(read_limit, reader_ring);
+    });
+    let _writer_jh = thread::spawn(move || {
+        writer(ring);
+    });
+    <br/>    reader_jh.join().unwrap();<br/>}</pre>
+<p>We wrap our <kbd>Ring</kbd>, which is not thread-safe in the least, in an <kbd>Arc</kbd>, <kbd>Mutex</kbd> layer, clone this to the reader, and move it into the writer. Here, this is a matter of style, but it's important to realize that if a main thread creates and clones an <kbd>Arc</kbd> into child threads then the contents of <kbd>Arc</kbd> are still alive, at least as long as the main thread is. For instance, if a file handler were held in a main-thread <kbd>Arc</kbd>, cloned to temporary start-up workers, and then not dropped, the file handler itself would never be closed. This may or may not be what your program intends, of course. The reader and the writer each take a lock on the mutex—<kbd>Arc</kbd> has convenient <kbd>Deref</kbd>/<kbd>DerefMut</kbd> implementations—and then perform their action. Running this new program through <kbd>helgrind</kbd> gives a clean run. The reader is encouraged to confirm this on their own system.</p>
+<p>Moreover, the program itself runs to completion successfully after repeated runs. The unfortunate thing is that, theoretically, it's not especially efficient. Locking a mutex is not free, and while our thread's operations are short—a handful of arithmetic in addition to one memory swap—while one thread holds the mutex the other waits dumbly. Linux perf proves this somewhat:</p>
+<pre><strong>&gt; perf stat --event task-clock,context-switches,page-faults,cycles,instructions,branches,branch-misses,cache-references,cache-misses ./data_race02
+
+ Performance counter stats for './data_race02':
+
+        988.944526      task-clock (msec)         #    1.943 CPUs utilized
+             8,005      context-switches          #    0.008 M/sec
+               137      page-faults               #    0.139 K/sec
+     2,836,237,759      cycles                    #    2.868 GHz 
+     1,074,887,696      instructions              #    0.38  insn per cycle
+       198,103,111      branches                  #  200.318 M/sec
+         1,557,868      branch-misses             #    0.79% of all branches
+        63,377,456      cache-references          #   64.086 M/sec
+             3,326      cache-misses              #    0.005 % of all cache refs
+
+       0.508990976 seconds time elapsed</strong></pre>
+<p>Only 1.3 CPUs are used during the execution. For a program as simple as this, we're likely better off with the simplest approach. Also, because of cache write effects in the presence of a memory barrier—of which a mutex assuredly is one—it <em>may</em> be cheaper to prefer mutual exclusion instead of fine-grained locking strategies. Ultimately, it comes down to finding the trade-off in development time, need for machine efficiency, and defining what machine efficiency is for the CPU in use. We'll see some of this in later chapters.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

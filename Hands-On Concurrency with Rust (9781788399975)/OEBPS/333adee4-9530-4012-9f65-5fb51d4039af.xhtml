@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Tradeoffs</h1>
+                </header>
+            
+            <article>
+                
+<p>Reference counting has much to recommend it as an approach for atomic memory reclamation. The programming model of reference counting is straightforward to understand and memory is reclaimed as soon as it's possible to be safely reclaimed. Programming reference-counted implementations without the use of <kbd>Arc&lt;T&gt;</kbd> remains difficult, owing to the lack of double-word compare and swap in Rust. Consider a Treiber stack in which the reference counter is internal to stack nodes. The head of the stack might be snapshotted, then freed by some other thread, and the subsequent read to the reference counter will be forced through an invalid pointer.</p>
+<p>The following reference-counted Treiber stack is flawed:</p>
+<pre style="padding-left: 30px">use std::sync::atomic::{fence, AtomicPtr, AtomicUsize, Ordering};
+use std::{mem, ptr};
+
+unsafe impl&lt;T: Send&gt; Send for Stack&lt;T&gt; {}
+unsafe impl&lt;T: Send&gt; Sync for Stack&lt;T&gt; {}
+
+struct Node&lt;T&gt; {
+    references: AtomicUsize,
+    next: *mut Node&lt;T&gt;,
+    data: Option&lt;T&gt;,
+}
+
+impl&lt;T&gt; Node&lt;T&gt; {
+    fn new(t: T) -&gt; Self {
+        Node {
+            references: AtomicUsize::new(1),
+            next: ptr::null_mut(),
+            data: Some(t),
+        }
+    }
+}
+
+pub struct Stack&lt;T&gt; {
+    head: AtomicPtr&lt;Node&lt;T&gt;&gt;,
+}
+
+impl&lt;T&gt; Stack&lt;T&gt; {
+    pub fn new() -&gt; Self {
+        Stack {
+            head: AtomicPtr::default(),
+        }
+    }
+
+    pub fn pop(&amp;self) -&gt; Option&lt;T&gt; {
+        loop {
+            let head: *mut Node&lt;T&gt; = self.head.load(Ordering::Relaxed);
+
+            if head.is_null() {
+                return None;
+            }
+            let next: *mut Node&lt;T&gt; = unsafe { (*head).next };
+
+            if self.head.compare_and_swap(head, next, <br/>            Ordering::Relaxed) == head {
+                let mut head: Box&lt;Node&lt;T&gt;&gt; = unsafe {<br/>                    Box::from_raw(head) <br/>                };
+                let data: Option&lt;T&gt; = mem::replace(&amp;mut (*head).data, <br/>                                                   None);
+                unsafe {
+                    assert_eq!(
+                        (*(*head).next).references.fetch_sub(1, <br/>                             Ordering::Release),
+                        2
+                    );
+                }
+                drop(head);
+                return data;
+            }
+        }
+    }
+
+    pub fn push(&amp;self, t: T) -&gt; () {
+        let node: *mut Node&lt;T&gt; = Box::into_raw(Box::new(Node::new(t)));
+        loop {
+            let head = self.head.load(Ordering::Relaxed);
+            unsafe {
+                (*node).next = head;
+            }
+
+            fence(Ordering::Acquire);
+            if self.head.compare_and_swap(head, node, <br/>            Ordering::Release) == head {
+                // node is now self.head
+                // head is now self.head.next
+                if !head.is_null() {
+                    unsafe {
+                        assert_eq!(1, <br/>                                   (*head).references.fetch_add(1, <br/>                                       Ordering::Release)<br/>                        );
+                    }
+                }
+                break;
+            }
+        }
+    }
+}</pre>
+<p>This is one of the few (intentionally) flawed examples in this book. You are encouraged to apply the techniques discussed earlier in this book to identify and correct the flaws with this implementation. It should be interesting. J.D. Valois' 1995 paper, <em>Lock-Free Linked Lists Using Compare-and-Swap</em>, will be of use. You are further warmly encouraged to attempt a Treiber stack using only <kbd>Arc</kbd>.</p>
+<p>Ultimately, where reference counting struggles is contention, as the number of threads operating on the same reference-counted data increase., those acquire/release pairs don't come cheaply. Reference counting is a good model when you expect the number of threads to be relatively low or where absolute performance is not a key consideration. Otherwise, you'll need to investigate the following methods, which have tradeoffs of their own.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

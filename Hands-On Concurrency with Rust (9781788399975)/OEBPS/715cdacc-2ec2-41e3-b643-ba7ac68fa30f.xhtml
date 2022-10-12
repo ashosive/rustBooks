@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Feruscore – a Corewars evolver</h1>
+                </header>
+            
+            <article>
+                
+<p>I want to make sure we're all on the same page, before we start digging through source code. The way simulated evolution works is you make a population—maybe totally random, maybe not—and call it generation <kbd>0</kbd>. You then run some <kbd>fitness</kbd> function on the members of the population. Fitness may be defined in terms of some known absolute or as a relative value between members of the population. The fittest members of the population are then taken to form a subset of parents. Many algorithms take two members, but the sky's the limit and your species could well require six individuals for reproduction. That's what we're after—reproduction.</p>
+<p>The individuals of the population are non-destructively recombined to form children. The population is then mutated, changing genes in an individual's genomes with some domain-specific probability. This may be <em>all</em> members of the population or just children, or just parents, or whatever you'd like. There's no perfect answer here. After mutation, the parents, their children, and any non-reproducing members of the population that did not die during fitness evaluation are then promoted to generation 2. The cycle continues:</p>
+<ul>
+<li>Fitness evaluation</li>
+<li>Parents reproduce</li>
+<li>Population is mutated</li>
+</ul>
+<p>Exactly when the cycle stops is up to the programmer: perhaps when a fixed number of generations have passed, perhaps when an individual that meets some minimum threshold of fitness has evolved.</p>
+<p>Simulated evolution is not magic. Much like QuickCheck, which uses randomness to probe programs for property violations, this algorithm is probing a problem space for the most fit solution. It's an optimization strategy, mimicking the biological process. As you can probably infer from the description I just gave, there are a lot of knobs and alternatives to the basic approach. We'll be putting together a straightforward approach here but the you are warmly encouraged to make your own modifications.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

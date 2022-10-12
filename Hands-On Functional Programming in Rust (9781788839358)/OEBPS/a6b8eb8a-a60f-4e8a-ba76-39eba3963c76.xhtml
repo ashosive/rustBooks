@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style00.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style01.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Using the combinator pattern</h1>
+                </header>
+            
+            <article>
+                
+<p><span>A combinator is a function that takes other functions as arguments and returns a new function.</span></p>
+<p>A simple example of a combinator would be the composition operator, which chains two functions together:</p>
+<pre style="padding-left: 30px" class="p1"><span class="s1">fn compose&lt;A,B,C,F,G&gt;(f: F, g: G) -&gt; impl Fn(A) -&gt; C<br/></span><span class="s1">   where F: 'static + Fn(A) -&gt; B,<br/></span><span class="s1">         G: 'static + Fn(B) -&gt; C {<br/></span><span class="s1">   move |x| g(f(x))<br/></span><span class="s1">}<br/><br/></span>fn main() {<br/><span class="s1">   let fa = |x| x+1;<br/></span><span class="s1">   let fb = |y| y*2;<br/></span><span class="s1">   let fc = |z| z/3;<br/></span><span class="s1">   let g = compose(compose(fa,fb),fc);<br/></span><span class="s1">   println!("g(1) = {}", g(1));<br/></span><span class="s1">   println!("g(12) = {}", g(12));<br/></span><span class="s1">   println!("g(123) = {}", g(123));<br/></span>}</pre>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

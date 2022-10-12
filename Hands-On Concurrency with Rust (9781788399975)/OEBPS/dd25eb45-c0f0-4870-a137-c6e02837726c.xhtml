@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">The rocket preparation problem</h1>
+                </header>
+            
+            <article>
+                
+<p>This puzzle does not actually appear in <em>The Little Book of Semaphores</em> but it is based on one of the puzzles there - the cigarette smoker's problem from section 4.5. Personally, I think cigarettes are gross so we're going to reword things a touch. The idea is the same.</p>
+<p>We have four threads in total. One thread, the <kbd>producer</kbd>, randomly publishes one of <kbd>fuel</kbd>, <kbd>oxidizer</kbd>, or <kbd>astronauts</kbd>. The remaining three threads are the consumers, or <em>rockets</em>, which must take their resources in the order listed previously. If a rocket doesn't get its resources in that order, it's not safe to prepare the rocket, and if it doesn't have all three, the rocket can't lift-off. Moreover, once all the rockets are prepped, we want to start a 10 second count-down, only after which may the rockets lift-off.</p>
+<p>The preamble to our solution is a little longer than usual, in the interest of keeping the solution as a standalone:</p>
+<pre style="padding-left: 30px">use std::{thread, time};
+use std::sync::{Arc, Barrier, Condvar, Mutex};
+
+// NOTE if this were a crate, rather than a stand-alone<br/>// program, we could and _should_ use the XorShiftRng<br/>// from the 'rand' crate.
+pub struct XorShiftRng {
+    state: u32,
+}
+
+impl XorShiftRng {
+    fn with_seed(seed: u32) -&gt; XorShiftRng {
+        XorShiftRng { state: seed }
+    }
+
+    fn next_u32(&amp;mut self) -&gt; u32 {
+        self.state ^= self.state &lt;&lt; 13;
+        self.state ^= self.state &gt;&gt; 17;
+        self.state ^= self.state &lt;&lt; 5;
+        return self.state;
+    }
+}</pre>
+<p>We don't really need excellent randomness for this solution—the OS scheduler injects enough already—but just something small-ish. <kbd>XorShift</kbd> fits the bill. Now, for our resources:</p>
+<pre style="padding-left: 30px">struct Resources {
+    lock: Mutex&lt;(bool, bool, bool)&gt;,
+    fuel: Condvar,
+    oxidizer: Condvar,
+    astronauts: Condvar,
+}</pre>
+<p>The struct is protected by a single <kbd>Mutex&lt;(bool, bool, bool)&gt;</kbd>, the Boolean being a flag to indicate that there's a resource available. We hold the first flag to mean <kbd>fuel</kbd>, the second <kbd>oxidizer</kbd>, and the third <kbd>astronauts</kbd>. The remainder of the struct are condvars to match each of these resource concerns. The <kbd>producer</kbd> is a straightforward infinite loop:</p>
+<pre>fn producer(resources: Arc&lt;Resources&gt;) {
+    let mut rng = XorShiftRng::with_seed(2005);
+    loop {
+        let mut guard = resources.lock.lock().unwrap();
+        (*guard).0 = false;
+        (*guard).1 = false;
+        (*guard).2 = false;
+        match rng.next_u32() % 3 {
+            0 =&gt; {
+                (*guard).0 = true;
+                resources.fuel.notify_all()
+            }
+            1 =&gt; {
+                (*guard).1 = true;
+                resources.oxidizer.notify_all()
+            }
+            2 =&gt; {
+                (*guard).2 = true;
+                resources.astronauts.notify_all()
+            }</pre>
+<pre>            _ =&gt; unreachable!(),
+        }
+    }
+}</pre>
+<p>On each iteration, the producer chooses a new resource—<kbd>rng.next_u32() % 3</kbd>—and sets the Boolean flag for that resource before notifying all threads waiting on the <kbd>fuel</kbd> condvar. Meanwhile, the compiler and CPU are free to re-order instructions and the memory <kbd>notify_all</kbd> acts like a causality gate; everything before in the code is before in causality, and likewise, afterwards. If the resource bool flip was after the notification, the wake-up would be spurious from the point of view of the waiting threads and lost from the point of view of the producer. The <kbd>rocket</kbd> is straightforward:</p>
+<pre style="padding-left: 30px">fn rocket(name: String, resources: Arc&lt;Resources&gt;, <br/>          all_go: Arc&lt;Barrier&gt;, lift_off: Arc&lt;Barrier&gt;) {
+    {
+        let mut guard = resources.lock.lock().unwrap();
+        while !(*guard).0 {
+            guard = resources.fuel.wait(guard).unwrap();
+        }
+        (*guard).0 = false;
+        println!("{:&lt;6} ACQUIRE FUEL", name);
+    }
+    {
+        let mut guard = resources.lock.lock().unwrap();
+        while !(*guard).1 {
+            guard = resources.oxidizer.wait(guard).unwrap();
+        }
+        (*guard).1 = false;
+        println!("{:&lt;6} ACQUIRE OXIDIZER", name);
+    }
+    {
+        let mut guard = resources.lock.lock().unwrap();
+        while !(*guard).2 {
+            guard = resources.astronauts.wait(guard).unwrap();
+        }
+        (*guard).2 = false;
+        println!("{:&lt;6} ACQUIRE ASTRONAUTS", name);
+    }
+
+    all_go.wait();
+    lift_off.wait();
+    println!("{:&lt;6} LIFT OFF", name);
+}</pre>
+<p>Each thread, regarding the resource requirements, waits on the condvar for the producer to make it available. A race occurs to re-acquire the mutex, as discussed, and only a single thread gets the resource. Finally, once all the resources are acquired, the <kbd>all_go</kbd> barrier is hit to delay any threads ahead of the count-down. Here we need the <kbd>main</kbd> function:</p>
+<pre style="padding-left: 30px">fn main() {
+    let all_go = Arc::new(Barrier::new(4));
+    let lift_off = Arc::new(Barrier::new(4));
+    let resources = Arc::new(Resources {
+        lock: Mutex::new((false, false, false)),
+        fuel: Condvar::new(),
+        oxidizer: Condvar::new(),
+        astronauts: Condvar::new(),
+    });
+
+    let mut rockets = Vec::new();
+    for name in &amp;["KSC", "VAB", "WSMR"] {
+        let all_go = Arc::clone(&amp;all_go);
+        let lift_off = Arc::clone(&amp;lift_off);
+        let resources = Arc::clone(&amp;resources);
+        rockets.push(thread::spawn(move || {
+            rocket(name.to_string(), resources, <br/>                   all_go, lift_off)
+        }));
+    }
+
+    thread::spawn(move || {
+        producer(resources);
+    });
+
+    all_go.wait();
+    let one_second = time::Duration::from_millis(1_000);
+    println!("T-11");
+    for i in 0..10 {
+        println!("{:&gt;4}", 10 - i);
+        thread::sleep(one_second);
+    }
+    lift_off.wait();
+
+    for jh in rockets {
+        jh.join().unwrap();
+    }
+}</pre>
+<p>Note that, roughly, the first half of the function is made up of the barriers and resources or rocket threads. <kbd>all_go.wait()</kbd> is where it gets interesting. This main thread has spawned all the children and is now blocked on the all-go signal from the rocket threads, meaning they've collected their resources and are also blocked on the same barrier. That done, the count-down happens, to add a little panache to the solution; meanwhile, the rocket threads have started to wait on the <kbd>lift_off</kbd> barrier. It is, incidentally, worth noting that the producer is still producing, drawing CPU and power. Once the count-down is complete, the rocket threads are released, the main thread joins on them to allow them to print their goodbyes, and the program is finished. Outputs will vary, but here's one representative example:</p>
+<pre style="padding-left: 30px"><strong>KSC    ACQUIRE FUEL
+WSMR   ACQUIRE FUEL
+WSMR   ACQUIRE OXIDIZER
+VAB    ACQUIRE FUEL
+WSMR   ACQUIRE ASTRONAUTS
+KSC    ACQUIRE OXIDIZER
+KSC    ACQUIRE ASTRONAUTS
+VAB    ACQUIRE OXIDIZER
+VAB    ACQUIRE ASTRONAUTS
+T-11
+  10
+   9
+   8
+   7
+   6
+   5
+   4
+   3
+   2
+   1
+VAB    LIFT OFF
+WSMR   LIFT OFF
+KSC    LIFT OFF</strong></pre>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

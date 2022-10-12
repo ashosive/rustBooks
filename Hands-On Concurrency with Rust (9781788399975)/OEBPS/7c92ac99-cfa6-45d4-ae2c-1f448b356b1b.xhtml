@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Racing threads</h1>
+                </header>
+            
+            <article>
+                
+<p>You can also mark types as thread-safe, effectively promising the compiler that you've arranged all the data races in such a way as to make them safe. This is relatively rare in practice but it's worth seeing what it takes to make a type thread-safe in Rust before we start building on top of safe primitives. First, let's take a look at code that's intentionally sideways:</p>
+<pre style="padding-left: 30px">use std::{mem, thread};
+use std::ops::{Deref, DerefMut};
+
+unsafe impl Send for Ring {}
+unsafe impl Sync for Ring {}
+
+struct InnerRing {
+    capacity: isize,
+    size: usize,
+    data: *mut Option&lt;u32&gt;,
+}
+
+#[derive(Clone)]
+struct Ring {
+    inner: *mut InnerRing,
+}</pre>
+<p>What we have here is a ring, or a circular buffer, of <kbd>u32</kbd>. <kbd>InnerRing</kbd> holds a raw mutable pointer and is not automatically thread-safe as a result. But, we've promised to Rust that we know what we're doing and implement <kbd>Send</kbd> and <kbd>Sync</kbd> for <kbd>Ring</kbd>. Why not on <kbd>InnerRing</kbd>? When we manipulate an object in memory from multiple threads, the location of that object has to be fixed. <kbd>InnerRing</kbd>—and the data it contains—have to occupy a stable place in memory. <kbd>Ring</kbd> can and will be bounced around, at the very least from a creating thread to a worker. Now, what's that data there in <kbd>InnerRing</kbd>? It's a pointer to the 0th offset of a contiguous block of memory that will be the store of our circular buffer. At the time of writing this book, Rust has no stable allocator interface and, so, to get a contiguous allocation we have to do it in a roundabout fashion—strip a <kbd>Vec&lt;u32&gt;</kbd> down to its pointer:</p>
+<pre style="padding-left: 30px">impl Ring {
+    fn with_capacity(capacity: usize) -&gt; Ring {
+        let mut data: Vec&lt;Option&lt;u32&gt;&gt; = Vec::with_capacity(capacity);
+        for _ in 0..capacity {
+            data.push(None);
+        }
+        let raw_data = (&amp;mut data).as_mut_ptr();
+        mem::forget(data);
+        let inner_ring = Box::new(InnerRing {
+            capacity: capacity as isize,
+            size: 0,
+            data: raw_data,
+        });
+
+        Ring {
+            inner: Box::into_raw(inner_ring),
+        }
+    }
+}</pre>
+<p><kbd>Ring::with_capacity</kbd> functions much the same as other types' <kbd>with_capacity</kbd> from the Rust ecosystem: sufficient space is allocated to fit capacity items. In our case, we piggyback off <kbd>Vec::with_capacity</kbd>, being sure to allocate enough room for capacity <kbd>Option&lt;u32&gt;</kbd> instances, initializing to None along the full length of the memory block. If you'll recall from <a href="605ce307-29ed-4b5a-961e-8d327467b84f.xhtml" target="_blank">Chapter 3</a><span>, <em>The Rust Memory Model – Ownership, References and Manipulation</em>,</span> this is done as <kbd>Vec</kbd> is lazy about allocating and we require the allocation. <kbd>Vec::as_mut_ptr</kbd> returns a raw pointer to a slice but does not consume the original object, a problem for <kbd>Ring</kbd>. When data falls out of scope, the allocated block must survive. The standard library's <kbd>mem::forget</kbd> is ideal for this very use case. The allocation now being safe, an <kbd>InnerRing</kbd> is boxed to store it. The box is then consumed by <kbd>Box::into_raw</kbd> and passed into a <kbd>Ring</kbd>. Ta-da!</p>
+<p>Interacting with a type that has an inner raw pointer can be verbose, scattering unsafe blocks around to little good effect. To that end, <kbd>Ring</kbd> gets a <kbd>Deref</kbd> and <kbd>DerefMut</kbd> implementation, both of which tidy up the interaction with <kbd>Ring</kbd>:</p>
+<pre style="padding-left: 30px">impl Deref for Ring {
+    type Target = InnerRing;
+
+    fn deref(&amp;self) -&gt; &amp;InnerRing {
+        unsafe { &amp;*self.inner }
+    }
+}
+
+impl DerefMut for Ring {
+    fn deref_mut(&amp;mut self) -&gt; &amp;mut InnerRing {
+        unsafe { &amp;mut *self.inner }
+    }
+}</pre>
+<p>Now that we have <kbd>Ring</kbd> defined, we can get into the meat of the program. We'll define two operations that will run concurrently with one another—writer and reader. The idea here is that writer will race around the ring writing, increasing <kbd>u32</kbd> values into the ring whenever there's capacity to do so. (At type boundary the <kbd>u32</kbd> will wrap.) The reader will race around behind the writer reading the values written, checking that each read value is up one from the previous read, with the caveat of wrapping. Here's the writer:</p>
+<pre style="padding-left: 30px">fn writer(mut ring: Ring) -&gt; () {
+    let mut offset: isize = 0;
+    let mut cur: u32 = 0;
+    loop {
+        unsafe {
+            if (*ring).size != ((*ring).capacity as usize) {
+                *(*ring).data.offset(offset) = Some(cur);
+                (*ring).size += 1;
+                cur = cur.wrapping_add(1);
+                offset += 1;
+                offset %= (*ring).capacity;
+            } else {
+                thread::yield_now();
+            }
+        }
+    }
+}</pre>
+<p>Now, to be crystal clear, there's a <em>lot</em> that's wrong here. The ambition is to only write when the size of the ring buffer has not reached its capacity—meaning there's free space available. The actual writing is:</p>
+<pre>                *(*ring).data.offset(offset) = Some(cur);
+                (*ring).size += 1;</pre>
+<p>That is, we dereference the <kbd>ring (*ring)</kbd> and get the pointer to the <kbd>Option&lt;u32&gt;</kbd> sized block at <kbd>(*ring).data.offset(offset)</kbd>, which we then dereference and move <kbd>Some(cur)</kbd> onto the top of whatever was previously there. It is entirely possible that because of races on the size of the <kbd>Ring</kbd> that we'll overwrite an unread <kbd>u32.</kbd> The remainder of the write block sets up our next <kbd>cur</kbd> and our next offset, adding one and modulating around if need be:</p>
+<pre>            } else {
+                thread::yield_now();
+            }</pre>
+<p><kbd>thread::yield_now</kbd> is new. The writer is a fast spin-loop—it checks a single condition and loops back around again for another try. This is very CPU and power inefficient. <kbd>thread::yield_now</kbd> hints to the operating system that this thread had no work to do and should be deprioritized in favor of other threads. The effect is OS and running environment-dependent but it's still a good idea to yield if you have to spin-loop:</p>
+<pre style="padding-left: 30px">fn reader(mut ring: Ring) -&gt; () {
+    let mut offset: isize = 0;
+    let mut cur: u32 = 0;
+    while cur &lt; 1_000 {
+        unsafe {
+            if let Some(num) = mem::replace(<br/>                &amp;mut *(*ring).data.offset(offset), <br/>                None) <br/>            {
+                assert_eq!(num, cur);
+                (*ring).size -= 1;
+                cur = cur.wrapping_add(1);
+                offset += 1;
+                offset %= (*ring).capacity;
+            } else {
+                thread::yield_now();
+            }
+        }
+    }
+}</pre>
+<p>The reader is similar to the writer, with the major difference being that it's not an infinite loop. Reads are done with <kbd>mem::replace</kbd>, swapping the block at the reader offset with <kbd>None</kbd>. When we hit bingo and score a <kbd>Some</kbd>, the memory of that <kbd>u32</kbd> is now owned by the reader—a drop will be called when it goes out of scope. This is important. The writer is responsible for losing memory inside of a raw pointer and the reader is responsible for finding it. In this way, we are careful not to leak memory. Or, well, we would if there wasn't a race on the size of the <kbd>Ring</kbd>.</p>
+<p>Finally, we have the <kbd>main</kbd> function:</p>
+<pre style="padding-left: 30px">fn main() {
+    let capacity = 10;
+    let ring = Ring::with_capacity(capacity);
+
+    let reader_ring = ring.clone();
+    let reader_jh = thread::spawn(move || {
+        reader(reader_ring);
+    });
+    let _writer_jh = thread::spawn(move || {
+        writer(ring);
+    });
+
+    reader_jh.join().unwrap();
+}</pre>
+<p>There are two new things going on here. The first is our use of <kbd>thread::spawn</kbd> to start a <kbd>reader</kbd> and a <kbd>writer</kbd>. The <kbd>move || {}</kbd> construct is called a <em>move closure</em>. That is, every variable reference inside the closure from the outer scope is moved into the closure's scope. It's for this reason that we clone ring to <kbd>reader_ring</kbd>. Otherwise, there'd be no <kbd>ring</kbd> for the writer to work with. The second new thing is the <kbd>JoinHandle</kbd> that <kbd>thread::spawn</kbd> returns. Rust threads are not a drastic departure from the common POSIX or Windows threads. Rust threads receive their own stack and are independently runnable by the operating system.</p>
+<p>Every Rust thread has a return value, though here ours is <kbd>()</kbd>. We get at that return value by <em>joining</em> on the thread's <kbd>JoinHandler</kbd>, pausing execution of our thread until the thread wraps up successfully or crashes. Our main thread assumes its child threads will return successfully, hence the <kbd>join().unwrap()</kbd>.</p>
+<p>What happens when we run our program? Well, failure, which is what we were expecting:</p>
+<pre><strong>&gt; rustc -C opt-level=3 data_race00.rs &amp;&amp; ./data_race00</strong><br/><strong>thread '&lt;unnamed&gt;' panicked at 'assertion failed: `(left == right)`</strong><br/><strong>  left: `31`,</strong><br/><strong>   right: `21`', data_race00.rs:90:17</strong><br/><strong>   note: Run with `RUST_BACKTRACE=1` for a backtrace.</strong><br/><strong>   thread 'main' panicked at 'called `Result::unwrap()` on an `Err` value: Any', libcore/result.rs:916:5</strong></pre>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

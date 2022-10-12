@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">The size of a type</h1>
+                </header>
+            
+            <article>
+                
+<p>There's two important things here we have not come across yet in this book<span>—</span><kbd>Sized</kbd> and <kbd>Unique</kbd>. First, <kbd>Sized</kbd>, or more properly, <kbd>std::marker::Sized</kbd>. <kbd>Sized</kbd>, is a Rust <kbd>trait</kbd> that bounds a type to have a known size at compile time. Almost everything in Rust has an implicit <kbd>Sized</kbd> bound, which we can inspect. For instance:</p>
+<pre style="padding-left: 30px">use std::mem;
+
+#[allow(dead_code)]
+enum Project {
+    Mercury { mission: u8 },
+    Gemini { mission: u8 },
+    Apollo { mission: u8 },
+    Shuttle { mission: u8 },
+}
+
+fn main() {
+    assert_eq!(1, mem::size_of::&lt;u8&gt;());
+    assert_eq!(2, mem::size_of::&lt;Project&gt;());
+
+    let ptr_sz = mem::size_of::&lt;usize&gt;();
+    assert_eq!(ptr_sz, mem::size_of::&lt;&amp;Project&gt;());
+
+    let vec_sz = mem::size_of::&lt;usize&gt;() * 2 + ptr_sz;
+    assert_eq!(vec_sz, mem::size_of::&lt;Vec&lt;Project&gt;&gt;());
+}</pre>
+<p><kbd>u8</kbd> is a single byte, Project is the byte to distinguish the enum variants plus the inner mission byte, pointers are the size of a machine word–a <kbd>usize-</kbd> and a <kbd>Vec&lt;T&gt;</kbd> is guaranteed to be a pointer and two <kbd>usize</kbd> fields no matter the size of <kbd>T</kbd>. There's something interesting going on with <kbd>Vec&lt;T&gt;</kbd> and we'll get into it in depth later in this chapter. Note that we said almost everything in Rust has an implicit <kbd>Sized</kbd> bound. Rust supports <em>dynamically sized types</em>, these being types that have no known size or alignment. Rust requires known size and alignment and so all DSTs must exist behind a reference or pointer. A slice—a view into contiguous memory—is one such type. In the following program, the compiler will not be able to determine the size of the slice of values:</p>
+<pre style="padding-left: 30px">use std::time::{SystemTime, UNIX_EPOCH};
+
+fn main() {
+    let values = vec![0, 1, 2, 3, 4, 5, 7, 8, 9, 10];
+    let cur: usize = SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .unwrap()
+        .as_secs() as usize;
+    let cap: usize = cur % values.len();
+
+    let slc: &amp;[u8] = &amp;values[0..cap];
+
+    println!("{:?}", slc);
+}</pre>
+<p><em>Slices are a view into a block of memory represented as a pointer and a length</em>, as the documentation for the primitive type slice puts it. The trick is that the length is determined at runtime. The following program will compile:</p>
+<pre style="padding-left: 30px">fn main() {
+    let values = vec![0, 1, 2, 3, 4, 5, 7, 8, 9, 10];
+    let slc: &amp;[u8] = &amp;values[0..10_000];
+
+    println!("{:?}", slc);
+}</pre>
+<p>However, the previous code will panic at runtime:</p>
+<pre><strong>&gt; ./past_the_end thread <br/>'main' panicked at 'index 10000 out of range for slice of length 10', libcore/slice/mod.rs:785:5 note: Run with `RUST_BACKTRACE=1` for a backtrace.</strong></pre>
+<p>Rust allows programmers to include DSTs as the last field of a <kbd>struct</kbd>, like so:</p>
+<pre style="padding-left: 30px">struct ImportantThing {
+  tag: u8,
+  data: [u8],
+}</pre>
+<p>However, this causes the struct itself to become a DST.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

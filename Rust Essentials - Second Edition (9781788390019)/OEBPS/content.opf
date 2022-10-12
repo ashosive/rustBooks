@@ -1,0 +1,423 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://www.idpf.org/2007/opf" unique-identifier="bookid" version="2.0" >
+<metadata xmlns:dc="http://purl.org/dc/elements/1.1/"  xmlns:opf="http://www.idpf.org/2007/opf">
+<dc:title>Rust Essentials - Second Edition</dc:title>
+<dc:creator opf:file-as="Ivo Balbaert" opf:role="aut">Ivo Balbaert</dc:creator>
+<dc:description>&lt;span&gt;&lt;p&gt;&lt;b&gt;Leverage the functional programming and concurrency features of Rust and speed up your application development&lt;/b&gt;&lt;/p&gt;&lt;p&gt;&lt;b&gt;About This Book&lt;/b&gt;&lt;/p&gt;&lt;ul&gt;&lt;li&gt;Get started with Rust to build scalable and high performance applications&lt;/li&gt;&lt;li&gt;Enhance your application development skills using the power of Rust&lt;/li&gt;&lt;li&gt;Discover the power of Rust when developing concurrent applications for large and scalable software&lt;/li&gt;&lt;/ul&gt;&lt;p&gt;&lt;b&gt;Who This Book Is For&lt;/b&gt;&lt;/p&gt;&lt;p&gt;The book is for developers looking for a quick entry into using Rust and understanding the core features of the language. Basic programming knowledge is assumed.&lt;/p&gt;&lt;p&gt;&lt;b&gt;What You Will Learn&lt;/b&gt;&lt;/p&gt;&lt;ul&gt;&lt;li&gt;Set up your Rust environment to achieve the highest productivity&lt;/li&gt;&lt;li&gt;Bridge the performance gap between safe and unsafe languages&lt;/li&gt;&lt;li&gt;Use pattern matching to create flexible code&lt;/li&gt;&lt;li&gt;Apply generics and traits to develop widely applicable code&lt;/li&gt;&lt;li&gt;Organize your code in modules and crates&lt;/li&gt;&lt;li&gt;Build macros to extend Rust&#x27;s capabilities and reach&lt;/li&gt;&lt;li&gt;Apply tasks to tackle problems concurrently in a distributed environment&lt;/li&gt;&lt;/ul&gt;&lt;p&gt;&lt;b&gt;In Detail&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Rust is the new, open source, fast, and safe systems programming language for the 21st century, developed at Mozilla Research, and with a steadily growing community. It was created to solve the dilemma between high-level, slow code with minimal control over the system, and low-level, fast code with maximum system control. It is no longer necessary to learn C/C++ to develop resource intensive and low-level systems applications. This book will give you a head start to solve systems programming and application tasks with Rust.&lt;/p&gt;&lt;p&gt;We start off with an argumentation of Rust&#x27;s unique place in today&#x27;s landscape of programming languages. You&#x27;ll install Rust and learn how to work with its package manager Cargo. The various concepts are introduced step by step: variables, types, functions, and control structures to lay the groundwork. Then we explore more structured data such as strings, arrays, and enums, and you&#x27;ll see how pattern matching works.&lt;/p&gt;&lt;p&gt;Throughout all this, we stress the unique ways of reasoning that the Rust compiler uses to produce safe code. Next we look at Rust&#x27;s specific way of error handling, and the overall importance of traits in Rust code. The pillar of memory safety is treated in depth as we explore the various pointer kinds. Next, you&#x27;ll see how macros can simplify code generation, and how to compose bigger projects with modules and crates. Finally, you&#x27;ll discover how we can write safe concurrent code in Rust and interface with C programs, get a view of the Rust ecosystem, and explore the use of the standard library.&lt;/p&gt;&lt;p&gt;&lt;b&gt;Style and approach&lt;/b&gt;&lt;/p&gt;&lt;p&gt;The book takes a pragmatic approach, showing various methods to solve systems programming tasks with Rust and develop resource intensive and low-level systems applications.&lt;/p&gt;&lt;/span&gt;</dc:description>
+<dc:publisher>Packt Publishing</dc:publisher>
+<dc:rights>Copyright © Packt Publishing</dc:rights>
+<dc:language>en-US</dc:language>
+<dc:date>2017-11-08</dc:date>
+<dc:identifier id="bookid">9781788390019</dc:identifier>
+<meta name="cover" content="Images/0eaa9554-6427-4bbb-b48d-489eeb7c1268.png"/>
+</metadata>
+<manifest>
+<item id="ncx" href="toc.ncx" media-type="application/x-dtbncx+xml" />
+<item id="cover" href="cover.xhtml" media-type="application/xhtml+xml" />
+<item id="bad3615e-c022-4185-9781-9658e89284d0" href="bad3615e-c022-4185-9781-9658e89284d0.xhtml" media-type="application/xhtml+xml" />
+<item id="188ab857-eee8-416e-b473-5b08486be602" href="188ab857-eee8-416e-b473-5b08486be602.xhtml" media-type="application/xhtml+xml" />
+<item id="45cdf966-f6f7-4a8a-a8b8-e832f7b212e0" href="45cdf966-f6f7-4a8a-a8b8-e832f7b212e0.xhtml" media-type="application/xhtml+xml" />
+<item id="8097bcea-1079-4317-8157-4324e385b9b4" href="8097bcea-1079-4317-8157-4324e385b9b4.xhtml" media-type="application/xhtml+xml" />
+<item id="d2508110-391c-410b-b836-b0a55f8c152c" href="d2508110-391c-410b-b836-b0a55f8c152c.xhtml" media-type="application/xhtml+xml" />
+<item id="b707b7bc-d8e1-4b92-a7b8-f15d59411ae1" href="b707b7bc-d8e1-4b92-a7b8-f15d59411ae1.xhtml" media-type="application/xhtml+xml" />
+<item id="565883ed-7221-45c0-ae0c-2a37205064cf" href="565883ed-7221-45c0-ae0c-2a37205064cf.xhtml" media-type="application/xhtml+xml" />
+<item id="30efc44a-c874-41e1-85cf-99ba15458ea2" href="30efc44a-c874-41e1-85cf-99ba15458ea2.xhtml" media-type="application/xhtml+xml" />
+<item id="b8db349c-581c-4fd5-b3ef-dbac822fc710" href="b8db349c-581c-4fd5-b3ef-dbac822fc710.xhtml" media-type="application/xhtml+xml" />
+<item id="2d933f19-78bf-4df0-8bdb-3858c60c52d2" href="2d933f19-78bf-4df0-8bdb-3858c60c52d2.xhtml" media-type="application/xhtml+xml" />
+<item id="7b31a98b-fe0c-42af-9bfd-be8986c89d7c" href="7b31a98b-fe0c-42af-9bfd-be8986c89d7c.xhtml" media-type="application/xhtml+xml" />
+<item id="d38fa6b1-49cf-4c03-a082-763d056eec6d" href="d38fa6b1-49cf-4c03-a082-763d056eec6d.xhtml" media-type="application/xhtml+xml" />
+<item id="toc" href="toc.xhtml" media-type="application/xhtml+xml" />
+<item id="7ad1f893-48e7-414b-8eb9-8107eb97c975" href="7ad1f893-48e7-414b-8eb9-8107eb97c975.xhtml" media-type="application/xhtml+xml" />
+<item id="bdf0d5a3-1a84-48c2-8986-008755eed20a" href="bdf0d5a3-1a84-48c2-8986-008755eed20a.xhtml" media-type="application/xhtml+xml" />
+<item id="8292c794-29d2-40b0-8db7-65c072710b04" href="8292c794-29d2-40b0-8db7-65c072710b04.xhtml" media-type="application/xhtml+xml" />
+<item id="49515b2e-b82f-4def-b953-38edb5fca094" href="49515b2e-b82f-4def-b953-38edb5fca094.xhtml" media-type="application/xhtml+xml" />
+<item id="788500fe-7b46-4a89-a3e2-d68b30c3d829" href="788500fe-7b46-4a89-a3e2-d68b30c3d829.xhtml" media-type="application/xhtml+xml" />
+<item id="a28bce7c-1e39-4b15-9fa4-80fd30fe38c6" href="a28bce7c-1e39-4b15-9fa4-80fd30fe38c6.xhtml" media-type="application/xhtml+xml" />
+<item id="a66205ba-59d2-4f5a-8993-9ac1d33b2688" href="a66205ba-59d2-4f5a-8993-9ac1d33b2688.xhtml" media-type="application/xhtml+xml" />
+<item id="1e037e55-0cbe-4320-b6d2-670eff064ada" href="1e037e55-0cbe-4320-b6d2-670eff064ada.xhtml" media-type="application/xhtml+xml" />
+<item id="5b517f8b-cf4d-49b7-952a-421e8c4de861" href="5b517f8b-cf4d-49b7-952a-421e8c4de861.xhtml" media-type="application/xhtml+xml" />
+<item id="b77a4ac4-6a4c-42a6-aecf-63fd957f3d8a" href="b77a4ac4-6a4c-42a6-aecf-63fd957f3d8a.xhtml" media-type="application/xhtml+xml" />
+<item id="93450c0c-0d8f-4866-9314-7c86c03f940f" href="93450c0c-0d8f-4866-9314-7c86c03f940f.xhtml" media-type="application/xhtml+xml" />
+<item id="8d6ef6d0-f713-4782-abd1-14e6476346a1" href="8d6ef6d0-f713-4782-abd1-14e6476346a1.xhtml" media-type="application/xhtml+xml" />
+<item id="6b561401-194c-46d8-8d15-cfcc800446d8" href="6b561401-194c-46d8-8d15-cfcc800446d8.xhtml" media-type="application/xhtml+xml" />
+<item id="207ee76b-9c27-49c7-bc04-cb277edafd80" href="207ee76b-9c27-49c7-bc04-cb277edafd80.xhtml" media-type="application/xhtml+xml" />
+<item id="927ae742-5b3a-4532-b6b4-58ac970c4040" href="927ae742-5b3a-4532-b6b4-58ac970c4040.xhtml" media-type="application/xhtml+xml" />
+<item id="f0dfbcd0-95b3-42d6-b1bf-30d9a2b2fa93" href="f0dfbcd0-95b3-42d6-b1bf-30d9a2b2fa93.xhtml" media-type="application/xhtml+xml" />
+<item id="c5ebd317-181d-444a-b21c-94257e9ff5f8" href="c5ebd317-181d-444a-b21c-94257e9ff5f8.xhtml" media-type="application/xhtml+xml" />
+<item id="3f3d28ae-c234-45b5-affe-38819a90707d" href="3f3d28ae-c234-45b5-affe-38819a90707d.xhtml" media-type="application/xhtml+xml" />
+<item id="663ab6c2-0d4b-481e-9622-214dd4e892ed" href="663ab6c2-0d4b-481e-9622-214dd4e892ed.xhtml" media-type="application/xhtml+xml" />
+<item id="80788668-fce5-4de9-88a4-fc661e4c7dd3" href="80788668-fce5-4de9-88a4-fc661e4c7dd3.xhtml" media-type="application/xhtml+xml" />
+<item id="59026ac7-c3bc-4519-ac6d-0ba9b42c079b" href="59026ac7-c3bc-4519-ac6d-0ba9b42c079b.xhtml" media-type="application/xhtml+xml" />
+<item id="8a2131e4-d864-4c44-9b46-88aba464d872" href="8a2131e4-d864-4c44-9b46-88aba464d872.xhtml" media-type="application/xhtml+xml" />
+<item id="ab38de2c-d441-4e74-9442-d978e9feba93" href="ab38de2c-d441-4e74-9442-d978e9feba93.xhtml" media-type="application/xhtml+xml" />
+<item id="587a7e24-63cd-493f-9284-7ca77cf8cca7" href="587a7e24-63cd-493f-9284-7ca77cf8cca7.xhtml" media-type="application/xhtml+xml" />
+<item id="c756e8d2-fcc4-466e-bb06-b2efbd77e65e" href="c756e8d2-fcc4-466e-bb06-b2efbd77e65e.xhtml" media-type="application/xhtml+xml" />
+<item id="4e1f4309-1ce5-4eb2-9860-99a814bdd2ea" href="4e1f4309-1ce5-4eb2-9860-99a814bdd2ea.xhtml" media-type="application/xhtml+xml" />
+<item id="1f1ea41c-1b40-40a8-a6bf-5c77b8f74a8f" href="1f1ea41c-1b40-40a8-a6bf-5c77b8f74a8f.xhtml" media-type="application/xhtml+xml" />
+<item id="bee5fe75-95ca-4ab5-98be-e2fc205a48b2" href="bee5fe75-95ca-4ab5-98be-e2fc205a48b2.xhtml" media-type="application/xhtml+xml" />
+<item id="6d1d8edb-b08c-4ab2-9041-1a8ac262c094" href="6d1d8edb-b08c-4ab2-9041-1a8ac262c094.xhtml" media-type="application/xhtml+xml" />
+<item id="88e3618b-aa25-4694-8495-e0a40f26ed31" href="88e3618b-aa25-4694-8495-e0a40f26ed31.xhtml" media-type="application/xhtml+xml" />
+<item id="808ec572-fc78-4e21-b277-add12e7cbdb1" href="808ec572-fc78-4e21-b277-add12e7cbdb1.xhtml" media-type="application/xhtml+xml" />
+<item id="08271300-7beb-4a1a-b857-b01a66c85b3b" href="08271300-7beb-4a1a-b857-b01a66c85b3b.xhtml" media-type="application/xhtml+xml" />
+<item id="75689517-2138-4871-99a6-a89f0d72b84a" href="75689517-2138-4871-99a6-a89f0d72b84a.xhtml" media-type="application/xhtml+xml" />
+<item id="d0ec2cfe-fa50-4263-8883-518ff0db7dd8" href="d0ec2cfe-fa50-4263-8883-518ff0db7dd8.xhtml" media-type="application/xhtml+xml" />
+<item id="624dde5b-e544-41f4-be2a-fcd1d50989ba" href="624dde5b-e544-41f4-be2a-fcd1d50989ba.xhtml" media-type="application/xhtml+xml" />
+<item id="77251e6a-f263-4cd3-b068-109473f859da" href="77251e6a-f263-4cd3-b068-109473f859da.xhtml" media-type="application/xhtml+xml" />
+<item id="188b7e89-3fe4-47d2-8b16-59309e775bab" href="188b7e89-3fe4-47d2-8b16-59309e775bab.xhtml" media-type="application/xhtml+xml" />
+<item id="0b621954-95fa-4b2a-b4de-7ced61027a3e" href="0b621954-95fa-4b2a-b4de-7ced61027a3e.xhtml" media-type="application/xhtml+xml" />
+<item id="7bcf35b5-3c73-4a29-92a2-3ea98ad53d1f" href="7bcf35b5-3c73-4a29-92a2-3ea98ad53d1f.xhtml" media-type="application/xhtml+xml" />
+<item id="59b7261a-67fa-4a7e-9928-27ae01a25ceb" href="59b7261a-67fa-4a7e-9928-27ae01a25ceb.xhtml" media-type="application/xhtml+xml" />
+<item id="51852e0e-0a90-4011-a67a-0272ba2ba3d5" href="51852e0e-0a90-4011-a67a-0272ba2ba3d5.xhtml" media-type="application/xhtml+xml" />
+<item id="87b1aa32-dbf6-44b5-a5d5-5bcc526f6d4b" href="87b1aa32-dbf6-44b5-a5d5-5bcc526f6d4b.xhtml" media-type="application/xhtml+xml" />
+<item id="9816583a-0a5c-41db-bf46-17ebee620259" href="9816583a-0a5c-41db-bf46-17ebee620259.xhtml" media-type="application/xhtml+xml" />
+<item id="67ec70d7-a913-48b9-8818-a8f940ec0c87" href="67ec70d7-a913-48b9-8818-a8f940ec0c87.xhtml" media-type="application/xhtml+xml" />
+<item id="0ecdcd9a-f3b8-4cb7-9592-275a4056e714" href="0ecdcd9a-f3b8-4cb7-9592-275a4056e714.xhtml" media-type="application/xhtml+xml" />
+<item id="031141d4-5800-4751-ab51-f899c690e93d" href="031141d4-5800-4751-ab51-f899c690e93d.xhtml" media-type="application/xhtml+xml" />
+<item id="88cce6f3-423c-4180-9568-bd96baa3912c" href="88cce6f3-423c-4180-9568-bd96baa3912c.xhtml" media-type="application/xhtml+xml" />
+<item id="cc0b2149-1696-4318-8bac-95ee94af21ad" href="cc0b2149-1696-4318-8bac-95ee94af21ad.xhtml" media-type="application/xhtml+xml" />
+<item id="21cb9cef-8ac3-4eba-b2c2-ccf1f64dab0f" href="21cb9cef-8ac3-4eba-b2c2-ccf1f64dab0f.xhtml" media-type="application/xhtml+xml" />
+<item id="414c9daa-1b2b-4025-a11f-fda494b7b33f" href="414c9daa-1b2b-4025-a11f-fda494b7b33f.xhtml" media-type="application/xhtml+xml" />
+<item id="397a1a97-368f-4af7-a7fb-f44ad8c5aab9" href="397a1a97-368f-4af7-a7fb-f44ad8c5aab9.xhtml" media-type="application/xhtml+xml" />
+<item id="6ed67f4c-1bdf-4eda-978f-9be72d3c4d6a" href="6ed67f4c-1bdf-4eda-978f-9be72d3c4d6a.xhtml" media-type="application/xhtml+xml" />
+<item id="85eece2c-fde9-4db7-9df6-53e74ebb1d36" href="85eece2c-fde9-4db7-9df6-53e74ebb1d36.xhtml" media-type="application/xhtml+xml" />
+<item id="90ad242e-e073-43d7-849c-cbeab3005796" href="90ad242e-e073-43d7-849c-cbeab3005796.xhtml" media-type="application/xhtml+xml" />
+<item id="31c9a174-374f-4480-a537-6a6194f0ebb4" href="31c9a174-374f-4480-a537-6a6194f0ebb4.xhtml" media-type="application/xhtml+xml" />
+<item id="d6fe439f-07ea-4b74-8c82-1ef790e7622b" href="d6fe439f-07ea-4b74-8c82-1ef790e7622b.xhtml" media-type="application/xhtml+xml" />
+<item id="7ad82c05-671d-42c6-8b0d-7fe095028906" href="7ad82c05-671d-42c6-8b0d-7fe095028906.xhtml" media-type="application/xhtml+xml" />
+<item id="4d3f596a-dc91-460a-81ac-10c3bf3ed6ba" href="4d3f596a-dc91-460a-81ac-10c3bf3ed6ba.xhtml" media-type="application/xhtml+xml" />
+<item id="8ad62aad-74b2-4e7a-8104-3a2074b2af50" href="8ad62aad-74b2-4e7a-8104-3a2074b2af50.xhtml" media-type="application/xhtml+xml" />
+<item id="28a40c2e-cafc-4be9-810e-24622793a78a" href="28a40c2e-cafc-4be9-810e-24622793a78a.xhtml" media-type="application/xhtml+xml" />
+<item id="85528d89-4995-4fa0-9b23-0885b8fdb831" href="85528d89-4995-4fa0-9b23-0885b8fdb831.xhtml" media-type="application/xhtml+xml" />
+<item id="4662d0ad-e18f-45b5-846b-165c84bab95a" href="4662d0ad-e18f-45b5-846b-165c84bab95a.xhtml" media-type="application/xhtml+xml" />
+<item id="0ce0debf-e266-4bc9-a7c0-a11d8dda3393" href="0ce0debf-e266-4bc9-a7c0-a11d8dda3393.xhtml" media-type="application/xhtml+xml" />
+<item id="65752f86-a81c-4848-a721-eeda8813f525" href="65752f86-a81c-4848-a721-eeda8813f525.xhtml" media-type="application/xhtml+xml" />
+<item id="680a0457-8a2d-4196-9ef4-ddc2476dd715" href="680a0457-8a2d-4196-9ef4-ddc2476dd715.xhtml" media-type="application/xhtml+xml" />
+<item id="b2e2fe50-da93-409d-90d8-68295f4c1053" href="b2e2fe50-da93-409d-90d8-68295f4c1053.xhtml" media-type="application/xhtml+xml" />
+<item id="0521c80d-b132-4916-9c58-75c1433ee33e" href="0521c80d-b132-4916-9c58-75c1433ee33e.xhtml" media-type="application/xhtml+xml" />
+<item id="0b518804-9f9e-4766-bbbe-ffd7d503bcc2" href="0b518804-9f9e-4766-bbbe-ffd7d503bcc2.xhtml" media-type="application/xhtml+xml" />
+<item id="5cd96fb8-0859-4e89-8ac9-718aa25a94b0" href="5cd96fb8-0859-4e89-8ac9-718aa25a94b0.xhtml" media-type="application/xhtml+xml" />
+<item id="51d8be4d-6960-4f26-ae7b-3ab42ad25896" href="51d8be4d-6960-4f26-ae7b-3ab42ad25896.xhtml" media-type="application/xhtml+xml" />
+<item id="88946401-64c3-452f-9191-dbc3155f1cd8" href="88946401-64c3-452f-9191-dbc3155f1cd8.xhtml" media-type="application/xhtml+xml" />
+<item id="653525ad-8e4b-49d0-a304-b1307d3db9dd" href="653525ad-8e4b-49d0-a304-b1307d3db9dd.xhtml" media-type="application/xhtml+xml" />
+<item id="9543e8bd-e4ec-48f2-b769-6d669bc259af" href="9543e8bd-e4ec-48f2-b769-6d669bc259af.xhtml" media-type="application/xhtml+xml" />
+<item id="dc50d064-8ba1-4d2f-bd26-040ebd8ff5e6" href="dc50d064-8ba1-4d2f-bd26-040ebd8ff5e6.xhtml" media-type="application/xhtml+xml" />
+<item id="119031e0-b60c-411a-a54f-ff238d6957ce" href="119031e0-b60c-411a-a54f-ff238d6957ce.xhtml" media-type="application/xhtml+xml" />
+<item id="2535f67f-e1a7-4ef7-af15-dcebffd38149" href="2535f67f-e1a7-4ef7-af15-dcebffd38149.xhtml" media-type="application/xhtml+xml" />
+<item id="da378e6c-918f-4f12-aca3-4b217d782ee0" href="da378e6c-918f-4f12-aca3-4b217d782ee0.xhtml" media-type="application/xhtml+xml" />
+<item id="d7e51b97-80fc-4a3f-99c4-577a9a11c0c9" href="d7e51b97-80fc-4a3f-99c4-577a9a11c0c9.xhtml" media-type="application/xhtml+xml" />
+<item id="2340511a-d495-4e56-9ee4-28a9af4cf529" href="2340511a-d495-4e56-9ee4-28a9af4cf529.xhtml" media-type="application/xhtml+xml" />
+<item id="502a23de-4e1b-4699-822d-188e2c985751" href="502a23de-4e1b-4699-822d-188e2c985751.xhtml" media-type="application/xhtml+xml" />
+<item id="87f2f54b-9706-4986-afbc-56f562cc766e" href="87f2f54b-9706-4986-afbc-56f562cc766e.xhtml" media-type="application/xhtml+xml" />
+<item id="fe08f684-521c-4a40-a464-96dcd2449618" href="fe08f684-521c-4a40-a464-96dcd2449618.xhtml" media-type="application/xhtml+xml" />
+<item id="737230be-ac23-4251-baaa-947dea31a27a" href="737230be-ac23-4251-baaa-947dea31a27a.xhtml" media-type="application/xhtml+xml" />
+<item id="1b6b2db1-fa8a-4e59-b195-afab29cc664e" href="1b6b2db1-fa8a-4e59-b195-afab29cc664e.xhtml" media-type="application/xhtml+xml" />
+<item id="747e605e-72d4-4781-895e-f7ad8cb548fa" href="747e605e-72d4-4781-895e-f7ad8cb548fa.xhtml" media-type="application/xhtml+xml" />
+<item id="4875c800-9bb8-4542-a4bb-8e23127e599d" href="4875c800-9bb8-4542-a4bb-8e23127e599d.xhtml" media-type="application/xhtml+xml" />
+<item id="b2d97b19-1d93-4e88-9707-49965fe587bc" href="b2d97b19-1d93-4e88-9707-49965fe587bc.xhtml" media-type="application/xhtml+xml" />
+<item id="a18c9af4-e21f-4bef-b89a-1f93f8ad43ef" href="a18c9af4-e21f-4bef-b89a-1f93f8ad43ef.xhtml" media-type="application/xhtml+xml" />
+<item id="8f065c2d-8acb-4f83-8bd7-28cdbd72e9f2" href="8f065c2d-8acb-4f83-8bd7-28cdbd72e9f2.xhtml" media-type="application/xhtml+xml" />
+<item id="181718d1-5b78-4952-8082-796f69471c96" href="181718d1-5b78-4952-8082-796f69471c96.xhtml" media-type="application/xhtml+xml" />
+<item id="3fc7edb8-b526-4298-a469-f2606aa3f4f5" href="3fc7edb8-b526-4298-a469-f2606aa3f4f5.xhtml" media-type="application/xhtml+xml" />
+<item id="f664f575-82ed-405e-aff2-b1d92a4cc2c4" href="f664f575-82ed-405e-aff2-b1d92a4cc2c4.xhtml" media-type="application/xhtml+xml" />
+<item id="d2254d68-5be6-4edc-ba01-d0eda2ede8bb" href="d2254d68-5be6-4edc-ba01-d0eda2ede8bb.xhtml" media-type="application/xhtml+xml" />
+<item id="8c9bd990-8b36-4ceb-8068-4cd2f37bf68e" href="8c9bd990-8b36-4ceb-8068-4cd2f37bf68e.xhtml" media-type="application/xhtml+xml" />
+<item id="cc06926b-cabc-459c-b059-6cf2754ef0cd" href="cc06926b-cabc-459c-b059-6cf2754ef0cd.xhtml" media-type="application/xhtml+xml" />
+<item id="875bdc1d-b329-40bb-8669-ec1b7723f761" href="875bdc1d-b329-40bb-8669-ec1b7723f761.xhtml" media-type="application/xhtml+xml" />
+<item id="d79ea38d-220b-46e0-a78e-1c5275a23a62" href="d79ea38d-220b-46e0-a78e-1c5275a23a62.xhtml" media-type="application/xhtml+xml" />
+<item id="42713710-9e35-44ba-bfe8-b79126f8c1d8" href="42713710-9e35-44ba-bfe8-b79126f8c1d8.xhtml" media-type="application/xhtml+xml" />
+<item id="fa43937c-8782-45aa-a512-19eff82103e9" href="fa43937c-8782-45aa-a512-19eff82103e9.xhtml" media-type="application/xhtml+xml" />
+<item id="b4665848-8de6-47ca-bfad-00740ba0c044" href="b4665848-8de6-47ca-bfad-00740ba0c044.xhtml" media-type="application/xhtml+xml" />
+<item id="13a26d16-a0f5-4258-98ff-85ca85f236e8" href="13a26d16-a0f5-4258-98ff-85ca85f236e8.xhtml" media-type="application/xhtml+xml" />
+<item id="c46a81a8-4d79-4d8e-9ddb-ce31f81be2a4" href="c46a81a8-4d79-4d8e-9ddb-ce31f81be2a4.xhtml" media-type="application/xhtml+xml" />
+<item id="bf549c4b-0290-47f6-abb9-4c95dc70c38a" href="bf549c4b-0290-47f6-abb9-4c95dc70c38a.xhtml" media-type="application/xhtml+xml" />
+<item id="11b9dfd4-09d4-4677-af1a-5f0055b8e78b" href="11b9dfd4-09d4-4677-af1a-5f0055b8e78b.xhtml" media-type="application/xhtml+xml" />
+<item id="5268d349-e437-4c5e-a71f-e796d5d8d4ad" href="5268d349-e437-4c5e-a71f-e796d5d8d4ad.xhtml" media-type="application/xhtml+xml" />
+<item id="14de6250-1963-4c62-8216-d997dcf3d1bc" href="14de6250-1963-4c62-8216-d997dcf3d1bc.xhtml" media-type="application/xhtml+xml" />
+<item id="7e9c59f1-0a17-42b5-b21c-91d0b8ecb230" href="7e9c59f1-0a17-42b5-b21c-91d0b8ecb230.xhtml" media-type="application/xhtml+xml" />
+<item id="f9733fee-55c1-41f5-8c3c-bd8b46c4c72a" href="f9733fee-55c1-41f5-8c3c-bd8b46c4c72a.xhtml" media-type="application/xhtml+xml" />
+<item id="d271499e-5fd5-48a4-8395-e5efedc8a482" href="d271499e-5fd5-48a4-8395-e5efedc8a482.xhtml" media-type="application/xhtml+xml" />
+<item id="7ca3976a-7fe9-4e2f-8ed4-68b1f7895faa" href="7ca3976a-7fe9-4e2f-8ed4-68b1f7895faa.xhtml" media-type="application/xhtml+xml" />
+<item id="f487bf6f-374e-4947-9e38-cda869ad6ef5" href="f487bf6f-374e-4947-9e38-cda869ad6ef5.xhtml" media-type="application/xhtml+xml" />
+<item id="a4b5abc2-5d6c-47d2-919a-fe5f183f5292" href="a4b5abc2-5d6c-47d2-919a-fe5f183f5292.xhtml" media-type="application/xhtml+xml" />
+<item id="bab6dc97-53f8-40b9-9fdc-de01c5747c95" href="bab6dc97-53f8-40b9-9fdc-de01c5747c95.xhtml" media-type="application/xhtml+xml" />
+<item id="b6339c0a-5bd9-4a0b-aeff-ab64255d77c1" href="b6339c0a-5bd9-4a0b-aeff-ab64255d77c1.xhtml" media-type="application/xhtml+xml" />
+<item id="7924a38a-8bec-4bfd-a224-17c5645e11a4" href="7924a38a-8bec-4bfd-a224-17c5645e11a4.xhtml" media-type="application/xhtml+xml" />
+<item id="57e1a322-29e4-4a4f-a235-70d1b2845956" href="57e1a322-29e4-4a4f-a235-70d1b2845956.xhtml" media-type="application/xhtml+xml" />
+<item id="5c12a301-63b5-4b72-8b19-e45f2e0a5da7" href="5c12a301-63b5-4b72-8b19-e45f2e0a5da7.xhtml" media-type="application/xhtml+xml" />
+<item id="598665de-e0f4-40f2-b0ae-3a01961fbb19" href="598665de-e0f4-40f2-b0ae-3a01961fbb19.xhtml" media-type="application/xhtml+xml" />
+<item id="e09c5f73-e9b7-4a42-a7aa-1630667abf81" href="e09c5f73-e9b7-4a42-a7aa-1630667abf81.xhtml" media-type="application/xhtml+xml" />
+<item id="7764c555-3971-4be6-b876-67543894a2c6" href="7764c555-3971-4be6-b876-67543894a2c6.xhtml" media-type="application/xhtml+xml" />
+<item id="89851352-efc5-4485-a192-b2a6d07df721" href="89851352-efc5-4485-a192-b2a6d07df721.xhtml" media-type="application/xhtml+xml" />
+<item id="5ef8bb2d-9502-452c-bc37-50998fdc5cd4" href="5ef8bb2d-9502-452c-bc37-50998fdc5cd4.xhtml" media-type="application/xhtml+xml" />
+<item id="004aeecc-4276-4c3b-8267-b4536960130c" href="004aeecc-4276-4c3b-8267-b4536960130c.xhtml" media-type="application/xhtml+xml" />
+<item id="42da0dc5-a5c2-440c-a998-d975e994c207" href="42da0dc5-a5c2-440c-a998-d975e994c207.xhtml" media-type="application/xhtml+xml" />
+<item id="0e7d9b23-eedf-4b1b-b864-30bb1f1f7b89" href="0e7d9b23-eedf-4b1b-b864-30bb1f1f7b89.xhtml" media-type="application/xhtml+xml" />
+<item id="c63023f7-02a3-4e09-9bba-294f7b8a7d07" href="c63023f7-02a3-4e09-9bba-294f7b8a7d07.xhtml" media-type="application/xhtml+xml" />
+<item id="1eb4fcd1-2967-4a84-adae-dcd5b44ec6ab" href="1eb4fcd1-2967-4a84-adae-dcd5b44ec6ab.xhtml" media-type="application/xhtml+xml" />
+<item id="60543aaa-c7d6-43ec-9237-9fe71a0cad4d" href="60543aaa-c7d6-43ec-9237-9fe71a0cad4d.xhtml" media-type="application/xhtml+xml" />
+<item id="b7188282-39e0-4f13-a02a-075b426f7c08" href="b7188282-39e0-4f13-a02a-075b426f7c08.xhtml" media-type="application/xhtml+xml" />
+<item id="52dc22bd-7aaa-4a18-9920-e31419430bb6" href="52dc22bd-7aaa-4a18-9920-e31419430bb6.xhtml" media-type="application/xhtml+xml" />
+<item id="da03ece6-ce7a-4b9a-9565-c2bb7aa089e5" href="da03ece6-ce7a-4b9a-9565-c2bb7aa089e5.xhtml" media-type="application/xhtml+xml" />
+<item id="8a0ae04b-b495-43c9-a8fc-c421f9dcf39a" href="8a0ae04b-b495-43c9-a8fc-c421f9dcf39a.xhtml" media-type="application/xhtml+xml" />
+<item id="b8d4960e-7e8f-497d-a2cf-6d63cb8dbec1" href="b8d4960e-7e8f-497d-a2cf-6d63cb8dbec1.xhtml" media-type="application/xhtml+xml" />
+<item id="d7610293-872f-41ba-9a8f-5647c64b19d4" href="d7610293-872f-41ba-9a8f-5647c64b19d4.xhtml" media-type="application/xhtml+xml" />
+<item id="6c275caf-fbf3-4c0d-8ce0-ba1150231ca9" href="6c275caf-fbf3-4c0d-8ce0-ba1150231ca9.xhtml" media-type="application/xhtml+xml" />
+<item id="0398b5d6-257d-478e-b6fd-90dc82ec2bc0" href="0398b5d6-257d-478e-b6fd-90dc82ec2bc0.xhtml" media-type="application/xhtml+xml" />
+<item id="3eec2ba5-4019-4931-afde-d7f1b8d48c2b" href="3eec2ba5-4019-4931-afde-d7f1b8d48c2b.xhtml" media-type="application/xhtml+xml" />
+<item id="2dd1f09a-d8f3-4af0-859b-44bb3611b675" href="2dd1f09a-d8f3-4af0-859b-44bb3611b675.xhtml" media-type="application/xhtml+xml" />
+<item id="f69d26ce-f8ae-46c4-8094-948eaa0c8d37" href="f69d26ce-f8ae-46c4-8094-948eaa0c8d37.xhtml" media-type="application/xhtml+xml" />
+<item id="f8806aec-a2be-401d-8a51-067fd1ff581c" href="f8806aec-a2be-401d-8a51-067fd1ff581c.xhtml" media-type="application/xhtml+xml" />
+<item id="dd4032b8-1fa7-4ca8-b034-3e67c27a2d15" href="dd4032b8-1fa7-4ca8-b034-3e67c27a2d15.xhtml" media-type="application/xhtml+xml" />
+<item id="9077c1ee-9de0-4bfa-8da1-220301ae4912" href="9077c1ee-9de0-4bfa-8da1-220301ae4912.xhtml" media-type="application/xhtml+xml" />
+<item id="1b271374-e696-4ddd-92c4-8efa2cc2dd5c" href="1b271374-e696-4ddd-92c4-8efa2cc2dd5c.xhtml" media-type="application/xhtml+xml" />
+<item id="4b959ff8-fbf2-44e8-bb32-6055ef9fe740" href="4b959ff8-fbf2-44e8-bb32-6055ef9fe740.xhtml" media-type="application/xhtml+xml" />
+<item id="b1f1e087-ed85-4c97-b3c2-8ece882890e6" href="b1f1e087-ed85-4c97-b3c2-8ece882890e6.xhtml" media-type="application/xhtml+xml" />
+<item id="7882bc8e-a9db-4c6e-8a09-7ef826ed84ea" href="7882bc8e-a9db-4c6e-8a09-7ef826ed84ea.xhtml" media-type="application/xhtml+xml" />
+<item id="5307510b-b36f-40c4-9d80-3ff1e34b426a" href="5307510b-b36f-40c4-9d80-3ff1e34b426a.xhtml" media-type="application/xhtml+xml" />
+<item id="0167ca84-ce2a-4199-b53b-892615492279" href="0167ca84-ce2a-4199-b53b-892615492279.xhtml" media-type="application/xhtml+xml" />
+<item id="ac36a75b-e904-4478-822f-fab05b380cda" href="ac36a75b-e904-4478-822f-fab05b380cda.xhtml" media-type="application/xhtml+xml" />
+<item id="0947a7fa-9d4e-46e2-ab8d-c6a70df99561" href="0947a7fa-9d4e-46e2-ab8d-c6a70df99561.xhtml" media-type="application/xhtml+xml" />
+<item id="e39ec659-6303-47a4-8e44-e40af460340c" href="e39ec659-6303-47a4-8e44-e40af460340c.xhtml" media-type="application/xhtml+xml" />
+<item id="22cccede-344e-4aab-999d-3df03992ba15" href="22cccede-344e-4aab-999d-3df03992ba15.xhtml" media-type="application/xhtml+xml" />
+<item id="575d229f-420f-45c3-acaf-779ef9494480" href="575d229f-420f-45c3-acaf-779ef9494480.xhtml" media-type="application/xhtml+xml" />
+<item id="d396b6d4-5eee-451a-a6ca-193b039ecd28" href="d396b6d4-5eee-451a-a6ca-193b039ecd28.xhtml" media-type="application/xhtml+xml" />
+<item id="cf2742c8-eb29-497d-9675-756a48f59f6e" href="cf2742c8-eb29-497d-9675-756a48f59f6e.xhtml" media-type="application/xhtml+xml" />
+<item id="1f115370-80b3-4fa8-8a64-3a2999b46be8" href="1f115370-80b3-4fa8-8a64-3a2999b46be8.xhtml" media-type="application/xhtml+xml" />
+<item id="26d40d72-a046-4624-a625-b4b17f7e3bfb" href="26d40d72-a046-4624-a625-b4b17f7e3bfb.xhtml" media-type="application/xhtml+xml" />
+<item id="aa985e77-367b-4db6-9b84-0d686388953c" href="aa985e77-367b-4db6-9b84-0d686388953c.xhtml" media-type="application/xhtml+xml" />
+<item id="035f8176-43a8-43a3-a2f1-953f52d2cb9c" href="035f8176-43a8-43a3-a2f1-953f52d2cb9c.xhtml" media-type="application/xhtml+xml" />
+<item id="063ed382-c316-42e0-8b0f-7f4428f3ab2b" href="063ed382-c316-42e0-8b0f-7f4428f3ab2b.xhtml" media-type="application/xhtml+xml" />
+<item id="18062abc-f7f4-4666-9bf8-014814307651" href="18062abc-f7f4-4666-9bf8-014814307651.xhtml" media-type="application/xhtml+xml" />
+<item id="d87f1dce-afc0-4557-ae4d-98a6b29d984f" href="d87f1dce-afc0-4557-ae4d-98a6b29d984f.xhtml" media-type="application/xhtml+xml" />
+<item id="e3970c88-87e2-40ad-834c-5999aa7b8e13" href="e3970c88-87e2-40ad-834c-5999aa7b8e13.xhtml" media-type="application/xhtml+xml" />
+<item id="a6254534-5679-4aba-a10b-b3657e583098" href="a6254534-5679-4aba-a10b-b3657e583098.xhtml" media-type="application/xhtml+xml" />
+<item id="01d31ed7-89bd-4b1f-8717-1627f21d7968" href="01d31ed7-89bd-4b1f-8717-1627f21d7968.xhtml" media-type="application/xhtml+xml" />
+<item id="dbbf7355-69c2-4829-a1ca-4abd4eba1809" href="dbbf7355-69c2-4829-a1ca-4abd4eba1809.xhtml" media-type="application/xhtml+xml" />
+<item id="7c8f4833-84ce-4eb1-8e62-b2fb547598d7" href="7c8f4833-84ce-4eb1-8e62-b2fb547598d7.xhtml" media-type="application/xhtml+xml" />
+<item id="ec122db8-890a-4d36-892a-857fe252a8f8" href="ec122db8-890a-4d36-892a-857fe252a8f8.xhtml" media-type="application/xhtml+xml" />
+<item id="9ddd92a5-e1ec-44ac-8d7a-f143bf1a7911" href="9ddd92a5-e1ec-44ac-8d7a-f143bf1a7911.xhtml" media-type="application/xhtml+xml" />
+<item id="a4984057-7a97-425c-bce4-8aba9f0ce390" href="a4984057-7a97-425c-bce4-8aba9f0ce390.xhtml" media-type="application/xhtml+xml" />
+<item id="98fb3c7e-fadd-412d-96bf-52855debdb62" href="98fb3c7e-fadd-412d-96bf-52855debdb62.xhtml" media-type="application/xhtml+xml" />
+<item id="35d623bb-4b31-4498-a0c3-1f56ab136d4a" href="35d623bb-4b31-4498-a0c3-1f56ab136d4a.xhtml" media-type="application/xhtml+xml" />
+<item id="5427b533-725e-4c21-926a-590ddde5b063" href="5427b533-725e-4c21-926a-590ddde5b063.xhtml" media-type="application/xhtml+xml" />
+<item id="2b97be9a-f91c-4666-af5f-3e9dce5535eb" href="2b97be9a-f91c-4666-af5f-3e9dce5535eb.xhtml" media-type="application/xhtml+xml" />
+<item id="img_a1acf747-28a2-4a0d-9713-dab051911ed4" href="Images/a1acf747-28a2-4a0d-9713-dab051911ed4.png" media-type="image/png" />
+<item id="img_887d5a3f-66b6-418c-bd72-4e8f67fc6473" href="Images/887d5a3f-66b6-418c-bd72-4e8f67fc6473.png" media-type="image/png" />
+<item id="img_602959a3-f3fa-4310-a2dd-0a94efe20bab" href="Images/602959a3-f3fa-4310-a2dd-0a94efe20bab.png" media-type="image/png" />
+<item id="img_fb31e24b-cacc-4e53-925c-84e48366029c" href="Images/fb31e24b-cacc-4e53-925c-84e48366029c.png" media-type="image/png" />
+<item id="img_4a9785ef-ce65-4879-bfb2-2dc0a0c389c4" href="Images/4a9785ef-ce65-4879-bfb2-2dc0a0c389c4.jpg" media-type="image/jpeg" />
+<item id="img_38bd73fc-f1bf-4970-a41d-c213b1e6128f" href="Images/38bd73fc-f1bf-4970-a41d-c213b1e6128f.png" media-type="image/png" />
+<item id="img_d4cfea22-971c-4ae3-9ebe-810391f4dcad" href="Images/d4cfea22-971c-4ae3-9ebe-810391f4dcad.png" media-type="image/png" />
+<item id="img_c72692cc-1d7d-49a9-a87d-e7193d206437" href="Images/c72692cc-1d7d-49a9-a87d-e7193d206437.png" media-type="image/png" />
+<item id="img_0eaa9554-6427-4bbb-b48d-489eeb7c1268" href="Images/0eaa9554-6427-4bbb-b48d-489eeb7c1268.png" media-type="image/png" />
+<item id="img_cb20a2f5-b370-4368-b2c1-14d446539bb4" href="Images/cb20a2f5-b370-4368-b2c1-14d446539bb4.png" media-type="image/png" />
+<item id="img_1a3eb32c-db56-4795-a4c1-f54c93e09f01" href="Images/1a3eb32c-db56-4795-a4c1-f54c93e09f01.png" media-type="image/png" />
+<item id="img_c89ad286-4669-48aa-a202-3faf93870c5b" href="Images/c89ad286-4669-48aa-a202-3faf93870c5b.png" media-type="image/png" />
+<item id="img_161a8b30-4375-47d9-bf70-e3b277381f10" href="Images/161a8b30-4375-47d9-bf70-e3b277381f10.png" media-type="image/png" />
+<item id="img_6572c41c-9204-421b-ae95-6e744e4f542d" href="Images/6572c41c-9204-421b-ae95-6e744e4f542d.jpg" media-type="image/jpeg" />
+<item id="img_24bce67f-8cb4-444b-99a0-a66b1f76ac0f" href="Images/24bce67f-8cb4-444b-99a0-a66b1f76ac0f.png" media-type="image/png" />
+<item id="img_a95d218a-da3d-4ec4-b097-768b00f3bffa" href="Images/a95d218a-da3d-4ec4-b097-768b00f3bffa.png" media-type="image/png" />
+<item id="img_f3c217a3-0bc8-4d14-b3fc-c63e38d4777b" href="Images/f3c217a3-0bc8-4d14-b3fc-c63e38d4777b.png" media-type="image/png" />
+<item id="img_323174a5-49f8-474b-ba61-f97f00d64480" href="Images/323174a5-49f8-474b-ba61-f97f00d64480.png" media-type="image/png" />
+<item id="img_02e59aeb-5e69-40ab-a359-3d260ad24cf4" href="Images/02e59aeb-5e69-40ab-a359-3d260ad24cf4.jpg" media-type="image/jpeg" />
+<item id="img_f4ed44f6-fd70-4e90-bc1b-7034727b7fb8" href="Images/f4ed44f6-fd70-4e90-bc1b-7034727b7fb8.png" media-type="image/png" />
+<item id="img_03dc3d4e-42fa-44c7-a021-0509d8961db7" href="Images/03dc3d4e-42fa-44c7-a021-0509d8961db7.png" media-type="image/png" />
+<item id="img_0d782c55-7a2e-4a91-b96e-000656a91f17" href="Images/0d782c55-7a2e-4a91-b96e-000656a91f17.png" media-type="image/png" />
+<item id="img_34ebcb05-4257-43ed-845e-ebeec9adffe8" href="Images/34ebcb05-4257-43ed-845e-ebeec9adffe8.png" media-type="image/png" />
+<item id="img_db901730-9cbb-434c-8b76-1ecd87bc1c0a" href="Images/db901730-9cbb-434c-8b76-1ecd87bc1c0a.png" media-type="image/png" />
+<item id="style_00" href="Styles/Style00.css" media-type="text/css" />
+<item id="style_01" href="Styles/Style01.css" media-type="text/css" />
+<item id="style_02" href="Styles/Style02.css" media-type="text/css" />
+<item id="style_03" href="Styles/Style03.css" media-type="text/css" />
+</manifest>
+<spine toc="ncx">
+<itemref idref="cover"/>
+<itemref idref="bad3615e-c022-4185-9781-9658e89284d0"/>
+<itemref idref="188ab857-eee8-416e-b473-5b08486be602"/>
+<itemref idref="45cdf966-f6f7-4a8a-a8b8-e832f7b212e0"/>
+<itemref idref="8097bcea-1079-4317-8157-4324e385b9b4"/>
+<itemref idref="d2508110-391c-410b-b836-b0a55f8c152c"/>
+<itemref idref="b707b7bc-d8e1-4b92-a7b8-f15d59411ae1"/>
+<itemref idref="565883ed-7221-45c0-ae0c-2a37205064cf"/>
+<itemref idref="30efc44a-c874-41e1-85cf-99ba15458ea2"/>
+<itemref idref="b8db349c-581c-4fd5-b3ef-dbac822fc710"/>
+<itemref idref="2d933f19-78bf-4df0-8bdb-3858c60c52d2"/>
+<itemref idref="7b31a98b-fe0c-42af-9bfd-be8986c89d7c"/>
+<itemref idref="d38fa6b1-49cf-4c03-a082-763d056eec6d"/>
+<itemref idref="toc"/>
+<itemref idref="7ad1f893-48e7-414b-8eb9-8107eb97c975"/>
+<itemref idref="bdf0d5a3-1a84-48c2-8986-008755eed20a"/>
+<itemref idref="8292c794-29d2-40b0-8db7-65c072710b04"/>
+<itemref idref="49515b2e-b82f-4def-b953-38edb5fca094"/>
+<itemref idref="788500fe-7b46-4a89-a3e2-d68b30c3d829"/>
+<itemref idref="a28bce7c-1e39-4b15-9fa4-80fd30fe38c6"/>
+<itemref idref="a66205ba-59d2-4f5a-8993-9ac1d33b2688"/>
+<itemref idref="1e037e55-0cbe-4320-b6d2-670eff064ada"/>
+<itemref idref="5b517f8b-cf4d-49b7-952a-421e8c4de861"/>
+<itemref idref="b77a4ac4-6a4c-42a6-aecf-63fd957f3d8a"/>
+<itemref idref="93450c0c-0d8f-4866-9314-7c86c03f940f"/>
+<itemref idref="8d6ef6d0-f713-4782-abd1-14e6476346a1"/>
+<itemref idref="6b561401-194c-46d8-8d15-cfcc800446d8"/>
+<itemref idref="207ee76b-9c27-49c7-bc04-cb277edafd80"/>
+<itemref idref="927ae742-5b3a-4532-b6b4-58ac970c4040"/>
+<itemref idref="f0dfbcd0-95b3-42d6-b1bf-30d9a2b2fa93"/>
+<itemref idref="c5ebd317-181d-444a-b21c-94257e9ff5f8"/>
+<itemref idref="3f3d28ae-c234-45b5-affe-38819a90707d"/>
+<itemref idref="663ab6c2-0d4b-481e-9622-214dd4e892ed"/>
+<itemref idref="80788668-fce5-4de9-88a4-fc661e4c7dd3"/>
+<itemref idref="59026ac7-c3bc-4519-ac6d-0ba9b42c079b"/>
+<itemref idref="8a2131e4-d864-4c44-9b46-88aba464d872"/>
+<itemref idref="ab38de2c-d441-4e74-9442-d978e9feba93"/>
+<itemref idref="587a7e24-63cd-493f-9284-7ca77cf8cca7"/>
+<itemref idref="c756e8d2-fcc4-466e-bb06-b2efbd77e65e"/>
+<itemref idref="4e1f4309-1ce5-4eb2-9860-99a814bdd2ea"/>
+<itemref idref="1f1ea41c-1b40-40a8-a6bf-5c77b8f74a8f"/>
+<itemref idref="bee5fe75-95ca-4ab5-98be-e2fc205a48b2"/>
+<itemref idref="6d1d8edb-b08c-4ab2-9041-1a8ac262c094"/>
+<itemref idref="88e3618b-aa25-4694-8495-e0a40f26ed31"/>
+<itemref idref="808ec572-fc78-4e21-b277-add12e7cbdb1"/>
+<itemref idref="08271300-7beb-4a1a-b857-b01a66c85b3b"/>
+<itemref idref="75689517-2138-4871-99a6-a89f0d72b84a"/>
+<itemref idref="d0ec2cfe-fa50-4263-8883-518ff0db7dd8"/>
+<itemref idref="624dde5b-e544-41f4-be2a-fcd1d50989ba"/>
+<itemref idref="77251e6a-f263-4cd3-b068-109473f859da"/>
+<itemref idref="188b7e89-3fe4-47d2-8b16-59309e775bab"/>
+<itemref idref="0b621954-95fa-4b2a-b4de-7ced61027a3e"/>
+<itemref idref="7bcf35b5-3c73-4a29-92a2-3ea98ad53d1f"/>
+<itemref idref="59b7261a-67fa-4a7e-9928-27ae01a25ceb"/>
+<itemref idref="51852e0e-0a90-4011-a67a-0272ba2ba3d5"/>
+<itemref idref="87b1aa32-dbf6-44b5-a5d5-5bcc526f6d4b"/>
+<itemref idref="9816583a-0a5c-41db-bf46-17ebee620259"/>
+<itemref idref="67ec70d7-a913-48b9-8818-a8f940ec0c87"/>
+<itemref idref="0ecdcd9a-f3b8-4cb7-9592-275a4056e714"/>
+<itemref idref="031141d4-5800-4751-ab51-f899c690e93d"/>
+<itemref idref="88cce6f3-423c-4180-9568-bd96baa3912c"/>
+<itemref idref="cc0b2149-1696-4318-8bac-95ee94af21ad"/>
+<itemref idref="21cb9cef-8ac3-4eba-b2c2-ccf1f64dab0f"/>
+<itemref idref="414c9daa-1b2b-4025-a11f-fda494b7b33f"/>
+<itemref idref="397a1a97-368f-4af7-a7fb-f44ad8c5aab9"/>
+<itemref idref="6ed67f4c-1bdf-4eda-978f-9be72d3c4d6a"/>
+<itemref idref="85eece2c-fde9-4db7-9df6-53e74ebb1d36"/>
+<itemref idref="90ad242e-e073-43d7-849c-cbeab3005796"/>
+<itemref idref="31c9a174-374f-4480-a537-6a6194f0ebb4"/>
+<itemref idref="d6fe439f-07ea-4b74-8c82-1ef790e7622b"/>
+<itemref idref="7ad82c05-671d-42c6-8b0d-7fe095028906"/>
+<itemref idref="4d3f596a-dc91-460a-81ac-10c3bf3ed6ba"/>
+<itemref idref="8ad62aad-74b2-4e7a-8104-3a2074b2af50"/>
+<itemref idref="28a40c2e-cafc-4be9-810e-24622793a78a"/>
+<itemref idref="85528d89-4995-4fa0-9b23-0885b8fdb831"/>
+<itemref idref="4662d0ad-e18f-45b5-846b-165c84bab95a"/>
+<itemref idref="0ce0debf-e266-4bc9-a7c0-a11d8dda3393"/>
+<itemref idref="65752f86-a81c-4848-a721-eeda8813f525"/>
+<itemref idref="680a0457-8a2d-4196-9ef4-ddc2476dd715"/>
+<itemref idref="b2e2fe50-da93-409d-90d8-68295f4c1053"/>
+<itemref idref="0521c80d-b132-4916-9c58-75c1433ee33e"/>
+<itemref idref="0b518804-9f9e-4766-bbbe-ffd7d503bcc2"/>
+<itemref idref="5cd96fb8-0859-4e89-8ac9-718aa25a94b0"/>
+<itemref idref="51d8be4d-6960-4f26-ae7b-3ab42ad25896"/>
+<itemref idref="88946401-64c3-452f-9191-dbc3155f1cd8"/>
+<itemref idref="653525ad-8e4b-49d0-a304-b1307d3db9dd"/>
+<itemref idref="9543e8bd-e4ec-48f2-b769-6d669bc259af"/>
+<itemref idref="dc50d064-8ba1-4d2f-bd26-040ebd8ff5e6"/>
+<itemref idref="119031e0-b60c-411a-a54f-ff238d6957ce"/>
+<itemref idref="2535f67f-e1a7-4ef7-af15-dcebffd38149"/>
+<itemref idref="da378e6c-918f-4f12-aca3-4b217d782ee0"/>
+<itemref idref="d7e51b97-80fc-4a3f-99c4-577a9a11c0c9"/>
+<itemref idref="2340511a-d495-4e56-9ee4-28a9af4cf529"/>
+<itemref idref="502a23de-4e1b-4699-822d-188e2c985751"/>
+<itemref idref="87f2f54b-9706-4986-afbc-56f562cc766e"/>
+<itemref idref="fe08f684-521c-4a40-a464-96dcd2449618"/>
+<itemref idref="737230be-ac23-4251-baaa-947dea31a27a"/>
+<itemref idref="1b6b2db1-fa8a-4e59-b195-afab29cc664e"/>
+<itemref idref="747e605e-72d4-4781-895e-f7ad8cb548fa"/>
+<itemref idref="4875c800-9bb8-4542-a4bb-8e23127e599d"/>
+<itemref idref="b2d97b19-1d93-4e88-9707-49965fe587bc"/>
+<itemref idref="a18c9af4-e21f-4bef-b89a-1f93f8ad43ef"/>
+<itemref idref="8f065c2d-8acb-4f83-8bd7-28cdbd72e9f2"/>
+<itemref idref="181718d1-5b78-4952-8082-796f69471c96"/>
+<itemref idref="3fc7edb8-b526-4298-a469-f2606aa3f4f5"/>
+<itemref idref="f664f575-82ed-405e-aff2-b1d92a4cc2c4"/>
+<itemref idref="d2254d68-5be6-4edc-ba01-d0eda2ede8bb"/>
+<itemref idref="8c9bd990-8b36-4ceb-8068-4cd2f37bf68e"/>
+<itemref idref="cc06926b-cabc-459c-b059-6cf2754ef0cd"/>
+<itemref idref="875bdc1d-b329-40bb-8669-ec1b7723f761"/>
+<itemref idref="d79ea38d-220b-46e0-a78e-1c5275a23a62"/>
+<itemref idref="42713710-9e35-44ba-bfe8-b79126f8c1d8"/>
+<itemref idref="fa43937c-8782-45aa-a512-19eff82103e9"/>
+<itemref idref="b4665848-8de6-47ca-bfad-00740ba0c044"/>
+<itemref idref="13a26d16-a0f5-4258-98ff-85ca85f236e8"/>
+<itemref idref="c46a81a8-4d79-4d8e-9ddb-ce31f81be2a4"/>
+<itemref idref="bf549c4b-0290-47f6-abb9-4c95dc70c38a"/>
+<itemref idref="11b9dfd4-09d4-4677-af1a-5f0055b8e78b"/>
+<itemref idref="5268d349-e437-4c5e-a71f-e796d5d8d4ad"/>
+<itemref idref="14de6250-1963-4c62-8216-d997dcf3d1bc"/>
+<itemref idref="7e9c59f1-0a17-42b5-b21c-91d0b8ecb230"/>
+<itemref idref="f9733fee-55c1-41f5-8c3c-bd8b46c4c72a"/>
+<itemref idref="d271499e-5fd5-48a4-8395-e5efedc8a482"/>
+<itemref idref="7ca3976a-7fe9-4e2f-8ed4-68b1f7895faa"/>
+<itemref idref="f487bf6f-374e-4947-9e38-cda869ad6ef5"/>
+<itemref idref="a4b5abc2-5d6c-47d2-919a-fe5f183f5292"/>
+<itemref idref="bab6dc97-53f8-40b9-9fdc-de01c5747c95"/>
+<itemref idref="b6339c0a-5bd9-4a0b-aeff-ab64255d77c1"/>
+<itemref idref="7924a38a-8bec-4bfd-a224-17c5645e11a4"/>
+<itemref idref="57e1a322-29e4-4a4f-a235-70d1b2845956"/>
+<itemref idref="5c12a301-63b5-4b72-8b19-e45f2e0a5da7"/>
+<itemref idref="598665de-e0f4-40f2-b0ae-3a01961fbb19"/>
+<itemref idref="e09c5f73-e9b7-4a42-a7aa-1630667abf81"/>
+<itemref idref="7764c555-3971-4be6-b876-67543894a2c6"/>
+<itemref idref="89851352-efc5-4485-a192-b2a6d07df721"/>
+<itemref idref="5ef8bb2d-9502-452c-bc37-50998fdc5cd4"/>
+<itemref idref="004aeecc-4276-4c3b-8267-b4536960130c"/>
+<itemref idref="42da0dc5-a5c2-440c-a998-d975e994c207"/>
+<itemref idref="0e7d9b23-eedf-4b1b-b864-30bb1f1f7b89"/>
+<itemref idref="c63023f7-02a3-4e09-9bba-294f7b8a7d07"/>
+<itemref idref="1eb4fcd1-2967-4a84-adae-dcd5b44ec6ab"/>
+<itemref idref="60543aaa-c7d6-43ec-9237-9fe71a0cad4d"/>
+<itemref idref="b7188282-39e0-4f13-a02a-075b426f7c08"/>
+<itemref idref="52dc22bd-7aaa-4a18-9920-e31419430bb6"/>
+<itemref idref="da03ece6-ce7a-4b9a-9565-c2bb7aa089e5"/>
+<itemref idref="8a0ae04b-b495-43c9-a8fc-c421f9dcf39a"/>
+<itemref idref="b8d4960e-7e8f-497d-a2cf-6d63cb8dbec1"/>
+<itemref idref="d7610293-872f-41ba-9a8f-5647c64b19d4"/>
+<itemref idref="6c275caf-fbf3-4c0d-8ce0-ba1150231ca9"/>
+<itemref idref="0398b5d6-257d-478e-b6fd-90dc82ec2bc0"/>
+<itemref idref="3eec2ba5-4019-4931-afde-d7f1b8d48c2b"/>
+<itemref idref="2dd1f09a-d8f3-4af0-859b-44bb3611b675"/>
+<itemref idref="f69d26ce-f8ae-46c4-8094-948eaa0c8d37"/>
+<itemref idref="f8806aec-a2be-401d-8a51-067fd1ff581c"/>
+<itemref idref="dd4032b8-1fa7-4ca8-b034-3e67c27a2d15"/>
+<itemref idref="9077c1ee-9de0-4bfa-8da1-220301ae4912"/>
+<itemref idref="1b271374-e696-4ddd-92c4-8efa2cc2dd5c"/>
+<itemref idref="4b959ff8-fbf2-44e8-bb32-6055ef9fe740"/>
+<itemref idref="b1f1e087-ed85-4c97-b3c2-8ece882890e6"/>
+<itemref idref="7882bc8e-a9db-4c6e-8a09-7ef826ed84ea"/>
+<itemref idref="5307510b-b36f-40c4-9d80-3ff1e34b426a"/>
+<itemref idref="0167ca84-ce2a-4199-b53b-892615492279"/>
+<itemref idref="ac36a75b-e904-4478-822f-fab05b380cda"/>
+<itemref idref="0947a7fa-9d4e-46e2-ab8d-c6a70df99561"/>
+<itemref idref="e39ec659-6303-47a4-8e44-e40af460340c"/>
+<itemref idref="22cccede-344e-4aab-999d-3df03992ba15"/>
+<itemref idref="575d229f-420f-45c3-acaf-779ef9494480"/>
+<itemref idref="d396b6d4-5eee-451a-a6ca-193b039ecd28"/>
+<itemref idref="cf2742c8-eb29-497d-9675-756a48f59f6e"/>
+<itemref idref="1f115370-80b3-4fa8-8a64-3a2999b46be8"/>
+<itemref idref="26d40d72-a046-4624-a625-b4b17f7e3bfb"/>
+<itemref idref="aa985e77-367b-4db6-9b84-0d686388953c"/>
+<itemref idref="035f8176-43a8-43a3-a2f1-953f52d2cb9c"/>
+<itemref idref="063ed382-c316-42e0-8b0f-7f4428f3ab2b"/>
+<itemref idref="18062abc-f7f4-4666-9bf8-014814307651"/>
+<itemref idref="d87f1dce-afc0-4557-ae4d-98a6b29d984f"/>
+<itemref idref="e3970c88-87e2-40ad-834c-5999aa7b8e13"/>
+<itemref idref="a6254534-5679-4aba-a10b-b3657e583098"/>
+<itemref idref="01d31ed7-89bd-4b1f-8717-1627f21d7968"/>
+<itemref idref="dbbf7355-69c2-4829-a1ca-4abd4eba1809"/>
+<itemref idref="7c8f4833-84ce-4eb1-8e62-b2fb547598d7"/>
+<itemref idref="ec122db8-890a-4d36-892a-857fe252a8f8"/>
+<itemref idref="9ddd92a5-e1ec-44ac-8d7a-f143bf1a7911"/>
+<itemref idref="a4984057-7a97-425c-bce4-8aba9f0ce390"/>
+<itemref idref="98fb3c7e-fadd-412d-96bf-52855debdb62"/>
+<itemref idref="35d623bb-4b31-4498-a0c3-1f56ab136d4a"/>
+<itemref idref="5427b533-725e-4c21-926a-590ddde5b063"/>
+<itemref idref="2b97be9a-f91c-4666-af5f-3e9dce5535eb"/></spine>
+<guide><reference href="cover.xhtml" title="Cover" type="cover" /></guide>
+</package>

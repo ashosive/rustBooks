@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">SIMD</h1>
+                </header>
+            
+            <article>
+                
+<p>In this book, we discussed thread-based concurrency. In <a href="d4802512-564b-4037-9407-b6035bd38f31.xhtml" target="_blank">Chapter 8</a>, <em>High-Level Parallelism – Threadpools, Parallel Iterators, and Processes</em>, we took to a higher level of abstraction with Rayon's parallel iterators. Underneath, as we saw, rayon uses a sophisticated work-stealing threadpool. Threads are merely one approach to concurrency on modern CPUs. In a sense, serial programs are parallel on CPUs with deep lookahead pipelines and sophisticated branch predictors, as we saw in <a href="8c61da2f-08c8-40be-89d4-d8afa8510850.xhtml" target="_blank">Chapter 2</a>, <em>Sequential Rust Performance and Testing</em>. Exploiting this parallelism is a matter of carefully structuring your data and managing access to it, among the other details we discussed. What we have not gone into in this book is how to exploit a modern CPUs' ability to perform the same operation on contiguous memory in parallel <em>without</em> resorting to threads—vectorization. We haven't looked at this because, as I write this, the language is only now getting minimal support in the standard library for vectorization instructions.</p>
+<p>Vectorization comes in two variants—MIMD and SIMD. MIMD stands for multiple instructions, multiple data. SIMD stands for single instructions, single data. The basic idea is this: A modern CPU can apply an instruction to a contiguous, specifically sized block of data in parallel. That's it. Now, consider how many loops we've written in this book where we've done the exact same operation to every element of the loop. More than a few! Had we investigated string algorithms or looked into doing numeric calculations—encryption, physics simulations, or the like—we would have had more such loops in this book.</p>
+<p>As I write this, the merger of SIMD vectorization into the standard library is held up behind RFC 2366 (<a href="https://github.com/rust-lang/rfcs/pull/2366">https://github.com/rust-lang/rfcs/pull/2366</a>), with ambitions to having x86 SIMD in a stable channel by year's end, with other architectures to follow. The reader may remember from <a href="5f3aec9d-fd53-48ff-9ba8-43ce13e91cff.xhtml" target="_blank">Chapter 1</a>,<em> Preliminaries – Machine Architecture and Getting Started with Rust,</em> that the memory systems of x86 and ARM are quite different. Well, this difference extends to their SIMD systems. It <em>is</em> possible to exploit SIMD instructions using stable Rust via the stdsimd (<a href="https://crates.io/crates/stdsimd">https://crates.io/crates/stdsimd</a>) and simd (<a href="https://crates.io/crates/simd">https://crates.io/crates/simd</a>) crates. The stdsimd crate is the best for programmers to target as it will eventually be the standard library implementation.</p>
+<p>A discussion of SIMD is beyond the scope of this book, given the remaining <span>space</span><span>. Suffice it to say that getting the details right with SIMD is roughly on a par with the difficulty of getting the details right in atomic programming. I expect that, post stabilization, the community will build higher-level libraries to exploit SIMD approaches without requiring a great deal of pre-study, though potentially with less chance for finely tuned optimizations. The</span> faster (<a href="https://crates.io/crates/faster">https://crates.io/crates/faster</a>) <span>crate, for example, exposes SIMD-parallel iterators in the spirit of rayon. The programming model there, from an end-user perspective, is extremely convenient.</span></p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

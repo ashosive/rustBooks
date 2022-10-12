@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Closures as function arguments</h1>
+                </header>
+            
+            <article>
+                
+<p>Consider the following code:</p>
+<pre>fn call_with_three&lt;F&gt;(some_closure: F) -&gt; i32 where F : Fn(i32) -&gt; i32<br/>{<br/>some_closure(3)<br/>}<br/>fn main()<br/>{<br/>let answer = call_with_three(|x| x + 10 );<br/>println!("{}", answer);<br/>}</pre>
+<div class="packt_infobox">The code for this section can be found in <kbd>Chapter 11/close_fn_args</kbd>.</div>
+<p>We call <kbd>call_with_three</kbd> and pass in the closure as the parameter. The function <kbd>call_with_three</kbd> takes a parameter of type <kbd>F</kbd>. So far, it's no different from any other function taking a generic value as an argument. However, we're binding <kbd>F</kbd> to be a function of type <kbd>i32</kbd>, which returns a value of type <kbd>i32</kbd>. We have created an inline function to be a parameter for a called function! When the code is compiled, we get the expected value on screen—<span class="packt_screen">13</span>:</p>
+<div class="CDPAlignCenter CDPAlign"><img class=" image-border" src="Images/e3a430eb-325a-4a06-a7f7-2f9996d10bd0.png" width="1170" height="228"/></div>
+<div class="CDPAlignCenter CDPAlign packt_figref">Figure 8</div>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

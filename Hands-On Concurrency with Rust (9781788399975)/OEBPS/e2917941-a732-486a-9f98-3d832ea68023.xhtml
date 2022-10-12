@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Running the simulation</h1>
+                </header>
+            
+            <article>
+                
+<p>All that's left to do is run warriors in simulation. In the previous chapter, an <kbd>Individual</kbd> was responsible for managing its own pmars process. Now, <kbd>Mars</kbd> will be responsible for hosting the competitors, which you may have gleaned from the C API. We simply don't have any space in <kbd>Individual</kbd> to store something, and by pushing competition into <kbd>Mars</kbd>, we can avoid allocation churn on temporary <kbd>Mars</kbd> structures.</p>
+<p>The compete function that was formerly bound to <kbd>Individual</kbd> has now been moved to <kbd>Mars</kbd>:</p>
+<pre>impl Mars {
+    /// Competes two Individuals at random locations
+    ///
+    /// The return of this function indicates the winner. <br/>    /// `Winner::Right(12)` will mean that the 'right' player <br/>    /// won 12 more rounds than did 'left'. This may mean they<br/>    /// tied 40_000 times or maybe they only played 12 rounds <br/>    /// and right won each time.
+    pub fn compete(&amp;mut self, rounds: u16, left: &amp;Individual, <br/>                   right: &amp;Individual) -&gt; Winner {
+        let mut wins = Winner::Tie;
+        for _ in 0..rounds {
+            let core_size = self.core_size;
+            let half_core = (core_size / 2) - self.max_warrior_length;
+            let upper_core = core_size - self.max_warrior_length;
+            let left_pos = thread_rng().gen_range(0, upper_core);
+            let right_pos = if (left_pos + self.max_warrior_length) <br/>                               &lt; half_core {
+                thread_rng().gen_range(half_core + 1, upper_core)
+            } else {
+                thread_rng().gen_range(0, half_core)
+            };
+            wins = wins + self.compete_inner(left, left_pos, <br/>                                             right, right_pos);
+        }
+        tally_fitness(wins);
+        BATTLES.fetch_add(1, Ordering::Relaxed);
+        wins
+    }</pre>
+<p>The C API requires that we calculate the warrior offsets and take care to not overlap them. The approach taken here is to randomly place the left Individual, determine whether it's in the upper or lower core, and then place the right Individual, taking care with both to not place them past the <kbd>end</kbd> of the core. The actual implementation of the competition is <kbd>compete_inner</kbd>:</p>
+<pre>    pub fn compete_inner(
+        &amp;mut self,
+        left: &amp;Individual,
+        left_pos: u16,
+        right: &amp;Individual,
+        right_pos: u16,
+    ) -&gt; Winner {
+        let (left_len, left_code) = left.as_ptr();
+        let (right_len, right_code) = right.as_ptr();
+
+        let warrior_position_table: Vec&lt;u16&gt; = vec![left_pos, right_pos];
+        let mut deaths: Vec&lt;u32&gt; = vec![u32::max_value(), <br/>                                        u32::max_value()];</pre>
+<p>We call <kbd>Individual::as_ptr() -&gt; (u16, *const Instruction)</kbd> to get a raw view of the chromosome of the Individual and its length. Without this, we've got nothing to pass down to the C functions. <kbd>warrior_position_table</kbd> informs MARS which instructions are the start of its competitors. We could search out the <kbd>START</kbd> flag in the warriors and place that in <kbd>warrior_position_table</kbd>. This is an improvement left for the reader. The deaths table will be populated by the simulator code. If both warriors die during competition, the array will be <kbd>[0, 1]</kbd>. The death table is populated with <kbd>u32::max_value()</kbd> to make distinguishing no-result from result easy enough. Before starting the competition, we have to clear the simulator—which might be filled with instructions from a previous bout:</p>
+<pre>        unsafe {
+            sim_clear_core(self);</pre>
+<p>If you pull up the <kbd>sim_clear_core</kbd> implementation, you'll find a memset to 0 over <kbd>core_mem</kbd>. Recall that <kbd>DAT</kbd> is the 0<sup>th</sup> variant of the <kbd>Instruction</kbd> enumeration. Unlike <kbd>pmars</kbd>, this simulator must use <kbd>DAT</kbd> as a default instruction, but it does make resetting the field very fast. <kbd>sim_clear_core</kbd> also clears up the process queue and other C-owned storage. Loading the warriors is a matter of plugging in the information we've already computed:</p>
+<pre>            assert_eq!(
+                0,
+                sim_load_warrior(self, left_pos.into(), <br/>                                 left_code, left_len)
+            );
+            assert_eq!(
+                0,
+                sim_load_warrior(self, right_pos.into(), <br/>                                 right_code, right_len)
+            );</pre>
+<p>If the result is non-zero, that's an indicator that some serious and non-recoverable fault has happened. <kbd>sim_load_warrior</kbd> is an array operation, writing the warrior Instructions into <kbd>core_mem</kbd> at the defined offsets. We could, very conceivably, rewrite the functions of <kbd>sim_clear_core</kbd> and <kbd>sim_load_warrior</kbd> in Rust if we wanted to. Finally, field cleared and warriors loaded, we are able to simulate:</p>
+<pre>            let alive = sim_mw(self, <br/>                               warrior_position_table.as_ptr(),     <br/>                               deaths.as_mut_ptr());
+            assert_ne!(-1, alive);
+        }</pre>
+<p>The <kbd>sim_mw</kbd> function returns the total number of warriors left alive at the end of the simulation run. If this value is <kbd>-1</kbd>, there's been some catastrophic, unrecoverable error.</p>
+<p>Now, because we have a nice type system to play with, we don't really want to signal results back to the user with a vector of integers. We preserve the <kbd>Winner</kbd> type seen</p>
+<p>in the previous chapter, doing a quick conversion before returning:</p>
+<pre>        let left_dead = deaths[0] != u32::max_value();
+        let right_dead = deaths[1] != u32::max_value();
+        match (left_dead, right_dead) {
+            (false, false) | (true, true) =&gt; Winner::Tie,
+            (true, false) =&gt; Winner::Right(1),
+            (false, true) =&gt; Winner::Left(1),
+        }
+    }<br/>}</pre>
+<p>You may have noticed that <kbd>Winner</kbd> implements <kbd>Add</kbd>, allowing compete to signal how many rounds the warriors won. <kbd>impl Add for Winner</kbd> is also in <kbd>src/mars.rs</kbd>, should you be curious to see it. As a final sanity test around <kbd>Mars</kbd>, we confirm that the Imp will lose to Dwarf more often than other outcomes:</p>
+<pre>#[cfg(test)]
+mod tests {
+    use super::*;
+    use individual::*;
+
+    #[test]
+    fn imp_vs_dwarf() {
+        let core_size = 8_000;
+        let rounds = 100;
+        let mut mars = MarsBuilder::default()<br/>                           .core_size(core_size).freeze();
+        let imp = ringers::imp(core_size);
+        let dwarf = ringers::dwarf(core_size);
+        let res = mars.compete(rounds, &amp;imp, &amp;dwarf);
+        println!("RES: {:?}", res);
+        match res {
+            Winner::Left(_) | Winner::Tie =&gt; { <br/>                panic!("imp should lose to dwarf")<br/>            },
+            Winner::Right(_) =&gt; {}
+        }
+    }
+}</pre>
+<p>Recall that an Imp can't self-kill, only propagate. The Dwarf bombs core memory at regular, increasing offsets. An Imp versus Dwarf competition, then, is a race between Imp finding Dwarf's instructions and Dwarf dropping a <kbd>DAT</kbd> in the path of an Imp.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

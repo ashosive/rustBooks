@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Embedding Rust</h1>
+                </header>
+            
+            <article>
+                
+<p>So far, we've seen how to embed C and Lua into Rust. But, what if you want to combine Rust into other programming languages? Doing so is a very handy technique for improving runtime performance in interpreted languages, making memory-safe extensions where once you might have been using C or C++. If your target high-level language has difficulty with concurrency embedding, Rust is a further win. Python programs suffer in this regard—at least those implemented on CPython or PyPy—because of the Global Interpreter Lock, an internal mutex that locks objects' bytecode. Offloading computation of large blocks of data into a Rust + Rayon extension, for example, can be both straightforward to program and improve computation speed.</p>
+<p>Well, great. How do we make this sort of thing happen? Rust's approach is simple: if you can embed C, you can embed Rust.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

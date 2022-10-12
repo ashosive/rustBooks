@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Back to sync</h1>
+                </header>
+            
+            <article>
+                
+<p>For sync to occur, we cannot have any type that uses interior mutability (which also includes some of the primitive types).</p>
+<p>When it comes to sharing across threads, Rust uses <kbd>Arc&lt;T&gt;</kbd>. This is a wrapper type that implements <kbd>send</kbd> and <kbd>sync</kbd> if the following condition is met: <kbd>T</kbd> must implement both <kbd>send</kbd> and <kbd>sync</kbd>. <kbd>RefCell</kbd> uses interior mutability, so <kbd>Arc&lt;RefCell&lt;T&gt;&gt;</kbd> won't implement <kbd>sync</kbd>, which also means <kbd>send</kbd> can't be used—therefore <kbd>RefCell</kbd> can't be passed around threads.</p>
+<p>Using <kbd>send</kbd> and <kbd>sync</kbd> provides the strong guarantees of safety Rust relies upon to ensure the code is rock solid when using a threading system.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

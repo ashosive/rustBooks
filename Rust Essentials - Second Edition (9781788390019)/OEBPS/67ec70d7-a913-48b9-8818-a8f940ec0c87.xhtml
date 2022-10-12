@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style00.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style01.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Documenting a function</h1>
+                </header>
+            
+            <article>
+                
+<p>Let's show an example of documenting code. In the <kbd>exdoc.rs</kbd> file, we have documented a function <kbd>cube</kbd> as follows:</p>
+<pre>fn main() { 
+  println!("The cube of 4 is {}", cube(4)); 
+} 
+/// Calculates the cube `val * val * val`. 
+/// 
+/// # Examples 
+/// 
+/// ``` 
+/// let cube = cube(val); 
+/// ``` 
+pub fn cube(val: u32) -&gt; u32 { 
+    val * val * val 
+} </pre>
+<p>If we now invoke <kbd>rustdoc exdoc.rs</kbd> on the command line, a <kbd>doc</kbd> folder is created. For a project do <kbd>cargo.doc</kbd> in the project's root folder. This contains a subfolder <kbd>exdoc</kbd>, with an <kbd>index.html</kbd> file that is the starting point of a website providing a documentation page for each function. For example, <kbd>fn.cube.html</kbd> shows:</p>
+<div class="packt_figure CDPAlignCenter CDPAlign"><img height="239" width="756" src="Images/db901730-9cbb-434c-8b76-1ecd87bc1c0a.png"/></div>
+<p>Clicking on the <kbd>exdoc</kbd> link returns you to the index page.</p>
+<p>Documentation comments are written in <em>Markdown</em> (for a brief intro, see <a href="https://en.wikipedia.org/wiki/Markdown"><span class="URLPACKT">https://en.wikipedia.org/wiki/Markdown</span></a>). They can contain the following special sections preceded by a <kbd>#</kbd>. The examples are Panics, Failures, and Safety. Code appears between <kbd>```</kbd>. For a function to be documented, it must belong to the public interface, so it must be prefixed with <kbd>pub</kbd>. See <a href="d271499e-5fd5-48a4-8395-e5efedc8a482.xhtml"><span class="ChapterrefPACKT">Chapter 8</span></a>, <em>Organizing Code and Macros</em>.</p>
+<p>A module can be documented with <kbd>//!</kbd> comments that start after the initial <kbd>{</kbd>.</p>
+<div class="packt_infobox">For more info see <a href="https://doc.rust-lang.org/book/first-edition/documentation.html"><span class="URLPACKT">https://doc.rust-lang.org/book/first-edition/documentation.html</span></a>.</div>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

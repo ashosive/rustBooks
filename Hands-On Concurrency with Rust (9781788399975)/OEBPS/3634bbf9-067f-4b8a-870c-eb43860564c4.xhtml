@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Diminishing returns</h1>
+                </header>
+            
+            <article>
+                
+<p>The hard truth is that there's a diminishing return when applying more and more concurrent computational resources to a problem. Performing parallel computations implies some coordination overhead—spawning new threads, chunking data, and memory bus issues in the presence of barriers or fences, depending on your CPU. Parallel computing is not free. Consider this <kbd>Hello, world!</kbd> program:</p>
+<pre style="padding-left: 30px">fn main() {
+    println!("GREETINGS, HUMANS");
+}</pre>
+<p>Straightforward enough, yeah? Compile and run it 100 times:</p>
+<pre><strong>hello_worlds &gt; rustc -C opt-level=3 sequential_hello_world.rs
+hello_worlds &gt; time for i in {1..100}; do ./sequential_hello_world &gt; /dev/null; done
+
+real    0m0.091s
+user    0m0.004s
+sys     0m0.012s</strong></pre>
+<p>Now, consider basically the same program but involving the overhead of spawning a thread:</p>
+<pre style="padding-left: 30px">use std::thread;
+
+fn main() {
+    thread::spawn(|| println!("GREETINGS, HUMANS"))
+        .join()
+        .unwrap();
+}</pre>
+<p>Compile and run it 100 times:</p>
+<pre><strong>hello_worlds &gt; rustc -C opt-level=3 parallel_hello_world.rs
+hello_worlds &gt; time for i in {1..100}; do ./parallel_hello_world &gt; /dev/null; done
+
+real    0m0.115s
+user    0m0.004s
+sys     0m0.012s</strong></pre>
+<p>This implies a thread-spawn time on my test system of 0.24 milliseconds. That is, of course, without any synchronization. The point is, it's not free. It's also not magic. Say you have a program that runs on a single processor in 24 hours and there are parts of the program that will have to be done sequentially and which, added together, consume 1 hour of the total runtime. The remaining 23 hours represent computations that can be run in parallel. If this computation is important and needs to be done in a hurry, the temptation is going to be to chuck in as much hardware as possible. How much of an improvement should you expect?</p>
+<p>One well-known answer to this question is Amdahl's law. It states that the speedup of a computation is proportional to the inverse of the percentage of time taken by the sequential bit plus the percentage of the parallel time divided by the total new computation units, <em>1/(s + p / N)</em>. As <em>N</em> tends toward infinity, <em>1/s == 1/(1-p),</em> in our example, <em>1/(1 - (23/24)) = 24</em>. That is, the maximum factor speedup you can ever hope to see is 24 times, with infinite additional capacity. Ouch.</p>
+<p>Amdahl's law is a touch pessimistic, as noted by John Gustafson in his 1988 Reevaluating Amdahl's Law:</p>
+<div class="packt_quote">
+<p>"At Sandia National Laboratories, we are currently engaged in research involving massively-parallel processing. There is considerable skepticism regarding the viability of massive parallelism; the skepticism centers around Amdahl's law, an argument put forth by Gene Amdahl in 1967 that even when the fraction of serial work in a given problem is small, say s, the maximum speedup obtainable from even an infinite number of parallel processors is only 1/s. We now have timing results for a 1024-processor system that demonstrate that the assumptions underlying Amdahl's 1967 argument are inappropriate for the current approach to massive ensemble parallelism."</p>
+</div>
+<p>Gustafson argues that real workloads will take the time factor of a computation as fixed and vary the input work accordingly. In some hypothetical, very important computations we'd see 24 hours as acceptable and, on increasing the total number of processors available, then rush to figure out how to add in more computation so as to get the time back up to one day. As we increase the total workload, the serial portion of the computation tends towards zero. This is, itself, maybe somewhat optimistic and is certainly not applicable to problems where there's no more datasets available. Communication overhead is not included in either analysis.</p>
+<p>Ultimately, what has to be internalized is this—performing computations in parallel is subject to diminishing returns. Exactly how that take shape depends strongly on your problem, the machine, and so on, but it's there. What the programmer must do to bend that curve is shrink the percentage of time spent in serial computation, either by increasing the relative portion of parallel computation per Gustafson with a larger dataset or by optimizing the serial computation's runtime. The remainder of this chapter will be focused on the latter approach—improving the runtime of serial computations.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

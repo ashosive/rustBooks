@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style00.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style01.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Shared mutable states</h1>
+                </header>
+            
+            <article>
+                
+<p>How can we make the <kbd>not_shared.rs</kbd> program give us the correct result? Rust provides tools, such as <strong>atomic types</strong> from the submodule <kbd>std::sync::atomic</kbd>, to handle shared mutable state safely. In order to share data, you need to wrap the data in some of these sync primitives, such as <kbd>Arc</kbd>, <kbd>Mutex</kbd>, <kbd>RwLock</kbd>, <kbd>AtomicUSize</kbd>, and so on.</p>
+<p>Basically, the principle of locking is used, as in operating systems and database systems. Exclusive access to a resource is given to the thread that has obtained a <strong>lock</strong> (also called a <strong>mutex</strong>, from mutually exclusive) on the resource. A lock can only be obtained by one thread at a time. In this way, two threads cannot change this resource at the same time, so no data races can occur; locking atomicity is enforced when required. When the thread that has acquired the lock has done its work, the lock is removed and another thread can then work with the data.</p>
+<p>In Rust, this is done with the generic <kbd>Mutex&lt;T&gt;</kbd> type from the <kbd>std::sync</kbd> module. The sync comes from synchronize, which is exactly what we want to do with our threads.</p>
+<p>The <kbd>Mutex</kbd> ensures that only one thread at a time can change the contents of our data.</p>
+<p>We must make an instance of this type, wrapping our data like this:</p>
+<pre>// code from Chapter 9/code/thread_safe.rs:   
+use std::sync::{Arc, Mutex};<br/> let data = Mutex::new(health); 
+Now, within the for loop immediately after that, we spawn the new thread, and we place a lock on the health object: 
+     for i in 2..5 {  
+thread::spawn(move || { 
+            let mut health = data.lock().unwrap(); 
+            // do other things 
+         } 
+     } </pre>
+<p>The call to <kbd>lock()</kbd> will return a reference to the value inside the <kbd>Mutex</kbd>, and it will block any other calls to <kbd>lock()</kbd> until that reference goes out of scope, which is at the end of the thread closure. Then the thread has done its work and the lock is automatically removed. But for now, we will still get an <kbd>error: capture of moved value: 'data'</kbd>. This is because the <kbd>data</kbd> variable cannot be moved to another thread multiple times.</p>
+<p>This problem can be solved by using an equivalent of the <kbd>Rc</kbd> pointer from <a href="181718d1-5b78-4952-8082-796f69471c96.xhtml"><span class="ChapterrefPACKT">Chapter 7</span></a>, <em>Ensuring Memory Safety and Pointers</em>, in the Reference counting section. Indeed, the situation is very similar: all the threads need a reference to the same data, our <kbd>health</kbd> variable. So we apply the same techniques from <a href="2535f67f-e1a7-4ef7-af15-dcebffd38149.xhtml">Chapter 6</a>, ;<em>Using Traits and OOP in Rust</em> here: make an <kbd>Rc</kbd> pointer to point to our data, and make a <kbd>clone()</kbd> of the pointer for each reference that is needed. But a simple <kbd>Rc</kbd> pointer is not thread-safe, therefore we need a special version of it that is thread-safe, the so-called <strong>atomic reference counted pointer</strong>, or <kbd>Arc&lt;T&gt;</kbd>. Atomic means it is safe across threads, and it is also generic.</p>
+<p>So, we envelop our <kbd>health</kbd> variable inside an <kbd>Arc</kbd> pointer, like this:</p>
+<pre>  let data = Arc::new(Mutex::new(health)); </pre>
+<p>And in the <kbd>for</kbd> loop, we make a new pointer to the <kbd>Mutex</kbd> with <kbd>clone</kbd>:</p>
+<pre>  for i in 2..5 { 
+      let mutex = data.clone(); 
+      thread::spawn(move || {  
+               let mut health = mutex.lock().unwrap(); 
+            *health *= i; 
+}); 
+  } </pre>
+<p>Each thread now works with a copy of the pointer obtained by <kbd>clone()</kbd>. The <kbd>Arc</kbd> instance will keep track of the number of references to <kbd>health</kbd>. A call to <kbd>clone()</kbd> will increment the reference count on <kbd>health</kbd>. The <kbd>mutex</kbd> reference goes out of scope at the end of the thread closure, which will decrement the reference count. <kbd>Arc</kbd> will free the associated <kbd>health</kbd> resource when that reference count is zero.</p>
+<p>Calling <kbd>lock()</kbd> gives the active thread exclusive access to the data. In principle, acquiring the lock might fail, so it returns a <kbd>Result&lt;T, E&gt;</kbd> object. In the preceding code, we assume everything is OK. <kbd>unwrap()</kbd> is a quick means to return a reference to the data, but in a failure case, it panics.</p>
+<p>Quite a few steps were involved here, so we will repeat the code in its entirety here, this time providing robust error handling to replace <kbd>unwrap()</kbd>. Digest each line with the explanations given previously:</p>
+<pre>// code from Chapter 9/code/thread_safe.rs: 
+use std::thread; 
+use std::sync::{Arc, Mutex}; 
+ 
+fn main() { 
+   let mut health = 12; 
+   println!("health before: {:?}", health); 
+<strong>   let data = Arc::new(Mutex::new(health));</strong> 
+   for i in 2..5 { 
+<strong>        let mutex = data.clone();</strong> 
+        thread::spawn(move || { 
+<strong>            let health = mutex.lock();</strong> 
+            match health { 
+                // health is multiplied by i: 
+Ok(mut health) =&gt; *health *= i, 
+                Err(str) =&gt; println!("{}", str) 
+            } 
+        }).join().unwrap(); 
+    }; 
+<strong>    health = *data.lock().unwrap();</strong> 
+    println!("health after: {:?}", health); 
+} </pre>
+<p>This prints out the following:</p>
+<pre><strong>health before: 12</strong><br/><strong>health after: 288</strong></pre>
+<p>(Indeed, <em>288 = 12 * 2 * 3 * 4</em>)</p>
+<p>We <kbd>join()</kbd> the threads to give them time to do their work; <kbd>data</kbd> is a reference, so we need to dereference it to obtain the <kbd>health</kbd> value:</p>
+<pre>health = *data.lock().unwrap(); </pre>
+<p>The mechanism outlined previously, using a combined <kbd>Mutex</kbd> and <kbd>Arc</kbd>, is advisable when the shared data occupies a significant amount of memory, because with an <kbd>Arc</kbd>, the data will no longer be copied for each thread. The <kbd>Arc</kbd> acts as a reference to the shared data and only this reference is shared and cloned.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Further reading</h1>
+                </header>
+            
+            <article>
+                
+<p>At the end of each chapter, we'll include a list of bibliographic materials, things that are warmly recommended for readers wishing to dive further into the topic discussed in the chapter, links to relevant Rust community discussions, or links to the documentation of important tools. Bibliographic material may appear in multiple chapters because if something's important, it bears repeating.</p>
+<ul>
+<li><em>An Introduction to Parallel Algorithms</em>, 1992, Joseph JaJa. A fine textbook that introduces important abstract models. The book is significantly focused on abstract implementations of algorithms from an era when cache coherency and instruction pipelines were less important, so do be aware of that if you pull a copy.</li>
+<li><em>What Every Programmer Should Know About Memory</em>, 2006, Ulrich Drepper.<span> </span>A classic, detailed description of how memory works in modern computers, despite being twelve years old at the time of writing this book.</li>
+<li><em>Computer Architecture: A Quantitative Approach</em>, 2011, John Hennessy and David Patterson. A classic somewhat more geared toward computer architects than software engineers. Still, this is well worth studying in depth, even if you do skip over the circuit diagrams here and there.</li>
+<li><em>The C11 and C++11 Concurrency Model</em>, 2014, Mark Batty. Batty formalizes the C++11/C11 memory model, which if you can get up to speed with his logic language, is an excellent way to learn the memory model and its consequences.</li>
+<li><em>LLVM Atomic Instructions and Concurrency Guide</em>, available at <a href="https://llvm.org/docs/Atomics.html">https://llvm.org/docs/Atomics.html</a>.<a href="https://llvm.org/docs/Atomics.html"> </a>Rust has specifically documented its concurrency memory model as being that of LLVM. This guide—and the documentation it links to—will be well-trod territory for any Rust programmer reading this book.</li>
+<li><em>Cache Speculation Side-Channels</em>, 2018, ARM. Speculative execution of branches leads to surprising information leaks, it turns out. This paper by ARM gives a very clear discussion of speculative execution on ARM, as well as tidy examples.</li>
+<li><em>std::memory_order</em>, available at <a href="http://en.cppreference.com/w/cpp/atomic/memory_order">http://en.cppreference.com/w/cpp/atomic/memory_order</a>. While this document covers the memory order defined in C++, its examples of the consequences of the C++ memory-ordering guarantees are both straightforward and illustrative.</li>
+<li><em>Valgrind User Manual</em>, available at <a href="http://valgrind.org/docs/manual/manual.html">http://valgrind.org/docs/manual/manual.html</a>. We'll be making extensive use of <kbd>Valgrind</kbd>, and it's well worth it for any systems programmer to be familiar with these tools. The documentation necessarily touches on some of the same material as this book, and may help illuminate things under a different light.</li>
+<li><em>Compiler Explorer</em>, available at <a href="https://rust.godbolt.org/">https://rust.godbolt.org/</a>. <em>Compiler Explorer</em> is not a paper so much as a well-designed web tool. It allows easy cross-compilation, and refers to simplified explanations of instructions.</li>
+</ul>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

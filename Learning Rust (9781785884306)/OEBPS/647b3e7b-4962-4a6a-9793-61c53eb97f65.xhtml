@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">The single element tuple struct</h1>
+                </header>
+            
+            <article>
+                
+<p>At this point, you're probably wondering whether there are any uses for a tuple <kbd>struct</kbd> over a standard <kbd>struct</kbd>. One of the uses is when the tuple <kbd>struct</kbd> has a single element. Here, we are able to create a variable based on the tuple. It's similar to a destructured tuple in appearance:</p>
+<pre>struct MyPi(f32);  
+fn main()  
+{ 
+    let my_pi = MyPi(22f32 / 7f32); 
+    let MyPi(pi) = my_pi;  
+    println!("pi = {}", pi); 
+} </pre>
+<div class="packt_infobox">The source for this section is in the <kbd>07/newtype</kbd> folder, present in the supporting code bundle provided for this book.</div>
+<p>This produces the following output when compiled and run:</p>
+<div class="packt_figure CDPAlignCenter CDPAlign"><img class=" image-border" src="Images/61c8edb9-3d58-49cb-9a86-abe4c715f5d5.png" width="585" height="114"/></div>
+<p>This form of assignment is known as a new type pattern; it has allowed the creation of a new type distinct from the contained value.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

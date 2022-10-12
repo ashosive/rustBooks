@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Linearizability</h1>
+                </header>
+            
+            <article>
+                
+<p>Up till this point in the book, we've avoided dipping into the formal terms for specifying concurrent systems, because while they are <em>very</em> useful for discussing ideas and reasoning, they can be difficult to learn absent some context. Now that we have context, it's time.</p>
+<p>How do we decide whether a concurrent algorithm is correct? How, if we're game for the algorithm, do we analyze an implementation and reason about it's correctness? To this point, we've used techniques to demonstrate fitness-for-purpose of an implementation through randomized and repeat testing as well as simulation, in the case of helgrind. We will continue to do so. In fact, if that's all we did, demonstrating fitness-for-purpose of implementations, then we'd be in pretty good condition. The working programmer will find themselves inventing more often than not, taking an algorithm and adapting it—as was seen in the previous chapter's discussion of hopper—to fit some novel domain. It's easy enough to do this and not notice.</p>
+<p>What we're searching for, when we sit down to reason about the systems we're constructing, is a unifying concept that'll separate the workable ideas from the goofs. That concept for us, here, in the design and construction of concurrent data structures, is linearizability. What we're looking to build are objects that, paraphrasing Nancy Lynch, make it seem like operations on them occur one at a time, in some sequential order, consistent with the order of operations and responses. Lynch's <em>Distributed Algorithms</em> is concerned with the behavior of distributed systems, but I've always thought that her explanation of what she refers to as atomic objects is brilliantly concise.</p>
+<p>The notion of linearizability was introduced in <em>Axioms for Concurrent Objects</em> by Herlihy and Wing in 1986. Their definition is a bit more involved, done up in terms of histories—<em>a finite sequence of operation invocation and response events</em><em>—</em>and specifications<em>,</em> which are, to be quick about it, a set of axiomatic pre and post conditions that hold on, the object in terms of the operations defined on it.</p>
+<p>Let the result of an operation be called <kbd>res(op)</kbd> and the application or invocation of an operation be called <kbd>inv(op)</kbd>, and distinguish operations by some extra identifier. <kbd>op_1</kbd> is distinct from <kbd>op_2</kbd> but the identifier has no bearing on their ordering; it's just a name. A history <kbd>H</kbd> is a partial order over operations so that <kbd>op_0 &lt; op_1</kbd> if <kbd>res(op_0)</kbd> happens before <kbd>inv(op_1)</kbd> in <kbd>H</kbd>. Operations that have no ordering according to <kbd>&lt;</kbd> are concurrent in the history. A history <kbd>H</kbd> is sequential if all of its operations are ordered with regard to <kbd>&lt;</kbd>. Now, the history <kbd>H</kbd> is linearizable if it can be adjusted by adding zero or more operations into the history to make some other history <kbd>H'</kbd> so that:</p>
+<ol type="1">
+<li><kbd>H'</kbd> is composed only of invocations and responses and are equivalent to some legal, sequential history <kbd>S</kbd></li>
+<li>The ordering operation of <kbd>H'</kbd> is an inclusive subset of the ordering of <kbd>S</kbd>.</li>
+</ol>
+<p>Phew! An object is linearizable if you can record the order of the operations done to it, fiddle with them some, and find an equivalent sequential application of operations on the same object. We've actually done linearizabilty analysis in previous chapters, I just didn't call it out as such. Let's keep on with Herlihy and Wing and take a look at their examples of linearizable vs. unlinearizable histories. Here's a history on a familiar queue:</p>
+<pre style="padding-left: 30px">A: Enq(x)       0
+B: Enq(y)       1
+B: Ok(())       2
+A: Ok(())       3
+B: Deq()        4
+B: Ok(x)        5
+A: Deq()        6
+A: Ok(y)        7
+A: Enq(z)       8</pre>
+<p>We have two threads, <kbd>A</kbd> and <kbd>B</kbd>, performing the operations <kbd>enq(val: T) -&gt; Result((), Error)</kbd> and <kbd>deq() -&gt; Result(T, Error)</kbd>, in pseudo-Rust types. This history is in fact linearizable and is equivalent to:</p>
+<pre style="padding-left: 30px">A: Enq(x)       0
+A: Ok(())       3
+B: Enq(y)       1
+B: Ok(())       2
+B: Deq()        4
+B: Ok(x)        5
+A: Deq()        6
+A: Ok(y)        7
+A: Enq(z)       8
+A: Ok(())</pre>
+<p>Notice that the last operation does not exist in the original history. It's possible for a history to be linearizable, as Herlihy and Wing note it, even if an operation <em>takes effect</em> before its response. For example:</p>
+<pre style="padding-left: 30px">A: Enq(x)       0
+B: Deq()        1
+C: Ok(x)        2</pre>
+<p>This is equivalent to the sequential history:</p>
+<pre style="padding-left: 30px">A: Enq(x)       0
+A: Ok(())
+B: Deq()        1
+B: Ok(x)        2</pre>
+<p>This history is not linearizable:</p>
+<pre style="padding-left: 30px">A: Enq(x)       0
+A: Ok(())       1
+B: Enq(y)       2
+B: Ok(())       3
+A: Deq()        4
+A: Ok(y)        5</pre>
+<p>The culprit in this case is the violation of the queue's ordering. In sequential history, the dequeue would receive <em>x</em> and not <em>y</em>.</p>
+<p>That's it. When we talk about a structure being <em>linearizable,</em> what we're really asking is, can any list of valid operations against the structure be shuffled around or added to in such a way that the list is indistinguishable from a sequential history? Each of the synchronization tools we looked at in the last chapter were used to force linearizability by carefully sequencing the ordering of operations across threads. At a different level, these tools also manipulated the ordering of memory loads and stores. Controlling this ordering directly, while also controlling the order of operations on structures, will consume the remainder of this chapter.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

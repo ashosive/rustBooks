@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style00.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style01.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Mutable and immutable variables</h1>
+                </header>
+            
+            <article>
+                
+<p>Suppose we get a boost from swallowing a health pack and our energy rises to a value of <kbd>25</kbd>. However, if we assign the value to the variable <kbd>energy</kbd> as follows:</p>
+<pre>energy = 25;</pre>
+<p>We get an error, as follows:</p>
+<pre><strong>error: re-assignment of immutable variable `energy`.</strong></pre>
+<p>What is wrong here?</p>
+<p>Well, Rust applies programmer's wisdom here: a lot of bugs come from inadvertent or wrong changes of variables, so don't let code change a value unless you have deliberately allowed it!</p>
+<div class="packt_infobox">Variables are, by default,immutable, in Rust, which is very similar to what functional languages do (in pure functional languages, mutability is not even allowed).</div>
+<p>If you want a mutable variable, because its value can change during code execution, you have to indicate that explicitly with the <kbd>mut</kbd> variable, for example:</p>
+<pre>  let mut fuel = 34; 
+  fuel = 60; </pre>
+<p>Simply declaring a variable as <kbd>let n;</kbd> is also not enough. We get the following error:</p>
+<pre><strong>error: type annotations needed, consider giving `energy2` a type, cannot infer type for `_`</strong></pre>
+<p>Indeed, the compiler needs a value to infer its type.</p>
+<p>We can give the compiler this information by assigning a value to the variable <kbd>n</kbd>, like <kbd>n = -2;</kbd> but as the message says, we could also indicate its type as follows:</p>
+<pre>  let n: i32; </pre>
+<p>Or:</p>
+<pre>let n: i32 = -2; // n is a binding of type i32 and value -2 </pre>
+<p>The type (here <kbd>i32</kbd>) follows the variable name after a colon <kbd>:</kbd> (as we already showed for global constants), optionally followed by an initialization. In general the type is indicated like this-<kbd>n: T</kbd> where <kbd>n</kbd> is a variable and <kbd>T</kbd> a type, and it reads, variable <kbd>n</kbd> is of type <kbd>T</kbd>. So, this is the inverse of what is done in C or C++, Java or C#, where one would write <kbd>T<span>n</span></kbd>.</p>
+<p>For the primitive types, this can also be done simply with a suffix, as follows:</p>
+<pre>let x = 42u8; 
+let magic_number = 3.14f64; </pre>
+<p>Trying to use an uninitialized variable results in the following error:</p>
+<pre><strong>error: use of possibly uninitialized variable</strong></pre>
+<p>Local variables have to be initialized before use in order to prevent undefined behavior. When the compiler does not recognize a name (for example, a function name) in your code, you will get the following error:</p>
+<pre><strong>error: not found in this scope error</strong></pre>
+<p>It is probably just a typo, but it is caught early on at compilation, and not at runtime!</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>

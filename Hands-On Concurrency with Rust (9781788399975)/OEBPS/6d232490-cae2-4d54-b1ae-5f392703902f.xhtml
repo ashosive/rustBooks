@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2002/06/xhtml2/ http://www.w3.org/MarkUp/SCHEMA/xhtml2.xsd" xmlns:epub="http://www.idpf.org/2007/ops">
+<head>
+<link href="Styles/Style02.css" rel="stylesheet" type="text/css" />
+<link href="Styles/Style03.css" rel="stylesheet" type="text/css" />
+
+<style type="text/css">body{margin:1em;background-color:transparent!important;}#sbo-rt-content *{text-indent:0pt!important;}#sbo-rt-content .bq{margin-right:1em!important;}#sbo-rt-content *{word-wrap:break-word!important;word-break:break-word!important;}#sbo-rt-content table,#sbo-rt-content pre{overflow-x:unset!important;overflow:unset!important;overflow-y:unset!important;white-space:pre-wrap!important;}</style></head>
+<body><div id="sbo-rt-content"><section>
+
+                            <header>
+                    <h1 class="header-title">Static and dynamic dispatch</h1>
+                </header>
+            
+            <article>
+                
+<p>Trait objects likewise have no statically known size in Rust. Trait objects are the mechanism by which Rust performs dynamic dispatch. Preferentially, Rust is a static dispatch language as there are increased opportunities for inlining and optimization—the compiler simply knows more. Consider the following code:</p>
+<pre style="padding-left: 30px">use std::ops::Add;
+
+fn sd_add&lt;T: Add&lt;Output=T&gt;&gt;(x: T, y: T) -&gt; T {
+    x + y
+}
+
+fn main() {
+    assert_eq!(48, sd_add(16 as u8, 32 as u8));
+    assert_eq!(48, sd_add(16 as u64, 32 as u64));
+}</pre>
+<p>Here, we define a function, <kbd>sd_add&lt;T: Add&lt;Output=T&gt;&gt;(x: T, y: T) -&gt; T</kbd>. Rust, like C++, will perform monomorphization at compile time, emitting two <kbd>sd_add</kbd> functions, one for <kbd>u8</kbd> and the other for <kbd>u64</kbd>. Like C++, this potentially increases the code size of a Rust program and slows compilation but at the benefit of allowing inlining at the caller site, potentially more efficient implementations owing to type specialization, and fewer branches.</p>
+<p>When static dispatch is not desirable, the programmer can construct trait objects to perform dynamic dispatch. Trait objects do not have a known size—indeed, they can be any <kbd>T</kbd> that implements the trait—and so, like slices, must exist behind a kind of pointer. Dynamic dispatch will not see much use in this book. The reader is warmly encouraged to consult the documentation for <kbd>std::raw::TraitObject</kbd> for full details on Rust's trait object notion.</p>
+
+
+            </article>
+
+            
+        </section>
+    </div></body>
+</html>
